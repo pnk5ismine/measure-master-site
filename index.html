@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Measure Master — 만능줄자 앱</title>
+  <meta name="description" content="Measure Master: 사진 기반 투시보정으로 길이·면적을 빠르고 정확하게 재는 만능줄자 앱" />
+  <link rel="icon" href="/favicon.ico" />
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+
+  <!-- Open Graph / SEO -->
+  <meta property="og:title" content="Measure Master — 만능줄자 앱" />
+  <meta property="og:description" content="사진 기반 투시보정으로 길이·면적을 빠르고 정확하게 재는 만능줄자 앱" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://measure-master.net" />
+  <meta property="og:image" content="/images/og-cover.jpg" />
+
+  <style>
+    :root {
+      --bg: #0b0f14; /* near-black */
+      --card: #111827; /* slate-900 */
+      --muted: #9ca3af; /* gray-400 */
+      --text: #e5e7eb; /* gray-200 */
+      --brand: #06b6d4; /* cyan-500 */
+      --brand-2: #22d3ee; /* cyan-400 */
+      --accent: #a78bfa; /* violet-400 */
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; background: var(--bg); color: var(--text); font-family: system-ui, -apple-system, Segoe UI, Roboto, Noto Sans KR, Apple SD Gothic Neo, Arial, sans-serif; }
+
+    a { color: var(--brand-2); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    .container { max-width: 1080px; margin: 0 auto; padding: 0 16px; }
+
+    /* Header */
+    header { position: sticky; top: 0; backdrop-filter: saturate(120%) blur(6px); background-color: rgba(11,15,20,0.65); border-bottom: 1px solid rgba(255,255,255,0.06); z-index: 50; }
+    .nav { display: flex; align-items: center; justify-content: space-between; height: 64px; }
+    .brand { display: flex; align-items: center; gap: 10px; }
+    .brand img { width: 36px; height: 36px; border-radius: 8px; object-fit: cover; }
+    .brand strong { font-weight: 700; letter-spacing: 0.2px; }
+
+    .nav-links { display: flex; gap: 18px; align-items: center; }
+    .btn { display: inline-flex; align-items: center; gap: 8px; padding: 10px 14px; border-radius: 10px; background: linear-gradient(135deg, var(--brand), var(--accent)); color: white; font-weight: 600; border: none; cursor: pointer; }
+    .btn.secondary { background: #1f2937; color: var(--text); border: 1px solid rgba(255,255,255,0.08); }
+
+    /* Hero */
+    .hero { padding: 72px 0 32px; }
+    .hero-grid { display: grid; gap: 24px; grid-template-columns: 1.2fr 1fr; align-items: center; }
+    .hero h1 { font-size: clamp(28px, 4vw, 44px); margin: 0 0 12px; line-height: 1.1; }
+    .hero p { color: var(--muted); font-size: 16px; margin: 0 0 24px; }
+    .hero .cta { display: flex; gap: 12px; flex-wrap: wrap; }
+    .hero .mock { background: linear-gradient(180deg, rgba(34,197,218,0.10), rgba(167,139,250,0.10)); border: 1px solid rgba(255,255,255,0.06); border-radius: 18px; padding: 8px; display: grid; place-items: center; }
+    .hero .mock img { width: 100%; border-radius: 14px; }
+
+    /* Features */
+    section { padding: 56px 0; }
+    .cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+    .card { background: var(--card); border: 1px solid rgba(255,255,255,0.06); padding: 20px; border-radius: 14px; }
+    .card h3 { margin: 0 0 8px; font-size: 18px; }
+    .card p { margin: 0; color: var(--muted); }
+
+    /* Gallery */
+    .gallery { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+    .gallery img { width: 100%; border-radius: 12px; border: 1px solid rgba(255,255,255,0.06); }
+
+    /* Reviews */
+    .reviews { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+    .quote { background: var(--card); border: 1px solid rgba(255,255,255,0.06); padding: 18px; border-radius: 14px; }
+    .quote p { margin: 0; color: var(--text); }
+    .quote small { color: var(--muted); }
+
+    /* Footer */
+    footer { padding: 48px 0; border-top: 1px solid rgba(255,255,255,0.06); color: var(--muted); }
+
+    /* Responsive */
+    @media (max-width: 900px) {
+      .hero-grid { grid-template-columns: 1fr; }
+      .cards { grid-template-columns: 1fr; }
+      .gallery { grid-template-columns: 1fr 1fr; }
+      .reviews { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container nav">
+      <div class="brand">
+        <!-- ⬇ 로고 이미지 교체: /images/logo.png 를 HomeGate 로고로 바꾸세요 -->
+        <img src="/images/logo.png" alt="Measure Master Logo" />
+        <strong>Measure Master</strong>
+      </div>
+      <nav class="nav-links">
+        <a href="#features">기능</a>
+        <a href="#gallery">갤러리</a>
+        <a href="#reviews">후기</a>
+        <a href="#faq">FAQ</a>
+        <a class="btn secondary" href="#contact">문의</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <!-- Hero -->
+    <section class="hero container">
+      <div class="hero-grid">
+        <div>
+          <h1>사진 한 장으로 <span style="color:var(--brand-2)">정확한 길이·면적</span>을</h1>
+          <p>기준 사각형(A4 등)으로 투시 보정하여 실제 크기를 계산하는 <strong>만능줄자</strong> 앱.
+             직선·곡선 측정, 자동 스냅, 다국어 지원.</p>
+          <div class="cta">
+            <!-- 스토어 버튼은 추후 연결 -->
+            <a class="btn" href="#download">Google Play (준비중)</a>
+            <a class="btn secondary" href="#howto">사용 가이드</a>
+          </div>
+        </div>
+        <div class="mock">
+          <!-- ⬇ 앱 스크린샷 교체: HomeGate에서 쓰는 대표 이미지를 사용하세요 -->
+          <img src="/images/app-hero.png" alt="Measure Master Screenshot" />
+        </div>
+      </div>
+    </section>
+
+    <!-- Features -->
+    <section id="features" class="container">
+      <h2 style="margin:0 0 16px; font-size:24px">핵심 기능</h2>
+      <div class="cards">
+        <div class="card">
+          <h3>투시 보정</h3>
+          <p>A4 등 기준 사각형을 인식해 원근을 교정하고, 실제 mm 단위로 환산합니다.</p>
+        </div>
+        <div class="card">
+          <h3>길이·면적 측정</h3>
+          <p>직선/곡선 다각형, 홀(구멍) 면적도 지원. 평균값·편차 표시로 신뢰성 제공.</p>
+        </div>
+        <div class="card">
+          <h3>스냅 & 레이어</h3>
+          <p>각도/점 스냅, 메인·상대 레이어 분리로 정밀한 드로잉 워크플로.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Gallery -->
+    <section id="gallery" class="container">
+      <h2 style="margin:0 0 16px; font-size:24px">갤러리</h2>
+      <div class="gallery">
+        <!-- ⬇ 스크린샷 3~6장 교체하세요 -->
+        <img src="/images/screen-1.jpg" alt="screenshot 1" />
+        <img src="/images/screen-2.jpg" alt="screenshot 2" />
+        <img src="/images/screen-3.jpg" alt="screenshot 3" />
+      </div>
+    </section>
+
+    <!-- Reviews (초기엔 정적 문구, 이후 Disqus/Giscus 등 연결) -->
+    <section id="reviews" class="container">
+      <h2 style="margin:0 0 16px; font-size:24px">사용자 후기</h2>
+      <div class="reviews">
+        <div class="quote"><p>원근 보정이 확실해서 현장 치수 뽑을 때 정말 편합니다.</p><small>— 현장시공 팀장</small></div>
+        <div class="quote"><p>곡선 면적도 계산돼서 조경 면적 산출할 때 유용해요.</p><small>— 조경 설계</small></div>
+        <div class="quote"><p>스냅이 좋아서 도형이 깔끔합니다. 업데이트 기대!</p><small>— 사용자 J***</small></div>
+      </div>      <div id="disqus_thread"></div>
+      <script>
+        // Disqus 임베드 — 아래 shortname을 본인 것으로 교체하세요.
+        var disqus_config = function () {
+          this.page.url = location.href;
+          this.page.identifier = 'measure-master-home';
+        };
+        (function() {
+          var d = document, s = d.createElement('script');
+          s.src = 'https://YOUR_DISQUS_SHORTNAME.disqus.com/embed.js';
+          s.setAttribute('data-timestamp', +new Date());
+          (d.head || d.body).appendChild(s);
+        })();
+      </script>
+    </section>
+
+    <!-- FAQ -->
+    <section id="faq" class="container">
+      <h2 style="margin:0 0 16px; font-size:24px">자주 묻는 질문</h2>
+      <div class="cards">
+        <div class="card"><h3>A4는 가로/세로를 정확히 입력해야 하나요?</h3><p>예. 210×297(세로) vs 297×210(가로)가 뒤바뀌면 길이값이 달라집니다. 혼동 시 스왑 안내가 표시됩니다.</p></div>
+        <div class="card"><h3>보정 후에도 약간의 편차가 있어요.</h3><p>렌즈 왜곡·외삽 영향입니다. 평균값·편차와 촬영 가이드(1× 이상, 수직 촬영)를 참고하세요.</p></div>
+        <div class="card"><h3>지원 언어</h3><p>한국어, 영어, 러시아어(ru), 독일어(de), 포르투갈어(pt), 스페인어(es), 아랍어(ar), 힌디어(hi) 등 순차 확대.</p></div>
+      </div>
+    </section>
+
+    <!-- Contact -->
+    <section id="contact" class="container">
+      <h2 style="margin:0 0 16px; font-size:24px">문의</h2>
+      <p>메일: <a href="mailto:contact@measure-master.net">contact@measure-master.net</a></p>
+      <p>개인정보 처리방침: <a href="/privacy.html">/privacy.html</a> (추가 예정)</p>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container">
+      © <span id="y"></span> Measure Master. All rights reserved.
+    </div>
+  </footer>
+
+  <script>
+    document.getElementById('y').textContent = new Date().getFullYear();
+  </script>
+</body>
+</html>

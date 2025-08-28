@@ -1,0 +1,12 @@
+<!-- 저장 시 파일명을 favicon.svg 로 저장하세요 -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#06b6d4"/>
+      <stop offset="1" stop-color="#a78bfa"/>
+    </linearGradient>
+  </defs>
+  <rect width="64" height="64" rx="12" fill="#0b0f14"/>
+  <!-- M자형 캘리퍼스/게이지 느낌 아이콘 -->
+  <path d="M12 44 V20 h8 l6 10 6-10 h8 v24 h-6 V28 l-8 12 -8-12 v16 z" fill="url(#g)"/>
+</svg>
