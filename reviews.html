@@ -1,0 +1,204 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>사용후기 · Measure Master</title>
+  <meta name="description" content="Measure Master 사용자 후기 게시판" />
+  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  <style>
+    :root { --bg:#0b0d12; --card:#121622; --muted:#9aa4b2; --pri:#5eead4; --border:#1e2230; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,'Noto Sans KR',sans-serif;background:var(--bg);color:#e7edf5}
+    a{color:var(--pri);text-decoration:none} a:hover{text-decoration:underline}
+    header,main,footer{max-width:1000px;margin:0 auto;padding:16px}
+    header{display:flex;align-items:center;justify-content:space-between;gap:12px}
+    .brand{display:flex;align-items:center;gap:10px}
+    .logo{width:26px;height:26px;border-radius:8px;background:linear-gradient(135deg,#26f,#0bf);box-shadow:0 0 24px rgba(94,234,212,.25)}
+    .muted{color:var(--muted)}
+    .wrap{display:grid;grid-template-columns:1fr;gap:18px;margin-top:10px}
+    @media(min-width:980px){.wrap{grid-template-columns:.9fr .6fr}}
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:18px}
+    .card h3{margin:0 0 8px;font-size:20px}
+    .row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+    .sp{flex:1 1 auto}
+    .pill{font:inherit;background:#0f1320;border:1px solid var(--border);border-radius:999px;padding:6px 10px}
+    .field{display:flex;flex-direction:column;gap:6px;margin:10px 0 2px}
+    input,textarea{width:100%;padding:10px 12px;border-radius:12px;border:1px solid var(--border);background:#0f1320;color:#e7edf5}
+    textarea{min-height:120px;resize:vertical}
+    button.primary{margin-top:10px;padding:10px 14px;background:#1d2639;color:#e7edf5;border:1px solid var(--border);border-radius:12px;cursor:pointer}
+    button.primary:hover{background:#223049}
+    ul.reviews{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:12px}
+    .review{padding:12px;border:1px solid var(--border);border-radius:12px;background:#0f1320}
+    footer{margin:30px auto 60px;text-align:center;color:var(--muted);font-size:14px}
+  </style>
+</head>
+<body>
+<header>
+  <div class="brand">
+    <div class="logo" aria-hidden="true"></div>
+    <strong>Measure Master</strong>
+  </div>
+  <nav>
+    <a href="/index.html">홈</a>
+    <a href="/privacy.html">개인정보처리방침</a>
+  </nav>
+</header>
+
+<main>
+  <div class="wrap">
+    <!-- 후기 목록 -->
+    <section class="card">
+      <div class="row">
+        <h3 class="sp">최신 후기</h3>
+        <span class="pill" title="실시간 반영">LIVE</span>
+      </div>
+      <ul class="reviews" id="reviews-list">
+        <li class="review muted">불러오는 중…</li>
+      </ul>
+    </section>
+
+    <!-- 작성/로그인 -->
+    <section class="card">
+      <div class="row">
+        <h3 class="sp">후기 작성</h3>
+        <span id="auth-status" class="muted">로그아웃 상태</span>
+      </div>
+
+      <form id="review-form" style="display:none">
+        <div class="field">
+          <label for="username">닉네임</label>
+          <input id="username" name="username" placeholder="예: 현장왕" required />
+        </div>
+        <div class="field">
+          <label for="content">후기 내용</label>
+          <textarea id="content" name="content" placeholder="앱을 써 보신 소감을 남겨 주세요" required></textarea>
+        </div>
+        <button type="submit" class="primary">등록</button>
+      </form>
+
+      <div id="login-box">
+        <p class="muted">로그인 후 후기를 작성할 수 있습니다.</p>
+        <form id="login-form" autocomplete="on">
+          <div class="field">
+            <label for="login-email">이메일</label>
+            <input id="login-email" name="email" type="email" required placeholder="you@example.com" />
+          </div>
+          <div class="field">
+            <label for="login-password">비밀번호</label>
+            <input id="login-password" name="password" type="password" required minlength="8" />
+          </div>
+          <button type="submit" class="primary">로그인</button>
+          <button type="button" id="logout-btn" style="display:none;margin-left:8px">로그아웃</button>
+        </form>
+        <p class="muted" style="margin-top:8px">
+          아직 계정이 없으신가요? <a href="/index.html#auth">회원가입</a>
+        </p>
+      </div>
+    </section>
+  </div>
+</main>
+
+<footer>© <span id="year"></span> Measure Master</footer>
+
+<!-- Supabase -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+  // ===== TODO: 본인 Supabase 값으로 교체 =====
+  const SUPABASE_URL  = "https://snxjcbaaysgfunpsohzg.supabase.co
+";
+  const SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNueGpjYmFheXNnZnVucHNvaHpnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY1OTk3MzQsImV4cCI6MjA3MjE3NTczNH0.T8b9PpabXkCvwW2W57Qbr-h--JLZB6errlyP5IwsYyk";
+  // ===========================================
+  const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+
+  const $ = (s)=>document.querySelector(s);
+  $("#year").textContent = new Date().getFullYear();
+
+  const elStatus = $("#auth-status");
+  const elLogin  = $("#login-form");
+  const elLogout = $("#logout-btn");
+  const elLoginBox = $("#login-box");
+  const elReviewForm = $("#review-form");
+  const elReviews = $("#reviews-list");
+
+  function escapeHtml(t){return String(t).replace(/[&<>"']/g,(m)=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]))}
+
+  async function refreshAuthUI(){
+    const { data:{ session } } = await supabase.auth.getSession();
+    if(session?.user){
+      elStatus.textContent = `로그인: ${session.user.email}`;
+      elLoginBox.style.display = "none";
+      elReviewForm.style.display = "block";
+      elLogout.style.display = "inline-block";
+    }else{
+      elStatus.textContent = "로그아웃 상태";
+      elLoginBox.style.display = "block";
+      elReviewForm.style.display = "none";
+      elLogout.style.display = "none";
+    }
+  }
+
+  // 로그인 / 로그아웃
+  elLogin.addEventListener("submit", async(e)=>{
+    e.preventDefault();
+    const email = e.target.email.value.trim();
+    const password = e.target.password.value;
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    alert(error ? `로그인 오류: ${error.message}` : "로그인 성공");
+    refreshAuthUI();
+  });
+
+  elLogout.addEventListener("click", async()=>{
+    await supabase.auth.signOut();
+    refreshAuthUI();
+  });
+
+  // 후기 목록 로드
+  async function loadReviews(){
+    const { data, error } = await supabase
+      .from("reviews")
+      .select("*")
+      .order("created_at",{ascending:false})
+      .limit(100);
+    if(error){ elReviews.innerHTML = `<li class="review">불러오기 오류: ${escapeHtml(error.message)}</li>`; return; }
+    if(!data || data.length===0){ elReviews.innerHTML = `<li class="review muted">아직 후기가 없습니다. 첫 후기를 남겨 주세요!</li>`; return; }
+    elReviews.innerHTML = data.map(r=>`
+      <li class="review">
+        <div class="row" style="justify-content:space-between">
+          <b>${escapeHtml(r.username)}</b>
+          <small class="muted">${new Date(r.created_at).toLocaleString()}</small>
+        </div>
+        <div style="margin-top:6px;line-height:1.7">${escapeHtml(r.content)}</div>
+      </li>
+    `).join("");
+  }
+
+  // 후기 작성
+  elReviewForm.addEventListener("submit", async(e)=>{
+    e.preventDefault();
+    const { data:{ session } } = await supabase.auth.getSession();
+    if(!session?.user){ alert("로그인이 필요합니다."); return; }
+    const username = e.target.username.value.trim();
+    const content  = e.target.content.value.trim();
+    if(username.length<2 || content.length<3){ alert("닉네임 또는 내용이 너무 짧습니다."); return; }
+    const { error } = await supabase.from("reviews").insert([{ user_id: session.user.id, username, content }]);
+    if(error){ alert(`등록 오류: ${error.message}`); return; }
+    e.target.reset();
+    await loadReviews();
+  });
+
+  // 실시간 반영(INSERT)
+  supabase.channel("reviews-realtime")
+    .on("postgres_changes",{event:"INSERT",schema:"public",table:"reviews"}, loadReviews)
+    .subscribe();
+
+  // 초기
+  refreshAuthUI().then(loadReviews);
+
+  // ===== Supabase Auth URL 설정 리마인드 =====
+  // Supabase > Authentication > URL configuration
+  // Site URL: https://measure-master.net
+  // Redirect URLs: https://measure-master.net/*, https://www.measure-master.net/*
+</script>
+</body>
+</html>

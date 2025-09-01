@@ -1,207 +1,203 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ko">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Measure Master — 만능줄자 앱</title>
-  <meta name="description" content="Measure Master: 사진 기반 투시보정으로 길이·면적을 빠르고 정확하게 재는 만능줄자 앱" />
-  <link rel="icon" href="/favicon.ico" />
-  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-  <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-
-  <!-- Open Graph / SEO -->
-  <meta property="og:title" content="Measure Master — 만능줄자 앱" />
-  <meta property="og:description" content="사진 기반 투시보정으로 길이·면적을 빠르고 정확하게 재는 만능줄자 앱" />
-  <meta property="og:type" content="website" />
-  <meta property="og:url" content="https://measure-master.net" />
-  <meta property="og:image" content="/images/og-cover.jpg" />
-
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Measure Master — 사진 보정 · 길이/면적 계산</title>
+  <meta name="description" content="A4 기준 사각형으로 투시 보정 후 길이/면적을 계산하는 Measure Master 앱" />
+  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
   <style>
-    :root {
-      --bg: #0b0f14; /* near-black */
-      --card: #111827; /* slate-900 */
-      --muted: #9ca3af; /* gray-400 */
-      --text: #e5e7eb; /* gray-200 */
-      --brand: #06b6d4; /* cyan-500 */
-      --brand-2: #22d3ee; /* cyan-400 */
-      --accent: #a78bfa; /* violet-400 */
-    }
-    * { box-sizing: border-box; }
-    html, body { margin: 0; padding: 0; background: var(--bg); color: var(--text); font-family: system-ui, -apple-system, Segoe UI, Roboto, Noto Sans KR, Apple SD Gothic Neo, Arial, sans-serif; }
-
-    a { color: var(--brand-2); text-decoration: none; }
-    a:hover { text-decoration: underline; }
-
-    .container { max-width: 1080px; margin: 0 auto; padding: 0 16px; }
-
-    /* Header */
-    header { position: sticky; top: 0; backdrop-filter: saturate(120%) blur(6px); background-color: rgba(11,15,20,0.65); border-bottom: 1px solid rgba(255,255,255,0.06); z-index: 50; }
-    .nav { display: flex; align-items: center; justify-content: space-between; height: 64px; }
-    .brand { display: flex; align-items: center; gap: 10px; }
-    .brand img { width: 36px; height: 36px; border-radius: 8px; object-fit: cover; }
-    .brand strong { font-weight: 700; letter-spacing: 0.2px; }
-
-    .nav-links { display: flex; gap: 18px; align-items: center; }
-    .btn { display: inline-flex; align-items: center; gap: 8px; padding: 10px 14px; border-radius: 10px; background: linear-gradient(135deg, var(--brand), var(--accent)); color: white; font-weight: 600; border: none; cursor: pointer; }
-    .btn.secondary { background: #1f2937; color: var(--text); border: 1px solid rgba(255,255,255,0.08); }
-
-    /* Hero */
-    .hero { padding: 72px 0 32px; }
-    .hero-grid { display: grid; gap: 24px; grid-template-columns: 1.2fr 1fr; align-items: center; }
-    .hero h1 { font-size: clamp(28px, 4vw, 44px); margin: 0 0 12px; line-height: 1.1; }
-    .hero p { color: var(--muted); font-size: 16px; margin: 0 0 24px; }
-    .hero .cta { display: flex; gap: 12px; flex-wrap: wrap; }
-    .hero .mock { background: linear-gradient(180deg, rgba(34,197,218,0.10), rgba(167,139,250,0.10)); border: 1px solid rgba(255,255,255,0.06); border-radius: 18px; padding: 8px; display: grid; place-items: center; }
-    .hero .mock img { width: 100%; border-radius: 14px; }
-
-    /* Features */
-    section { padding: 56px 0; }
-    .cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
-    .card { background: var(--card); border: 1px solid rgba(255,255,255,0.06); padding: 20px; border-radius: 14px; }
-    .card h3 { margin: 0 0 8px; font-size: 18px; }
-    .card p { margin: 0; color: var(--muted); }
-
-    /* Gallery */
-    .gallery { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
-    .gallery img { width: 100%; border-radius: 12px; border: 1px solid rgba(255,255,255,0.06); }
-
-    /* Reviews */
-    .reviews { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
-    .quote { background: var(--card); border: 1px solid rgba(255,255,255,0.06); padding: 18px; border-radius: 14px; }
-    .quote p { margin: 0; color: var(--text); }
-    .quote small { color: var(--muted); }
-
-    /* Footer */
-    footer { padding: 48px 0; border-top: 1px solid rgba(255,255,255,0.06); color: var(--muted); }
-
-    /* Responsive */
-    @media (max-width: 900px) {
-      .hero-grid { grid-template-columns: 1fr; }
-      .cards { grid-template-columns: 1fr; }
-      .gallery { grid-template-columns: 1fr 1fr; }
-      .reviews { grid-template-columns: 1fr; }
-    }
+    :root { --bg:#0b0d12; --card:#121622; --muted:#9aa4b2; --pri:#5eead4; --border:#1e2230; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,'Noto Sans KR',sans-serif;background:var(--bg);color:#e7edf5}
+    a{color:var(--pri);text-decoration:none} a:hover{text-decoration:underline}
+    header,main,footer{max-width:1100px;margin:0 auto;padding:16px}
+    header{display:flex;align-items:center;justify-content:space-between;gap:12px}
+    .brand{display:flex;align-items:center;gap:10px}
+    .logo{width:28px;height:28px;border-radius:8px;background:linear-gradient(135deg,#26f,#0bf);box-shadow:0 0 24px rgba(94,234,212,.25)}
+    nav a{margin-left:16px;color:#cfd6e4}
+    .hero{margin-top:8px;padding:40px;border:1px solid var(--border);border-radius:18px;background:
+      radial-gradient(800px 300px at 10% -10%, rgba(94,234,212,.10), transparent 60%),
+      linear-gradient(180deg, rgba(94,234,212,.06), transparent 45%), var(--card)}
+    .hero h1{margin:0 0 10px;font-size:clamp(28px,4.2vw,42px);letter-spacing:-0.02em}
+    .hero p{margin:0;color:var(--muted);line-height:1.7}
+    .cta{margin-top:18px;display:flex;gap:10px;flex-wrap:wrap}
+    .btn{display:inline-flex;gap:8px;align-items:center;padding:10px 14px;border-radius:12px;border:1px solid var(--border);background:#0f1320}
+    .btn:hover{background:#11182a;text-decoration:none}
+    .layout{display:grid;grid-template-columns:1fr;gap:18px;margin-top:24px}
+    @media(min-width:1024px){.layout{grid-template-columns:1.2fr .8fr}}
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:22px}
+    .card h3{margin:0 0 8px;font-size:20px}
+    .muted{color:var(--muted)}
+    .featurelist{display:grid;grid-template-columns:1fr;gap:12px}
+    @media(min-width:700px){.featurelist{grid-template-columns:1fr 1fr}}
+    .feature{border:1px dashed var(--border);border-radius:14px;padding:14px;background:#0f1320}
+    .field{display:flex;flex-direction:column;gap:6px;margin:10px 0 2px}
+    input{width:100%;padding:10px 12px;border-radius:12px;border:1px solid var(--border);background:#0f1320;color:#e7edf5}
+    button.primary{margin-top:10px;padding:10px 14px;background:#1d2639;color:#e7edf5;border:1px solid var(--border);border-radius:12px;cursor:pointer}
+    button.primary:hover{background:#223049}
+    .row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+    .sp{flex:1 1 auto}
+    .pill{font:inherit;background:#0f1320;border:1px solid var(--border);border-radius:999px;padding:6px 10px}
+    footer{margin:30px auto 60px;text-align:center;color:var(--muted);font-size:14px}
   </style>
 </head>
 <body>
-  <header>
-    <div class="container nav">
-      <div class="brand">
-        <!-- ⬇ 로고 이미지 교체: /images/logo.png 를 HomeGate 로고로 바꾸세요 -->
-        <img src="/images/logo.png" alt="Measure Master Logo" />
-        <strong>Measure Master</strong>
-      </div>
-      <nav class="nav-links">
-        <a href="#features">기능</a>
-        <a href="#gallery">갤러리</a>
-        <a href="#reviews">후기</a>
-        <a href="#faq">FAQ</a>
-        <a class="btn secondary" href="#contact">문의</a>
-      </nav>
+<header>
+  <div class="brand">
+    <div class="logo" aria-hidden="true"></div>
+    <strong>Measure Master</strong>
+    <span class="pill">v1</span>
+  </div>
+  <nav>
+    <a href="#auth">로그인</a>
+    <a href="/reviews.html">사용후기</a>
+    <a href="/privacy.html">개인정보처리방침</a>
+  </nav>
+</header>
+
+<main>
+  <section class="hero">
+    <h1>사진 속 왜곡을 보정해<br/>정확한 길이·면적을 계산</h1>
+    <p class="muted">A4 기준 사각형으로 투시 보정 후, 보정된 도형의 길이/면적을 산출합니다. 건축·실측·인테리어 현장에서 빠르고 간편하게.</p>
+    <div class="cta">
+      <a class="btn" href="#" title="곧 공개">Google Play(준비중)</a>
+      <a class="btn" href="/reviews.html">사용후기 보기</a>
+      <a class="btn" href="/privacy.html">개인정보처리방침</a>
     </div>
-  </header>
+  </section>
 
-  <main>
-    <!-- Hero -->
-    <section class="hero container">
-      <div class="hero-grid">
-        <div>
-          <h1>사진 한 장으로 <span style="color:var(--brand-2)">정확한 길이·면적</span>을</h1>
-          <p>기준 사각형(A4 등)으로 투시 보정하여 실제 크기를 계산하는 <strong>만능줄자</strong> 앱.
-             직선·곡선 측정, 자동 스냅, 다국어 지원.</p>
-          <div class="cta">
-            <!-- 스토어 버튼은 추후 연결 -->
-            <a class="btn" href="#download">Google Play (준비중)</a>
-            <a class="btn secondary" href="#howto">사용 가이드</a>
-          </div>
+  <div class="layout">
+    <!-- 기능 요약 -->
+    <section class="card">
+      <h3>왜 Measure Master인가요?</h3>
+      <div class="featurelist">
+        <div class="feature">
+          <strong>정확한 투시 보정</strong>
+          <p class="muted">A4 기준 사각형 4점만 지정하면 사진을 직사각형 기준으로 보정해 길이·면적을 신뢰성 있게 계산.</p>
         </div>
-        <div class="mock">
-          <!-- ⬇ 앱 스크린샷 교체: HomeGate에서 쓰는 대표 이미지를 사용하세요 -->
-          <img src="/images/app-hero.png" alt="Measure Master Screenshot" />
+        <div class="feature">
+          <strong>실측 친화 UI</strong>
+          <p class="muted">직선/곡선 도형, 스냅 각도, 자동 커밋 등 현장 사용성을 최우선으로 설계.</p>
         </div>
-      </div>
-    </section>
-
-    <!-- Features -->
-    <section id="features" class="container">
-      <h2 style="margin:0 0 16px; font-size:24px">핵심 기능</h2>
-      <div class="cards">
-        <div class="card">
-          <h3>투시 보정</h3>
-          <p>A4 등 기준 사각형을 인식해 원근을 교정하고, 실제 mm 단위로 환산합니다.</p>
+        <div class="feature">
+          <strong>빠른 결과</strong>
+          <p class="muted">보정 후 즉시 길이 합계, 면적 합계 표시. 내보내기 및 공유도 간편.</p>
         </div>
-        <div class="card">
-          <h3>길이·면적 측정</h3>
-          <p>직선/곡선 다각형, 홀(구멍) 면적도 지원. 평균값·편차 표시로 신뢰성 제공.</p>
-        </div>
-        <div class="card">
-          <h3>스냅 & 레이어</h3>
-          <p>각도/점 스냅, 메인·상대 레이어 분리로 정밀한 드로잉 워크플로.</p>
+        <div class="feature">
+          <strong>피드백 루프</strong>
+          <p class="muted">사용자 후기 기반 개선. 버그 리포트/요청은 후기 게시판으로 알려주세요.</p>
         </div>
       </div>
     </section>
 
-    <!-- Gallery -->
-    <section id="gallery" class="container">
-      <h2 style="margin:0 0 16px; font-size:24px">갤러리</h2>
-      <div class="gallery">
-        <!-- ⬇ 스크린샷 3~6장 교체하세요 -->
-        <img src="/images/screen-1.jpg" alt="screenshot 1" />
-        <img src="/images/screen-2.jpg" alt="screenshot 2" />
-        <img src="/images/screen-3.jpg" alt="screenshot 3" />
+    <!-- 로그인/가입 전용 박스 -->
+    <section id="auth" class="card">
+      <div class="row">
+        <h3 class="sp">회원가입 · 로그인</h3>
+        <span id="auth-status" class="muted">로그아웃 상태</span>
       </div>
+
+      <form id="signup-form" autocomplete="on">
+        <div class="field">
+          <label for="signup-email">이메일</label>
+          <input id="signup-email" name="email" type="email" required placeholder="you@example.com" />
+        </div>
+        <div class="field">
+          <label for="signup-password">비밀번호</label>
+          <input id="signup-password" name="password" type="password" required placeholder="8자 이상" minlength="8" />
+        </div>
+        <button type="submit" class="primary">회원가입</button>
+      </form>
+
+      <form id="login-form" autocomplete="on" style="margin-top:10px">
+        <div class="field">
+          <label for="login-email">이메일</label>
+          <input id="login-email" name="email" type="email" required placeholder="you@example.com" />
+        </div>
+        <div class="field">
+          <label for="login-password">비밀번호</label>
+          <input id="login-password" name="password" type="password" required minlength="8" />
+        </div>
+        <button type="submit" class="primary">로그인</button>
+        <button type="button" id="logout-btn" style="margin-left:8px;display:none">로그아웃</button>
+      </form>
+
+      <p class="muted" style="margin-top:10px">가입 후 이메일 인증이 설정된 경우, 받은 메일에서 확인을 완료해 주세요.</p>
+
+      <hr style="border:none;border-top:1px solid var(--border);margin:16px 0">
+      <p>후기를 남기시려면 <a href="/reviews.html">사용후기 페이지</a>로 이동하세요.</p>
     </section>
+  </div>
+</main>
 
-    <!-- Reviews (초기엔 정적 문구, 이후 Disqus/Giscus 등 연결) -->
-    <section id="reviews" class="container">
-      <h2 style="margin:0 0 16px; font-size:24px">사용자 후기</h2>
-      <div class="reviews">
-        <div class="quote"><p>원근 보정이 확실해서 현장 치수 뽑을 때 정말 편합니다.</p><small>— 현장시공 팀장</small></div>
-        <div class="quote"><p>곡선 면적도 계산돼서 조경 면적 산출할 때 유용해요.</p><small>— 조경 설계</small></div>
-        <div class="quote"><p>스냅이 좋아서 도형이 깔끔합니다. 업데이트 기대!</p><small>— 사용자 J***</small></div>
-      </div>      <div id="disqus_thread"></div>
-      <script>
-        // Disqus 임베드 — 아래 shortname을 본인 것으로 교체하세요.
-        var disqus_config = function () {
-          this.page.url = location.href;
-          this.page.identifier = 'measure-master-home';
-        };
-        (function() {
-          var d = document, s = d.createElement('script');
-          s.src = 'https://YOUR_DISQUS_SHORTNAME.disqus.com/embed.js';
-          s.setAttribute('data-timestamp', +new Date());
-          (d.head || d.body).appendChild(s);
-        })();
-      </script>
-    </section>
+<footer>
+  © <span id="year"></span> Measure Master. All rights reserved.
+</footer>
 
-    <!-- FAQ -->
-    <section id="faq" class="container">
-      <h2 style="margin:0 0 16px; font-size:24px">자주 묻는 질문</h2>
-      <div class="cards">
-        <div class="card"><h3>A4는 가로/세로를 정확히 입력해야 하나요?</h3><p>예. 210×297(세로) vs 297×210(가로)가 뒤바뀌면 길이값이 달라집니다. 혼동 시 스왑 안내가 표시됩니다.</p></div>
-        <div class="card"><h3>보정 후에도 약간의 편차가 있어요.</h3><p>렌즈 왜곡·외삽 영향입니다. 평균값·편차와 촬영 가이드(1× 이상, 수직 촬영)를 참고하세요.</p></div>
-        <div class="card"><h3>지원 언어</h3><p>한국어, 영어, 러시아어(ru), 독일어(de), 포르투갈어(pt), 스페인어(es), 아랍어(ar), 힌디어(hi) 등 순차 확대.</p></div>
-      </div>
-    </section>
+<noscript>
+  <div style="max-width:1100px;margin:10px auto;padding:12px;border-radius:12px;background:#1a2236;border:1px solid #2a3450;color:#ffb4a2;">
+    이 페이지는 JavaScript를 필요로 합니다. 브라우저 설정에서 JavaScript를 활성화해 주세요.
+  </div>
+</noscript>
 
-    <!-- Contact -->
-    <section id="contact" class="container">
-      <h2 style="margin:0 0 16px; font-size:24px">문의</h2>
-      <p>메일: <a href="mailto:contact@measure-master.net">contact@measure-master.net</a></p>
-      <p>개인정보 처리방침: <a href="/privacy.html">/privacy.html</a> (추가 예정)</p>
-    </section>
-  </main>
+<!-- Supabase -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+  // ===== TODO: 본인 Supabase 값으로 교체 =====
+  const SUPABASE_URL  = "https://snxjcbaaysgfunpsohzg.supabase.co";
+  const SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNueGpjYmFheXNnZnVucHNvaHpnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY1OTk3MzQsImV4cCI6MjA3MjE3NTczNH0.T8b9PpabXkCvwW2W57Qbr-h--JLZB6errlyP5IwsYyk";
+  // ===========================================
+  const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
 
-  <footer>
-    <div class="container">
-      © <span id="y"></span> Measure Master. All rights reserved.
-    </div>
-  </footer>
+  const $ = (s)=>document.querySelector(s);
+  $("#year").textContent = new Date().getFullYear();
 
-  <script>
-    document.getElementById('y').textContent = new Date().getFullYear();
-  </script>
+  const elStatus = $("#auth-status");
+  const elSignup = $("#signup-form");
+  const elLogin  = $("#login-form");
+  const elLogout = $("#logout-btn");
+
+  async function refreshAuthUI(){
+    const { data:{ session } } = await supabase.auth.getSession();
+    if(session?.user){
+      elStatus.textContent = `로그인: ${session.user.email}`;
+      elSignup.style.display = "none";
+      elLogin.style.display  = "none";
+      elLogout.style.display = "inline-block";
+    }else{
+      elStatus.textContent = "로그아웃 상태";
+      elSignup.style.display = "block";
+      elLogin.style.display  = "block";
+      elLogout.style.display = "none";
+    }
+  }
+
+  elSignup.addEventListener("submit", async(e)=>{
+    e.preventDefault();
+    const email = e.target.email.value.trim();
+    const password = e.target.password.value;
+    const { error } = await supabase.auth.signUp({ email, password });
+    alert(error ? `회원가입 오류: ${error.message}` : "가입 완료! 메일 확인을 진행해 주세요.");
+    refreshAuthUI();
+  });
+
+  elLogin.addEventListener("submit", async(e)=>{
+    e.preventDefault();
+    const email = e.target.email.value.trim();
+    const password = e.target.password.value;
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    alert(error ? `로그인 오류: ${error.message}` : "로그인 성공");
+    refreshAuthUI();
+  });
+
+  elLogout.addEventListener("click", async()=>{
+    await supabase.auth.signOut();
+    refreshAuthUI();
+  });
+
+  // 초기
+  refreshAuthUI();
+</script>
 </body>
 </html>
-<!-- redeploy 2025-08-30 14:00:58 -->
