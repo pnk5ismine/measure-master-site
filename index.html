@@ -1,10 +1,10 @@
 <!doctype html>
-<html lang="ko">
+<html lang="ko" data-lang="ko">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Measure Master — 사진 보정 · 길이/면적 계산</title>
-  <meta name="description" content="A4 기준 사각형으로 투시 보정 후 길이/면적을 계산하는 Measure Master 앱" />
+  <title data-i18n="meta.title">Measure Master — 사진 보정 · 길이/면적 계산</title>
+  <meta name="description" content="A4 기준 사각형으로 투시 보정 후 길이/면적을 계산하는 Measure Master 앱" data-i18n-attr="content=meta.description" />
   <link rel="icon" href="favicon.svg" type="image/svg+xml" />
   <style>
     :root { --bg:#0b0d12; --card:#121622; --muted:#9aa4b2; --pri:#5eead4; --border:#1e2230; }
@@ -16,6 +16,9 @@
     .brand{display:flex;align-items:center;gap:10px}
     .logo{width:28px;height:28px;border-radius:8px;background:linear-gradient(135deg,#26f,#0bf);box-shadow:0 0 24px rgba(94,234,212,.25)}
     nav a{margin-left:16px;color:#cfd6e4}
+    .lang{display:flex;gap:6px;align-items:center}
+    .lang button{border:1px solid var(--border);background:#0f1320;color:#e7edf5;border-radius:999px;padding:6px 10px;cursor:pointer}
+    .lang button.active{outline:2px solid #2dd; font-weight:600}
     .hero{margin-top:8px;padding:40px;border:1px solid var(--border);border-radius:18px;background:
       radial-gradient(800px 300px at 10% -10%, rgba(94,234,212,.10), transparent 60%),
       linear-gradient(180deg, rgba(94,234,212,.06), transparent 45%), var(--card)}
@@ -40,6 +43,7 @@
     .sp{flex:1 1 auto}
     .pill{font:inherit;background:#0f1320;border:1px solid var(--border);border-radius:999px;padding:6px 10px}
     footer{margin:30px auto 60px;text-align:center;color:var(--muted);font-size:14px}
+    hr{border:none;border-top:1px solid var(--border);margin:16px 0}
   </style>
 </head>
 <body>
@@ -50,99 +54,226 @@
     <span class="pill">v1</span>
   </div>
   <nav>
-    <a href="#auth">로그인</a>
-    <a href="/reviews.html">사용후기</a>
-    <a href="/privacy.html">개인정보처리방침</a>
+    <a href="#auth" data-i18n="nav.login">로그인</a>
+    <a href="/reviews.html" data-i18n="nav.reviews">사용후기</a>
+    <a href="/privacy.html" data-i18n="nav.privacy">개인정보처리방침</a>
   </nav>
+  <div class="lang">
+    <button type="button" data-lang-btn="ko">🇰🇷 한국어</button>
+    <button type="button" data-lang-btn="en">🇬🇧 English</button>
+  </div>
 </header>
 
 <main>
   <section class="hero">
-    <h1>사진 속 왜곡을 보정해<br/>정확한 길이·면적을 계산</h1>
-    <p class="muted">A4 기준 사각형으로 투시 보정 후, 보정된 도형의 길이/면적을 산출합니다. 건축·실측·인테리어 현장에서 빠르고 간편하게.</p>
+    <h1 data-i18n="hero.title">사진 속 왜곡을 보정해<br/>정확한 길이·면적을 계산</h1>
+    <p class="muted" data-i18n="hero.desc">A4 기준 사각형으로 투시 보정 후, 보정된 도형의 길이/면적을 산출합니다. 건축·실측·인테리어 현장에서 빠르고 간편하게.</p>
     <div class="cta">
-      <a class="btn" href="#" title="곧 공개">Google Play(준비중)</a>
-      <a class="btn" href="/reviews.html">사용후기 보기</a>
-      <a class="btn" href="/privacy.html">개인정보처리방침</a>
+      <a class="btn" href="#" title="Coming soon" data-i18n="hero.cta.play">Google Play(준비중)</a>
+      <a class="btn" href="/reviews.html" data-i18n="hero.cta.reviews">사용후기 보기</a>
+      <a class="btn" href="/privacy.html" data-i18n="hero.cta.privacy">개인정보처리방침</a>
     </div>
   </section>
 
   <div class="layout">
     <!-- 기능 요약 -->
     <section class="card">
-      <h3>왜 Measure Master인가요?</h3>
+      <h3 data-i18n="why.title">왜 Measure Master인가요?</h3>
       <div class="featurelist">
         <div class="feature">
-          <strong>정확한 투시 보정</strong>
-          <p class="muted">A4 기준 사각형 4점만 지정하면 사진을 직사각형 기준으로 보정해 길이·면적을 신뢰성 있게 계산.</p>
+          <strong data-i18n="why.f1.title">정확한 투시 보정</strong>
+          <p class="muted" data-i18n="why.f1.desc">A4 기준 사각형 4점만 지정하면 사진을 직사각형 기준으로 보정해 길이·면적을 신뢰성 있게 계산.</p>
         </div>
         <div class="feature">
-          <strong>실측 친화 UI</strong>
-          <p class="muted">직선/곡선 도형, 스냅 각도, 자동 커밋 등 현장 사용성을 최우선으로 설계.</p>
+          <strong data-i18n="why.f2.title">실측 친화 UI</strong>
+          <p class="muted" data-i18n="why.f2.desc">직선/곡선 도형, 스냅 각도, 자동 커밋 등 현장 사용성을 최우선으로 설계.</p>
         </div>
         <div class="feature">
-          <strong>빠른 결과</strong>
-          <p class="muted">보정 후 즉시 길이 합계, 면적 합계 표시. 내보내기 및 공유도 간편.</p>
+          <strong data-i18n="why.f3.title">빠른 결과</strong>
+          <p class="muted" data-i18n="why.f3.desc">보정 후 즉시 길이 합계, 면적 합계 표시. 내보내기 및 공유도 간편.</p>
         </div>
         <div class="feature">
-          <strong>피드백 루프</strong>
-          <p class="muted">사용자 후기 기반 개선. 버그 리포트/요청은 후기 게시판으로 알려주세요.</p>
+          <strong data-i18n="why.f4.title">피드백 루프</strong>
+          <p class="muted" data-i18n="why.f4.desc">사용자 후기 기반 개선. 버그 리포트/요청은 후기 게시판으로 알려주세요.</p>
         </div>
       </div>
     </section>
 
-    <!-- 로그인/가입 전용 박스 -->
+    <!-- 로그인/가입 -->
     <section id="auth" class="card">
       <div class="row">
-        <h3 class="sp">회원가입 · 로그인</h3>
-        <span id="auth-status" class="muted">로그아웃 상태</span>
+        <h3 class="sp" data-i18n="auth.title">회원가입 · 로그인</h3>
+        <span id="auth-status" class="muted" data-i18n="auth.logged_out">로그아웃 상태</span>
       </div>
 
       <form id="signup-form" autocomplete="on">
         <div class="field">
-          <label for="signup-email">이메일</label>
-          <input id="signup-email" name="email" type="email" required placeholder="you@example.com" />
+          <label for="signup-email" data-i18n="auth.email">이메일</label>
+          <input id="signup-email" name="email" type="email" required
+                 placeholder="you@example.com"
+                 data-i18n-attr="placeholder=auth.email_ph">
         </div>
         <div class="field">
-          <label for="signup-password">비밀번호</label>
-          <input id="signup-password" name="password" type="password" required placeholder="8자 이상" minlength="8" />
+          <label for="signup-password" data-i18n="auth.password">비밀번호</label>
+          <input id="signup-password" name="password" type="password" required minlength="8"
+                 placeholder="8자 이상"
+                 data-i18n-attr="placeholder=auth.password_ph">
         </div>
-        <button type="submit" class="primary">회원가입</button>
+        <button type="submit" class="primary" data-i18n="auth.signup">회원가입</button>
       </form>
 
       <form id="login-form" autocomplete="on" style="margin-top:10px">
         <div class="field">
-          <label for="login-email">이메일</label>
-          <input id="login-email" name="email" type="email" required placeholder="you@example.com" />
+          <label for="login-email" data-i18n="auth.email">이메일</label>
+          <input id="login-email" name="email" type="email" required
+                 placeholder="you@example.com"
+                 data-i18n-attr="placeholder=auth.email_ph">
         </div>
         <div class="field">
-          <label for="login-password">비밀번호</label>
-          <input id="login-password" name="password" type="password" required minlength="8" />
+          <label for="login-password" data-i18n="auth.password">비밀번호</label>
+          <input id="login-password" name="password" type="password" required minlength="8"
+                 data-i18n-attr="placeholder=auth.password_ph">
         </div>
-        <button type="submit" class="primary">로그인</button>
-        <button type="button" id="logout-btn" style="margin-left:8px;display:none">로그아웃</button>
+        <button type="submit" class="primary" data-i18n="auth.login">로그인</button>
+        <button type="button" id="logout-btn" style="margin-left:8px;display:none" data-i18n="auth.logout">로그아웃</button>
       </form>
 
-      <p class="muted" style="margin-top:10px">가입 후 이메일 인증이 설정된 경우, 받은 메일에서 확인을 완료해 주세요.</p>
+      <p class="muted" style="margin-top:10px" data-i18n="auth.note">
+        가입 후 이메일 인증이 설정된 경우, 받은 메일에서 확인을 완료해 주세요.
+      </p>
 
-      <hr style="border:none;border-top:1px solid var(--border);margin:16px 0">
-      <p>후기를 남기시려면 <a href="/reviews.html">사용후기 페이지</a>로 이동하세요.</p>
+      <hr />
+      <p data-i18n="auth.reviews_link">후기를 남기시려면 <a href="/reviews.html">사용후기 페이지</a>로 이동하세요.</p>
     </section>
   </div>
 </main>
 
 <footer>
-  © <span id="year"></span> Measure Master. All rights reserved.
+  © <span id="year"></span> Measure Master. <span data-i18n="footer.all">All rights reserved.</span>
 </footer>
 
 <noscript>
-  <div style="max-width:1100px;margin:10px auto;padding:12px;border-radius:12px;background:#1a2236;border:1px solid #2a3450;color:#ffb4a2;">
+  <div style="max-width:1100px;margin:10px auto;padding:12px;border-radius:12px;background:#1a2236;border:1px solid #2a3450;color:#ffb4a2;" data-i18n="noscript">
     이 페이지는 JavaScript를 필요로 합니다. 브라우저 설정에서 JavaScript를 활성화해 주세요.
   </div>
 </noscript>
 
 <!-- Supabase -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<!-- i18n 공통 유틸 -->
+<script>
+  const I18N = {
+    ko: {
+      "meta.title": "Measure Master — 사진 보정 · 길이/면적 계산",
+      "meta.description": "A4 기준 사각형으로 투시 보정 후 길이/면적을 계산하는 Measure Master 앱",
+      "nav.login":"로그인","nav.reviews":"사용후기","nav.privacy":"개인정보처리방침",
+      "hero.title":"사진 속 왜곡을 보정해<br/>정확한 길이·면적을 계산",
+      "hero.desc":"A4 기준 사각형으로 투시 보정 후, 보정된 도형의 길이/면적을 산출합니다. 건축·실측·인테리어 현장에서 빠르고 간편하게.",
+      "hero.cta.play":"Google Play(준비중)","hero.cta.reviews":"사용후기 보기","hero.cta.privacy":"개인정보처리방침",
+      "why.title":"왜 Measure Master인가요?",
+      "why.f1.title":"정확한 투시 보정","why.f1.desc":"A4 기준 사각형 4점만 지정하면 사진을 직사각형 기준으로 보정해 길이·면적을 신뢰성 있게 계산.",
+      "why.f2.title":"실측 친화 UI","why.f2.desc":"직선/곡선 도형, 스냅 각도, 자동 커밋 등 현장 사용성을 최우선으로 설계.",
+      "why.f3.title":"빠른 결과","why.f3.desc":"보정 후 즉시 길이 합계, 면적 합계 표시. 내보내기 및 공유도 간편.",
+      "why.f4.title":"피드백 루프","why.f4.desc":"사용자 후기 기반 개선. 버그 리포트/요청은 후기 게시판으로 알려주세요.",
+      "auth.title":"회원가입 · 로그인","auth.logged_out":"로그아웃 상태","auth.logged_in":"로그인: {email}",
+      "auth.email":"이메일","auth.email_ph":"you@example.com",
+      "auth.password":"비밀번호","auth.password_ph":"8자 이상",
+      "auth.signup":"회원가입","auth.login":"로그인","auth.logout":"로그아웃",
+      "auth.note":"가입 후 이메일 인증이 설정된 경우, 받은 메일에서 확인을 완료해 주세요.",
+      "auth.reviews_link":"후기를 남기시려면 <a href=\"/reviews.html\">사용후기 페이지</a>로 이동하세요.",
+      "msg.signup_ok":"가입 완료! 메일 확인을 진행해 주세요.",
+      "msg.signup_err":"회원가입 오류: {msg}",
+      "msg.login_ok":"로그인 성공",
+      "msg.login_err":"로그인 오류: {msg}",
+      "footer.all":"All rights reserved.",
+      "noscript":"이 페이지는 JavaScript를 필요로 합니다. 브라우저 설정에서 JavaScript를 활성화해 주세요."
+    },
+    en: {
+      "meta.title": "Measure Master — Perspective Fix · Length/Area",
+      "meta.description": "Measure Master calculates length and area by rectifying perspective using an A4 reference rectangle.",
+      "nav.login":"Log In","nav.reviews":"Reviews","nav.privacy":"Privacy",
+      "hero.title":"Fix perspective in photos<br/>and measure length & area accurately",
+      "hero.desc":"Use an A4 reference rectangle to rectify perspective, then compute reliable length/area. Fast and handy for field work.",
+      "hero.cta.play":"Google Play (Coming Soon)","hero.cta.reviews":"See Reviews","hero.cta.privacy":"Privacy Policy",
+      "why.title":"Why Measure Master?",
+      "why.f1.title":"Accurate Rectification","why.f1.desc":"Specify 4 corners of an A4 reference to rectify to a rectangle and obtain reliable length/area results.",
+      "why.f2.title":"Field-Friendly UI","why.f2.desc":"Straight/curved shapes, angle snapping, auto-commit—designed for real-world usage.",
+      "why.f3.title":"Instant Results","why.f3.desc":"Total length and area after rectification, with simple export & sharing.",
+      "why.f4.title":"Feedback Loop","why.f4.desc":"We improve via user feedback. Post requests and bug reports in Reviews.",
+      "auth.title":"Sign Up · Log In","auth.logged_out":"Signed out","auth.logged_in":"Signed in: {email}",
+      "auth.email":"Email","auth.email_ph":"you@example.com",
+      "auth.password":"Password","auth.password_ph":"At least 8 characters",
+      "auth.signup":"Sign Up","auth.login":"Log In","auth.logout":"Log Out",
+      "auth.note":"If email verification is enabled, please confirm via the email after sign-up.",
+      "auth.reviews_link":"To leave feedback, go to the <a href=\"/reviews.html\">Reviews page</a>.",
+      "msg.signup_ok":"Sign-up completed! Please check your email.",
+      "msg.signup_err":"Sign-up error: {msg}",
+      "msg.login_ok":"Logged in",
+      "msg.login_err":"Login error: {msg}",
+      "footer.all":"All rights reserved.",
+      "noscript":"This site requires JavaScript. Please enable it in your browser."
+    }
+  };
+
+  function getLang(){
+    return localStorage.getItem("lang") || document.documentElement.getAttribute("lang") || "ko";
+  }
+  function setLang(lang){
+    localStorage.setItem("lang", lang);
+    document.documentElement.setAttribute("lang", lang);
+    document.documentElement.setAttribute("data-lang", lang);
+    applyI18n();
+    markActiveLang(lang);
+  }
+  function t(key, vars={}){
+    const lang = getLang();
+    let s = (I18N[lang] && I18N[lang][key]) || (I18N.ko && I18N.ko[key]) || key;
+    for(const k in vars){ s = s.replaceAll(`{${k}}`, vars[k]); }
+    return s;
+  }
+  function applyI18n(){
+    // textContent
+    document.querySelectorAll("[data-i18n]").forEach(el=>{
+      el.innerHTML = t(el.getAttribute("data-i18n"));
+    });
+    // attributes : data-i18n-attr="placeholder=auth.email_ph,title=..."
+    document.querySelectorAll("[data-i18n-attr]").forEach(el=>{
+      const pairs = el.getAttribute("data-i18n-attr").split(",");
+      pairs.forEach(p=>{
+        const [attr,key] = p.split("=").map(s=>s.trim());
+        if(attr && key) el.setAttribute(attr, t(key));
+      });
+    });
+    // title 태그도 업데이트
+    const titleEl = document.querySelector("title[data-i18n]");
+    if(titleEl){ titleEl.textContent = t(titleEl.getAttribute("data-i18n")); }
+    // meta description 업데이트
+    const metaDesc = document.querySelector('meta[name="description"][data-i18n-attr]');
+    if(metaDesc){
+      const pairs = metaDesc.getAttribute("data-i18n-attr").split(",");
+      pairs.forEach(p=>{
+        const [attr,key] = p.split("=").map(s=>s.trim());
+        if(attr && key) metaDesc.setAttribute(attr, t(key));
+      });
+    }
+  }
+  function markActiveLang(lang){
+    document.querySelectorAll("[data-lang-btn]").forEach(btn=>{
+      btn.classList.toggle("active", btn.getAttribute("data-lang-btn")===lang);
+    });
+  }
+  // 초기화
+  (function(){
+    const lang = getLang();
+    setLang(lang);
+    document.querySelectorAll("[data-lang-btn]").forEach(btn=>{
+      btn.addEventListener("click", ()=> setLang(btn.getAttribute("data-lang-btn")));
+    });
+    document.getElementById("year").textContent = new Date().getFullYear();
+  })();
+</script>
+
 <script>
   // ===== TODO: 본인 Supabase 값으로 교체 =====
   const SUPABASE_URL  = "https://snxjcbaaysgfunpsohzg.supabase.co";
@@ -151,8 +282,6 @@
   const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
 
   const $ = (s)=>document.querySelector(s);
-  $("#year").textContent = new Date().getFullYear();
-
   const elStatus = $("#auth-status");
   const elSignup = $("#signup-form");
   const elLogin  = $("#login-form");
@@ -161,12 +290,12 @@
   async function refreshAuthUI(){
     const { data:{ session } } = await supabase.auth.getSession();
     if(session?.user){
-      elStatus.textContent = `로그인: ${session.user.email}`;
+      elStatus.innerHTML = t("auth.logged_in", { email: session.user.email });
       elSignup.style.display = "none";
       elLogin.style.display  = "none";
       elLogout.style.display = "inline-block";
     }else{
-      elStatus.textContent = "로그아웃 상태";
+      elStatus.textContent = t("auth.logged_out");
       elSignup.style.display = "block";
       elLogin.style.display  = "block";
       elLogout.style.display = "none";
@@ -178,7 +307,7 @@
     const email = e.target.email.value.trim();
     const password = e.target.password.value;
     const { error } = await supabase.auth.signUp({ email, password });
-    alert(error ? `회원가입 오류: ${error.message}` : "가입 완료! 메일 확인을 진행해 주세요.");
+    alert(error ? t("msg.signup_err",{msg:error.message}) : t("msg.signup_ok"));
     refreshAuthUI();
   });
 
@@ -187,7 +316,7 @@
     const email = e.target.email.value.trim();
     const password = e.target.password.value;
     const { error } = await supabase.auth.signInWithPassword({ email, password });
-    alert(error ? `로그인 오류: ${error.message}` : "로그인 성공");
+    alert(error ? t("msg.login_err",{msg:error.message}) : t("msg.login_ok"));
     refreshAuthUI();
   });
 
