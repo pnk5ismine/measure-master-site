@@ -1,81 +1,111 @@
-<!DOCTYPE html>
-<html lang="ko">
+<!doctype html>
+<html lang="ko" data-lang="ko">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>개인정보 처리방침 | Measure Master</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title data-i18n="privacy.meta.title">개인정보처리방침 · Measure Master</title>
+  <meta name="description" content="Measure Master 개인정보 처리에 관한 안내" data-i18n-attr="content=privacy.meta.desc" />
+  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
   <style>
-    body { font-family: -apple-system, Segoe UI, Roboto, Noto Sans KR, Apple SD Gothic Neo, Arial, sans-serif; margin: 0; padding: 24px; line-height: 1.68; color: #111827; }
-    main { max-width: 900px; margin: 0 auto; }
-    h1 { font-size: 28px; margin: 0 0 8px; }
-    h2 { font-size: 20px; margin: 24px 0 8px; }
-    .muted { color: #6b7280; }
-    ul { padding-left: 18px; }
-    code { background: #f3f4f6; padding: 1px 4px; border-radius: 4px; }
-    a { color: #0ea5e9; text-decoration: none; }
-    a:hover { text-decoration: underline; }
+    :root { --bg:#0b0d12; --card:#121622; --muted:#9aa4b2; --pri:#5eead4; --border:#1e2230; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,'Noto Sans KR',sans-serif;background:var(--bg);color:#e7edf5}
+    a{color:var(--pri);text-decoration:none} a:hover{text-decoration:underline}
+    header,main,footer{max-width:1000px;margin:0 auto;padding:16px}
+    header{display:flex;align-items:center;justify-content:space-between;gap:12px}
+    .brand{display:flex;align-items:center;gap:10px}
+    .logo{width:26px;height:26px;border-radius:8px;background:linear-gradient(135deg,#26f,#0bf);box-shadow:0 0 24px rgba(94,234,212,.25)}
+    nav a{margin-left:16px;color:#cfd6e4}
+    .lang{display:flex;gap:6px;align-items:center}
+    .lang button{border:1px solid var(--border);background:#0f1320;color:#e7edf5;border-radius:999px;padding:6px 10px;cursor:pointer}
+    .lang button.active{outline:2px solid #2dd; font-weight:600}
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:22px;margin-top:16px}
+    .muted{color:var(--muted)}
+    h1{margin:6px 0 4px;font-size:28px}
+    h2{margin:18px 0 8px;font-size:20px}
+    p{line-height:1.7}
+    footer{margin:30px auto 60px;text-align:center;color:var(--muted);font-size:14px}
+    .pill{font:inherit;background:#0f1320;border:1px solid var(--border);border-radius:999px;padding:4px 10px}
   </style>
 </head>
 <body>
-  <main>
-    <h1>개인정보 처리방침</h1>
-    <p class="muted">시행일: <strong>2025-08-27</strong></p>
-    <p>Measure Master(이하 “회사”)는 이용자의 개인정보를 중요시하며, 『개인정보 보호법』 등 관련 법령을 준수합니다. 본 방침은 회사가 제공하는 웹사이트(<code>measure-master.net</code>) 및 모바일 앱(이하 통칭 “서비스”)에 적용됩니다.</p>
+<header>
+  <div class="brand">
+    <div class="logo" aria-hidden="true"></div>
+    <strong>Measure Master</strong>
+    <span class="pill">Policy</span>
+  </div>
+  <nav>
+    <a href="/index.html" data-i18n="nav.home">홈</a>
+    <a href="/reviews.html" data-i18n="nav.reviews">사용후기</a>
+    <a href="/privacy.html" data-i18n="nav.privacy">개인정보처리방침</a>
+  </nav>
+  <div class="lang">
+    <button type="button" data-lang-btn="ko">🇰🇷 한국어</button>
+    <button type="button" data-lang-btn="en">🇬🇧 English</button>
+  </div>
+</header>
 
-    <h2>1. 수집하는 개인정보 항목</h2>
-    <ul>
-      <li>문의/고객지원: 이름, 이메일 주소, 문의 내용</li>
-      <li>웹사이트 이용: 쿠키, 접속 로그, 접속 IP, 기기/브라우저 정보(비식별)</li>
-      <li>후기/댓글(Disqus 등 외부 댓글 서비스 사용 시): 계정 식별자, 공개 프로필, 댓글 내용(해당 서비스의 정책에 따름)</li>
-    </ul>
+<main>
+  <section class="card">
+    <h1 data-i18n="privacy.title">개인정보처리방침</h1>
+    <p class="muted" data-i18n="privacy.updated">최종 업데이트: 2025-09-01</p>
+    <p data-i18n="privacy.intro">
+      Measure Master(이하 '당사')는 이용자의 개인정보를 소중히 여기며, 관련 법령을 준수합니다...
+    </p>
 
-    <h2>2. 개인정보의 수집·이용 목적</h2>
-    <ul>
-      <li>서비스 제공 및 운영, 고객문의 대응</li>
-      <li>오류 분석 및 품질 개선</li>
-      <li>법령 준수 및 분쟁 대응</li>
-    </ul>
+    <h2 data-i18n="privacy.section1">1. 수집하는 정보</h2>
+    <p data-i18n="privacy.section1.body">
+      회원가입/로그인 시 이메일과 비밀번호를 수집합니다...
+    </p>
 
-    <h2>3. 보유 및 이용기간</h2>
-    <ul>
-      <li>법령에 별도 규정이 없는 한, 수집 목적 달성 시까지 보관 후 지체 없이 파기합니다.</li>
-      <li>관련 법령에 따른 보존(예: 전자상거래 등에서의 소비자보호에 관한 법률): 계약·청약철회 기록 5년, 대금결제 기록 5년, 소비자 불만/분쟁 처리 3년 등</li>
-    </ul>
+    <h2 data-i18n="privacy.section2">2. 수집·이용 목적</h2>
+    <p data-i18n="privacy.section2.body">
+      회원 식별 및 계정 관리, 서비스 제공(로그인, 후기 게시)...
+    </p>
 
-    <h2>4. 개인정보의 제3자 제공 및 처리위탁</h2>
-    <ul>
-      <li>회사는 이용자의 동의가 있거나 법령에 근거가 있는 경우에 한하여 제3자에게 제공할 수 있습니다.</li>
-      <li>서비스 운영을 위해 다음과 같이 업무를 위탁할 수 있습니다: 호스팅/배포(Vercel), 소스 저장소(GitHub), 댓글/후기(Disqus) 등. 위탁 시 개인정보 보호 관련 법령을 준수합니다.</li>
-    </ul>
+    <h2 data-i18n="privacy.section3">3. 보관 및 파기</h2>
+    <p data-i18n="privacy.section3.body">
+      서비스 제공에 필요한 기간 동안 보관 후 목적 달성 시 지체없이 파기합니다...
+    </p>
 
-    <h2>5. 이용자 권리 및 행사 방법</h2>
-    <ul>
-      <li>이용자는 언제든지 개인정보 열람·정정·삭제·처리정지 요청을 할 수 있습니다.</li>
-      <li>요청 방법: 이메일 <a href="mailto:contact@measure-master.net">contact@measure-master.net</a> 로 문의</li>
-    </ul>
+    <h2 data-i18n="privacy.section4">4. 제3자 제공 및 처리위탁</h2>
+    <p data-i18n="privacy.section4.body">
+      Supabase(인증/DB), Vercel(호스팅) 등 클라우드 서비스를 이용합니다...
+    </p>
 
-    <h2>6. 쿠키(Cookie)의 사용</h2>
-    <ul>
-      <li>웹사이트는 서비스 개선 및 사용자 편의를 위해 쿠키를 사용할 수 있습니다.</li>
-      <li>브라우저 설정을 통해 쿠키 저장을 거부하거나 삭제할 수 있습니다.</li>
-    </ul>
+    <h2 data-i18n="privacy.section5">5. 이용자 권리</h2>
+    <p data-i18n="privacy.section5.body">
+      개인정보의 열람·정정·삭제, 동의 철회(회원탈퇴) 요청 권리가 있습니다...
+    </p>
 
-    <h2>7. 개인정보의 안전성 확보 조치</h2>
-    <ul>
-      <li>접근 통제, 암호화, 보안 프로그램 설치 등 합리적 보호 조치를 적용합니다.</li>
-    </ul>
+    <h2 data-i18n="privacy.section6">6. 쿠키 및 로깅</h2>
+    <p data-i18n="privacy.section6.body">
+      인증 상태 유지를 위해 로컬/세션 저장소 또는 쿠키를 사용할 수 있습니다...
+    </p>
 
-    <h2>8. 개인정보 보호책임자</h2>
-    <p>개인정보 보호 관련 문의는 아래로 연락해 주세요.</p>
-    <ul>
-      <li>이메일: <a href="mailto:privacy@measure-master.net">privacy@measure-master.net</a></li>
-      <li>주소: (추가 예정)</li>
-    </ul>
+    <h2 data-i18n="privacy.section7">7. 개인정보 보호조치</h2>
+    <p data-i18n="privacy.section7.body">
+      전송 구간 암호화(HTTPS), 접근 통제, 최소 수집 원칙을 준수합니다...
+    </p>
 
-    <h2>9. 고지의 의무</h2>
-    <p>본 방침은 법령·서비스 변경에 따라 개정될 수 있으며, 중요한 변경이 있을 경우 웹사이트 공지사항을 통해 안내합니다.</p>
+    <h2 data-i18n="privacy.section8">8. 문의처</h2>
+    <p data-i18n="privacy.section8.body">
+      이메일: support@measure-master.net
+    </p>
 
-    <p class="muted">최종 업데이트: 2025-08-27</p>
-  </main>
+    <h2 data-i18n="privacy.section9">9. 고지 의무</h2>
+    <p data-i18n="privacy.section9.body">
+      본 방침이 변경될 경우, 본 페이지에 업데이트일과 함께 공지합니다.
+    </p>
+  </section>
+</main>
+
+<footer>
+  © <span id="year"></span> Measure Master — <span data-i18n="footer.all">All rights reserved.</span>
+</footer>
+
+<!-- 공통 i18n -->
+<script src="/i18n.js"></script>
 </body>
 </html>

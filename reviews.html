@@ -117,60 +117,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <!-- i18n 공통 유틸 (index와 동일) -->
-<script>
-  const I18N = {
-    ko: {
-      "meta.title":"사용후기 · Measure Master","meta.description":"Measure Master 사용자 후기 게시판",
-      "nav.home":"홈","nav.privacy":"개인정보처리방침",
-      "reviews.title":"최신 후기","reviews.live":"LIVE","reviews.loading":"불러오는 중…",
-      "write.title":"후기 작성","write.nickname":"닉네임","write.nickname_ph":"예: 현장왕",
-      "write.content":"후기 내용","write.content_ph":"앱을 써 보신 소감을 남겨 주세요",
-      "write.submit":"등록","write.need_login":"로그인 후 후기를 작성할 수 있습니다.","write.no_account":"아직 계정이 없으신가요? <a href=\"/index.html#auth\">회원가입</a>",
-      "auth.logged_out":"로그아웃 상태","auth.logged_in":"로그인: {email}",
-      "auth.email":"이메일","auth.email_ph":"you@example.com",
-      "auth.password":"비밀번호","auth.password_ph":"8자 이상",
-      "auth.login":"로그인","auth.logout":"로그아웃",
-      "msg.login_ok":"로그인 성공","msg.login_err":"로그인 오류: {msg}",
-      "msg.post_err":"등록 오류: {msg}","msg.need_login":"로그인이 필요합니다.","msg.short":"닉네임 또는 내용이 너무 짧습니다.",
-      "footer.all":"All rights reserved."
-    },
-    en: {
-      "meta.title":"Reviews · Measure Master","meta.description":"User reviews for Measure Master",
-      "nav.home":"Home","nav.privacy":"Privacy",
-      "reviews.title":"Latest Reviews","reviews.live":"LIVE","reviews.loading":"Loading…",
-      "write.title":"Write a Review","write.nickname":"Nickname","write.nickname_ph":"e.g., ProMeasurer",
-      "write.content":"Your Review","write.content_ph":"Tell us about your experience with the app",
-      "write.submit":"Submit","write.need_login":"You need to log in to post a review.","write.no_account":"Don't have an account? <a href=\"/index.html#auth\">Sign up</a>",
-      "auth.logged_out":"Signed out","auth.logged_in":"Signed in: {email}",
-      "auth.email":"Email","auth.email_ph":"you@example.com",
-      "auth.password":"Password","auth.password_ph":"At least 8 characters",
-      "auth.login":"Log In","auth.logout":"Log Out",
-      "msg.login_ok":"Logged in","msg.login_err":"Login error: {msg}",
-      "msg.post_err":"Post error: {msg}","msg.need_login":"Login required.","msg.short":"Nickname or content is too short.",
-      "footer.all":"All rights reserved."
-    }
-  };
-  function getLang(){ return localStorage.getItem("lang") || document.documentElement.getAttribute("lang") || "ko"; }
-  function setLang(lang){ localStorage.setItem("lang",lang); document.documentElement.setAttribute("lang",lang); document.documentElement.setAttribute("data-lang",lang); applyI18n(); markActiveLang(lang); }
-  function t(key, vars={}){ const lang=getLang(); let s=(I18N[lang]&&I18N[lang][key])||(I18N.ko&&I18N.ko[key])||key; for(const k in vars){ s=s.replaceAll(`{${k}}`,vars[k]); } return s; }
-  function applyI18n(){
-    document.querySelectorAll("[data-i18n]").forEach(el=>{ el.innerHTML = t(el.getAttribute("data-i18n")); });
-    document.querySelectorAll("[data-i18n-attr]").forEach(el=>{
-      el.getAttribute("data-i18n-attr").split(",").forEach(p=>{
-        const [attr,key]=p.split("=").map(s=>s.trim()); if(attr&&key) el.setAttribute(attr, t(key));
-      });
-    });
-    const titleEl=document.querySelector("title[data-i18n]"); if(titleEl){ titleEl.textContent=t(titleEl.getAttribute("data-i18n")); }
-    const metaDesc=document.querySelector('meta[name="description"][data-i18n-attr]');
-    if(metaDesc){ metaDesc.getAttribute("data-i18n-attr").split(",").forEach(p=>{ const [attr,key]=p.split("=").map(s=>s.trim()); if(attr&&key) metaDesc.setAttribute(attr, t(key)); }); }
-  }
-  function markActiveLang(lang){ document.querySelectorAll("[data-lang-btn]").forEach(btn=>btn.classList.toggle("active", btn.getAttribute("data-lang-btn")===lang)); }
-  (function(){
-    const lang=getLang(); setLang(lang);
-    document.querySelectorAll("[data-lang-btn]").forEach(btn=>btn.addEventListener("click",()=>setLang(btn.getAttribute("data-lang-btn"))));
-    document.getElementById("year").textContent=new Date().getFullYear();
-  })();
-</script>
+<script src="/i18n.js"></script>
 
 <script>
   // ===== TODO: 본인 Supabase 값으로 교체 =====
