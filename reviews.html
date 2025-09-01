@@ -1,10 +1,10 @@
 <!doctype html>
-<html lang="ko">
+<html lang="ko" data-lang="ko">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>사용후기 · Measure Master</title>
-  <meta name="description" content="Measure Master 사용자 후기 게시판" />
+  <title data-i18n="meta.title">사용후기 · Measure Master</title>
+  <meta name="description" content="Measure Master 사용자 후기 게시판" data-i18n-attr="content=meta.description" />
   <link rel="icon" href="favicon.svg" type="image/svg+xml" />
   <style>
     :root { --bg:#0b0d12; --card:#121622; --muted:#9aa4b2; --pri:#5eead4; --border:#1e2230; }
@@ -15,6 +15,9 @@
     header{display:flex;align-items:center;justify-content:space-between;gap:12px}
     .brand{display:flex;align-items:center;gap:10px}
     .logo{width:26px;height:26px;border-radius:8px;background:linear-gradient(135deg,#26f,#0bf);box-shadow:0 0 24px rgba(94,234,212,.25)}
+    .lang{display:flex;gap:6px;align-items:center}
+    .lang button{border:1px solid var(--border);background:#0f1320;color:#e7edf5;border-radius:999px;padding:6px 10px;cursor:pointer}
+    .lang button.active{outline:2px solid #2dd; font-weight:600}
     .muted{color:var(--muted)}
     .wrap{display:grid;grid-template-columns:1fr;gap:18px;margin-top:10px}
     @media(min-width:980px){.wrap{grid-template-columns:.9fr .6fr}}
@@ -40,9 +43,13 @@
     <strong>Measure Master</strong>
   </div>
   <nav>
-    <a href="/index.html">홈</a>
-    <a href="/privacy.html">개인정보처리방침</a>
+    <a href="/index.html" data-i18n="nav.home">홈</a>
+    <a href="/privacy.html" data-i18n="nav.privacy">개인정보처리방침</a>
   </nav>
+  <div class="lang">
+    <button type="button" data-lang-btn="ko">🇰🇷 한국어</button>
+    <button type="button" data-lang-btn="en">🇬🇧 English</button>
+  </div>
 </header>
 
 <main>
@@ -50,48 +57,53 @@
     <!-- 후기 목록 -->
     <section class="card">
       <div class="row">
-        <h3 class="sp">최신 후기</h3>
-        <span class="pill" title="실시간 반영">LIVE</span>
+        <h3 class="sp" data-i18n="reviews.title">최신 후기</h3>
+        <span class="pill" title="Live" data-i18n="reviews.live">LIVE</span>
       </div>
       <ul class="reviews" id="reviews-list">
-        <li class="review muted">불러오는 중…</li>
+        <li class="review muted" data-i18n="reviews.loading">불러오는 중…</li>
       </ul>
     </section>
 
     <!-- 작성/로그인 -->
     <section class="card">
       <div class="row">
-        <h3 class="sp">후기 작성</h3>
-        <span id="auth-status" class="muted">로그아웃 상태</span>
+        <h3 class="sp" data-i18n="write.title">후기 작성</h3>
+        <span id="auth-status" class="muted" data-i18n="auth.logged_out">로그아웃 상태</span>
       </div>
 
       <form id="review-form" style="display:none">
         <div class="field">
-          <label for="username">닉네임</label>
-          <input id="username" name="username" placeholder="예: 현장왕" required />
+          <label for="username" data-i18n="write.nickname">닉네임</label>
+          <input id="username" name="username" placeholder="예: 현장왕" required
+                 data-i18n-attr="placeholder=write.nickname_ph">
         </div>
         <div class="field">
-          <label for="content">후기 내용</label>
-          <textarea id="content" name="content" placeholder="앱을 써 보신 소감을 남겨 주세요" required></textarea>
+          <label for="content" data-i18n="write.content">후기 내용</label>
+          <textarea id="content" name="content" placeholder="앱을 써 보신 소감을 남겨 주세요" required
+                    data-i18n-attr="placeholder=write.content_ph"></textarea>
         </div>
-        <button type="submit" class="primary">등록</button>
+        <button type="submit" class="primary" data-i18n="write.submit">등록</button>
       </form>
 
       <div id="login-box">
-        <p class="muted">로그인 후 후기를 작성할 수 있습니다.</p>
+        <p class="muted" data-i18n="write.need_login">로그인 후 후기를 작성할 수 있습니다.</p>
         <form id="login-form" autocomplete="on">
           <div class="field">
-            <label for="login-email">이메일</label>
-            <input id="login-email" name="email" type="email" required placeholder="you@example.com" />
+            <label for="login-email" data-i18n="auth.email">이메일</label>
+            <input id="login-email" name="email" type="email" required
+                   placeholder="you@example.com"
+                   data-i18n-attr="placeholder=auth.email_ph">
           </div>
           <div class="field">
-            <label for="login-password">비밀번호</label>
-            <input id="login-password" name="password" type="password" required minlength="8" />
+            <label for="login-password" data-i18n="auth.password">비밀번호</label>
+            <input id="login-password" name="password" type="password" required minlength="8"
+                   data-i18n-attr="placeholder=auth.password_ph">
           </div>
-          <button type="submit" class="primary">로그인</button>
-          <button type="button" id="logout-btn" style="display:none;margin-left:8px">로그아웃</button>
+          <button type="submit" class="primary" data-i18n="auth.login">로그인</button>
+          <button type="button" id="logout-btn" style="display:none;margin-left:8px" data-i18n="auth.logout">로그아웃</button>
         </form>
-        <p class="muted" style="margin-top:8px">
+        <p class="muted" style="margin-top:8px" data-i18n="write.no_account">
           아직 계정이 없으신가요? <a href="/index.html#auth">회원가입</a>
         </p>
       </div>
@@ -99,21 +111,75 @@
   </div>
 </main>
 
-<footer>© <span id="year"></span> Measure Master</footer>
+<footer>© <span id="year"></span> Measure Master — <span data-i18n="footer.all">All rights reserved.</span></footer>
 
 <!-- Supabase -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<!-- i18n 공통 유틸 (index와 동일) -->
+<script>
+  const I18N = {
+    ko: {
+      "meta.title":"사용후기 · Measure Master","meta.description":"Measure Master 사용자 후기 게시판",
+      "nav.home":"홈","nav.privacy":"개인정보처리방침",
+      "reviews.title":"최신 후기","reviews.live":"LIVE","reviews.loading":"불러오는 중…",
+      "write.title":"후기 작성","write.nickname":"닉네임","write.nickname_ph":"예: 현장왕",
+      "write.content":"후기 내용","write.content_ph":"앱을 써 보신 소감을 남겨 주세요",
+      "write.submit":"등록","write.need_login":"로그인 후 후기를 작성할 수 있습니다.","write.no_account":"아직 계정이 없으신가요? <a href=\"/index.html#auth\">회원가입</a>",
+      "auth.logged_out":"로그아웃 상태","auth.logged_in":"로그인: {email}",
+      "auth.email":"이메일","auth.email_ph":"you@example.com",
+      "auth.password":"비밀번호","auth.password_ph":"8자 이상",
+      "auth.login":"로그인","auth.logout":"로그아웃",
+      "msg.login_ok":"로그인 성공","msg.login_err":"로그인 오류: {msg}",
+      "msg.post_err":"등록 오류: {msg}","msg.need_login":"로그인이 필요합니다.","msg.short":"닉네임 또는 내용이 너무 짧습니다.",
+      "footer.all":"All rights reserved."
+    },
+    en: {
+      "meta.title":"Reviews · Measure Master","meta.description":"User reviews for Measure Master",
+      "nav.home":"Home","nav.privacy":"Privacy",
+      "reviews.title":"Latest Reviews","reviews.live":"LIVE","reviews.loading":"Loading…",
+      "write.title":"Write a Review","write.nickname":"Nickname","write.nickname_ph":"e.g., ProMeasurer",
+      "write.content":"Your Review","write.content_ph":"Tell us about your experience with the app",
+      "write.submit":"Submit","write.need_login":"You need to log in to post a review.","write.no_account":"Don't have an account? <a href=\"/index.html#auth\">Sign up</a>",
+      "auth.logged_out":"Signed out","auth.logged_in":"Signed in: {email}",
+      "auth.email":"Email","auth.email_ph":"you@example.com",
+      "auth.password":"Password","auth.password_ph":"At least 8 characters",
+      "auth.login":"Log In","auth.logout":"Log Out",
+      "msg.login_ok":"Logged in","msg.login_err":"Login error: {msg}",
+      "msg.post_err":"Post error: {msg}","msg.need_login":"Login required.","msg.short":"Nickname or content is too short.",
+      "footer.all":"All rights reserved."
+    }
+  };
+  function getLang(){ return localStorage.getItem("lang") || document.documentElement.getAttribute("lang") || "ko"; }
+  function setLang(lang){ localStorage.setItem("lang",lang); document.documentElement.setAttribute("lang",lang); document.documentElement.setAttribute("data-lang",lang); applyI18n(); markActiveLang(lang); }
+  function t(key, vars={}){ const lang=getLang(); let s=(I18N[lang]&&I18N[lang][key])||(I18N.ko&&I18N.ko[key])||key; for(const k in vars){ s=s.replaceAll(`{${k}}`,vars[k]); } return s; }
+  function applyI18n(){
+    document.querySelectorAll("[data-i18n]").forEach(el=>{ el.innerHTML = t(el.getAttribute("data-i18n")); });
+    document.querySelectorAll("[data-i18n-attr]").forEach(el=>{
+      el.getAttribute("data-i18n-attr").split(",").forEach(p=>{
+        const [attr,key]=p.split("=").map(s=>s.trim()); if(attr&&key) el.setAttribute(attr, t(key));
+      });
+    });
+    const titleEl=document.querySelector("title[data-i18n]"); if(titleEl){ titleEl.textContent=t(titleEl.getAttribute("data-i18n")); }
+    const metaDesc=document.querySelector('meta[name="description"][data-i18n-attr]');
+    if(metaDesc){ metaDesc.getAttribute("data-i18n-attr").split(",").forEach(p=>{ const [attr,key]=p.split("=").map(s=>s.trim()); if(attr&&key) metaDesc.setAttribute(attr, t(key)); }); }
+  }
+  function markActiveLang(lang){ document.querySelectorAll("[data-lang-btn]").forEach(btn=>btn.classList.toggle("active", btn.getAttribute("data-lang-btn")===lang)); }
+  (function(){
+    const lang=getLang(); setLang(lang);
+    document.querySelectorAll("[data-lang-btn]").forEach(btn=>btn.addEventListener("click",()=>setLang(btn.getAttribute("data-lang-btn"))));
+    document.getElementById("year").textContent=new Date().getFullYear();
+  })();
+</script>
+
 <script>
   // ===== TODO: 본인 Supabase 값으로 교체 =====
-  const SUPABASE_URL  = "https://snxjcbaaysgfunpsohzg.supabase.co
-";
+  const SUPABASE_URL  = "https://snxjcbaaysgfunpsohzg.supabase.co";
   const SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNueGpjYmFheXNnZnVucHNvaHpnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY1OTk3MzQsImV4cCI6MjA3MjE3NTczNH0.T8b9PpabXkCvwW2W57Qbr-h--JLZB6errlyP5IwsYyk";
   // ===========================================
   const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
 
   const $ = (s)=>document.querySelector(s);
-  $("#year").textContent = new Date().getFullYear();
-
   const elStatus = $("#auth-status");
   const elLogin  = $("#login-form");
   const elLogout = $("#logout-btn");
@@ -126,25 +192,24 @@
   async function refreshAuthUI(){
     const { data:{ session } } = await supabase.auth.getSession();
     if(session?.user){
-      elStatus.textContent = `로그인: ${session.user.email}`;
+      elStatus.innerHTML = t("auth.logged_in",{email:session.user.email});
       elLoginBox.style.display = "none";
       elReviewForm.style.display = "block";
       elLogout.style.display = "inline-block";
     }else{
-      elStatus.textContent = "로그아웃 상태";
+      elStatus.textContent = t("auth.logged_out");
       elLoginBox.style.display = "block";
       elReviewForm.style.display = "none";
       elLogout.style.display = "none";
     }
   }
 
-  // 로그인 / 로그아웃
   elLogin.addEventListener("submit", async(e)=>{
     e.preventDefault();
     const email = e.target.email.value.trim();
     const password = e.target.password.value;
     const { error } = await supabase.auth.signInWithPassword({ email, password });
-    alert(error ? `로그인 오류: ${error.message}` : "로그인 성공");
+    alert(error ? t("msg.login_err",{msg:error.message}) : t("msg.login_ok"));
     refreshAuthUI();
   });
 
@@ -153,15 +218,10 @@
     refreshAuthUI();
   });
 
-  // 후기 목록 로드
   async function loadReviews(){
-    const { data, error } = await supabase
-      .from("reviews")
-      .select("*")
-      .order("created_at",{ascending:false})
-      .limit(100);
-    if(error){ elReviews.innerHTML = `<li class="review">불러오기 오류: ${escapeHtml(error.message)}</li>`; return; }
-    if(!data || data.length===0){ elReviews.innerHTML = `<li class="review muted">아직 후기가 없습니다. 첫 후기를 남겨 주세요!</li>`; return; }
+    const { data, error } = await supabase.from("reviews").select("*").order("created_at",{ascending:false}).limit(100);
+    if(error){ elReviews.innerHTML = `<li class="review">${escapeHtml(t("reviews.loading"))} (${escapeHtml(error.message)})</li>`; return; }
+    if(!data || data.length===0){ elReviews.innerHTML = `<li class="review muted">${escapeHtml(t("reviews.loading"))}</li>`; return; }
     elReviews.innerHTML = data.map(r=>`
       <li class="review">
         <div class="row" style="justify-content:space-between">
@@ -173,32 +233,24 @@
     `).join("");
   }
 
-  // 후기 작성
   elReviewForm.addEventListener("submit", async(e)=>{
     e.preventDefault();
     const { data:{ session } } = await supabase.auth.getSession();
-    if(!session?.user){ alert("로그인이 필요합니다."); return; }
+    if(!session?.user){ alert(t("msg.need_login")); return; }
     const username = e.target.username.value.trim();
     const content  = e.target.content.value.trim();
-    if(username.length<2 || content.length<3){ alert("닉네임 또는 내용이 너무 짧습니다."); return; }
+    if(username.length<2 || content.length<3){ alert(t("msg.short")); return; }
     const { error } = await supabase.from("reviews").insert([{ user_id: session.user.id, username, content }]);
-    if(error){ alert(`등록 오류: ${error.message}`); return; }
+    if(error){ alert(t("msg.post_err",{msg:error.message})); return; }
     e.target.reset();
     await loadReviews();
   });
 
-  // 실시간 반영(INSERT)
   supabase.channel("reviews-realtime")
     .on("postgres_changes",{event:"INSERT",schema:"public",table:"reviews"}, loadReviews)
     .subscribe();
 
-  // 초기
   refreshAuthUI().then(loadReviews);
-
-  // ===== Supabase Auth URL 설정 리마인드 =====
-  // Supabase > Authentication > URL configuration
-  // Site URL: https://measure-master.net
-  // Redirect URLs: https://measure-master.net/*, https://www.measure-master.net/*
 </script>
 </body>
 </html>
