@@ -2,7 +2,7 @@
 const I18N = {
   ko: {
     "meta.title": "Measure Master — 사진 보정 · 길이/면적 계산",
-    "meta.description": "A4 등과 같은 기준 사각형으로 투시 보정 후 길이/면적을 계산하는 Measure Master 앱",
+    "meta.description": "A4 등과 같이 용적을 아는 기준 사각형으로 투시 보정 후 길이/면적을 계산하는 Measure Master 앱",
     "nav.home": "홈",
     "nav.login": "로그인",
     "nav.reviews": "사용후기",
@@ -53,7 +53,7 @@ const I18N = {
   },
   en: {
     "meta.title": "Measure Master — Perspective Fix · Length/Area",
-    "meta.description": "Measure Master calculates length and area by rectifying perspective using an rectangle like A4.",
+    "meta.description": "Measure Master calculates length and area by rectifying perspective using an already known rectangle like A4.",
     "nav.home": "Home",
     "nav.login": "Log In",
     "nav.reviews": "Reviews",
