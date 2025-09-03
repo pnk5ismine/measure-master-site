@@ -1,4 +1,4 @@
-@echo off
+﻿@echo off
 REM === Git 자동 Push 스크립트 ===
 
 REM 1. 작업 디렉토리 이동
