@@ -142,6 +142,7 @@
       if (e2) log('자동 로그인 실패: ' + e2.message, true)
       else { log('자동 로그인 성공'); await refreshSession(); await ensureProfileExists() }
     }
+   document.getElementById('btn-signup')?.addEventListener('click', doSignUp)
 
   // 바인딩
   document.getElementById('btn-debug-session')?.addEventListener('click', safe(async()=>{
@@ -159,7 +160,7 @@
   // 초기
   log('모듈 스크립트 로드 완료. 버튼을 눌러 테스트하세요.')
   await refreshSession()
-  document.getElementById('btn-signup')?.addEventListener('click', doSignUp)
+  
 </script>
 
   <!-- 모듈이 전혀 실행되지 않을 때(브라우저/정책 문제) 표시 -->
