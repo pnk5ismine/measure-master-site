@@ -127,6 +127,22 @@
     else { log('로그인 성공'); await refreshSession(); await ensureProfileExists() }
   })
 
+//회원가입
+  const doSignUp = safe(async () => {
+    const email = (document.getElementById('email')?.value || '').trim()
+    const password = document.getElementById('password')?.value || ''
+    if (!email || !password) { log('이메일/비밀번호 입력', true); return }
+
+    const { error } = await supabase.auth.signUp({ email, password })
+    if (error) { log('회원가입 실패: ' + error.message, true) }
+    else {
+      log('회원가입 성공 (이메일 확인 설정에 따라 로그인 필요)')
+      // confirm off라면 바로 로그인 시도
+      const { error: e2 } = await supabase.auth.signInWithPassword({ email, password })
+      if (e2) log('자동 로그인 실패: ' + e2.message, true)
+      else { log('자동 로그인 성공'); await refreshSession(); await ensureProfileExists() }
+    }
+
   // 바인딩
   document.getElementById('btn-debug-session')?.addEventListener('click', safe(async()=>{
     const s = await supabase.auth.getSession()
