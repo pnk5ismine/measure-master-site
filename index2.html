@@ -78,25 +78,28 @@
   if (!SUPABASE_ANON_KEY || SUPABASE_ANON_KEY.length < 20) log('⚠️ ANON KEY 비정상 길이', true)
 
   // === 3) 헬스체크: 네트워크 차단/도메인 오타 즉시 검출 ===
-  async function fetchWithTimeout(url, ms=5000) {
-    const ctrl = new AbortController(); const t = setTimeout(()=>ctrl.abort(), ms)
-    try {
-      const res = await fetch(url, { signal: ctrl.signal })
-      return res
-    } finally { clearTimeout(t) }
-  }
-  try {
-    const health = await fetchWithTimeout(`${SUPABASE_URL}/auth/v1/health`, 5000)
-    log(`auth health: ${health.status}`)
-    if (!health.ok) log('auth health 비정상: '+health.status, true)
-  } catch (e) {
-    log('auth health 호출 실패(차단/오타/네트워크): '+(e?.message||e), true)
-    setSessionText('<span class="err">세션 조회 실패(네트워크/차단)</span>')
-    // 계속 진행은 하되, getSession도 타임아웃 가드
-  }
+ async function fetchWithTimeout(url, ms=5000, init={}) {
+  const ctrl = new AbortController(); const t = setTimeout(()=>ctrl.abort(), ms)
+  try { return await fetch(url, { signal: ctrl.signal, ...init }) }
+  finally { clearTimeout(t) }
+}
+
+// 변경된 헬스체크
+try {
+  const health = await fetchWithTimeout(
+    `https://snxjcbaaysgfunpsohzg.supabase.co/auth/v1/health`,
+    5000,
+    { headers: { apikey: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNueGpjYmFheXNnZnVucHNvaHpnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY1OTk3MzQsImV4cCI6MjA3MjE3NTczNH0.T8b9PpabXkCvwW2W57Qbr-h--JLZB6errlyP5IwsYyk} }   // ✅ apikey 헤더 추가
+  )
+  log(`auth health: ${health.status}`)
+  if (!health.ok) log('auth health 비정상: '+health.status, true)
+} catch (e) {
+  log('auth health 호출 실패: '+(e?.message||e), true)
+  setSessionText('<span class="err">세션 조회 실패(네트워크/차단)</span>')
+}
 
   // === 4) 클라이언트 생성 ===
-  const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+  const supabase = createClient(https://snxjcbaaysgfunpsohzg.supabase.co,  eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNueGpjYmFheXNnZnVucHNvaHpnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY1OTk3MzQsImV4cCI6MjA3MjE3NTczNH0.T8b9PpabXkCvwW2W57Qbr-h--JLZB6errlyP5IwsYyk)
   log('client created')
 
   // === 5) getSession 타임아웃 가드 ===
