@@ -158,9 +158,49 @@
   document.getElementById('btn-login')?.addEventListener('click', doLogin)
 
   // 초기
-  log('모듈 스크립트 로드 완료. 버튼을 눌러 테스트하세요.')
-  await refreshSession()
-  
+  const sessionText = document.getElementById('session-text')
+  const logEl = document.getElementById('log')
+  const log = (m,e=false)=>{ logEl.textContent=(e?'[ERR] ':'[OK] ')+m+'\n'+logEl.textContent }
+
+  // 5초 타임아웃 가드
+  const withTimeout = (p, ms=5000) =>
+    Promise.race([
+      p,
+      new Promise((_, rej)=>setTimeout(()=>rej(new Error(`timeout ${ms}ms`)), ms))
+    ])
+
+  async function refreshSession() {
+    try {
+      sessionText.textContent = '확인 중…'
+      log('refreshSession: 호출 시작')
+
+      // 네트워크 상태/도메인 체크 로그
+      log(`env: proto=${location.protocol}, host=${location.host}, online=${navigator.onLine}`)
+
+      const { data, error } = await withTimeout(supabase.auth.getSession(), 5000)
+
+      if (error) {
+        sessionText.innerHTML = `<span class="err">세션 조회 실패: ${error.message}</span>`
+        log('getSession error: ' + error.message, true)
+        return
+      }
+      if (data?.session?.user) {
+        sessionText.innerHTML = `<span class="ok">로그인됨</span> (${data.session.user.email})`
+        log('세션 OK: '+data.session.user.email)
+      } else {
+        sessionText.innerHTML = `<span class="err">로그아웃 상태</span>`
+        log('세션 없음')
+      }
+    } catch (e) {
+      sessionText.innerHTML = `<span class="err">세션 조회 실패(타임아웃/차단)</span>`
+      log('refreshSession 예외: ' + (e?.message||e), true)
+      log('팁: HTTPS 접속, 시크릿 모드, 확장프로그램 일시중지, VPN/회사망 프록시 확인', true)
+    }
+  }
+
+  // 페이지 초기화 시 1회 호출
+  refreshSession()
+
 </script>
 
   <!-- 모듈이 전혀 실행되지 않을 때(브라우저/정책 문제) 표시 -->
