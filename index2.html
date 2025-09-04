@@ -45,109 +45,104 @@
     <pre id="log"></pre>
   </div>
 
-  <script type="module">
-    // 1) Supabase SDK를 CDN으로 로드 (외부 파일 의존 제거)
-    import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+<script type="module">
+  const logEl = document.getElementById('log') || (() => {
+    const p = document.createElement('pre'); p.id='log'; document.body.appendChild(p); return p
+  })()
+  const log = (m,e=false)=>{ logEl.textContent=(e?'[ERR] ':'[OK] ')+m+'\n'+logEl.textContent }
+  const safe = (fn)=>async(...args)=>{ try{ await fn(...args) }catch(err){ log('예외: '+(err?.message||err), true); console.error(err) } }
 
-    // 2) 여기를 본인 프로젝트 값으로 교체하세요
-    const SUPABASE_URL = 'https://snxjcbaaysgfunpsohzg.supabase.co'
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNueGpjYmFheXNnZnVucHNvaHpnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY1OTk3MzQsImV4cCI6MjA3MjE3NTczNH0.T8b9PpabXkCvwW2W57Qbr-h--JLZB6errlyP5IwsYyk'
+  // 환경 진단
+  log('proto='+location.protocol+', online='+navigator.onLine)
+  if (location.protocol !== 'https:' && location.hostname !== 'localhost') {
+    log('⚠️ HTTPS가 아니면 Supabase 호출이 차단될 수 있습니다 (Mixed Content).', true)
+  }
 
-    // 3) 클라이언트 생성
-    const supabase = createClient(https://snxjcbaaysgfunpsohzg.supabase.co, eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNueGpjYmFheXNnZnVucHNvaHpnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY1OTk3MzQsImV4cCI6MjA3MjE3NTczNH0.T8b9PpabXkCvwW2W57Qbr-h--JLZB6errlyP5IwsYyk)
+  let createClient
+  try {
+    // CDN 로드 (확장프로그램/네트워크가 막으면 여기서 실패)
+    ({ createClient } = await import('https://esm.sh/@supabase/supabase-js@2'))
+    log('Supabase SDK import 성공')
+  } catch (e) {
+    log('Supabase SDK import 실패: '+(e?.message||e), true)
+    throw e
+  }
 
-    // 4) UI 핸들
-    const $ = (id) => document.getElementById(id)
-    const logEl = $('log')
-    const sessionText = $('session-text')
-    const loginMsg = $('login-msg')
+  // ⚠️ 여기를 본인 값으로 교체
+  const SUPABASE_URL = 'https://YOUR_PROJECT_ID.supabase.co'
+  const SUPABASE_ANON_KEY = 'YOUR_PUBLIC_ANON_KEY'
 
-    const log = (msg, err=false) => {
-      logEl.textContent = (err ? '[ERR] ' : '[OK] ') + msg + '\n' + logEl.textContent
+  if (!/^https:\/\/.+\.supabase\.co$/.test(SUPABASE_URL)) {
+    log('SUPABASE_URL 형식이 이상합니다: '+SUPABASE_URL, true)
+  }
+  if (!SUPABASE_ANON_KEY || SUPABASE_ANON_KEY.length < 20) {
+    log('SUPABASE_ANON_KEY가 비어있거나 짧습니다.', true)
+  }
+
+  const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+  log('Supabase 클라이언트 생성됨')
+
+  const $ = (id)=>document.getElementById(id)
+
+  // 세션 표시
+  const refreshSession = safe(async()=>{
+    const { data, error } = await supabase.auth.getSession()
+    if (error) { log('세션 조회 실패: '+error.message, true); return }
+    const t = document.getElementById('session-text')
+    if (data?.session?.user) {
+      t && (t.innerHTML = `<span class="ok">로그인됨</span> (${data.session.user.email})`)
+      log('세션 OK: '+data.session.user.email)
+    } else {
+      t && (t.innerHTML = `<span class="err">로그아웃 상태</span>`)
+      log('세션 없음')
     }
+  })
 
-    // 세션 표시
-    async function refreshSession() {
-      const { data, error } = await supabase.auth.getSession()
-      if (error) {
-        sessionText.innerHTML = `<span class="err">세션 조회 실패: ${error.message}</span>`
-        return
-      }
-      if (data?.session?.user) {
-        sessionText.innerHTML = `<span class="ok">로그인됨</span> (${data.session.user.email})`
-      } else {
-        sessionText.innerHTML = `<span class="err">로그아웃 상태</span>`
-      }
+  // 프로필 보장
+  const ensureProfileExists = safe(async()=>{
+    const { data:{ user }, error:uErr } = await supabase.auth.getUser()
+    if (uErr) { log('getUser 오류: '+uErr.message, true); return }
+    if (!user) { log('로그인 필요(세션 없음)', true); return }
+    const { data, error } = await supabase.from('profiles').select('id').eq('id', user.id).maybeSingle()
+    if (error) { log('profiles 조회 오류: '+error.message, true); return }
+    if (!data) {
+      const { error:e2 } = await supabase.from('profiles').upsert({
+        id: user.id, email: user.email, last_login: new Date().toISOString()
+      }, { onConflict: 'id' })
+      if (e2) log('upsert 실패: '+e2.message, true)
+      else log('profiles upsert 완료')
+    } else {
+      log('프로필 이미 존재')
     }
+  })
 
-    // 프로필 없으면 만들어 넣기
-    async function ensureProfileExists() {
-      const { data: { user }, error: uErr } = await supabase.auth.getUser()
-      if (uErr) { log('getUser 오류: ' + uErr.message, true); return }
-      if (!user) { log('로그인 필요(세션 없음)', true); return }
+  // 로그인
+  const doLogin = safe(async()=>{
+    const email = (document.getElementById('email')?.value||'').trim()
+    const password = document.getElementById('password')?.value||''
+    if (!email || !password) { log('이메일/비밀번호 입력', true); return }
+    const { error } = await supabase.auth.signInWithPassword({ email, password })
+    if (error) { log('로그인 실패: '+error.message, true) }
+    else { log('로그인 성공'); await refreshSession(); await ensureProfileExists() }
+  })
 
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('id')
-        .eq('id', user.id)
-        .maybeSingle()
+  // 바인딩
+  document.getElementById('btn-debug-session')?.addEventListener('click', safe(async()=>{
+    const s = await supabase.auth.getSession()
+    const u = await supabase.auth.getUser()
+    log('session.user=' + JSON.stringify(s.data?.session?.user ?? null))
+    log('user=' + JSON.stringify(u.data?.user ?? null))
+  }))
+  document.getElementById('btn-ensure-profile')?.addEventListener('click', ensureProfileExists)
+  document.getElementById('btn-logout')?.addEventListener('click', safe(async()=>{
+    await supabase.auth.signOut(); await refreshSession(); log('로그아웃 완료')
+  }))
+  document.getElementById('btn-login')?.addEventListener('click', doLogin)
 
-      if (error) { log('profiles 조회 오류: ' + error.message, true); return }
-
-      if (!data) {
-        const { error: e2 } = await supabase
-          .from('profiles')
-          .upsert({
-            id: user.id,
-            email: user.email,
-            last_login: new Date().toISOString()
-          }, { onConflict: 'id' })
-        if (e2) log('upsert 실패: ' + e2.message, true)
-        else log('profiles upsert 완료')
-      } else {
-        log('프로필 이미 존재')
-      }
-    }
-
-    // 이벤트 바인딩
-    $('btn-debug-session').addEventListener('click', async () => {
-      const s = await supabase.auth.getSession()
-      const u = await supabase.auth.getUser()
-      log('session.user=' + JSON.stringify(s.data?.session?.user ?? null))
-      log('user=' + JSON.stringify(u.data?.user ?? null))
-    })
-
-    $('btn-ensure-profile').addEventListener('click', ensureProfileExists)
-
-    $('btn-logout').addEventListener('click', async () => {
-      await supabase.auth.signOut()
-      await refreshSession()
-      log('로그아웃 완료')
-    })
-
-    $('btn-login').addEventListener('click', async () => {
-      loginMsg.textContent = ''
-      const email = $('email').value.trim()
-      const password = $('password').value
-      if (!email || !password) { loginMsg.innerHTML = '<span class="err">이메일/비밀번호 입력</span>'; return }
-
-      const { error } = await supabase.auth.signInWithPassword({ email, password })
-      if (error) {
-        loginMsg.innerHTML = `<span class="err">로그인 실패: ${error.message}</span>`
-        log('로그인 실패: ' + error.message, true)
-      } else {
-        loginMsg.innerHTML = '<span class="ok">로그인 성공</span>'
-        log('로그인 성공')
-        await refreshSession()
-        // 로그인 직후 프로필 보강
-        await ensureProfileExists()
-      }
-    })
-
-    // 초기 알림 + 세션 상태
-    log('스크립트 로드 완료. 버튼을 눌러 세션/프로필을 확인하세요.')
-    refreshSession()
-  </script>
+  // 초기
+  log('모듈 스크립트 로드 완료. 버튼을 눌러 테스트하세요.')
+  await refreshSession()
+</script>
 
   <!-- 모듈이 전혀 실행되지 않을 때(브라우저/정책 문제) 표시 -->
   <noscript><p class="err">자바스크립트가 비활성화되어 있습니다.</p></noscript>
