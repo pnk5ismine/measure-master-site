@@ -35,7 +35,7 @@
       <input type="password" id="password" placeholder="비밀번호" />
     </div>
     <div style="margin-top:8px;">
-      <button id="btn-login">로그인</button>
+      <button id="btn-login">로그인</button><button id="btn-signup">회원가입</button>
     </div>
     <div id="login-msg" style="margin-top:6px;"></div>
   </div>
@@ -69,8 +69,8 @@
   }
 
   // ⚠️ 여기를 본인 값으로 교체
-  const SUPABASE_URL = 'https://YOUR_PROJECT_ID.supabase.co'
-  const SUPABASE_ANON_KEY = 'YOUR_PUBLIC_ANON_KEY'
+  const SUPABASE_URL = 'https://snxjcbaaysgfunpsohzg.supabase.co'
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNueGpjYmFheXNnZnVucHNvaHpnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY1OTk3MzQsImV4cCI6MjA3MjE3NTczNH0.T8b9PpabXkCvwW2W57Qbr-h--JLZB6errlyP5IwsYyk'
 
   if (!/^https:\/\/.+\.supabase\.co$/.test(SUPABASE_URL)) {
     log('SUPABASE_URL 형식이 이상합니다: '+SUPABASE_URL, true)
@@ -115,6 +115,7 @@
       log('프로필 이미 존재')
     }
   })
+
 
   // 로그인
   const doLogin = safe(async()=>{
