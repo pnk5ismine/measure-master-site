@@ -46,199 +46,143 @@
   </div>
 
 <script type="module">
-  // === 화면 로그 유틸 & 전역 에러포착 ===
-  const logEl = document.getElementById('log') || (() => {
-    const p = document.createElement('pre'); p.id='log'; document.body.appendChild(p); return p
-  })()
-  const setSessionText = (html)=>{ const el = document.getElementById('session-text'); if (el) el.innerHTML = html }
-  const log = (m,e=false)=>{ logEl.textContent=(e?'[ERR] ':'[OK] ')+m+'\n'+logEl.textContent }
-  window.addEventListener('error', (ev)=>log('window.error: '+ev.message, true))
-  window.addEventListener('unhandledrejection', (ev)=>log('unhandledrejection: '+(ev.reason?.message||ev.reason), true))
+  // ===== 화면 로그 & 유틸 =====
+  const $ = (id)=>document.getElementById(id)
+  const logEl = $('log') || (()=>{const p=document.createElement('pre');p.id='log';document.body.appendChild(p);return p})()
+  const setSession = (html)=>{ const el=$('session-text'); if (el) el.innerHTML=html }
+  const log = (m,err=false)=>{ logEl.textContent=(err?'[ERR] ':'[OK] ')+m+'\n'+logEl.textContent }
 
-  // === 환경 출력 ===
-  log('diag v1.3 start'); 
-  log(`location=${location.href}`);
-  log(`proto=${location.protocol} host=${location.host} online=${navigator.onLine}`);
+  // ===== 환경 출력 =====
+  log('diag v2.0 start')
+  log(`loc=${location.href}`)
+  log(`proto=${location.protocol} host=${location.host} online=${navigator.onLine}`)
 
-  // === 1) SDK import 진단 ===
-  let createClient;
+  // 전역 에러 포착
+  window.addEventListener('error', ev=>log('window.error: '+ev.message, true))
+  window.addEventListener('unhandledrejection', ev=>log('unhandledrejection: '+(ev.reason?.message||ev.reason), true))
+
+  // ===== Supabase SDK import =====
+  let createClient
   try {
     ({ createClient } = await import('https://esm.sh/@supabase/supabase-js@2?target=es2020'))
-    log('Supabase SDK import OK')
-  } catch (e) {
+    log('SDK import OK')
+  } catch(e) {
     log('SDK import 실패: '+(e?.message||e), true)
-    setSessionText('<span class="err">SDK import 실패</span>')
+    setSession('<span class="err">SDK import 실패</span>')
     throw e
   }
 
-  // === 2) 프로젝트 키 설정 (여기 교체!) ===
+  // ===== 프로젝트 키(교체 필수) =====
   const SUPABASE_URL = 'https://snxjcbaaysgfunpsohzg.supabase.co'
-  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNueGpjYmFheXNnZnVucHNvaHpnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY1OTk3MzQsImV4cCI6MjA3MjE3NTczNH0.T8b9PpabXkCvwW2W57Qbr-h--JLZB6errlyP5IwsYyk'
+  const SUPABASE_ANON_KEY = '  eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNueGpjYmFheXNnZnVucHNvaHpnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY1OTk3MzQsImV4cCI6MjA3MjE3NTczNH0.T8b9PpabXkCvwW2W57Qbr-h--JLZB6errlyP5IwsYyk'
   if (!/^https:\/\/.+\.supabase\.co$/.test(SUPABASE_URL)) log('⚠️ URL 형식 확인: '+SUPABASE_URL, true)
   if (!SUPABASE_ANON_KEY || SUPABASE_ANON_KEY.length < 20) log('⚠️ ANON KEY 비정상 길이', true)
 
-  // === 3) 헬스체크: 네트워크 차단/도메인 오타 즉시 검출 ===
- async function fetchWithTimeout(url, ms=5000, init={}) {
-  const ctrl = new AbortController(); const t = setTimeout(()=>ctrl.abort(), ms)
-  try { return await fetch(url, { signal: ctrl.signal, ...init }) }
-  finally { clearTimeout(t) }
-}
+  // ===== 헬스체크 (apikey 헤더 포함 → 200 기대) =====
+  async function fetchWithTimeout(url, ms=6000, init={}) {
+    const ctrl=new AbortController(); const t=setTimeout(()=>ctrl.abort(), ms)
+    try { return await fetch(url, {signal:ctrl.signal, ...init}) }
+    finally { clearTimeout(t) }
+  }
+  try {
+    const res = await fetchWithTimeout(`${SUPABASE_URL}/auth/v1/health`, 6000, { headers:{ apikey: SUPABASE_ANON_KEY } })
+    log(`auth health: ${res.status}`) // ✅ 200 기대
+    if (!res.ok) log('auth health 비정상: '+res.status, true)
+  } catch(e) {
+    log('auth health 호출 실패: '+(e?.message||e), true)
+    setSession('<span class="err">네트워크/차단 의심</span>')
+  }
 
-// 변경된 헬스체크
-try {
-  const health = await fetchWithTimeout(
-    `https://snxjcbaaysgfunpsohzg.supabase.co/auth/v1/health`,
-    5000,
-    { headers: { apikey: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNueGpjYmFheXNnZnVucHNvaHpnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY1OTk3MzQsImV4cCI6MjA3MjE3NTczNH0.T8b9PpabXkCvwW2W57Qbr-h--JLZB6errlyP5IwsYyk} }   // ✅ apikey 헤더 추가
-  )
-  log(`auth health: ${health.status}`)
-  if (!health.ok) log('auth health 비정상: '+health.status, true)
-} catch (e) {
-  log('auth health 호출 실패: '+(e?.message||e), true)
-  setSessionText('<span class="err">세션 조회 실패(네트워크/차단)</span>')
-}
-
-  // === 4) 클라이언트 생성 ===
-  const supabase = createClient(https://snxjcbaaysgfunpsohzg.supabase.co,  eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNueGpjYmFheXNnZnVucHNvaHpnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY1OTk3MzQsImV4cCI6MjA3MjE3NTczNH0.T8b9PpabXkCvwW2W57Qbr-h--JLZB6errlyP5IwsYyk)
+  // ===== 클라이언트 생성 =====
+  const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
   log('client created')
 
-  // === 5) getSession 타임아웃 가드 ===
-  const withTimeout = (p, ms=6000) =>
-    Promise.race([p, new Promise((_,rej)=>setTimeout(()=>rej(new Error('timeout '+ms+'ms')), ms))])
-
-  async function refreshSession() {
-    setSessionText('확인 중…')
-    log('refreshSession: start')
-
-    try {
-      const { data, error } = await withTimeout(supabase.auth.getSession(), 6000)
-      if (error) {
-        log('getSession error: '+error.message, true)
-        setSessionText(`<span class="err">세션 조회 실패: ${error.message}</span>`)
-        return
-      }
-      if (data?.session?.user) {
-        setSessionText(`<span class="ok">로그인됨</span> (${data.session.user.email})`)
-        log('session OK: '+data.session.user.email)
-      } else {
-        setSessionText('<span class="err">로그아웃 상태</span>')
-        log('no session')
-      }
-    } catch (e) {
-      log('getSession 예외: '+(e?.message||e), true)
-      setSessionText('<span class="err">세션 조회 실패(타임아웃/차단)</span>')
-      log('점검: HTTPS접속/시크릿모드/확장프로그램 OFF/VPN·회사망 프록시', true)
-    }
-  }
-
-const doSignUp = safe(async()=>{
-  const email = (document.getElementById('email')?.value||'').trim()
-  const password = document.getElementById('password')?.value||''
-  if (!email || !password) { log('이메일/비밀번호 입력', true); return }
-
-  const { data, error } = await withTimeout(
-    supabase.auth.signUp({ email, password }),
-    8000
-  )
-  if (error) { log('회원가입 실패: ' + error.message, true); return }
-
-  // Email 확인 설정이 켜져 있으면 즉시 세션이 없을 수 있음
-  if (!data?.session) {
-    log('회원가입 성공. 이메일 확인이 필요할 수 있습니다.')
-    // 테스트 편의를 위해 즉시 로그인도 시도
-    const { error: e2 } = await withTimeout(
-      supabase.auth.signInWithPassword({ email, password }),
-      8000
-    )
-    if (e2) {
-      log('자동 로그인 실패: '+e2.message, true)
-    } else {
-      log('자동 로그인 성공')
-      await refreshSession()
-      await ensureProfileExists()
-    }
-  } else {
-    // 바로 세션이 생긴 경우
-    log('회원가입+세션 생성 완료')
-    await refreshSession()
-    await ensureProfileExists()
-  }
-})
-
-// 버튼 연결
-document.getElementById('btn-signup')?.addEventListener('click', doSignUp)
-
-  // === 6) 버튼 바인딩(로그인/로그아웃/프로필보장) ===
-  const $ = (id)=>document.getElementById(id)
+  // ===== 보조 유틸 =====
+  const withTimeout = (p, ms=8000) => Promise.race([p, new Promise((_,rej)=>setTimeout(()=>rej(new Error('timeout '+ms+'ms')), ms))])
   const safe = (fn)=>async(...a)=>{ try{ await fn(...a) }catch(e){ log('예외: '+(e?.message||e), true) } }
 
-  async function ensureProfileExists() {
-    const { data:{ user }, error:uErr } = await supabase.auth.getUser()
-    if (uErr) { log('getUser 오류: '+uErr.message, true); return }
-    if (!user) { log('로그인 필요(세션 없음)', true); return }
-    const { data, error } = await supabase.from('profiles').select('id').eq('id', user.id).maybeSingle()
-    if (error) { log('profiles 조회 오류: '+error.message, true); return }
-    if (!data) {
-      const { error:e2 } = await supabase.from('profiles').upsert({
-        id:user.id, email:user.email, last_login:new Date().toISOString()
-      }, { onConflict:'id' })
-      if (e2) log('upsert 실패: '+e2.message, true); else log('profiles upsert 완료')
-    } else { log('프로필 이미 존재') }
+  // ===== 세션 갱신 =====
+  async function refreshSession() {
+    setSession('확인 중…'); log('refreshSession: start')
+    try {
+      const { data, error } = await withTimeout(supabase.auth.getSession(), 8000)
+      if (error) { log('getSession error: '+error.message, true); setSession('<span class="err">세션 조회 실패: '+error.message+'</span>'); return }
+      if (data?.session?.user) { setSession(`<span class="ok">로그인됨</span> (${data.session.user.email})`); log('session OK: '+data.session.user.email) }
+      else { setSession('<span class="err">로그아웃 상태</span>'); log('no session') }
+    } catch(e) {
+      log('getSession 예외: '+(e?.message||e), true)
+      setSession('<span class="err">세션 조회 실패(타임아웃/차단)</span>')
+    }
   }
 
+  // ===== 프로필 보장 =====
+  async function ensureProfileExists() {
+    const { data:{ user }, error:uErr } = await withTimeout(supabase.auth.getUser(), 8000)
+    if (uErr) { log('getUser 오류: '+uErr.message, true); return }
+    if (!user) { log('로그인 필요(세션 없음)', true); return }
+
+    const { data, error } = await withTimeout(
+      supabase.from('profiles').select('id').eq('id', user.id).maybeSingle(), 8000
+    )
+    if (error) { log('profiles 조회 오류: '+error.message, true); return }
+
+    if (!data) {
+      const { error:e2 } = await withTimeout(
+        supabase.from('profiles').upsert({ id:user.id, email:user.email, last_login:new Date().toISOString() }, { onConflict:'id' }),
+        8000
+      )
+      if (e2) log('profiles upsert 실패: '+e2.message, true)
+      else log('profiles upsert 완료')
+    } else {
+      log('프로필 이미 존재')
+    }
+  }
+
+  // ===== 버튼 바인딩 =====
   $('btn-debug-session')?.addEventListener('click', safe(async()=>{
-    const s = await withTimeout(supabase.auth.getSession(), 6000)
-    const u = await withTimeout(supabase.auth.getUser(), 6000)
+    const s = await withTimeout(supabase.auth.getSession(), 8000)
+    const u = await withTimeout(supabase.auth.getUser(), 8000)
     log('session.user=' + JSON.stringify(s.data?.session?.user ?? null))
     log('user=' + JSON.stringify(u.data?.user ?? null))
   }))
-  $('btn-ensure-profile')?.addEventListener('click', safe(ensureProfileExists))
-  $('btn-logout')?.addEventListener('click', safe(async()=>{
-    await withTimeout(supabase.auth.signOut(), 6000)
-    log('로그아웃 완료'); await refreshSession()
-  }))
+
   $('btn-login')?.addEventListener('click', safe(async()=>{
     const email = ($('email')?.value||'').trim()
     const password = $('password')?.value||''
     if (!email || !password) { log('이메일/비밀번호 입력', true); return }
-    const { error } = await withTimeout(
-      supabase.auth.signInWithPassword({ email, password }), 8000
-    )
-    if (error) log('로그인 실패: '+error.message, true)
+    const { error } = await withTimeout(supabase.auth.signInWithPassword({ email, password }), 10000)
+    if (error) log('로그인 실패: ' + error.message, true)
     else { log('로그인 성공'); await refreshSession(); await ensureProfileExists() }
   }))
 
-  // === 7) 첫 세션 확인 ===
+  $('btn-signup')?.addEventListener('click', safe(async()=>{
+    const email = ($('email')?.value||'').trim()
+    const password = $('password')?.value||''
+    if (!email || !password) { log('이메일/비밀번호 입력', true); return }
+    const { data, error } = await withTimeout(supabase.auth.signUp({ email, password }), 10000)
+    if (error) { log('회원가입 실패: ' + error.message, true); return }
+
+    if (!data?.session) {
+      log('회원가입 성공(세션 없음) — 이메일 확인 필요 설정일 수 있음.')
+      // 테스트 편의: 즉시 로그인 시도
+      const { error:e2 } = await withTimeout(supabase.auth.signInWithPassword({ email, password }), 10000)
+      if (e2) log('자동 로그인 실패: '+e2.message, true)
+      else { log('자동 로그인 성공'); await refreshSession(); await ensureProfileExists() }
+    } else {
+      log('회원가입+세션 생성 완료'); await refreshSession(); await ensureProfileExists()
+    }
+  }))
+
+  $('btn-logout')?.addEventListener('click', safe(async()=>{
+    await withTimeout(supabase.auth.signOut(), 8000)
+    log('로그아웃 완료'); await refreshSession()
+  }))
+
+  $('btn-ensure-profile')?.addEventListener('click', safe(ensureProfileExists))
+
+  // ===== 초기 세션 점검 =====
   await refreshSession()
 </script>
-
-<script>
-  // 화면에 반드시 <span id="session-text">가 있어야 합니다.
-  // 없거나 id가 다르면 즉시 빨간 경고를 띄웁니다.
-  (function () {
-    var el = document.getElementById('session-text');
-    if (!el) {
-      alert('세션 상태 표시 요소(#session-text)를 찾을 수 없습니다.\n' +
-            'HTML에 <span id="session-text">확인 중…</span> 이 반드시 있어야 합니다.');
-      return;
-    }
-    // 1초마다 현재시각을 찍어, 이 엘리먼트 갱신이 되는지 눈으로 확인
-    var i = 0;
-    setInterval(function () {
-      i++;
-      el.textContent = 'JS 연결 OK (' + new Date().toLocaleTimeString() + ', #' + i + ')';
-    }, 1000);
-  })();
-</script>
-
-<script>
-  ['btn-debug-session','btn-ensure-profile','btn-logout','btn-login','btn-signup']
-    .forEach(function(id){
-      var b = document.getElementById(id);
-      if (b) b.addEventListener('click', function(){ alert('클릭됨: ' + id); });
-    });
-</script>
-
 
   <!-- 모듈이 전혀 실행되지 않을 때(브라우저/정책 문제) 표시 -->
   <noscript><p class="err">자바스크립트가 비활성화되어 있습니다.</p></noscript>
