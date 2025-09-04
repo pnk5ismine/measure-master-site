@@ -131,6 +131,43 @@ try {
     }
   }
 
+const doSignUp = safe(async()=>{
+  const email = (document.getElementById('email')?.value||'').trim()
+  const password = document.getElementById('password')?.value||''
+  if (!email || !password) { log('이메일/비밀번호 입력', true); return }
+
+  const { data, error } = await withTimeout(
+    supabase.auth.signUp({ email, password }),
+    8000
+  )
+  if (error) { log('회원가입 실패: ' + error.message, true); return }
+
+  // Email 확인 설정이 켜져 있으면 즉시 세션이 없을 수 있음
+  if (!data?.session) {
+    log('회원가입 성공. 이메일 확인이 필요할 수 있습니다.')
+    // 테스트 편의를 위해 즉시 로그인도 시도
+    const { error: e2 } = await withTimeout(
+      supabase.auth.signInWithPassword({ email, password }),
+      8000
+    )
+    if (e2) {
+      log('자동 로그인 실패: '+e2.message, true)
+    } else {
+      log('자동 로그인 성공')
+      await refreshSession()
+      await ensureProfileExists()
+    }
+  } else {
+    // 바로 세션이 생긴 경우
+    log('회원가입+세션 생성 완료')
+    await refreshSession()
+    await ensureProfileExists()
+  }
+})
+
+// 버튼 연결
+document.getElementById('btn-signup')?.addEventListener('click', doSignUp)
+
   // === 6) 버튼 바인딩(로그인/로그아웃/프로필보장) ===
   const $ = (id)=>document.getElementById(id)
   const safe = (fn)=>async(...a)=>{ try{ await fn(...a) }catch(e){ log('예외: '+(e?.message||e), true) } }
