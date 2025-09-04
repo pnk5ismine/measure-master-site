@@ -1,45 +1,39 @@
-<!-- 세션/유저 디버그 -->
-<button id="btn-debug-session">세션/유저 보기</button>
-<!-- 프로필 강제 생성(없으면) -->
-<button id="btn-ensure-profile">프로필 강제 생성</button>
-
 <script type="module">
-  import { supabase } from './supabaseClient.js'
+  import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+  const SUPABASE_URL = 'https://snxjcbaaysgfunpsohzg.supabase.co'
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNueGpjYmFheXNnZnVucHNvaHpnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY1OTk3MzQsImV4cCI6MjA3MjE3NTczNH0.T8b9PpabXkCvwW2W57Qbr-h--JLZB6errlyP5IwsYyk'
+  const supabase = createClient(https://snxjcbaaysgfunpsohzg.supabase.co, eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNueGpjYmFheXNnZnVucHNvaHpnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY1OTk3MzQsImV4cCI6MjA3MjE3NTczNH0.T8b9PpabXkCvwW2W57Qbr-h--JLZB6errlyP5IwsYyk)
 
-  const debugLog = document.getElementById('debug-log') || document.createElement('pre')
-  debugLog.id = 'debug-log'
-  document.body.appendChild(debugLog)
-  const log = (m, e=false) => debugLog.textContent = (e?'[ERR] ':'[OK] ') + m + '\n' + debugLog.textContent
-
-  document.getElementById('btn-debug-session').addEventListener('click', async () => {
-    const s = await supabase.auth.getSession()
-    const u = await supabase.auth.getUser()
-    log('session=' + JSON.stringify(s.data?.session?.user ?? null))
-    log('user=' + JSON.stringify(u.data?.user ?? null))
-  })
+  const btnDebug = document.getElementById('btn-debug-session')
+  const btnEnsure = document.getElementById('btn-ensure-profile')
+  let debugLog = document.getElementById('debug-log') || document.createElement('pre')
+  debugLog.id = 'debug-log'; document.body.appendChild(debugLog)
+  const log = (m,e=false)=>debugLog.textContent=(e?'[ERR] ':'[OK] ')+m+'\n'+debugLog.textContent
 
   async function ensureProfileExists() {
-    const { data: { user }, error: uErr } = await supabase.auth.getUser()
-    if (uErr || !user) { log('로그인 필요', true); return }
+    const { data:{ user }, error:uErr } = await supabase.auth.getUser()
+    if (uErr) { log('getUser 오류: '+uErr.message, true); return }
+    if (!user) { log('로그인 필요(세션 없음)', true); return }
 
-    // 내 프로필 존재 확인
-    const { data, error } = await supabase.from('profiles')
-      .select('id').eq('id', user.id).maybeSingle()
-    if (error) { log('조회 오류: ' + error.message, true); return }
-
+    const { data, error } = await supabase.from('profiles').select('id').eq('id', user.id).maybeSingle()
+    if (error) { log('profiles 조회 오류: '+error.message, true); return }
     if (!data) {
-      // 없으면 생성
-      const { error: upsertErr } = await supabase.from('profiles').upsert({
-        id: user.id,
-        email: user.email,
-        last_login: new Date().toISOString()
+      const { error: e2 } = await supabase.from('profiles').upsert({
+        id: user.id, email: user.email, last_login: new Date().toISOString()
       }, { onConflict: 'id' })
-      if (upsertErr) log('upsert 실패: ' + upsertErr.message, true)
-      else log('프로필 upsert 완료')
-    } else {
-      log('프로필 이미 존재')
-    }
+      if (e2) log('upsert 실패: '+e2.message, true); else log('profiles upsert 완료')
+    } else { log('프로필 이미 존재') }
   }
-  document.getElementById('btn-ensure-profile')
-    .addEventListener('click', ensureProfileExists)
+
+  btnDebug?.addEventListener('click', async () => {
+    try {
+      const s = await supabase.auth.getSession()
+      const u = await supabase.auth.getUser()
+      log('session.user=' + JSON.stringify(s.data?.session?.user ?? null))
+      log('user=' + JSON.stringify(u.data?.user ?? null))
+    } catch (e) { log('세션 디버그 실행 오류: ' + (e?.message ?? e), true) }
+  })
+  btnEnsure?.addEventListener('click', ensureProfileExists)
+
+  log('스크립트 로드 완료. 버튼을 눌러 세션/프로필을 확인하세요.')
 </script>
