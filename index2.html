@@ -212,6 +212,34 @@ document.getElementById('btn-signup')?.addEventListener('click', doSignUp)
   await refreshSession()
 </script>
 
+<script>
+  // 화면에 반드시 <span id="session-text">가 있어야 합니다.
+  // 없거나 id가 다르면 즉시 빨간 경고를 띄웁니다.
+  (function () {
+    var el = document.getElementById('session-text');
+    if (!el) {
+      alert('세션 상태 표시 요소(#session-text)를 찾을 수 없습니다.\n' +
+            'HTML에 <span id="session-text">확인 중…</span> 이 반드시 있어야 합니다.');
+      return;
+    }
+    // 1초마다 현재시각을 찍어, 이 엘리먼트 갱신이 되는지 눈으로 확인
+    var i = 0;
+    setInterval(function () {
+      i++;
+      el.textContent = 'JS 연결 OK (' + new Date().toLocaleTimeString() + ', #' + i + ')';
+    }, 1000);
+  })();
+</script>
+
+<script>
+  ['btn-debug-session','btn-ensure-profile','btn-logout','btn-login','btn-signup']
+    .forEach(function(id){
+      var b = document.getElementById(id);
+      if (b) b.addEventListener('click', function(){ alert('클릭됨: ' + id); });
+    });
+</script>
+
+
   <!-- 모듈이 전혀 실행되지 않을 때(브라우저/정책 문제) 표시 -->
   <noscript><p class="err">자바스크립트가 비활성화되어 있습니다.</p></noscript>
 </body>
