@@ -1,85 +1,45 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Measure Master + Supabase</title>
-</head>
-<body>
-  <h1>Measure Master 회원 관리</h1>
+<!-- 세션/유저 디버그 -->
+<button id="btn-debug-session">세션/유저 보기</button>
+<!-- 프로필 강제 생성(없으면) -->
+<button id="btn-ensure-profile">프로필 강제 생성</button>
 
-  <h2>회원가입</h2>
-  <form id="signup-form">
-    <input type="email" id="signup-email" placeholder="이메일" required>
-    <input type="password" id="signup-password" placeholder="비밀번호" required>
-    <button type="submit">회원가입</button>
-  </form>
+<script type="module">
+  import { supabase } from './supabaseClient.js'
 
-  <h2>로그인</h2>
-  <form id="login-form">
-    <input type="email" id="login-email" placeholder="이메일" required>
-    <input type="password" id="login-password" placeholder="비밀번호" required>
-    <button type="submit">로그인</button>
-  </form>
+  const debugLog = document.getElementById('debug-log') || document.createElement('pre')
+  debugLog.id = 'debug-log'
+  document.body.appendChild(debugLog)
+  const log = (m, e=false) => debugLog.textContent = (e?'[ERR] ':'[OK] ') + m + '\n' + debugLog.textContent
 
-  <h2>프로필</h2>
-  <button id="load-profiles">모든 프로필 불러오기</button>
-  <pre id="output"></pre>
+  document.getElementById('btn-debug-session').addEventListener('click', async () => {
+    const s = await supabase.auth.getSession()
+    const u = await supabase.auth.getUser()
+    log('session=' + JSON.stringify(s.data?.session?.user ?? null))
+    log('user=' + JSON.stringify(u.data?.user ?? null))
+  })
 
-  <!-- JS 모듈 import -->
-  <script type="module">
-    import { supabase } from './supabaseClient.js'
+  async function ensureProfileExists() {
+    const { data: { user }, error: uErr } = await supabase.auth.getUser()
+    if (uErr || !user) { log('로그인 필요', true); return }
 
-    const output = document.getElementById('output')
+    // 내 프로필 존재 확인
+    const { data, error } = await supabase.from('profiles')
+      .select('id').eq('id', user.id).maybeSingle()
+    if (error) { log('조회 오류: ' + error.message, true); return }
 
-    // ✅ 회원가입
-    document.getElementById('signup-form').addEventListener('submit', async (e) => {
-      e.preventDefault()
-      const email = document.getElementById('signup-email').value
-      const password = document.getElementById('signup-password').value
-
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          data: { created_at: new Date().toISOString() } // profiles에 자동 연동
-        }
-      })
-
-      if (error) {
-        output.textContent = '❌ 회원가입 실패: ' + error.message
-      } else {
-        output.textContent = '✅ 회원가입 성공! 확인 메일을 확인하세요.'
-      }
-    })
-
-    // ✅ 로그인
-    document.getElementById('login-form').addEventListener('submit', async (e) => {
-      e.preventDefault()
-      const email = document.getElementById('login-email').value
-      const password = document.getElementById('login-password').value
-
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      })
-
-      if (error) {
-        output.textContent = '❌ 로그인 실패: ' + error.message
-      } else {
-        output.textContent = '✅ 로그인 성공! 유저: ' + JSON.stringify(data.user, null, 2)
-      }
-    })
-
-    // ✅ 프로필 불러오기
-    document.getElementById('load-profiles').addEventListener('click', async () => {
-      const { data, error } = await supabase.from('profiles').select('*')
-
-      if (error) {
-        output.textContent = '❌ 프로필 불러오기 오류: ' + error.message
-      } else {
-        output.textContent = JSON.stringify(data, null, 2)
-      }
-    })
-  </script>
-</body>
-</html>
+    if (!data) {
+      // 없으면 생성
+      const { error: upsertErr } = await supabase.from('profiles').upsert({
+        id: user.id,
+        email: user.email,
+        last_login: new Date().toISOString()
+      }, { onConflict: 'id' })
+      if (upsertErr) log('upsert 실패: ' + upsertErr.message, true)
+      else log('프로필 upsert 완료')
+    } else {
+      log('프로필 이미 존재')
+    }
+  }
+  document.getElementById('btn-ensure-profile')
+    .addEventListener('click', ensureProfileExists)
+</script>
