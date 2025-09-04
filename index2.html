@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Measure Master + Supabase</title>
+</head>
+<body>
+  <h1>Measure Master 회원 관리</h1>
+
+  <h2>회원가입</h2>
+  <form id="signup-form">
+    <input type="email" id="signup-email" placeholder="이메일" required>
+    <input type="password" id="signup-password" placeholder="비밀번호" required>
+    <button type="submit">회원가입</button>
+  </form>
+
+  <h2>로그인</h2>
+  <form id="login-form">
+    <input type="email" id="login-email" placeholder="이메일" required>
+    <input type="password" id="login-password" placeholder="비밀번호" required>
+    <button type="submit">로그인</button>
+  </form>
+
+  <h2>프로필</h2>
+  <button id="load-profiles">모든 프로필 불러오기</button>
+  <pre id="output"></pre>
+
+  <!-- JS 모듈 import -->
+  <script type="module">
+    import { supabase } from './supabaseClient.js'
+
+    const output = document.getElementById('output')
+
+    // ✅ 회원가입
+    document.getElementById('signup-form').addEventListener('submit', async (e) => {
+      e.preventDefault()
+      const email = document.getElementById('signup-email').value
+      const password = document.getElementById('signup-password').value
+
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: { created_at: new Date().toISOString() } // profiles에 자동 연동
+        }
+      })
+
+      if (error) {
+        output.textContent = '❌ 회원가입 실패: ' + error.message
+      } else {
+        output.textContent = '✅ 회원가입 성공! 확인 메일을 확인하세요.'
+      }
+    })
+
+    // ✅ 로그인
+    document.getElementById('login-form').addEventListener('submit', async (e) => {
+      e.preventDefault()
+      const email = document.getElementById('login-email').value
+      const password = document.getElementById('login-password').value
+
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      })
+
+      if (error) {
+        output.textContent = '❌ 로그인 실패: ' + error.message
+      } else {
+        output.textContent = '✅ 로그인 성공! 유저: ' + JSON.stringify(data.user, null, 2)
+      }
+    })
+
+    // ✅ 프로필 불러오기
+    document.getElementById('load-profiles').addEventListener('click', async () => {
+      const { data, error } = await supabase.from('profiles').select('*')
+
+      if (error) {
+        output.textContent = '❌ 프로필 불러오기 오류: ' + error.message
+      } else {
+        output.textContent = JSON.stringify(data, null, 2)
+      }
+    })
+  </script>
+</body>
+</html>
