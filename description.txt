@@ -1,0 +1,11 @@
+
+easy measuring without ruler by rectifying perspective using an well knowing rectangle like A4 etc.
+
+
+Fix perspective in photos and measure length & area accurately
+
+Use an refernce rectangle knowing each length like A4 paper to rectify perspective, then compute reliable length/area. Fast and handy for field work.
+
+Specify 4 corners of an reference quadrangle to rectify to a rectangle and obtain reliable length/area results.
+
+Straight/curved shapes, angle snapping, auto-commit—designed for real-world usage
