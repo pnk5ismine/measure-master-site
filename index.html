@@ -103,80 +103,72 @@
 <main>
   <div class="layout">
     <!-- 좌: 메인 이미지(배너) -->
-    <section class="hero" aria-labelledby="hero-title">
-      <img src="/image/mm_pamplet1.jpg" alt="Measure Master showcase" />
-      <div class="overlay">
-        <h1 id="hero-title" data-i18n="hero.title">사진 속 왜곡을 보정해 정확한 길이·면적을 계산</h1>
-        <p class="muted" data-i18n="hero.desc">A4 같이 각 갈리를 아는  기준 직사각형으로 투시 보정 후, 보정된 도형의 길이/면적을 산출합니다. 건축·실측·인테리어 현장에서 빠르고 간편하게.</p>
-        <div class="cta">
-          <a class="btn" href="#" title="Coming soon" data-i18n="hero.cta.play">Google Play(준비중)</a>
-          <a class="btn" href="/reviews.html" data-i18n="hero.cta.reviews">사용후기 보기</a>
-          <a class="btn" href="/privacy.html" data-i18n="hero.cta.privacy">개인정보처리방침</a>
-        </div>
-      </div>
-    </section>
+<section class="hero left-col">
+  <div class="overlay" style="position:static;background:none;padding:0">
+    <h1 data-i18n="hero.title">사진 속 왜곡을 보정해 정확한 길이·면적을 계산</h1>
+    <p class="muted" data-i18n="hero.desc">
+      A4 등 각 변의 길이를 아는 기준 사각형으로 투시 보정 후,
+      보정된 도형의 길이/면적을 산출합니다. 현장에서 빠르고 간편하게.
+    </p>
+  </div>
+</section>
 
     <!-- 우: 회원가입/로그인 -->
-    <section id="auth" class="card" aria-labelledby="auth-title">
-      <div class="row">
-        <h3 id="auth-title" class="sp" data-i18n="auth.title">회원가입 · 로그인</h3>
-        <span id="auth-status" class="muted" data-i18n="auth.logged_out">로그아웃 상태</span>
-      </div>
+<section id="auth" class="card right-col">
+  <div class="row">
+    <h3 id="auth-title" class="sp">회원가입</h3>
+    <span id="auth-status" class="muted">로그아웃 상태</span>
+  </div>
 
-      <!-- 회원가입 -->
-      <form id="signup-form" autocomplete="on">
-        <div class="field">
-          <label for="signup-email" data-i18n="auth.email">이메일</label>
-          <input id="signup-email" name="email" type="email" required
-                 placeholder="you@example.com"
-                 data-i18n-attr="placeholder=auth.email_ph" />
-        </div>
-        <div class="field">
-          <label for="signup-password" data-i18n="auth.password">비밀번호</label>
-          <input id="signup-password" name="password" type="password" required minlength="8"
-                 placeholder="8자 이상"
-                 data-i18n-attr="placeholder=auth.password_ph" />
-        </div>
-        <button type="submit" class="primary" data-i18n="auth.signup">회원가입</button>
-        <div class="field">
-  	<label for="signup-password2">비밀번호 확인</label>
-  	<input
-    	   id="signup-password2"
- 	   name="password2" 
-	   type="password"
-	   required
-	   minlength="8"
-	   autocomplete="new-password"
-	   placeholder="비밀번호 다시 입력"
-	/>
-       </div>	
+  <!-- 폼 전환 링크 -->
+  <p class="muted" style="margin:6px 0 12px">
+    <span id="to-login" style="display:inline">이미 계정이 있으신가요? <a href="#" id="link-login">로그인</a></span>
+    <span id="to-signup" style="display:none">계정이 없으신가요? <a href="#" id="link-signup">회원가입</a></span>
+  </p>
 
-      </form>
+  <!-- Signup -->
+  <form id="signup-form" autocomplete="on">
+    <div class="field">
+      <label for="signup-email">이메일</label>
+      <input id="signup-email" name="email" type="email" required
+             placeholder="you@example.com" autocomplete="email">
+    </div>
+    <div class="field">
+      <label for="signup-password">비밀번호</label>
+      <input id="signup-password" name="password" type="password" required minlength="8"
+             placeholder="8자 이상" autocomplete="new-password">
+    </div>
+    <div class="field">
+      <label for="signup-password2">비밀번호 확인</label>
+      <input id="signup-password2" name="password2" type="password" required minlength="8"
+             placeholder="비밀번호 다시 입력" autocomplete="new-password">
+    </div>
+    <button type="submit" class="primary">회원가입</button>
+  </form>
 
-      <!-- 로그인 -->
-      <form id="login-form" autocomplete="on" style="margin-top:10px">
-        <div class="field">
-          <label for="login-email" data-i18n="auth.email">이메일</label>
-          <input id="login-email" name="email" type="email" required
-                 placeholder="you@example.com"
-                 data-i18n-attr="placeholder=auth.email_ph" />
-        </div>
-        <div class="field">
-          <label for="login-password" data-i18n="auth.password">비밀번호</label>
-          <input id="login-password" name="password" type="password" required minlength="8"
-                 data-i18n-attr="placeholder=auth.password_ph" />
-        </div>
-        <button type="submit" class="primary" data-i18n="auth.login">로그인</button>
-        <button type="button" id="logout-btn" style="margin-left:8px;display:none" data-i18n="auth.logout">로그아웃</button>
-      </form>
+  <!-- Login -->
+  <form id="login-form" autocomplete="on" style="display:none">
+    <div class="field">
+      <label for="login-email">이메일</label>
+      <input id="login-email" name="email" type="email" required
+             placeholder="you@example.com" autocomplete="email">
+    </div>
+    <div class="field">
+      <label for="login-password">비밀번호</label>
+      <input id="login-password" name="password" type="password" required minlength="8"
+             placeholder="비밀번호" autocomplete="current-password">
+    </div>
+    <div class="row">
+      <button type="submit" class="primary">로그인</button>
+      <button type="button" id="logout-btn" style="display:none;margin-left:8px">로그아웃</button>
+    </div>
+  </form>
 
-      <p class="muted" style="margin-top:10px" data-i18n="auth.note">
-        가입 후 이메일 인증이 설정된 경우, 받은 메일에서 확인을 완료해 주세요.
-      </p>
-
-      <hr />
-      <p data-i18n="auth.reviews_link">후기를 남기시려면 <a href="/reviews.html">사용후기 페이지</a>로 이동하세요.</p>
-    </section>
+  <hr />
+  <p class="muted" style="margin-top:10px">
+    후기를 남기시려면 <a href="/reviews.html">사용후기 페이지</a>로 이동하세요.
+  </p>
+</section>
 
     <!-- 하단: 홍보 섹션(두 열 전체) -->
     <section class="card" aria-labelledby="why-title" style="grid-column:1 / -1">
