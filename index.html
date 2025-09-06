@@ -60,19 +60,7 @@
    .hero p{margin:0;color:#d7dee9}
    .cta{margin-top:12px;display:flex;gap:10px;flex-wrap:wrap}
 
-.image-sample{
-  background: var(--card);
-  border:1px solid var(--border);
-  border-radius:16px;
-  padding:10px;
-}
-.image-sample img{
-  display:block;
-  width:100%;
-  max-height:460px;     /* 필요시 조정 */
-  object-fit:cover;     /* 꽉 차게 */
-  border-radius:12px;
-}
+
 
     /* ─ Auth (우측) ─ */
     .field{display:flex;flex-direction:column;gap:6px;margin:10px 0 2px}
@@ -86,6 +74,39 @@
     .primary:hover{background:#223049}
     .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
     .sp{flex:1 1 auto}
+
+/* 그리드 배치: 모바일 1열 → 데스크탑 2열 + 영역 고정 */
+.site-grid{
+  display:grid;
+  grid-template-areas:
+    "hero"
+    "auth"
+    "sample"
+    "features";
+  gap:18px;
+}
+@media(min-width:1024px){
+  .site-grid{
+    grid-template-columns: 1.2fr .8fr;
+    grid-template-areas:
+      "hero auth"
+      "sample auth"
+      "features features";
+  }
+}
+.hero-block{ grid-area: hero; }
+.auth-block{ grid-area: auth; }
+.sample-block{ grid-area: sample; }
+.features-block{ grid-area: features; }
+
+/* 샘플 이미지 스타일 */
+.sample-block img{
+  display:block;
+  width:100%;
+  height:auto;           /* 비율 유지 */
+  border-radius:12px;
+  object-fit:cover;      /* 너무 긴 이미지면 크롭 */
+}
 
     /* ─ Features (하단) ─ */
     .featurelist{display:grid;grid-template-columns:1fr;gap:12px}
@@ -123,10 +144,6 @@
   </div>
 </section>
 
-<!-- (새) 샘플 이미지 섹션 : 좌우 전체(span-2) 또는 좌측 열에 배치 -->
-<section class="image-sample span-2">
-  <img src="/image/mm_pample1.jpg" alt="앱 샘플 화면" loading="lazy">
-</section>
 
     <!-- 우: 회원가입/로그인 -->
 <section id="auth" class="card right-col">
@@ -134,6 +151,11 @@
     <h3 id="auth-title" class="sp">회원가입</h3>
     <span id="auth-status" class="muted">로그아웃 상태</span>
   </div>
+
+<!-- (새) 샘플 이미지 섹션 : 좌우 전체(span-2) 또는 좌측 열에 배치 -->
+<section class="mm_pamplet1">
+  <img src="/image/mm_pamplet1.jpg" alt="앱 샘플 화면" loading="lazy">
+</section>
 
   <!-- 폼 전환 링크 -->
   <p class="muted" style="margin:6px 0 12px">
