@@ -99,13 +99,12 @@
 .sample-block{ grid-area: sample; }
 .features-block{ grid-area: features; }
 
-/* 샘플 이미지 스타일 */
-.sample-block img{
-  display:block;
-  width:100%;
-  height:auto;           /* 비율 유지 */
-  border-radius:12px;
-  object-fit:cover;      /* 너무 긴 이미지면 크롭 */
+.sample-block img {
+  display: block;
+  max-width: 100%;   /* 부모 영역 너비 넘지 않음 */
+  height: auto;      /* 비율 유지하면서 축소 */
+  border-radius: 12px;
+  object-fit: contain; /* 이미지 전체 보이게 */
 }
 
     /* ─ Features (하단) ─ */
