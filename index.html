@@ -74,6 +74,14 @@
     .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
     .sp{flex:1 1 auto}
 
+    /*  ---- 중간 이미지---- */
+    <!-- 아래 공간을 이미지로 꽉 채우기 (두 열 전체) -->
+   <section class="span-2" style="border:1px solid var(--border);border-radius:16px;overflow:hidden;background:#0f1320">
+     <img src="/image/mm_pamplet1.jpg" alt="Measure Master showcase"
+          style="display:block;width:100%;height:clamp(220px,40vw,420px);object-fit:cover">
+   </section>
+
+
     /* ─ Features (하단) ─ */
     .featurelist{display:grid;grid-template-columns:1fr;gap:12px}
     @media(min-width:700px){ .featurelist{grid-template-columns:1fr 1fr} }
@@ -217,91 +225,102 @@
   // ======================================
   const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
 
-  // 공통 요소
-  const $ = (s)=>document.querySelector(s);
-  const elStatus = $("#auth-status");
-  const elSignup = $("#signup-form");
-  const elLogin  = $("#login-form");
-  const elLogout = $("#logout-btn");
-  document.getElementById('year').textContent = new Date().getFullYear();
+ // 요소 참조
+const elStatus = document.getElementById("auth-status");
+const elAuthTitle = document.getElementById("auth-title");
+const elSignup = document.getElementById("signup-form");
+const elLogin  = document.getElementById("login-form");
+const elLogout = document.getElementById("logout-btn");
+const linkToLogin = document.getElementById("link-login");
+const linkToSignup = document.getElementById("link-signup");
+const hintToLogin = document.getElementById("to-login");
+const hintToSignup = document.getElementById("to-signup");
 
-  // 세션 UI 반영
-  async function refreshAuthUI(){
-    const { data:{ session }, error } = await supabase.auth.getSession();
-    if(error){ console.warn(error); }
-    if(session?.user){
-      elStatus.innerHTML = t("auth.logged_in",{ email: session.user.email });
-      elSignup.style.display = "none";
-      elLogin.style.display  = "none";
-      elLogout.style.display = "inline-block";
-    }else{
-      elStatus.textContent = t("auth.logged_out");
-      elSignup.style.display = "block";
-      elLogin.style.display  = "block";
-      elLogout.style.display = "none";
-    }
+// 폼 표시 제어
+function showSignup() {
+  elAuthTitle.textContent = "회원가입";
+  elSignup.style.display = "block";
+  elLogin.style.display  = "none";
+  hintToLogin.style.display = "inline";
+  hintToSignup.style.display = "none";
+}
+
+function showLogin() {
+  elAuthTitle.textContent = "로그인";
+  elSignup.style.display = "none";
+  elLogin.style.display  = "block";
+  hintToLogin.style.display = "none";
+  hintToSignup.style.display = "inline";
+}
+
+// 세션 상태 반영
+async function refreshAuthUI(){
+  const { data:{ session } } = await supabase.auth.getSession();
+
+  if(session?.user){
+    elStatus.textContent = `로그인: ${session.user.email}`;
+    // 로그인된 상태: 폼 숨기고 로그아웃만 노출(요청 정책)
+    elSignup.style.display = "none";
+    elLogin.style.display  = "none";
+    hintToLogin.style.display = "none";
+    hintToSignup.style.display = "none";
+    elLogout.style.display = "inline-block";
+  }else{
+    elStatus.textContent = "로그아웃 상태";
+    showSignup();                 // 게스트 기본: 가입 폼만
+    elLogout.style.display = "none";
   }
+}
 
-  // 회원가입
-  elSignup.addEventListener("submit", async (e) => {
-    e.preventDefault();
-    const form = e.target;
-    const email = form.email.value.trim();
-    const pw1 = form.password.value;
-    const pw2 = form.password2.value;
-    const btn = e.submitter;   // 클릭된 버튼
+// 폼 전환 링크
+linkToLogin.addEventListener("click", (e)=>{ e.preventDefault(); showLogin(); });
+linkToSignup.addEventListener("click", (e)=>{ e.preventDefault(); showSignup(); });
 
-  // 1) 기본 검증
-  if (!email) { alert("이메일을 입력해 주세요."); form.email.focus(); return; }
-  if (pw1.length < 8) { alert("비밀번호는 8자 이상이어야 합니다."); form.password.focus(); return; }
-  if (pw1 !== pw2) { alert("비밀번호가 일치하지 않습니다."); form.password2.focus(); return; }
+// ── 가입: 비밀번호 확인 포함 ──
+elSignup.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const f = e.target;
+  const email = f.email.value.trim();
+  const pw1 = f.password.value;
+  const pw2 = f.password2.value;
 
-  // 2) 중복 클릭 방지
-  if (btn) btn.disabled = true;
+  if (!email) { alert("이메일을 입력해 주세요."); f.email.focus(); return; }
+  if (pw1.length < 8) { alert("비밀번호는 8자 이상이어야 합니다."); f.password.focus(); return; }
+  if (pw1 !== pw2) { alert("비밀번호가 일치하지 않습니다."); f.password2.focus(); return; }
 
+  const btn = e.submitter; if (btn) btn.disabled = true;
   try {
     const { error } = await supabase.auth.signUp({ email, password: pw1 });
-    if (error) {
-      alert(`가입 실패: ${error.message}`);
-    } else {
+    if (error) alert(`가입 실패: ${error.message}`);
+    else {
       alert("가입 완료! (이메일 인증이 켜져 있다면 메일함을 확인해 주세요.)");
+      showLogin(); // 가입 직후 로그인으로 안내(선호에 따라 유지/삭제)
     }
-  } catch (err) {
-    alert(`가입 중 오류: ${err.message || err}`);
-  } finally {
-    if (btn) btn.disabled = false;
-    refreshAuthUI();
-  }
+  } finally { if (btn) btn.disabled = false; refreshAuthUI(); }
 });
 
-  // 로그인
-  elLogin.addEventListener("submit", async(e)=>{
-    e.preventDefault();
-    const email = e.target.email.value.trim();
-    const password = e.target.password.value;
+// ── 로그인 ──
+elLogin.addEventListener("submit", async (e)=>{
+  e.preventDefault();
+  const f = e.target;
+  const email = f.email.value.trim();
+  const password = f.password.value;
+  const btn = e.submitter; if (btn) btn.disabled = true;
+
+  try {
     const { error } = await supabase.auth.signInWithPassword({ email, password });
-    alert(error ? t("msg.login_err",{msg:error.message}) : t("msg.login_ok"));
-    refreshAuthUI();
-  });
+    if (error) alert(`로그인 실패: ${error.message}`);
+  } finally { if (btn) btn.disabled = false; refreshAuthUI(); }
+});
 
-  // 로그아웃
-  elLogout.addEventListener("click", async()=>{
-    await supabase.auth.signOut();
-    refreshAuthUI();
-  });
-
-  // 언어 버튼
-  document.querySelectorAll("[data-lang-btn]").forEach(btn=>{
-    btn.addEventListener("click", ()=>{
-      const lang = btn.getAttribute("data-lang-btn");
-      setLang(lang); // i18n.js에 정의되어 있다고 가정
-      document.documentElement.setAttribute("lang", lang);
-      document.querySelectorAll("[data-lang-btn]").forEach(b=>b.classList.toggle("active", b===btn));
-    });
-  });
-
-  // 초기 렌더
+// ── 로그아웃 ──
+elLogout.addEventListener("click", async ()=>{
+  await supabase.auth.signOut();
   refreshAuthUI();
+});
+
+// 초기 반영
+refreshAuthUI();
 </script>
 </body>
 </html>
