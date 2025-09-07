@@ -87,11 +87,31 @@
       <h1>사진 속 왜곡을 보정해 정확한 길이·면적을 계산</h1>
       <p class="muted">A4 같은 기준 사각형으로 투시 보정 후 길이/면적을 산출합니다. 현장에서 빠르고 간편하게.</p>
 
-      <!-- 샘플 이미지 -->
-      <div class="sample-block">
-        <!-- 경로/파일명은 실제 파일로 교체 -->
-        <img src="/image/mm_pamplet1.jpg" alt="앱 샘플 화면" loading="lazy">
-      </div>
+<!-- 흰색 밴드 + 3썸네일 갤러리 -->
+<div class="hero-bands">
+
+  <!-- 상단 흰색 밴드(텍스트만) -->
+  <div class="band-top">
+    <h2>How do you measure it</h2>
+    <p>when you have no ruler ?</p>
+  </div>
+
+  <!-- 하단 흰색 밴드(3썸네일 가로 정렬) -->
+  <div class="band-bottom">
+    <div class="thumbs">
+      <figure>
+        <img src="/image/mm_photo1.jpg" alt="샘플 1" loading="lazy">
+      </figure>
+      <figure>
+        <img src="/image/mm_photo2.jpg" alt="샘플 2" loading="lazy">
+      </figure>
+      <figure>
+        <img src="/image/mm_photo3.jpg" alt="샘플 3" loading="lazy">
+      </figure>
+    </div>
+  </div>
+
+</div>
     </section>
 
     <!-- (우) 가입/로그인 카드 -->
@@ -253,6 +273,58 @@
 
   // 최초 로드
   refreshAuthUI();
+
+/* ── 히어로: 흰색 밴드 & 3썸네일 ───────────────────────── */
+.hero-bands{display:flex;flex-direction:column;gap:0}
+
+/* 위/아래 밴드를 하나의 큰 흰 박스처럼 보이게 */
+.band-top,
+.band-bottom{
+  background:#fff;color:#0b0d12;
+  border:1px solid var(--border);
+  padding:16px;
+}
+.band-top{border-radius:12px 12px 0 0}
+.band-bottom{border-radius:0 0 12px 12px;border-top:none}
+
+/* 상단 밴드 텍스트 */
+.band-top h2{
+  margin:4px 0 2px;
+  text-align:center;
+  font-size:clamp(20px,3.2vw,28px);
+  letter-spacing:-0.02em;
+  font-weight:800;
+  color:#0b0d12;
+}
+.band-top p{
+  margin:0;
+  text-align:center;
+  color:#273047; /* 회색 잉크 느낌 */
+}
+
+/* 하단 밴드: 3장 썸네일 */
+.thumbs{
+  display:grid;
+  grid-template-columns:repeat(3, 1fr);
+  gap:12px;
+}
+.thumbs figure{margin:0}
+.thumbs img{
+  display:block;
+  width:100%;
+  height:160px;           /* 고정 높이로 라인 안정 */
+  object-fit:cover;       /* 다양한 비율도 보기 좋게 */
+  border-radius:10px;
+  border:1px solid var(--border);
+  background:#f4f6fa;
+}
+
+/* 모바일: 한 줄로 세로 스택 */
+@media (max-width: 700px){
+  .thumbs{grid-template-columns:1fr}
+  .thumbs img{height:180px}
+}
+
 </script>
 </body>
 </html>
