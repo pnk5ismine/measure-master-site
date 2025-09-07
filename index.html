@@ -76,36 +76,36 @@
    }
 
 
-/* 흰색 텍스트 밴드 */
-.hero-text {
-  background: #fff;
-  color: #000;
-  padding: 20px;
-  text-align: center;
-}
-.hero-text h2 {
-  margin: 0 0 8px;
-  font-size: clamp(20px, 3vw, 28px);
-}
-.hero-text p {
-  margin: 0;
-  font-size: clamp(14px, 2vw, 18px);
-}
+   /* 흰색 텍스트 밴드 */
+   .hero-text {
+     background: #fff;
+     color: #000;
+     padding: 20px;
+     text-align: center;
+   }
+   .hero-text h2 {
+     margin: 0 0 8px;
+     font-size: clamp(20px, 3vw, 28px);
+   }
+   .hero-text p {
+     margin: 0;
+     font-size: clamp(14px, 2vw, 18px);
+   }
 
-/* 가로 사진 3장 */
-.hero-photos {
-  display: flex;
-  justify-content: center;
-  gap: 12px;
-  background: #fff;
-  padding: 16px;
-}
-.hero-photos img {
-  width: 30%;
-  max-width: 220px;
-  height: auto;
-  border-radius: 8px;
-}
+   /* 가로 사진 3장 */
+   .hero-photos {
+     display: flex;
+     justify-content: center;
+     gap: 12px;
+     background: #fff;
+     padding: 16px;
+   }
+   .hero-photos img {
+     width: 30%;
+     max-width: 220px;
+     height: auto;
+     border-radius: 8px;
+   }
 
     /* ── 우측 컬럼(인증 카드) ─────────────────────────────── */
     .right-col{grid-column:1}
@@ -131,7 +131,46 @@
     .featurelist{display:grid;grid-template-columns:1fr;gap:12px}
     @media(min-width:700px){.featurelist{grid-template-columns:1fr 1fr}}
     .feature{border:1px dashed var(--border);border-radius:14px;padding:14px;background:#0f1320}
+
+   /* 사용법 그리드: 데스크탑 4열, 태블릿 3열, 모바일 2열 */
+   .howto-grid {
+     display: grid;
+     grid-template-columns: repeat(4, 1fr);
+     gap: 12px;
+   }
+
+   /* 반응형 */
+   @media (max-width: 1024px) {
+     .howto-grid { grid-template-columns: repeat(3, 1fr); }
+   }
+   @media (max-width: 640px) {
+     .howto-grid { grid-template-columns: repeat(2, 1fr); }
+   }
+
+   /* 타일: 비율 고정 + 자동 크롭 */
+   .howto-item {
+     display: block;
+     border-radius: 10px;
+     overflow: hidden;
+     background: #0f1320;  /* 로딩 중 배경 */
+     aspect-ratio: 4 / 3;  /* 타일 비율: 4:3 (원하시면 1/1, 3/2 등으로 변경 가능) */
+   }
+
+   .howto-item img {
+     width: 100%;
+     height: 100%;
+     object-fit: cover;    /* 꽉 채우며 중앙 크롭 */
+     display: block;
+     transition: transform .2s ease-out, opacity .2s ease-out;
+     opacity: .98;
+   }
+
+   .howto-item:hover img {
+     transform: scale(1.02);
+     opacity: 1;
+   }
   </style>
+
 </head>
 <body>
 <header>
@@ -140,11 +179,12 @@
     <strong>Measure Master</strong>
     <span class="pill" style="background:#0f1320;border:1px solid var(--border);border-radius:999px;padding:4px 8px;">v1</span>
   </div>
-  <nav>
-    <a href="#auth">로그인</a>
-    <a href="/reviews.html">사용후기</a>
-    <a href="/privacy.html">개인정보처리방침</a>
-  </nav>
+   <nav>
+     <a href="#auth" data-i18n="nav.login">로그인</a>
+     <a href="#howto" data-i18n="nav.howto">사용법</a>  <!-- ⬅️ 추가 -->
+     <a href="/reviews.html" data-i18n="nav.reviews">사용후기</a>
+     <a href="/privacy.html" data-i18n="nav.privacy">개인정보처리방침</a>
+   </nav>
   <div class="lang">
     <button type="button" data-lang-btn="ko">🇰🇷 한국어</button>
     <button type="button" data-lang-btn="en">🇬🇧 English</button>
@@ -222,6 +262,86 @@
         후기를 남기시려면 <a href="/reviews.html">사용후기 페이지</a>로 이동하세요.
       </p>
     </section>
+
+   <!-- 사용법 섹션 -->
+   <section id="howto" class="card span-2">
+     <div class="row" style="align-items:center;margin-bottom:10px">
+       <h3 class="sp">사용법</h3>
+       <span class="muted">총 22장 · 탭하여 확대(이미지 교체: /image/howtouse/howto01~22.jpg)</span>
+     </div>
+
+     <div class="howto-grid">
+       <!-- 파일명: /image/howtouse/howto01.jpg ~ /image/howtouse/howto22.jpg -->
+       <!-- 1~22까지 채움 (23,24는 빈칸 유지) -->
+       <a class="howto-item" href="/image/howtouse/howto01.jpg" target="_blank" rel="noopener">
+         <img src="/image/howtouse/howto01.jpg" alt="사용법 1" loading="lazy">
+       </a>
+       <a class="howto-item" href="/image/howtouse/howto02.jpg" target="_blank" rel="noopener">
+         <img src="/image/howtouse/howto02.jpg" alt="사용법 2" loading="lazy">
+       </a>
+       <a class="howto-item" href="/image/howtouse/howto03.jpg" target="_blank" rel="noopener">
+         <img src="/image/howtouse/howto03.jpg" alt="사용법 3" loading="lazy">
+       </a>
+       <a class="howto-item" href="/image/howtouse/howto04.jpg" target="_blank" rel="noopener">
+         <img src="/image/howtouse/howto04.jpg" alt="사용법 4" loading="lazy">
+       </a>
+       <a class="howto-item" href="/image/howtouse/howto05.jpg" target="_blank" rel="noopener">
+         <img src="/image/howtouse/howto05.jpg" alt="사용법 5" loading="lazy">
+       </a>
+       <a class="howto-item" href="/image/howtouse/howto06.jpg" target="_blank" rel="noopener">
+         <img src="/image/howtouse/howto06.jpg" alt="사용법 6" loading="lazy">
+       </a>
+       <a class="howto-item" href="/image/howtouse/howto07.jpg" target="_blank" rel="noopener">
+         <img src="/image/howtouse/howto07.jpg" alt="사용법 7" loading="lazy">
+       </a>
+       <a class="howto-item" href="/image/howtouse/howto08.jpg" target="_blank" rel="noopener">
+         <img src="/image/howtouse/howto08.jpg" alt="사용법 8" loading="lazy">
+       </a>
+       <a class="howto-item" href="/image/howtouse/howto09.jpg" target="_blank" rel="noopener">
+         <img src="/image/howtouse/howto09.jpg" alt="사용법 9" loading="lazy">
+       </a>
+       <a class="howto-item" href="/image/howtouse/howto10.jpg" target="_blank" rel="noopener">
+         <img src="/image/howtouse/howto10.jpg" alt="사용법 10" loading="lazy">
+       </a>
+       <a class="howto-item" href="/image/howtouse/howto11.jpg" target="_blank" rel="noopener">
+         <img src="/image/howtouse/howto11.jpg" alt="사용법 11" loading="lazy">
+       </a>
+       <a class="howto-item" href="/image/howtouse/howto12.jpg" target="_blank" rel="noopener">
+         <img src="/image/howtouse/howto12.jpg" alt="사용법 12" loading="lazy">
+       </a>
+       <a class="howto-item" href="/image/howtouse/howto13.jpg" target="_blank" rel="noopener">
+         <img src="/image/howtouse/howto13.jpg" alt="사용법 13" loading="lazy">
+       </a>
+       <a class="howto-item" href="/image/howtouse/howto14.jpg" target="_blank" rel="noopener">
+         <img src="/image/howtouse/howto14.jpg" alt="사용법 14" loading="lazy">
+       </a>
+       <a class="howto-item" href="/image/howtouse/howto15.jpg" target="_blank" rel="noopener">
+         <img src="/image/howtouse/howto15.jpg" alt="사용법 15" loading="lazy">
+       </a>
+       <a class="howto-item" href="/image/howtouse/howto16.jpg" target="_blank" rel="noopener">
+         <img src="/image/howtouse/howto16.jpg" alt="사용법 16" loading="lazy">
+       </a>
+       <a class="howto-item" href="/image/howtouse/howto17.jpg" target="_blank" rel="noopener">
+         <img src="/image/howtouse/howto17.jpg" alt="사용법 17" loading="lazy">
+       </a>
+       <a class="howto-item" href="/image/howtouse/howto18.jpg" target="_blank" rel="noopener">
+         <img src="/image/howtouse/howto18.jpg" alt="사용법 18" loading="lazy">
+       </a>
+       <a class="howto-item" href="/image/howtouse/howto19.jpg" target="_blank" rel="noopener">
+         <img src="/image/howtouse/howto19.jpg" alt="사용법 19" loading="lazy">
+       </a>
+       <a class="howto-item" href="/image/howtouse/howto20.jpg" target="_blank" rel="noopener">
+         <img src="/image/howtouse/howto20.jpg" alt="사용법 20" loading="lazy">
+       </a>
+       <a class="howto-item" href="/image/howtouse/howto21.jpg" target="_blank" rel="noopener">
+         <img src="/image/howtouse/howto21.jpg" alt="사용법 21" loading="lazy">
+       </a>
+       <a class="howto-item" href="/image/howtouse/howto22.jpg" target="_blank" rel="noopener">
+         <img src="/image/howtouse/howto22.jpg" alt="사용법 22" loading="lazy">
+       </a>
+     </div>
+   </section>
+
 
     <!-- 기능 요약(두 열 전체) -->
     <section class="card span-2">
