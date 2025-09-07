@@ -27,6 +27,26 @@
     footer{margin:30px auto 60px;text-align:center;color:var(--muted);font-size:14px}
     hr{border:none;border-top:1px solid var(--border);margin:16px 0}
 
+    /* 좌측 히어로 */
+   .hero-dark{
+     background:#0f1320;
+     color:#e7edf5;
+     border:1px solid var(--border);
+     border-radius:16px;
+     padding:18px;
+     margin-top:12px;
+   }
+   .hero-dark h1{
+     margin:0 0 6px;
+     font-size:clamp(26px, 4.8vw, 40px);
+     letter-spacing:-0.02em;
+   }
+   .hero-dark p{
+     margin:0;
+     color:#d7dee9;
+     font-size:clamp(14px, 2.6vw, 18px);
+   }
+
     /* ── 좌측 컬럼(텍스트/사진 밴드) ───────────────────────── */
     .left-col{grid-column:1}
     @media(min-width:1024px){ .left-col{grid-column:1} }
@@ -113,6 +133,13 @@
 
 <main>
   <div class="layout">
+
+   <!-- (새로 추가) 검정 바탕 히어로 텍스트 -->
+    <div class="hero-dark">
+     <h1>사진 속 왜곡을 보정해 정확한 길이·면적을 계산</h1>
+     <p>A4 같은 기준 사각형으로 투시 보정 후 길이/면적을 산출합니다. 현장에서 빠르고 간편하게.</p>
+   </div>
+
     <!-- (좌) 텍스트/사진 밴드 -->
     <section class="left-col">
       <div class="band-text">
