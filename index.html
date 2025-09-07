@@ -4,10 +4,13 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Measure Master — 사진 보정 · 길이/면적 계산</title>
-  <meta name="description" content="A4 같은 기준 사각형으로 투시 보정 후 길이/면적을 계산하는 Measure Master 앱" />
+  <meta name="description" content="A4 기준 사각형으로 투시 보정 후 길이/면적을 계산하는 Measure Master 앱" />
   <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+
   <style>
-    :root { --bg:#0b0d12; --card:#121622; --muted:#9aa4b2; --pri:#5eead4; --border:#1e2230; }
+    :root{
+      --bg:#0b0d12; --card:#121622; --muted:#9aa4b2; --pri:#5eead4; --border:#1e2230;
+    }
     *{box-sizing:border-box}
     body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,'Noto Sans KR',sans-serif;background:var(--bg);color:#e7edf5}
     a{color:var(--pri);text-decoration:none} a:hover{text-decoration:underline}
@@ -18,48 +21,51 @@
     nav a{margin-left:16px;color:#cfd6e4}
     .lang{display:flex;gap:6px;align-items:center}
     .lang button{border:1px solid var(--border);background:#0f1320;color:#e7edf5;border-radius:999px;padding:6px 10px;cursor:pointer}
-    .lang button.active{outline:2px solid #2dd; font-weight:600}
 
-    .layout{display:grid;grid-template-columns:1fr;gap:18px;margin-top:16px}
-    @media(min-width:1024px){ .layout{grid-template-columns:1.2fr .8fr} }
+    /* 레이아웃: 좌측(가변) + 우측(고정폭 카드) */
+    .layout{
+      display:grid;grid-template-columns:minmax(0,1fr);gap:18px;margin-top:16px
+    }
+    @media(min-width:1024px){
+      .layout{grid-template-columns:minmax(0, 1fr) 420px;}
+    }
 
     .card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:22px}
     .card h3{margin:0 0 8px;font-size:20px}
     .muted{color:var(--muted)}
-    .row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
-    .sp{flex:1 1 auto}
-    .pill{font:inherit;background:#0f1320;border:1px solid var(--border);border-radius:999px;padding:6px 10px}
-
-    /* ── 히어로(왼쪽 열) ───────────────────── */
-    .hero{display:flex;flex-direction:column;gap:16px}
-    .hero h1{margin:0 0 6px;font-size:clamp(22px,3.6vw,34px);letter-spacing:-0.02em}
-    .hero p{margin:0;color:#d7dee9}
-    .sample-block{width:100%}
-    .sample-block img{
-      display:block;
-      max-width:100%;
-      height:auto;
-      object-fit:contain;
-      border-radius:12px;
-      border:1px solid var(--border);
-      background:#0f1320;
-    }
-
-    /* ── 가입/로그인 카드(오른쪽 열) ───────── */
-    .field{display:flex;flex-direction:column;gap:6px;margin:10px 0 2px}
-    input{width:100%;padding:10px 12px;border-radius:12px;border:1px solid var(--border);background:#0f1320;color:#e7edf5}
-    button.primary{margin-top:10px;padding:10px 14px;background:#1d2639;color:#e7edf5;border:1px solid var(--border);border-radius:12px;cursor:pointer}
-    button.primary:hover{background:#223049}
-    .toggle{margin-top:8px;color:#cfd6e4}
-    .toggle button{background:none;border:none;color:#5eead4;cursor:pointer;padding:0}
-
-    /* ── 하단 특징(2×2) ───────────────────── */
     .featurelist{display:grid;grid-template-columns:1fr;gap:12px}
     @media(min-width:700px){.featurelist{grid-template-columns:1fr 1fr}}
-    .feature{border:1px dashed var(--border);border-radius:14px;padding:14px;background:#0f1320}
 
     footer{margin:30px auto 60px;text-align:center;color:var(--muted);font-size:14px}
     hr{border:none;border-top:1px solid var(--border);margin:16px 0}
+
+    /* ── 히어로(좌측) ───────────────────────────────────────── */
+    .hero{border:1px solid var(--border);border-radius:18px;padding:22px;background:#0f1320}
+    .hero h1{margin:0 0 8px;font-size:clamp(22px,3.6vw,34px);letter-spacing:-0.02em}
+    .hero p{margin:0 0 10px;color:#d7dee9}
+
+    /* 텍스트 밴드: 흰 바탕 + 검은 글씨 */
+    .band-text{
+      background:#fff;color:#0b0d12;border:1px solid var(--border);
+      border-radius:12px;padding:14px;margin-top:12px;
+    }
+    .band-text h3{margin:0 0 6px;font-size:20px;color:#0b0d12}
+    .band-text p{margin:0;color:#0b0d12}
+
+    /* 사진 밴드: 흰 바탕 + 가로 정렬(모바일 자동 줄바꿈) */
+    .band-photos{
+      background:#fff;border:1px solid var(--border);border-radius:12px;
+      padding:14px;margin-top:12px;
+      display:flex;justify-content:center;align-items:center;gap:20px;flex-wrap:wrap;
+    }
+    .band-photos img{
+      display:block; width:180px; max-width:32%;
+      aspect-ratio:4/3; object-fit:cover; border-radius:10px;
+      border:1px solid var(--border); background:#fff;
+    }
+    @media(max-width:700px){
+      .band-photos img{max-width:46%;}
+    }
   </style>
 </head>
 <body>
@@ -67,7 +73,7 @@
   <div class="brand">
     <img src="/image/mm_logo2.jpg" alt="Measure Master" class="logo-img" />
     <strong>Measure Master</strong>
-    <span class="pill">v1</span>
+    <span style="border:1px solid var(--border);border-radius:999px;padding:2px 8px;background:#0f1320;">v1</span>
   </div>
   <nav>
     <a href="#auth">로그인</a>
@@ -75,110 +81,105 @@
     <a href="/privacy.html">개인정보처리방침</a>
   </nav>
   <div class="lang">
-    <button type="button" data-lang-btn="ko">🇰🇷 한국어</button>
-    <button type="button" data-lang-btn="en">🇬🇧 English</button>
+    <button type="button">🇰🇷 한국어</button>
+    <button type="button">🇬🇧 English</button>
   </div>
 </header>
 
 <main>
   <div class="layout">
-    <!-- (좌) 히어로 + 샘플 이미지 -->
-    <section class="hero card">
+    <!-- (좌) 히어로 -->
+    <section class="hero">
       <h1>사진 속 왜곡을 보정해 정확한 길이·면적을 계산</h1>
-      <p class="muted">A4 같은 기준 사각형으로 투시 보정 후 길이/면적을 산출합니다. 현장에서 빠르고 간편하게.</p>
+      <p>A4 같은 기준 사각형으로 투시 보정 후 길이/면적을 산출합니다. 현장에서 빠르고 간편하게.</p>
 
-<!-- 흰색 밴드 + 3썸네일 갤러리 -->
-<div class="hero-bands">
+      <!-- 텍스트 밴드 -->
+      <div class="band-text">
+        <h3>How do you measure it</h3>
+        <p>when you have no ruler ?</p>
+      </div>
 
-  <!-- 상단 흰색 밴드(텍스트만) -->
-  <div class="band-top">
-    <h2>How do you measure it</h2>
-    <p>when you have no ruler ?</p>
-  </div>
-
-  <!-- 하단 흰색 밴드(3썸네일 가로 정렬) -->
-  <div class="band-bottom">
-    <div class="thumbs">
-      <figure>
-        <img src="/image/mm_photo1.jpg" alt="샘플 1" loading="lazy">
-      </figure>
-      <figure>
-        <img src="/image/mm_photo2.jpg" alt="샘플 2" loading="lazy">
-      </figure>
-      <figure>
-        <img src="/image/mm_photo3.jpg" alt="샘플 3" loading="lazy">
-      </figure>
-    </div>
-  </div>
-
-</div>
+      <!-- 사진 밴드 (이미지 경로 교체) -->
+      <div class="band-photos">
+        <img src="/mm_photo1.jpg" alt="sample 1">
+        <img src="/mm_photo2.jpg" alt="sample 2">
+        <img src="/mm_photo3.jpg" alt="sample 3">
+      </div>
     </section>
 
-    <!-- (우) 가입/로그인 카드 -->
+    <!-- (우) 회원가입/로그인 카드 -->
     <section id="auth" class="card">
-      <div class="row">
-        <h3 class="sp">회원가입 · 로그인</h3>
+      <div style="display:flex;gap:10px;align-items:center;justify-content:space-between;">
+        <h3 style="margin:0">회원가입 · 로그인</h3>
         <span id="auth-status" class="muted">로그아웃 상태</span>
       </div>
 
-      <!-- 가입 폼 -->
-      <form id="signup-form" autocomplete="on">
-        <div class="field">
+      <!-- 비번 재확인 필드 포함한 가입 폼 -->
+      <form id="signup-form" autocomplete="on" style="margin-top:12px">
+        <div style="display:flex;flex-direction:column;gap:6px;margin:10px 0 2px">
           <label for="signup-email">이메일</label>
-          <input id="signup-email" name="email" type="email" required placeholder="you@example.com">
+          <input id="signup-email" name="email" type="email" required placeholder="you@example.com"
+                 style="width:100%;padding:10px 12px;border-radius:12px;border:1px solid var(--border);background:#0f1320;color:#e7edf5">
         </div>
-        <div class="field">
+        <div style="display:flex;flex-direction:column;gap:6px;margin:10px 0 2px">
           <label for="signup-password">비밀번호</label>
-          <input id="signup-password" name="password" type="password" required minlength="8" placeholder="8자 이상">
+          <input id="signup-password" name="password" type="password" required minlength="8" placeholder="8자 이상"
+                 style="width:100%;padding:10px 12px;border-radius:12px;border:1px solid var(--border);background:#0f1320;color:#e7edf5">
         </div>
-        <div class="field">
+        <div style="display:flex;flex-direction:column;gap:6px;margin:10px 0 2px">
           <label for="signup-password2">비밀번호 확인</label>
-          <input id="signup-password2" name="password2" type="password" required minlength="8" placeholder="한 번 더 입력">
+          <input id="signup-password2" name="password2" type="password" required minlength="8" placeholder="한 번 더 입력"
+                 style="width:100%;padding:10px 12px;border-radius:12px;border:1px solid var(--border);background:#0f1320;color:#e7edf5">
         </div>
-        <button type="submit" class="primary">회원가입</button>
-        <div class="toggle">이미 계정이 있으신가요?
-          <button type="button" id="go-login">로그인</button>
-        </div>
+        <button type="submit" style="margin-top:10px;padding:10px 14px;background:#1d2639;color:#e7edf5;border:1px solid var(--border);border-radius:12px;cursor:pointer">
+          회원가입
+        </button>
       </form>
 
       <!-- 로그인 폼 -->
-      <form id="login-form" autocomplete="on" style="display:none">
-        <div class="field">
+      <form id="login-form" autocomplete="on" style="margin-top:10px">
+        <div style="display:flex;flex-direction:column;gap:6px;margin:10px 0 2px">
           <label for="login-email">이메일</label>
-          <input id="login-email" name="email" type="email" required placeholder="you@example.com">
+          <input id="login-email" name="email" type="email" required placeholder="you@example.com"
+                 style="width:100%;padding:10px 12px;border-radius:12px;border:1px solid var(--border);background:#0f1320;color:#e7edf5">
         </div>
-        <div class="field">
+        <div style="display:flex;flex-direction:column;gap:6px;margin:10px 0 2px">
           <label for="login-password">비밀번호</label>
-          <input id="login-password" name="password" type="password" required minlength="8" placeholder="비밀번호">
+          <input id="login-password" name="password" type="password" required minlength="8" placeholder="8자 이상"
+                 style="width:100%;padding:10px 12px;border-radius:12px;border:1px solid var(--border);background:#0f1320;color:#e7edf5">
         </div>
-        <button type="submit" class="primary">로그인</button>
-        <button type="button" id="logout-btn" style="margin-left:8px;display:none">로그아웃</button>
-        <div class="toggle">아직 계정이 없으신가요?
-          <button type="button" id="go-signup">회원가입</button>
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+          <button type="submit" style="padding:10px 14px;background:#1d2639;color:#e7edf5;border:1px solid var(--border);border-radius:12px;cursor:pointer">
+            로그인
+          </button>
+          <button type="button" id="logout-btn" style="display:none;padding:10px 14px;background:#0f1320;color:#e7edf5;border:1px solid var(--border);border-radius:12px;cursor:pointer">
+            로그아웃
+          </button>
         </div>
       </form>
 
-      <hr />
-      <p>후기를 남기시려면 <a href="/reviews.html">사용후기 페이지</a>로 이동하세요.</p>
+      <p class="muted" style="margin-top:10px">
+        후기를 남기시려면 <a href="/reviews.html">사용후기 페이지</a>로 이동하세요.
+      </p>
     </section>
 
-    <!-- (하단) 특징 2×2 -->
-    <section class="card" style="grid-column:1 / -1">
+    <!-- (하단) 기능 요약 4카드 -->
+    <section class="card" style="grid-column:1 / -1;">
       <h3>왜 Measure Master인가요?</h3>
       <div class="featurelist">
-        <div class="feature">
+        <div style="border:1px dashed var(--border);border-radius:14px;padding:14px;background:#0f1320">
           <strong>정확한 투시 보정</strong>
           <p class="muted">A4 같은 기준 사각형 4점만 지정하면 사진을 직사각형 기준으로 보정해 길이·면적을 신뢰성 있게 계산.</p>
         </div>
-        <div class="feature">
+        <div style="border:1px dashed var(--border);border-radius:14px;padding:14px;background:#0f1320">
           <strong>실측 친화 UI</strong>
           <p class="muted">직선/곡선 도형, 스냅 각도, 자동 커밋 등 현장 사용성을 최우선으로 설계.</p>
         </div>
-        <div class="feature">
+        <div style="border:1px dashed var(--border);border-radius:14px;padding:14px;background:#0f1320">
           <strong>빠른 결과</strong>
           <p class="muted">보정 후 즉시 길이 합계, 면적 합계 표시. 내보내기 및 공유도 간편.</p>
         </div>
-        <div class="feature">
+        <div style="border:1px dashed var(--border);border-radius:14px;padding:14px;background:#0f1320">
           <strong>피드백 루프</strong>
           <p class="muted">사용자 후기 기반 개선. 버그 리포트/요청은 후기 게시판으로 알려주세요.</p>
         </div>
@@ -191,127 +192,19 @@
   © <span id="year"></span> Measure Master. All rights reserved.
 </footer>
 
-<noscript>
-  <div style="max-width:1100px;margin:10px auto;padding:12px;border-radius:12px;background:#1a2236;border:1px solid #2a3450;color:#ffb4a2;">
-    이 페이지는 JavaScript를 필요로 합니다. 브라우저 설정에서 JavaScript를 활성화해 주세요.
-  </div>
-</noscript>
-
-<!-- Supabase SDK -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
 <script>
-  // ===== 여기를 본인 프로젝트 값으로 교체하세요 =====
-  const SUPABASE_URL  = "https://snxjcbaaysgfunpsohzg.supabase.co";
-  const SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNueGpjYmFheXNnZnVucHNvaHpnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY1OTk3MzQsImV4cCI6MjA3MjE3NTczNH0.T8b9PpabXkCvwW2W57Qbr-h--JLZB6errlyP5IwsYyk";
-  // ===================================================
-  const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
-
-  // 공통 요소
-  const $ = (s)=>document.querySelector(s);
-  const elStatus = $("#auth-status");
-  const elSignup = $("#signup-form");
-  const elLogin  = $("#login-form");
-  const elLogout = $("#logout-btn");
-  const goLogin  = $("#go-login");
-  const goSignup = $("#go-signup");
+  // 년도 표기
   document.getElementById('year').textContent = new Date().getFullYear();
 
-  // 폼 전환
-  function showSignup(){ elSignup.style.display="block"; elLogin.style.display="none"; }
-  function showLogin(){  elSignup.style.display="none";  elLogin.style.display="block"; }
-
-  goLogin.addEventListener("click", showLogin);
-  goSignup.addEventListener("click", showSignup);
-
-  // UI 갱신
-  async function refreshAuthUI(){
-    const { data:{ session } } = await supabase.auth.getSession();
-    if(session?.user){
-      elStatus.textContent = `로그인: ${session.user.email ?? ""}`;
-      showLogin();
-      $("#login-email").value = session.user.email ?? "";
-      elLogout.style.display = "inline-block";
-    }else{
-      elStatus.textContent = "로그아웃 상태";
-      elLogout.style.display = "none";
-      showSignup();
-    }
-  }
-
-  // 회원가입
-  elSignup.addEventListener("submit", async(e)=>{
-    e.preventDefault();
-    const email = e.target.email.value.trim();
-    const pw1   = e.target.password.value;
-    const pw2   = e.target.password2.value;
-
+  // (옵션) 비밀번호 확인 간단 검증
+  document.getElementById('signup-form')?.addEventListener('submit', (e)=>{
+    const pw1 = document.getElementById('signup-password').value;
+    const pw2 = document.getElementById('signup-password2').value;
     if(pw1 !== pw2){
-      alert("비밀번호가 서로 다릅니다.");
-      return;
+      e.preventDefault();
+      alert('비밀번호가 서로 다릅니다.');
     }
-    const { error } = await supabase.auth.signUp({ email, password: pw1 });
-    alert(error ? `회원가입 실패: ${error.message}` : "회원가입 성공. 이메일 인증 설정 시 메일함을 확인해 주세요.");
-    refreshAuthUI();
   });
-
-  // 로그인
-  elLogin.addEventListener("submit", async(e)=>{
-    e.preventDefault();
-    const email = e.target.email.value.trim();
-    const password = e.target.password.value;
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-    alert(error ? `로그인 실패: ${error.message}` : "로그인 성공");
-    refreshAuthUI();
-  });
-
-  // 로그아웃
-  elLogout.addEventListener("click", async()=>{
-    await supabase.auth.signOut();
-    refreshAuthUI();
-  });
-
-  // 최초 로드
-  refreshAuthUI();
-
-/* === PATCH: hero bands (white background + row thumbnails) === */
-.hero .band {
-  background: #fff !important;       /* 밴드 배경 흰색 */
-  color: #0b0d12 !important;          /* 글자색 진한색 */
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 14px;
-}
-
-/* 텍스트 밴드 안의 제목·본문 여백 정리(선택) */
-.hero .text-band h3 { margin: 0 0 6px; }
-.hero .text-band p  { margin: 0; color: #222; }
-
-/* 사진 밴드: 가로 한 줄 중앙 정렬 + 좁은 화면에서만 자동 줄바꿈 */
-.hero .thumbs{
-  display: flex !important;
-  justify-content: center !important; /* 중앙 정렬 */
-  align-items: center;
-  gap: 20px;
-  flex-wrap: wrap;                     /* 모바일에서 자동 줄바꿈 */
-}
-
-/* 썸네일 크기와 형태 */
-.hero .thumbs img{
-  display: block;
-  width: 180px;                        /* 필요시 160~220px로 조절 */
-  height: 130px;                       /* 비율 고정 */
-  object-fit: cover;                   /* 잘라서 맞추기 */
-  border-radius: 10px;
-  border: 1px solid var(--border);
-  background: #fff;                    /* 썸네일 뒤 배경도 흰색 */
-}
-/* 모바일: 한 줄로 세로 스택 */
-@media (max-width: 700px){
-  .thumbs{grid-template-columns:1fr}
-  .thumbs img{height:180px}
-}
-
 </script>
 </body>
 </html>
