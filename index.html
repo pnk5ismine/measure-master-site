@@ -20,31 +20,53 @@
     .lang button{border:1px solid var(--border);background:#0f1320;color:#e7edf5;border-radius:999px;padding:6px 10px;cursor:pointer}
     .lang button.active{outline:2px solid #2dd; font-weight:600}
 
-    .layout{display:grid;grid-template-columns:1fr;gap:18px;margin-top:16px}
-    @media(min-width:1024px){ .layout{grid-template-columns:1.2fr .8fr} }
+   /* 2열 레이아웃: 같은 줄에서 동일 높이 맞춤 */
+   .layout{
+     display:grid;
+     grid-template-columns: 1fr;
+     gap:18px;
+     margin-top:16px;
+   }
+   @media (min-width:1024px){
+     .layout{
+       grid-template-columns: 1.2fr .8fr;
+       align-items: stretch;            /* 같은 줄 카드 높이 맞춤 */
+     }
+   }
     .card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:22px}
     .muted{color:var(--muted)}
     footer{margin:30px auto 60px;text-align:center;color:var(--muted);font-size:14px}
     hr{border:none;border-top:1px solid var(--border);margin:16px 0}
 
-    /* 좌측 히어로 */
+   /* 좌/우 칼럼 컨테이너를 flex로 만들어 내용이 꽉 차도록 */
+   .left-col, .right-col{
+     display:flex;
+   } 
+
+   /* 카드/히어로를 늘려 같은 높이 채우기 */
+   .hero-dark, .card{
+     display:flex;
+     flex-direction:column;
+     height:100%;         /* 부모 높이 채움 */
+   }
+
+   /* 검정 바탕 히어로(유지/강화) */
    .hero-dark{
      background:#0f1320;
      color:#e7edf5;
      border:1px solid var(--border);
      border-radius:16px;
-     padding:18px;
-     margin-top:12px;
+     padding:22px;
    }
    .hero-dark h1{
      margin:0 0 6px;
-     font-size:clamp(26px, 4.8vw, 40px);
+     font-size:clamp(26px,4.8vw,40px);
      letter-spacing:-0.02em;
    }
    .hero-dark p{
      margin:0;
      color:#d7dee9;
-     font-size:clamp(14px, 2.6vw, 18px);
+     font-size:clamp(14px,2.6vw,18px);
    }
 
     /* ── 좌측 컬럼(텍스트/사진 밴드) ───────────────────────── */
@@ -133,31 +155,14 @@
 
 <main>
   <div class="layout">
-
-
-    <!-- (좌) 텍스트/사진 밴드 -->
     <section class="left-col">
-
-     <!-- (새로 추가) 검정 바탕 히어로 텍스트 -->
-      <div class="hero-dark">
+       <div class="hero-dark">
        <h1>사진 속 왜곡을 보정해 정확한 길이·면적을 계산</h1>
-       <p>A4 같은 기준 사각형으로 투시 보정 후 길이/면적을 산출합니다. 현장에서 빠르고 간편하게.</p>
-     </div>
-
-      <div class="band-text">
-        <h2>귀하는 어떻게 잴 겁니까?</h2>
-        <p>만약 자나 도구가 없으면</p>
-      </div>
-
-      <div class="band-photos">
-        <!-- 경로/대소문자 꼭 확인! 404면 서버의 실제 경로와 맞추세요 -->
-        <img src="/image/mm_photo1.jpg" alt="샘플 1">
-        <img src="/image/mm_photo2.jpg" alt="샘플 2">
-        <img src="/image/mm_photo3.jpg" alt="샘플 3">
+        <p>A4 같은 기준 사각형으로 투시 보정 후 길이/면적을 산출합니다. 현장에서 빠르고 간편하게.</p>
       </div>
     </section>
-
-    <!-- (우) 인증 카드 -->
+  
+       <!-- (우) 인증 카드 -->
     <section id="auth" class="card right-col">
       <div class="auth-head">
         <h3 style="margin:0">회원가입 · 로그인</h3>
