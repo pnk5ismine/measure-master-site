@@ -90,24 +90,36 @@
       font-size:clamp(14px, 2.6vw, 18px);
     }
 
-    .band-photos{
-      background:#fff;color:#0b0d12;border:1px solid var(--border);
-      border-radius:12px;padding:16px 18px;margin-top:0;          /* 위 여백 제거 */
-      border-top-left-radius:0;border-top-right-radius:0;border-top:none;
-      display:flex;justify-content:center;align-items:center;gap:20px;
-      flex-wrap:nowrap;
-    }
-    .band-photos img{
-      width:calc((100% - 40px)/3);      /* 3등분 */
-      max-width:none;
-      aspect-ratio:4/3; object-fit:cover;
-      border-radius:10px;border:1px solid var(--border);
-      background:#fff;display:block;
-    }
-    @media(max-width:700px){
-      .band-photos{ flex-wrap:wrap; }
-      .band-photos img{ width:48%; }
-    }
+/* 흰색 텍스트 밴드 */
+.hero-text {
+  background: #fff;
+  color: #000;
+  padding: 20px;
+  text-align: center;
+}
+.hero-text h2 {
+  margin: 0 0 8px;
+  font-size: clamp(20px, 3vw, 28px);
+}
+.hero-text p {
+  margin: 0;
+  font-size: clamp(14px, 2vw, 18px);
+}
+
+/* 가로 사진 3장 */
+.hero-photos {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  background: #fff;
+  padding: 16px;
+}
+.hero-photos img {
+  width: 30%;
+  max-width: 220px;
+  height: auto;
+  border-radius: 8px;
+}
 
     /* ── 우측 컬럼(인증 카드) ─────────────────────────────── */
     .right-col{grid-column:1}
@@ -159,6 +171,19 @@
        <div class="hero-dark">
        <h1>사진 속 왜곡을 보정해 정확한 길이·면적을 계산</h1>
         <p>A4 같은 기준 사각형으로 투시 보정 후 길이/면적을 산출합니다. 현장에서 빠르고 간편하게.</p>
+      </div>
+
+      <!-- 흰색 텍스트 밴드 -->
+      <div class="hero-text">
+      <h2>귀하는 어떻게 잴 것입니까?</h2>
+      <p>Measure Master는 현장의 불편을 줄이는 새로운 방식의 길이/면적 측정 도구입니다.</p>
+      </div>
+
+      <!-- 가로 사진 3장 -->
+      <div class="hero-photos">
+        <img src="/image/mm_photo1.jpg" alt="샘플1">
+        <img src="/image/mm_photo2.jpg" alt="샘플2">
+        <img src="/image/mm_photo3.jpg" alt="샘플3">
       </div>
     </section>
   
