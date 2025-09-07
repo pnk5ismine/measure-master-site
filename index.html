@@ -44,34 +44,66 @@
     .hero h1{margin:0 0 8px;font-size:clamp(22px,3.6vw,34px);letter-spacing:-0.02em}
     .hero p{margin:0 0 10px;color:#d7dee9}
 
-    /* 텍스트 밴드: 흰 바탕 + 검은 글씨 */
-    .band-text{
-      background:#fff;color:#0b0d12;border:1px solid var(--border);
-      border-radius:12px;padding:14px;margin-top:12px;
-    }
-    .band-text h3{margin:0 0 6px;font-size:20px;color:#0b0d12}
-    .band-text p{margin:0;color:#0b0d12}
+  /* ⬇️ 추가 */
+  text-align:center;
+}
+.band-text h3{
+  margin:0 0 6px;
+  color:#0b0d12;
+  /* ⬇️ 글자 크게 */
+  font-size:clamp(26px, 4.8vw, 30px);
+  letter-spacing:-0.02em;
+}
+.band-text p{
+  margin:0;
+  color:#0b0d12;
+  /* ⬇️ 보조문구도 키우기 */
+  font-size:clamp(14px, 2.6vw, 18px);
+}
 
-    /* 사진 밴드: 흰 바탕 + 가로 정렬(모바일 자동 줄바꿈) */
-    .band-photos{
-      background:#fff;border:1px solid var(--border);border-radius:12px;
-      padding:14px;margin-top:12px;
-      display:flex;justify-content:center;align-items:center;gap:20px;flex-wrap:wrap;
-    }
-    .band-photos img{
-      display:block; width:180px; max-width:32%;
-      aspect-ratio:4/3; object-fit:cover; border-radius:10px;
-      border:1px solid var(--border); background:#fff;
-    }
-    @media(max-width:700px){
-      .band-photos img{max-width:46%;}
-    }
+/* 윗 밴드(텍스트)의 아래 모서리/여백 제거 */
+.band-text{
+  margin-bottom:0;                           /* ⬅️ 아래 여백 제거 */
+  border-bottom-left-radius:0;
+  border-bottom-right-radius:0;
+}
+
+/* 아랫 밴드(사진)의 위 모서리/보더/여백 조정 */
+.band-photos{
+  margin-top:0;                              /* ⬅️ 위 여백 제거 */
+  border-top-left-radius:0;
+  border-top-right-radius:0;
+  border-top:none;                           /* ⬅️ 위쪽 보더 없애서 경계선 1줄로 보이게 */
+  padding-top:12px;                          /* ⬅️ 붙어보이게 살짝만 안쪽 여백 */
+}
+
+/* 데스크탑: 한 줄 고정 */
+.band-photos{
+  display:flex; justify-content:center; align-items:center; gap:20px;
+  flex-wrap:nowrap;                        /* ⬅️ 한 줄 고정 */
+}
+
+/* 3등분 정확히 채우기 */
+.band-photos img{
+  width:calc((100% - 40px)/3);             /* (간격 20px * 2) 제외한 3등분 */
+  max-width:none;                          /* ⬅️ 한 줄 유지 */
+  aspect-ratio:4/3; object-fit:cover;
+  border-radius:10px; border:1px solid var(--border);
+  background:#fff; display:block;
+}
+
+/* 모바일(가로 폭 좁음): 줄바꿈 허용 */
+@media(max-width:700px){
+  .band-photos{ flex-wrap:wrap; }
+  .band-photos img{ width:48%; }           /* 2열 → 더 좁으면 자동 1열 */
+}
+
   </style>
 </head>
 <body>
 <header>
   <div class="brand">
-    <img src="/image/mm_logo2.jpg" alt="Measure Master" class="logo-img" />
+    <img src="/image/mm_logo_small.png" alt="Measure Master" class="logo-img" />
     <strong>Measure Master</strong>
     <span style="border:1px solid var(--border);border-radius:999px;padding:2px 8px;background:#0f1320;">v1</span>
   </div>
