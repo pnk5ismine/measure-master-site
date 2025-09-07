@@ -20,24 +20,42 @@
     h1{margin:8px 0 2px;font-size:22px}
     p.muted{color:var(--muted);margin:2px 0 0}
 
-    /* --- 사용법 그리드 --- */
-    .howto-grid{
-      display:grid; grid-template-columns:repeat(4,1fr); gap:12px;
-    }
-    @media (max-width:1024px){ .howto-grid{ grid-template-columns:repeat(3,1fr);} }
-    @media (max-width:640px){  .howto-grid{ grid-template-columns:repeat(2,1fr);} }
+   /* --- 사용법 그리드 --- */
+   .howto-grid{
+     display:grid;
+     grid-template-columns:repeat(3,1fr); /* 🔹 3열 */
+     gap:12px;
+   }
+   @media (max-width:1024px){
+     .howto-grid{ grid-template-columns:repeat(2,1fr);} /* 태블릿 이하: 2열 */
+   }
+   @media (max-width:640px){
+     .howto-grid{ grid-template-columns:1fr;}           /* 모바일: 1열 */
+   }
 
-    .howto-item{
-      display:block; border-radius:10px; overflow:hidden; background:#0f1320;
-      aspect-ratio:4/3;  /* 타일 비율, 원하면 1 / 1.414(A4)로 변경 */
-      border:1px solid var(--border);
-    }
-    .howto-item img{
-      width:100%; height:100%; object-fit:cover; display:block;
-      image-rendering:auto; transition:transform .2s ease-out, opacity .2s ease-out; opacity:.98;
-    }
-    .howto-item:hover img{ transform:scale(1.02); opacity:1; }
+   .howto-item{
+     display:block;
+     border-radius:10px;
+     overflow:hidden;
+     background:#0f1320;
+     aspect-ratio:1/2;    /* 🔹 폭:높이 = 1:2 */
+     border:1px solid var(--border);
+   }
 
+   .howto-item img{
+     width:100%;
+     height:100%;
+     object-fit:cover;
+     display:block;
+     image-rendering:auto;
+     transition:transform .2s ease-out, opacity .2s ease-out;
+     opacity:.98;
+   }
+   .howto-item:hover img{
+     transform:scale(1.02);
+     opacity:1;
+   }
+ 
     footer{margin:30px auto 60px;text-align:center;color:var(--muted);font-size:14px}
   </style>
 </head>
