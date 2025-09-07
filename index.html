@@ -274,52 +274,37 @@
   // 최초 로드
   refreshAuthUI();
 
-/* ── 히어로: 흰색 밴드 & 3썸네일 ───────────────────────── */
-.hero-bands{display:flex;flex-direction:column;gap:0}
-
-/* 위/아래 밴드를 하나의 큰 흰 박스처럼 보이게 */
-.band-top,
-.band-bottom{
-  background:#fff;color:#0b0d12;
-  border:1px solid var(--border);
-  padding:16px;
-}
-.band-top{border-radius:12px 12px 0 0}
-.band-bottom{border-radius:0 0 12px 12px;border-top:none}
-
-/* 상단 밴드 텍스트 */
-.band-top h2{
-  margin:4px 0 2px;
-  text-align:center;
-  font-size:clamp(20px,3.2vw,28px);
-  letter-spacing:-0.02em;
-  font-weight:800;
-  color:#0b0d12;
-}
-.band-top p{
-  margin:0;
-  text-align:center;
-  color:#273047; /* 회색 잉크 느낌 */
+/* === PATCH: hero bands (white background + row thumbnails) === */
+.hero .band {
+  background: #fff !important;       /* 밴드 배경 흰색 */
+  color: #0b0d12 !important;          /* 글자색 진한색 */
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 14px;
 }
 
-/* 하단 밴드: 3장 썸네일 가로 일렬 + 중앙 정렬 */
-.thumbs{
-  display:flex;
-  justify-content:center; /* 중앙 정렬 */
-  gap:20px;               /* 썸네일 간격 */
-  flex-wrap:wrap;         /* 화면 좁으면 자동 줄바꿈 */
+/* 텍스트 밴드 안의 제목·본문 여백 정리(선택) */
+.hero .text-band h3 { margin: 0 0 6px; }
+.hero .text-band p  { margin: 0; color: #222; }
+
+/* 사진 밴드: 가로 한 줄 중앙 정렬 + 좁은 화면에서만 자동 줄바꿈 */
+.hero .thumbs{
+  display: flex !important;
+  justify-content: center !important; /* 중앙 정렬 */
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;                     /* 모바일에서 자동 줄바꿈 */
 }
 
-.thumbs figure{margin:0}
-
-.thumbs img{
-  display:block;
-  width:180px;            /* 원하는 가로 크기 고정 */
-  height:140px;           /* 원하는 세로 크기 고정 */
-  object-fit:cover;       /* 비율 맞게 잘림 */
-  border-radius:10px;
-  border:1px solid var(--border);
-  background:#fff;        /* 사진 배경도 흰색 */
+/* 썸네일 크기와 형태 */
+.hero .thumbs img{
+  display: block;
+  width: 180px;                        /* 필요시 160~220px로 조절 */
+  height: 130px;                       /* 비율 고정 */
+  object-fit: cover;                   /* 잘라서 맞추기 */
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: #fff;                    /* 썸네일 뒤 배경도 흰색 */
 }
 /* 모바일: 한 줄로 세로 스택 */
 @media (max-width: 700px){
