@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Measure Master — 사용법</title>
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  <style>
+    :root { --bg:#0b0d12; --card:#121622; --muted:#9aa4b2; --pri:#5eead4; --border:#1e2230; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,'Noto Sans KR',sans-serif;background:var(--bg);color:#e7edf5}
+    a{color:var(--pri);text-decoration:none} a:hover{text-decoration:underline}
+    header,main,footer{max-width:1100px;margin:0 auto;padding:16px}
+    header{display:flex;align-items:center;justify-content:space-between;gap:12px}
+    .brand{display:flex;align-items:center;gap:10px}
+    .logo-img{width:28px;height:28px;border-radius:6px;object-fit:contain;background:#0e1422}
+    nav a{margin-left:16px;color:#cfd6e4}
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:22px}
+
+    h1{margin:8px 0 2px;font-size:22px}
+    p.muted{color:var(--muted);margin:2px 0 0}
+
+    /* --- 사용법 그리드 --- */
+    .howto-grid{
+      display:grid; grid-template-columns:repeat(4,1fr); gap:12px;
+    }
+    @media (max-width:1024px){ .howto-grid{ grid-template-columns:repeat(3,1fr);} }
+    @media (max-width:640px){  .howto-grid{ grid-template-columns:repeat(2,1fr);} }
+
+    .howto-item{
+      display:block; border-radius:10px; overflow:hidden; background:#0f1320;
+      aspect-ratio:4/3;  /* 타일 비율, 원하면 1 / 1.414(A4)로 변경 */
+      border:1px solid var(--border);
+    }
+    .howto-item img{
+      width:100%; height:100%; object-fit:cover; display:block;
+      image-rendering:auto; transition:transform .2s ease-out, opacity .2s ease-out; opacity:.98;
+    }
+    .howto-item:hover img{ transform:scale(1.02); opacity:1; }
+
+    footer{margin:30px auto 60px;text-align:center;color:var(--muted);font-size:14px}
+  </style>
+</head>
+<body>
+<header>
+  <div class="brand">
+    <img src="/image/mm_logo2.jpg" alt="Measure Master" class="logo-img" />
+    <strong>Measure Master</strong>
+  </div>
+  <nav>
+    <a href="/">홈</a>
+    <a href="/howtouse.html">사용법</a>
+    <a href="/reviews.html">사용후기</a>
+    <a href="/privacy.html">개인정보처리방침</a>
+  </nav>
+</header>
+
+<main>
+  <section class="card">
+    <h1>사용법</h1>
+    <p class="muted">총 22장 · 이미지를 탭하면 원본이 새 탭에서 열립니다.</p>
+    <div class="howto-grid">
+      <!-- 1 ~ 22 -->
+      <a class="howto-item" href="/image/howtouse/howto01.jpg" target="_blank" rel="noopener">
+        <img src="/image/howtouse/howto01.jpg" alt="사용법 1" loading="lazy">
+      </a>
+      <a class="howto-item" href="/image/howtouse/howto02.jpg" target="_blank" rel="noopener">
+        <img src="/image/howtouse/howto02.jpg" alt="사용법 2" loading="lazy">
+      </a>
+      <a class="howto-item" href="/image/howtouse/howto03.jpg" target="_blank" rel="noopener">
+        <img src="/image/howtouse/howto03.jpg" alt="사용법 3" loading="lazy">
+      </a>
+      <a class="howto-item" href="/image/howtouse/howto04.jpg" target="_blank" rel="noopener">
+        <img src="/image/howtouse/howto04.jpg" alt="사용법 4" loading="lazy">
+      </a>
+      <a class="howto-item" href="/image/howtouse/howto05.jpg" target="_blank" rel="noopener">
+        <img src="/image/howtouse/howto05.jpg" alt="사용법 5" loading="lazy">
+      </a>
+      <a class="howto-item" href="/image/howtouse/howto06.jpg" target="_blank" rel="noopener">
+        <img src="/image/howtouse/howto06.jpg" alt="사용법 6" loading="lazy">
+      </a>
+      <a class="howto-item" href="/image/howtouse/howto07.jpg" target="_blank" rel="noopener">
+        <img src="/image/howtouse/howto07.jpg" alt="사용법 7" loading="lazy">
+      </a>
+      <a class="howto-item" href="/image/howtouse/howto08.jpg" target="_blank" rel="noopener">
+        <img src="/image/howtouse/howto08.jpg" alt="사용법 8" loading="lazy">
+      </a>
+      <a class="howto-item" href="/image/howtouse/howto09.jpg" target="_blank" rel="noopener">
+        <img src="/image/howtouse/howto09.jpg" alt="사용법 9" loading="lazy">
+      </a>
+      <a class="howto-item" href="/image/howtouse/howto10.jpg" target="_blank" rel="noopener">
+        <img src="/image/howtouse/howto10.jpg" alt="사용법 10" loading="lazy">
+      </a>
+      <a class="howto-item" href="/image/howtouse/howto11.jpg" target="_blank" rel="noopener">
+        <img src="/image/howtouse/howto11.jpg" alt="사용법 11" loading="lazy">
+      </a>
+      <a class="howto-item" href="/image/howtouse/howto12.jpg" target="_blank" rel="noopener">
+        <img src="/image/howtouse/howto12.jpg" alt="사용법 12" loading="lazy">
+      </a>
+      <a class="howto-item" href="/image/howtouse/howto13.jpg" target="_blank" rel="noopener">
+        <img src="/image/howtouse/howto13.jpg" alt="사용법 13" loading="lazy">
+      </a>
+      <a class="howto-item" href="/image/howtouse/howto14.jpg" target="_blank" rel="noopener">
+        <img src="/image/howtouse/howto14.jpg" alt="사용법 14" loading="lazy">
+      </a>
+      <a class="howto-item" href="/image/howtouse/howto15.jpg" target="_blank" rel="noopener">
+        <img src="/image/howtouse/howto15.jpg" alt="사용법 15" loading="lazy">
+      </a>
+      <a class="howto-item" href="/image/howtouse/howto16.jpg" target="_blank" rel="noopener">
+        <img src="/image/howtouse/howto16.jpg" alt="사용법 16" loading="lazy">
+      </a>
+      <a class="howto-item" href="/image/howtouse/howto17.jpg" target="_blank" rel="noopener">
+        <img src="/image/howtouse/howto17.jpg" alt="사용법 17" loading="lazy">
+      </a>
+      <a class="howto-item" href="/image/howtouse/howto18.jpg" target="_blank" rel="noopener">
+        <img src="/image/howtouse/howto18.jpg" alt="사용법 18" loading="lazy">
+      </a>
+      <a class="howto-item" href="/image/howtouse/howto19.jpg" target="_blank" rel="noopener">
+        <img src="/image/howtouse/howto19.jpg" alt="사용법 19" loading="lazy">
+      </a>
+      <a class="howto-item" href="/image/howtouse/howto20.jpg" target="_blank" rel="noopener">
+        <img src="/image/howtouse/howto20.jpg" alt="사용법 20" loading="lazy">
+      </a>
+      <a class="howto-item" href="/image/howtouse/howto21.jpg" target="_blank" rel="noopener">
+        <img src="/image/howtouse/howto21.jpg" alt="사용법 21" loading="lazy">
+      </a>
+      <a class="howto-item" href="/image/howtouse/howto22.jpg" target="_blank" rel="noopener">
+        <img src="/image/howtouse/howto22.jpg" alt="사용법 22" loading="lazy">
+      </a>
+    </div>
+  </section>
+</main>
+
+<footer>
+  © <span id="year"></span> Measure Master. All rights reserved.
+</footer>
+
+<script>
+  document.getElementById('year').textContent = new Date().getFullYear();
+</script>
+</body>
+</html>
