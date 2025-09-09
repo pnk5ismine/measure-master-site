@@ -16,6 +16,7 @@
     .brand{display:flex;align-items:center;gap:10px}
     .logo-img{width:28px;height:28px;border-radius:6px;object-fit:contain;background:#0e1422}
     nav a{margin-left:16px;color:#cfd6e4}
+nav a.is-active{font-weight:700;text-decoration:underline}
     .lang{display:flex;gap:6px;align-items:center}
     .lang button{border:1px solid var(--border);background:#0f1320;color:#e7edf5;border-radius:999px;padding:6px 10px;cursor:pointer}
     .lang button.active{outline:2px solid #2dd; font-weight:600}
@@ -138,7 +139,7 @@
 <body>
 <header>
   <div class="brand">
-    <img src="/image/mm_logo_small.jpg" alt="Measure Master" class="logo-img" />
+    <img src="" alt="Measure Master" class="logo-img" />
     <strong>Measure Master</strong>
     <span class="pill" style="background:#0f1320;border:1px solid var(--border);border-radius:999px;padding:4px 8px;">v1</span>
   </div>
@@ -153,6 +154,15 @@
     <button type="button" data-lang-btn="en">🇬🇧 English</button>
   </div>
 </header>
+
+<link rel="canonical" href="https://measure-master.net/" />
+<meta property="og:title" content="Measure Master — 사진 보정 · 길이/면적 계산" />
+<meta property="og:description" content="A4 같이 각 길이를 아는 기준 직사각형으로 투시 보정 후 길이/면적을 계산하는 Measure Master 앱" />
+<meta property="og:url" content="https://measure-master.net/" />
+<meta property="og:type" content="website" />
+<meta property="og:image" content="/images/og-image.jpg" />
+<meta name="twitter:card" content="summary_large_image" />
+<link rel="icon" href="/favicon.ico" />
 
 <main>
   <div class="layout">
@@ -170,9 +180,9 @@
 
       <!-- 가로 사진 3장 -->
       <div class="hero-photos">
-        <img src="/image/mm_photo1.jpg" alt="샘플1">
-        <img src="/image/mm_photo2.jpg" alt="샘플2">
-        <img src="/image/mm_photo3.jpg" alt="샘플3">
+        <img src="/images/mm_photo1.jpg" alt="샘플1">
+        <img src="/images/mm_photo2.jpg" alt="샘플2">
+        <img src="/imagess/mm_photo3.jpg" alt="샘플3">
       </div>
     </section>
   
@@ -182,6 +192,12 @@
         <h3 style="margin:0">회원가입 · 로그인</h3>
         <span id="auth-status" class="muted" style="margin-left:auto">로그아웃 상태</span>
       </div>
+
+<div class="auth-head">
+  <h3 style="margin:0">회원가입 · 로그인</h3>
+  <span id="auth-status" class="muted" style="margin-left:auto">로그아웃 상태</span>
+  <button id="logout-top" style="margin-left:8px;display:none">로그아웃</button>
+</div>
 
       <!-- 비로그인 상태에서만 보이는 탭 -->
       <div id="auth-tabs" class="tabbar" aria-hidden="true" hidden>
@@ -334,5 +350,132 @@
   document.getElementById('year').textContent = new Date().getFullYear();
   refreshAuthUI();
 </script>
+
+<script>
+/* ===== 언어 토글: html@lang 동기화 + 저장 ===== */
+(function(){
+  var urlLang = new URLSearchParams(location.search).get('lang');
+  var savedLang = localStorage.getItem('mm_lang');
+  var lang = (urlLang || savedLang || 'ko').toLowerCase();
+  document.documentElement.setAttribute('lang', lang);
+  if (urlLang) localStorage.setItem('mm_lang', lang);
+
+  document.querySelectorAll('[data-lang-btn]').forEach(function(btn){
+    var v = btn.getAttribute('data-lang-btn');
+    if(v === lang) btn.classList.add('active');
+    btn.addEventListener('click', function(){
+      localStorage.setItem('mm_lang', v);
+      document.documentElement.setAttribute('lang', v);
+      location.search = '?lang=' + encodeURIComponent(v); // 페이지 간 일관 유지
+    });
+  });
+})();
+
+/* ===== 네비 현재페이지 하이라이트 ===== */
+(function(){
+  var here = location.pathname.replace(/\/index\.html?$/,'/'); // /index.html -> /
+  document.querySelectorAll('nav a[href]').forEach(function(a){
+    var href = a.getAttribute('href');
+    if (!href) return;
+    // cleanUrls와 .html 혼용 모두 허용
+    var normalized = href.replace(/\/index\.html?$/,'/');
+    if (normalized === here || (here.startsWith(normalized) && normalized !== '/')) {
+      a.classList.add('is-active');
+      a.setAttribute('aria-current','page');
+    }
+  });
+})();
+
+/* ===== 이미지 지연 로딩(기본 이미지 일괄) ===== */
+(function(){
+  if (!('loading' in HTMLImageElement.prototype)) return;
+  document.querySelectorAll('img:not([loading])').forEach(function(img){
+    img.setAttribute('loading','lazy');
+    img.setAttribute('decoding','async');
+  });
+})();
+
+/* ===== Supabase: 세션 변화 자동 반영 + UI 미세개선 ===== */
+(function(){
+  const sb = window.supabase.createClient(
+    "https://snxjcbaaysgfunpsohzg.supabase.co",
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNueGpjYmFheXNnZnVucHNvaHpnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY1OTk3MzQsImV4cCI6MjA3MjE3NTczNH0.T8b9PpabXkCvwW2W57Qbr-h--JLZB6errlyP5IwsYyk"
+  );
+
+  const $ = s => document.querySelector(s);
+  const elStatus   = $("#auth-status");
+  const elTabs     = $("#auth-tabs");
+  const elTabSignup= $("#tab-signup");
+  const elTabLogin = $("#tab-login");
+  const elSignup   = $("#signup-form");
+  const elLogin    = $("#login-form");
+  const elLogout   = $("#logout-btn");   // (기존 폼 내부)
+  const elLogoutTop= $("#logout-top");   // (새로 추가된 상단 버튼)
+  const goLogin    = $("#go-login");
+
+  function showSignup(){ elTabSignup?.classList.add("active"); elTabLogin?.classList.remove("active"); if(elSignup) elSignup.hidden=false; if(elLogin) elLogin.hidden=true; }
+  function showLogin(){  elTabLogin?.classList.add("active");  elTabSignup?.classList.remove("active"); if(elLogin)  elLogin.hidden=false; if(elSignup) elSignup.hidden=true; }
+
+  elTabSignup?.addEventListener("click", showSignup);
+  elTabLogin?.addEventListener("click", showLogin);
+  goLogin?.addEventListener("click", (e)=>{ e.preventDefault(); showLogin(); });
+
+  async function refreshAuthUI(){
+    const { data:{ session } } = await sb.auth.getSession();
+    const loggedIn = !!session?.user;
+    if (loggedIn){
+      elStatus.textContent = `로그인: ${session.user.email}`;
+      if(elTabs) elTabs.hidden = true;
+      if(elSignup) elSignup.hidden = true;
+      if(elLogin)  elLogin.hidden  = true;   // ★ 로그인 상태에는 로그인 폼 숨김
+      if(elLogout) elLogout.style.display = "none";
+      if(elLogoutTop) elLogoutTop.style.display = "inline-block"; // ★ 상단 로그아웃 노출
+    } else {
+      elStatus.textContent = "로그아웃 상태";
+      if(elTabs) elTabs.hidden = false;
+      showSignup();
+      if(elLogout) elLogout.style.display = "none";
+      if(elLogoutTop) elLogoutTop.style.display = "none";
+    }
+  }
+
+  async function doLogout(){
+    await sb.auth.signOut();
+    refreshAuthUI();
+  }
+
+  elLogout?.addEventListener("click", doLogout);
+  elLogoutTop?.addEventListener("click", doLogout);
+
+  // 가입
+  $("#signup-form")?.addEventListener("submit", async(e)=>{
+    e.preventDefault();
+    const email = e.target.email.value.trim();
+    const pw1   = e.target.password.value;
+    const pw2   = e.target.password2.value;
+    if(pw1 !== pw2){ alert("비밀번호 확인이 일치하지 않습니다."); return; }
+    const { error } = await sb.auth.signUp({ email, password: pw1 });
+    alert(error ? `가입 실패: ${error.message}` : "가입 완료(이메일 인증 사용 시 메일을 확인하세요)");
+    refreshAuthUI();
+  });
+
+  // 로그인
+  $("#login-form")?.addEventListener("submit", async(e)=>{
+    e.preventDefault();
+    const email = e.target.email.value.trim();
+    const password = e.target.password.value;
+    const { error } = await sb.auth.signInWithPassword({ email, password });
+    alert(error ? `로그인 실패: ${error.message}` : "로그인 성공");
+    refreshAuthUI();
+  });
+
+  // 세션 변화 자동 반영(탭 복귀/리디렉션 대비)
+  sb.auth.onAuthStateChange((_event, _session) => { refreshAuthUI(); });
+
+  document.getElementById('year').textContent = new Date().getFullYear();
+  refreshAuthUI();
+})();
+</script>
+
 </body>
 </html>

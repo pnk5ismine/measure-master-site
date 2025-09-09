@@ -1,0 +1,117 @@
+{ "pages":
+[
+  [ { "key":"htu22_1_con","align":"TopCenter","dx":0,"dy":30,"sizeSp":30,"lineHeightSp":30,"bold":true,"textAlign":"End" },
+    { "key":"htu22_2_mul","align":"TopCenter","dx":0,"dy":390,"sizeSp":12,"lineHeightSp":12,"bold":false,"textAlign":"Center","colorHex": "#FFFF0000" },
+    { "key":"htu22_3_tos","align":"TopCenter","dx":0,"dy":470,"sizeSp":12,"lineHeightSp":14,"bold":false,"textAlign":"Center" },
+    { "key":"htu22_4_tha","align":"TopCenter","dx":0,"dy":550,"sizeSp":18,"lineHeightSp":20,"bold":true,"textAlign":"Center" }
+  ],
+  [
+    { "key":"htu01_1_col", "align":"TopCenter", "dy":30, "sizeSp":30, "lineHeightSp":30, "bold":true, "textAlign":"Center" }
+  ],
+  [
+    { "key":"htu02_1_exp", "align":"TopCenter", "dy":30, "sizeSp":30, "lineHeightSp":30, "bold":true, "textAlign":"Center" }
+  ],
+  [
+    { "key":"htu03_1_tmu", "align":"TopCenter", "dy":30, "sizeSp":30, "lineHeightSp":30, "bold":true, "textAlign":"Center" },
+
+    { "key":"htu03_2_hom", "align":"TopStart", "xPercent":0.50, "yPercent":0.32, "sizeSp":12, "lineHeightSp":13, "textAlign":"End", "maxWidthPercent":0.35 },
+    { "key":"htu03_3_mai", "align":"TopStart", "xPercent":0.48, "yPercent":0.50, "sizeSp":14, "lineHeightSp":14, "textAlign":"Start" },
+    { "key":"htu03_4_sub", "align":"TopStart", "xPercent":0.55, "yPercent":0.57, "sizeSp":12, "lineHeightSp":13, "textAlign":"Start" },
+    { "key":"htu03_5_rel", "align":"TopStart", "xPercent":0.45, "yPercent":0.62, "sizeSp":14, "lineHeightSp":14, "textAlign":"Start" },
+    { "key":"htu03_6_set", "align":"TopStart", "xPercent":0.50, "yPercent":0.72,  "sizeSp":12, "lineHeightSp":16, "textAlign":"Start"},
+    { "key":"htu03_7_sid", "align":"TopStart", "xPercent":0.50, "yPercent":0.82, "sizeSp":12, "lineHeightSp":16, "textAlign":"Start"}
+  ],
+  [
+    { "key":"htu04_1_sub", "align":"TopCenter", "dy":30, "sizeSp":30, "lineHeightSp":30, "bold":true, "textAlign":"Center" },
+    { "key":"htu04_2_sav",  "align":"TopStart", "xPercent":0.82, "yPercent":0.37, "sizeSp":12, "lineHeightSp":13, "textAlign":"End" },
+    { "key":"htu04_3_loa",  "align":"TopStart", "xPercent":0.82, "yPercent":0.43, "sizeSp":12, "lineHeightSp":13, "textAlign":"End" },
+    { "key":"htu04_4_red",  "align":"TopStart", "xPercent":0.73, "yPercent":0.51, "sizeSp":12, "lineHeightSp":13, "textAlign":"End" },
+    { "key":"htu04_5_und",  "align":"TopStart", "xPercent":0.65, "yPercent":0.58, "sizeSp":12, "lineHeightSp":13, "textAlign":"End" },
+    { "key":"htu04_6_res", "align":"TopStart", "xPercent":0.57, "yPercent":0.66, "sizeSp":12, "lineHeightSp":13, "textAlign":"End" },
+    { "key":"htu04_7_mov", "align":"TopStart", "xPercent":0.50, "yPercent":0.73, "sizeSp":12, "lineHeightSp":13, "textAlign":"End" },
+    { "key":"htu04_8_pai", "align":"TopStart", "xPercent":0.40, "yPercent":0.79, "sizeSp":12, "lineHeightSp":13, "textAlign":"End" },
+    { "key":"htu04_9_str", "align":"TopStart", "xPercent":0.35, "yPercent":0.856, "sizeSp":12, "lineHeightSp":13, "textAlign":"End" }
+  ],
+  [
+    { "key":"htu05_1_sid","align":"TopCenter","dx":0,"dy":30,"sizeSp":30,"lineHeightSp":30,"bold":true,"textAlign":"Center" },
+    { "key":"htu05_2_sho","align":"TopStart","xPercent":0.45,"yPercent":0.30,"sizeSp":12,"lineHeightSp":13,"bold":false,"textAlign":"End" },
+    { "key":"htu05_3_gri","align":"TopStart","xPercent":0.45,"yPercent":0.36,"sizeSp":12,"lineHeightSp":13,"bold":false,"textAlign":"End" },
+    { "key":"htu05_4_rot","align":"TopStart","xPercent":0.45,"yPercent":0.43,"sizeSp":12,"lineHeightSp":13,"bold":false,"textAlign":"End" },
+    { "key":"htu05_5_mov","align":"TopStart","xPercent":0.45,"yPercent":0.51,"sizeSp":12,"lineHeightSp":13,"bold":false,"textAlign":"End" },
+    { "key":"htu05_6_zmi","align":"TopStart","xPercent":0.45,"yPercent":0.56,"sizeSp":12,"lineHeightSp":13,"bold":false,"textAlign":"End" },
+    { "key":"htu05_7_zmo","align":"TopStart","xPercent":0.45,"yPercent":0.61,"sizeSp":12,"lineHeightSp":13,"bold":false,"textAlign":"End" },
+    { "key":"htu05_8_res","align":"TopStart","xPercent":0.45,"yPercent":0.66,"sizeSp":12,"lineHeightSp":13,"bold":false,"textAlign":"End" }
+  ],
+  [ { "key":"htu06_1_rec","align":"TopCenter","dx":0,"dy":30,"sizeSp":30,"lineHeightSp":30,"bold":true,"textAlign":"Center" },
+    { "key":"htu06_2_mai","align":"TopStart","xPercent":0.25,"yPercent":0.35,"sizeSp":12,"lineHeightSp":13,"bold":false,"textAlign":"End" },
+    { "key":"htu06_3_rel","align":"TopStart","xPercent":0.45,"yPercent":0.43,"sizeSp":12,"lineHeightSp":13,"bold":false,"textAlign":"End" }
+  ],
+  [ { "key":"htu07_1_str","align":"TopCenter","dx":0,"dy":30,"sizeSp":30,"lineHeightSp":30,"bold":true,"textAlign":"Center" },
+    { "key":"htu07_2_you","align":"TopCenter","dx":0,"dy":450,"sizeSp":12,"lineHeightSp":13,"bold":false,"textAlign":"Start" }
+  ],
+  [ { "key":"htu08_1_cur","align":"TopCenter","dx":0,"dy":30,"sizeSp":30,"lineHeightSp":30,"bold":true,"textAlign":"Center" },
+    { "key":"htu08_2_you","align":"TopCenter","dx":0,"dy":450,"sizeSp":12,"lineHeightSp":13,"bold":false,"textAlign":"Start" }
+  ],
+  [ { "key":"htu09_1_pai","align":"TopCenter","dx":0,"dy":30,"sizeSp":30,"lineHeightSp":30,"bold":true,"textAlign":"Center" },
+    { "key":"htu09_2_you","align":"TopCenter","dx":0,"dy":300,"sizeSp":15,"lineHeightSp":16,"bold":false,"textAlign":"Start" },
+    { "key":"htu09_3_the","align":"TopCenter","dx":0,"dy":420,"sizeSp":15,"lineHeightSp":15,"bold":false,"textAlign":"Start","colorHex":"0xFFF44336" }
+  ],
+  [ { "key":"htu10_1_mea","align":"TopCenter","dx":0,"dy":22,"sizeSp":30,"lineHeightSp":30,"bold":true,"textAlign":"Center" },
+    { "key":"htu10_2_how","align":"TopCenter","dx":0,"dy":350,"sizeSp":12,"lineHeightSp":13,"bold":false,"textAlign":"Start" }
+  ],
+  [ { "key":"htu11_1_cal","align":"TopCenter","dx":0,"dy":30,"sizeSp":30,"lineHeightSp":30,"bold":true,"textAlign":"Center" },
+    { "key":"htu11_2_how","align":"TopCenter","dx":0,"dy":390,"sizeSp":12,"lineHeightSp":13,"bold":false,"textAlign":"Start" }
+  ],
+  [ { "key":"htu12_1_acc","align":"TopCenter","dx":0,"dy":30,"sizeSp":30,"lineHeightSp":30,"bold":true,"textAlign":"Center" },
+    { "key":"htu12_2_thi","align":"TopCenter","dx":0,"dy":200,"sizeSp":14,"lineHeightSp":15,"bold":false,"textAlign":"Start" },
+    { "key":"htu12_3_wew","align":"TopCenter","dx":0,"dy":340,"sizeSp":14,"lineHeightSp":15,"bold":false,"textAlign":"Start" },
+    { "key":"htu12_4_jus","align":"TopCenter","dx":0,"dy":450,"sizeSp":14,"lineHeightSp":15,"bold":false,"textAlign":"Start" }
+  ],
+  [ { "key":"htu13_1_mea","align":"TopCenter","dx":0,"dy":30,"sizeSp":25,"lineHeightSp":30,"bold":true,"textAlign":"Center" },
+    { "key":"htu13_2_com","align":"TopCenter","dx":0,"dy":200,"sizeSp":12,"lineHeightSp":14,"bold":false,"textAlign":"Start" },
+    { "key":"htu13_3_dra","align":"TopCenter","dx":0,"dy":300,"sizeSp":12,"lineHeightSp":14,"bold":false,"textAlign":"Start" },
+    { "key":"htu13_4_you","align":"TopCenter","dx":0,"dy":400,"sizeSp":12,"lineHeightSp":14,"bold":false,"textAlign":"Start" }
+  ],
+  [ { "key":"htu14_1_set","align":"TopCenter","dx":0,"dy":30,"sizeSp":30,"lineHeightSp":30,"bold":true,"textAlign":"Center" },
+    { "key":"htu14_2_mea","align":"TopCenter","dx":0,"dy":200,"sizeSp":12,"lineHeightSp":14,"bold":false,"textAlign":"Start" },
+    { "key":"htu14_3_ent","align":"TopCenter","dx":0,"dy":290,"sizeSp":12,"lineHeightSp":14,"bold":false,"textAlign":"Start" },
+    { "key":"htu14_4_com","align":"TopCenter","dx":0,"dy":400,"sizeSp":12,"lineHeightSp":14,"bold":false,"textAlign":"Start" }
+  ],
+  [ { "key":"htu15_1_att","align":"TopCenter","dx":0,"dy":30,"sizeSp":30,"lineHeightSp":30,"bold":true,"textAlign":"Center" },
+    { "key":"htu15_2_onc","align":"TopCenter","dx":0,"dy":100,"sizeSp":15,"lineHeightSp":16,"bold":false,"textAlign":"Center" },
+    { "key":"htu15_3_tob","align":"TopCenter","dx":0,"dy":290,"sizeSp":15,"lineHeightSp":16,"bold":false,"textAlign":"Center","colorHex": "#FFFF0000" },
+    { "key":"htu15_4_the","align":"TopCenter","dx":0,"dy":410,"sizeSp":15,"lineHeightSp":16,"bold":false,"textAlign":"Center","colorHex": "#FFFF0000" }
+  ],
+  [ { "key":"htu16_1_rel","align":"TopCenter","dx":0,"dy":30,"sizeSp":30,"lineHeightSp":30,"bold":true,"textAlign":"Center" },
+    { "key":"htu16_2_wha","align":"TopCenter","dx":0,"dy":180,"sizeSp":20,"lineHeightSp":21,"bold":false,"textAlign":"Center" },
+    { "key":"htu16_3_you","align":"TopCenter","dx":0,"dy":250,"sizeSp":13,"lineHeightSp":14,"bold":false,"textAlign":"End","maxWidthPercent": 0.3 },
+    { "key":"htu16_4_mus","align":"TopCenter","dx":0,"dy":400,"sizeSp":18,"lineHeightSp":18,"bold":false,"textAlign":"Center","colorHex": "#FFFF0000"  }
+  ],
+  [ { "key":"htu17_1_loa","align":"TopCenter","dx":0,"dy":30,"sizeSp":30,"lineHeightSp":30,"bold":true,"textAlign":"Center" },
+    { "key":"htu17_2_thi","align":"TopCenter","dx":0,"dy":200,"sizeSp":18,"lineHeightSp":20,"bold":false,"textAlign":"Center","colorHex": "#FFFF0000" },
+    { "key":"htu17_3_gua","align":"TopCenter","dx":0,"dy":370,"sizeSp":13,"lineHeightSp":14,"bold":false,"textAlign":"Center","colorHex": "#FFFFD700" }
+  ],
+  [ { "key":"htu18_1_rec","align":"TopCenter","dx":0,"dy":30,"sizeSp":30,"lineHeightSp":30,"bold":true,"textAlign":"Center" },
+    { "key":"htu18_2_ima","align":"TopCenter","dx":0,"dy":90,"sizeSp":17,"lineHeightSp":19,"bold":false,"textAlign":"Center" },
+    { "key":"htu18_3_you","align":"TopCenter","dx":0,"dy":450,"sizeSp":13,"lineHeightSp":14,"bold":false,"textAlign":"Center" }
+  ],
+  [ { "key":"htu19_1_acc","align":"TopCenter","dx":0,"dy":30,"sizeSp":30,"lineHeightSp":30,"bold":true,"textAlign":"Center" },
+    { "key":"htu19_2_the","align":"TopCenter","dx":0,"dy":90,"sizeSp":14,"lineHeightSp":14,"bold":false,"textAlign":"Center" },
+    { "key":"htu19_3_dra","align":"TopCenter","dx":0,"dy":410,"sizeSp":12,"lineHeightSp":12,"bold":false,"textAlign":"Center" },
+    { "key":"htu19_4_som","align":"TopCenter","dx":0,"dy":590,"sizeSp":12,"lineHeightSp":12,"bold":false,"textAlign":"Center","colorHex": "#FFFF0000" }
+  ],
+  [ { "key":"htu20_1_con","align":"TopCenter","dx":0,"dy":30,"sizeSp":30,"lineHeightSp":30,"bold":true,"textAlign":"Center" },
+    { "key":"htu20_2_ple","align":"TopCenter","dx":0,"dy":170,"sizeSp":16,"lineHeightSp":18,"bold":false,"textAlign":"Center" },
+    { "key":"htu20_3_the","align":"TopCenter","dx":0,"dy":390,"sizeSp":12,"lineHeightSp":14,"bold":false,"textAlign":"Center" },
+    { "key":"htu20_4_you","align":"TopCenter","dx":0,"dy":470,"sizeSp":12,"lineHeightSp":14,"bold":false,"textAlign":"Center" },
+    { "key":"htu20_5_est","align":"TopCenter","dx":0,"dy":520,"sizeSp":16,"lineHeightSp":18,"bold":false,"textAlign":"Center","colorHex": "#FFFF0000" }
+  ],
+  [ { "key":"htu21_1_bas","align":"TopCenter","dx":0,"dy":30,"sizeSp":30,"lineHeightSp":30,"bold":true,"textAlign":"Center" },
+    { "key":"htu21_2_the","align":"TopCenter","dx":0,"dy":140,"sizeSp":10,"lineHeightSp":10,"bold":false,"textAlign":"Start","colorHex": "#FFFF0000" },
+    { "key":"htu21_3_1or","align":"TopCenter","dx":0,"dy":230,"sizeSp":16,"lineHeightSp":16,"bold":false,"textAlign":"Start" },
+    { "key":"htu21_4_2dr","align":"TopCenter","dx":0,"dy":305,"sizeSp":16,"lineHeightSp":16,"bold":false,"textAlign":"Start" },
+    { "key":"htu21_5_3si","align":"TopCenter","dx":0,"dy":400,"sizeSp":16,"lineHeightSp":16,"bold":false,"textAlign":"Start" },
+    { "key":"htu21_6_oth","align":"TopCenter","dx":0,"dy":515,"sizeSp":13,"lineHeightSp":13,"bold":false,"textAlign":"Center","colorHex": "#FFFF0000" }
+  ]
+]
+}
