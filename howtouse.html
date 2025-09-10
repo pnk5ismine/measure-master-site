@@ -67,21 +67,20 @@
 </footer>
 
 <script>
-  // ===== 경로(절대경로, 캐시버스터) =====
+/* ===================== howtouse: render + editor (Alt+Shift+C 지원) ===================== */
+(function(){
+  /* ---------- 기본 상수(필요시 버전 쿼리만 올려 캐시 무력화) ---------- */
   const IMG_DIR       = "/images/howtouse";
   const IMG_PREFIX    = "howtouse";
   const IMG_EXTS      = ["jpg","png","jpeg","webp"];
   const TOTAL_PAGES   = 22;
-  const OVERLAYS_JSON = "/assets/data/howtouse_overlays_pc.json?v=pc3";
-  const STRINGS_KO    = "/assets/data/strings_ko_pc.json?v=pc3";
+  const OVERLAYS_JSON = "/assets/data/howtouse_overlays_pc.json?v=pc5";
+  const STRINGS_KO    = "/assets/data/strings_ko_pc.json?v=pc5";
+  const BASE_H        = 600;  // dx/dy 기준 높이
 
-  // JS 작동 토스트
-  document.addEventListener('DOMContentLoaded',()=>{ 
-    const ping=document.createElement('div'); ping.id='ping'; ping.textContent='JS OK';
-    document.body.appendChild(ping);
-    setTimeout(()=> ping.remove(), 2500);
-  });
+  document.getElementById('year').textContent = new Date().getFullYear();
 
+  /* ---------- 유틸 ---------- */
   function showError(msg){
     let bar = document.getElementById("errbar");
     if(!bar){
@@ -93,7 +92,12 @@
     bar.textContent = msg;
     console.error("[howtouse]", msg);
   }
-
+  async function loadJson(url){
+    const res = await fetch(url, {cache:"no-store"});
+    if(!res.ok) throw new Error(`HTTP ${res.status} ${res.statusText} @ ${res.url}`);
+    try{ return await res.json(); }
+    catch(e){ throw new Error(`JSON parse error @ ${url}: ${e.message}`); }
+  }
   function parseColorHex(hex){
     if(!hex) return null;
     let s = String(hex).trim();
@@ -114,12 +118,6 @@
     if(a.includes("end"))    return "anchor-topend";
     return "anchor-topstart";
   }
-  async function loadJson(url){
-    const res = await fetch(url, {cache:"no-store"});
-    if(!res.ok) throw new Error(`HTTP ${res.status} ${res.statusText} @ ${res.url}`);
-    try{ return await res.json(); }
-    catch(e){ throw new Error(`JSON parse error @ ${url}: ${e.message}`); }
-  }
   function createImageWithFallback(num){
     const img = new Image();
     img.alt = `사용법 ${num}`;
@@ -136,6 +134,8 @@
     img.src = `${base}.${IMG_EXTS[i++]}`;
     return img;
   }
+
+  /* ---------- 오버레이 렌더 ---------- */
   function layoutLabels($item, labels){
     let $overlay = $item.querySelector(".overlay");
     if(!$overlay){ $overlay = document.createElement("div"); $overlay.className="overlay"; $item.appendChild($overlay); }
@@ -144,7 +144,7 @@
     $overlay.innerHTML = "";
     const rect = $item.getBoundingClientRect();
     const W = rect.width, H = rect.height;
-    const BASE_H = 600, scale = H/BASE_H;
+    const scale = H/BASE_H;
 
     labels.forEach(cfg=>{
       const el = document.createElement("div");
@@ -181,18 +181,18 @@
     return map;
   }
 
+  /* ---------- 초기화: JSON 로드 → 그리드 생성 ---------- */
+  let overlayData=null, map=null;
   (async function init(){
-    document.getElementById('year').textContent = new Date().getFullYear();
-
-    // JSON 로드
-    let overlaysData=null, stringsKo=null;
-    try{ overlaysData = await loadJson(OVERLAYS_JSON); }
-    catch(e){ showError(e.message); return; }
-    try{ stringsKo = await loadJson(STRINGS_KO); }
-    catch(e){ showError(e.message); /* 문자열 실패해도 key로 진행 */ }
-
-    window.__STRINGS = stringsKo || {};
-    const map = overlaysData?.pages ? buildOverlayMap(overlaysData.pages) : null;
+    try{
+      const [ov, ko] = await Promise.all([loadJson(OVERLAYS_JSON), loadJson(STRINGS_KO).catch(()=>null)]);
+      overlayData = ov;
+      map = buildOverlayMap(ov.pages);
+      window.__STRINGS = ko || {};
+    }catch(e){
+      showError(e.message);
+      return;
+    }
     if(!map){ showError("오버레이 데이터 형식 오류: pages 배열이 없습니다."); return; }
 
     const grid = document.getElementById("howtoGrid");
@@ -222,211 +222,225 @@
       }
     }
   })();
-</script>
 
-<script>
-/* ===== Overlay Editor (enable with ?edit=1) ===== */
-(function(){
-  const params = new URLSearchParams(location.search);
-  if (params.get('edit') !== '1') return;
+  /* ================================== 편집 모드 (?edit=1) ================================== */
+  (function editor(){
+    const params = new URLSearchParams(location.search);
+    if (params.get('edit') !== '1') return;
 
-  // 편집 모드용 CSS: 라벨 클릭 허용 + 시각 피드백
-  document.body.classList.add('edit-mode');
-  const style = document.createElement('style');
-  style.textContent = `
-    .edit-mode .overlay { pointer-events: auto; }
-    .edit-mode .olabel  { cursor: pointer; outline: 1px dashed rgba(0,0,0,.35); }
-    .edit-mode .olabel:hover { outline: 2px solid #5eead4; }
-  `;
-  document.head.appendChild(style);
+    // 편집 모드용 CSS: 라벨 클릭 허용 + 시각 피드백
+    document.body.classList.add('edit-mode');
+    const style = document.createElement('style');
+    style.textContent = [
+      '.edit-mode .overlay{pointer-events:auto}',
+      '.edit-mode .olabel{cursor:pointer;outline:1px dashed rgba(0,0,0,.35)}',
+      '.edit-mode .olabel:hover{outline:2px solid #5eead4}'
+    ].join('');
+    document.head.appendChild(style);
 
-  // 카드 <a> 클릭 시 원본 이미지로 넘어가지 않도록 차단 (편집 모드 한정)
-  document.addEventListener('click', (e)=>{
-    const a = e.target.closest('.howtouse-item');
-    if (a) { e.preventDefault(); e.stopPropagation(); }
-  }, true);
+    // 카드 <a> 클릭으로 원본 이미지로 이동하는 동작 차단
+    document.addEventListener('click', (e)=>{
+      const a = e.target.closest('.howtouse-item');
+      if (a) { e.preventDefault(); e.stopPropagation(); }
+    }, true);
 
-  // 설정(페이지에 쓰신 경로와 동일하게)
-  const OVERLAYS_JSON = "/assets/data/howtouse_overlays_pc.json?v=pc3";
-  const BASE_H = 600;
+    // HUD
+    const hud = document.createElement('div');
+    hud.style.cssText = "position:fixed;top:8px;right:8px;z-index:99999;background:#0b0d12dd;color:#fff;border:1px solid #1e2230;padding:10px 12px;border-radius:10px;font:12px/1.4 system-ui;max-width:40ch";
+    hud.innerHTML = '' +
+      '<div style="font-weight:700;margin-bottom:6px">Overlay Editor</div>' +
+      '<div id="ed-info" style="white-space:pre-wrap;margin-bottom:8px"></div>' +
+      '<div style="display:flex;gap:6px;flex-wrap:wrap">' +
+      '  <button id="btn-copy-one"  style="cursor:pointer;padding:6px 8px;border-radius:8px;border:1px solid #1e2230;background:#121622;color:#fff">선택 라벨 복사 (C)</button>' +
+      '  <button id="btn-copy-page" style="cursor:pointer;padding:6px 8px;border-radius:8px;border:1px solid #1e2230;background:#121622;color:#fff">이 페이지 복사 (Shift+C)</button>' +
+      '  <button id="btn-copy-all"  style="cursor:pointer;padding:6px 8px;border-radius:8px;border:1px solid #1e2230;background:#121622;color:#fff">전체 복사 (Alt+Shift+C)</button>' +
+      '</div>';
+    document.body.appendChild(hud);
+    const info = hud.querySelector('#ed-info');
 
-  // HUD
-  const hud = document.createElement('div');
-  hud.style.cssText = "position:fixed;top:8px;right:8px;z-index:99999;background:#0b0d12dd;color:#fff;border:1px solid #1e2230;padding:10px 12px;border-radius:10px;font:12px/1.4 system-ui;max-width:36ch";
-  hud.innerHTML = `<div style="font-weight:700;margin-bottom:6px">Overlay Editor</div>
-  <div id="ed-info" style="white-space:pre-wrap"></div>
-  <div style="margin-top:6px;opacity:.85">
-    ↑↓←→: 1px 이동 (Shift=5px)<br/>
-    +/-: 글자크기, ;/' : 줄간격, [ ]: 폭%<br/>
-    C: JSON 복사
-  </div>`;
-  document.body.appendChild(hud);
-  const info = hud.querySelector('#ed-info');
+    let selected = null; // {el, cfg, pageNum, card, uses:'percent'|'offset'}
 
-  // 오버레이 데이터 로드 → 페이지번호별 매핑
-  let map = {};
-  fetch(OVERLAYS_JSON, {cache:'no-store'}).then(r=>r.json()).then(data=>{
-    (data.pages||[]).forEach(group=>{
-      const any = group.find(it=>/^htu(\d{2})_/.test(it.key));
-      if (any) {
-        const num = any.key.match(/^htu(\d{2})_/)[1];
-        map[num] = group;
+    // 라벨 클릭 → 선택
+    document.addEventListener('click', e=>{
+      const label = e.target.closest('.olabel');
+      if (!label) return;
+
+      document.querySelectorAll('.olabel').forEach(n=>n.style.outline='1px dashed rgba(0,0,0,.35)');
+      label.style.outline = '2px solid #5eead4';
+
+      const card = label.closest('.howtouse-item');
+      const a = card?.tagName==='A' ? card : card?.closest('a');
+      let pageNum = null;
+      if (a?.href) {
+        const m = a.href.match(/howtouse(\d{2})\./);
+        if (m) pageNum = m[1];
       }
-    });
-  });
-
-  let selected = null; // {el, cfg, pageNum, card, uses:'percent'|'offset'}
-
-  // 라벨 클릭→선택
-  document.addEventListener('click', e=>{
-    const label = e.target.closest('.olabel');
-    if (!label) return;
-
-    document.querySelectorAll('.olabel').forEach(n=>n.style.outline='1px dashed rgba(0,0,0,.35)');
-    label.style.outline = '2px solid #5eead4';
-
-    const card = label.closest('.howtouse-item');
-    const a = card?.tagName==='A' ? card : card?.closest('a');
-    let pageNum = null;
-    if (a?.href) {
-      const m = a.href.match(/howtouse(\d{2})\./);
-      if (m) pageNum = m[1];
-    }
-    if (!pageNum) {
-      const m2 = card?.querySelector('img')?.alt?.match(/(\d{2})/);
-      if (m2) pageNum = m2[1];
-    }
-    if (!pageNum || !map[pageNum]) { info.textContent = '이 카드의 오버레이 그룹을 찾지 못했습니다.'; return; }
-
-    // 가장 가까운 cfg 선택(현재 화면 좌표 기준)
-    const rect = card.getBoundingClientRect();
-    const W=rect.width, H=rect.height;
-    const left = parseFloat(label.style.left)||0;
-    const top  = parseFloat(label.style.top)||0;
-
-    let best=null, bestDist=Infinity;
-    for(const cfg of map[pageNum]){
-      let cx, cy;
-      if (typeof cfg.xPercent==='number' && typeof cfg.yPercent==='number') {
-        cx = cfg.xPercent*W; cy = cfg.yPercent*H;
-      } else {
-        const a = String(cfg.align||'').toLowerCase();
-        const base = a.includes('center') ? W/2 : a.includes('end') ? W : 0;
-        const scale = H/BASE_H;
-        cx = base + (cfg.dx||0)*scale;
-        cy = (cfg.dy||0)*scale;
+      if (!pageNum) {
+        const m2 = card?.querySelector('img')?.alt?.match(/(\d{2})/);
+        if (m2) pageNum = m2[1];
       }
-      const d = Math.hypot(left-cx, top-cy);
-      if (d<bestDist){ bestDist=d; best=cfg; }
-    }
+      if (!pageNum || !map?.[pageNum]) { info.textContent = '이 카드의 오버레이 그룹을 찾지 못했습니다.'; return; }
 
-    if (!best){ info.textContent = '라벨 cfg를 찾지 못했습니다.'; return; }
+      // 화면 좌표에 가장 가까운 cfg 선택
+      const rect = card.getBoundingClientRect();
+      const W=rect.width, H=rect.height;
+      const left = parseFloat(label.style.left)||0;
+      const top  = parseFloat(label.style.top)||0;
 
-    selected = {
-      el: label,
-      cfg: best,
-      pageNum,
-      card,
-      uses: (typeof best.xPercent==='number' && typeof best.yPercent==='number') ? 'percent' : 'offset'
-    };
-    updateHUD();
-  }, true);
+      let best=null, bestDist=Infinity;
+      for(const cfg of map[pageNum]){
+        let cx, cy;
+        if (typeof cfg.xPercent==='number' && typeof cfg.yPercent==='number') {
+          cx = cfg.xPercent*W; cy = cfg.yPercent*H;
+        } else {
+          const al = String(cfg.align||'').toLowerCase();
+          const base = al.includes('center') ? W/2 : al.includes('end') ? W : 0;
+          const scale = H/BASE_H;
+          cx = base + (cfg.dx||0)*scale;
+          cy = (cfg.dy||0)*scale;
+        }
+        const d = Math.hypot(left-cx, top-cy);
+        if (d<bestDist){ bestDist=d; best=cfg; }
+      }
 
-  function updateHUD(){
-    if (!selected){ info.textContent = '라벨을 클릭해서 선택하세요.'; return; }
-    const {cfg, pageNum, uses} = selected;
-    const snippet = jsonSnippet(cfg, uses);
-    info.textContent =
+      if (!best){ info.textContent = '라벨 cfg를 찾지 못했습니다.'; return; }
+
+      selected = {
+        el: label,
+        cfg: best,
+        pageNum,
+        card,
+        uses: (typeof best.xPercent==='number' && typeof best.yPercent==='number') ? 'percent' : 'offset'
+      };
+      updateHUD();
+    }, true);
+
+    function updateHUD(){
+      if (!selected){ info.textContent = '라벨을 클릭해서 선택하세요.'; return; }
+      const {cfg, pageNum, uses} = selected;
+      info.textContent =
 `page: ${pageNum}
 key : ${cfg.key}
 mode: ${uses==='percent' ? 'xPercent/yPercent' : 'dx/dy'}
 size: ${cfg.sizeSp ?? '(default)'}  line: ${cfg.lineHeightSp ?? '(default)'}
 maxW: ${cfg.maxWidthPercent ?? '(none)'}  align: ${cfg.align ?? 'TopStart'}
 
-JSON:
-${snippet}`;
-  }
-
-  function jsonSnippet(cfg, uses){
-    const base = {
-      key: cfg.key,
-      align: cfg.align || 'TopStart',
-      sizeSp: cfg.sizeSp,
-      lineHeightSp: cfg.lineHeightSp,
-      bold: !!cfg.bold,
-      textAlign: cfg.textAlign || 'Start',
-      maxWidthPercent: cfg.maxWidthPercent
-    };
-    if (uses==='percent'){
-      base.xPercent = +(cfg.xPercent??0).toFixed(4);
-      base.yPercent = +(cfg.yPercent??0).toFixed(4);
-    } else {
-      base.dx = Math.round(cfg.dx||0);
-      base.dy = Math.round(cfg.dy||0);
+C = 선택 라벨 JSON 복사
+Shift+C = 현재 페이지 그룹 복사
+Alt+Shift+C = 전체 pages 복사`;
     }
-    return JSON.stringify(base, null, 2);
-  }
 
-  // 키보드 조정
-  document.addEventListener('keydown', (e)=>{
-    if (!selected) return;
-    const step = e.shiftKey ? 5 : 1;
-    const {el, card, cfg, uses} = selected;
-    const rect = card.getBoundingClientRect();
-    const W=rect.width, H=rect.height, scale=H/BASE_H;
+    function cleanCfg(cfg){
+      const out = { key: cfg.key, align: cfg.align||'TopStart', textAlign: cfg.textAlign||'Start', bold: !!cfg.bold };
+      if (typeof cfg.sizeSp==='number') out.sizeSp = Math.round(cfg.sizeSp);
+      if (typeof cfg.lineHeightSp==='number') out.lineHeightSp = Math.round(cfg.lineHeightSp);
+      if (typeof cfg.maxWidthPercent==='number') out.maxWidthPercent = +cfg.maxWidthPercent.toFixed(4);
+      if (cfg.colorHex) out.colorHex = cfg.colorHex;
 
-    let dirty=false;
-
-    // 이동
-    if (['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(e.key)){
-      e.preventDefault();
-      const dxp = e.key==='ArrowLeft'?-step : e.key==='ArrowRight'?step : 0;
-      const dyp = e.key==='ArrowUp'  ?-step : e.key==='ArrowDown'?step : 0;
-      if (uses==='percent'){
-        cfg.xPercent = (cfg.xPercent||0) + dxp/W;
-        cfg.yPercent = (cfg.yPercent||0) + dyp/H;
-        el.style.left = `${cfg.xPercent*100}%`;
-        el.style.top  = `${cfg.yPercent*100}%`;
+      if (typeof cfg.xPercent==='number' && typeof cfg.yPercent==='number'){
+        out.xPercent = +cfg.xPercent.toFixed(4);
+        out.yPercent = +cfg.yPercent.toFixed(4);
       } else {
-        cfg.dx = Math.round((cfg.dx||0) + dxp/scale);
-        cfg.dy = Math.round((cfg.dy||0) + dyp/scale);
-        const a = String(cfg.align||'').toLowerCase();
-        const base = a.includes('center') ? W/2 : a.includes('end') ? W : 0;
-        el.style.left = `${base + (cfg.dx||0)*scale}px`;
-        el.style.top  = `${(cfg.dy||0)*scale}px`;
+        out.dx = Math.round(cfg.dx || 0);
+        out.dy = Math.round(cfg.dy || 0);
       }
-      dirty=true;
+      return out;
+    }
+    function snippetOne(cfg){ return JSON.stringify(cleanCfg(cfg), null, 2); }
+    function snippetPage(num){
+      const group = map?.[num]; if(!group) return null;
+      return JSON.stringify(group.map(cleanCfg), null, 2);
+    }
+    function snippetAll(){
+      if (!overlayData?.pages) return null;
+      const pages = overlayData.pages.map(group => group.map(cleanCfg));
+      return JSON.stringify({ pages }, null, 2);
+    }
+    function copy(txt, label){
+      return navigator.clipboard.writeText(txt).then(()=>{
+        info.textContent = `✔ ${label} 복사됨\n\n${txt.slice(0,500)}${txt.length>500?'…':''}`;
+      });
     }
 
-    // 글자 크기
-    if (e.key==='+' || e.key==='='){ cfg.sizeSp=(cfg.sizeSp||12)+1; el.style.fontSize=`${cfg.sizeSp}px`; dirty=true; }
-    if (e.key==='-'){ cfg.sizeSp=(cfg.sizeSp||12)-1; el.style.fontSize=`${cfg.sizeSp}px`; dirty=true; }
+    // 키보드: 이동/크기/폭% + 복사(C, Shift+C, Alt+Shift+C)
+    document.addEventListener('keydown', (e)=>{
+      if (!selected) {
+        // 복사 핫키는 선택 없어도 전체 복사만 허용
+        if (e.key.toLowerCase()==='c' && e.altKey && e.shiftKey && !e.ctrlKey && !e.metaKey){
+          const all = snippetAll(); if (all){ e.preventDefault(); copy(all, '전체 pages'); }
+        }
+        return;
+      }
+      const step = e.shiftKey ? 5 : 1;
+      const {el, card, cfg, uses} = selected;
+      const rect = card.getBoundingClientRect();
+      const W=rect.width, H=rect.height, scale=H/BASE_H;
 
-    // 줄 간격 ; / '
-    if (e.key===';'){ cfg.lineHeightSp=(cfg.lineHeightSp||(cfg.sizeSp||12))-1; el.style.lineHeight=`${cfg.lineHeightSp}px`; dirty=true; }
-    if (e.key==="'"){ cfg.lineHeightSp=(cfg.lineHeightSp||(cfg.sizeSp||12))+1; el.style.lineHeight=`${cfg.lineHeightSp}px`; dirty=true; }
+      let dirty=false, k=e.key;
 
-    // maxWidthPercent [ / ]
-    if (e.key==='['){ cfg.maxWidthPercent=Math.max(0, +(cfg.maxWidthPercent||0)-0.01); el.style.maxWidth=`${cfg.maxWidthPercent*W}px`; dirty=true; }
-    if (e.key===']'){ cfg.maxWidthPercent=Math.min(1, +(cfg.maxWidthPercent||0)+0.01); el.style.maxWidth=`${cfg.maxWidthPercent*W}px`; dirty=true; }
+      if (['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(k)){
+        e.preventDefault();
+        const dxp = k==='ArrowLeft'?-step : k==='ArrowRight'?step : 0;
+        const dyp = k==='ArrowUp'  ?-step : k==='ArrowDown'?step : 0;
+        if (uses==='percent'){
+          cfg.xPercent = (cfg.xPercent||0) + dxp/W;
+          cfg.yPercent = (cfg.yPercent||0) + dyp/H;
+          el.style.left = `${cfg.xPercent*100}%`;
+          el.style.top  = `${cfg.yPercent*100}%`;
+        } else {
+          cfg.dx = Math.round((cfg.dx||0) + dxp/scale);
+          cfg.dy = Math.round((cfg.dy||0) + dyp/scale);
+          const a = String(cfg.align||'').toLowerCase();
+          const base = a.includes('center') ? W/2 : a.includes('end') ? W : 0;
+          el.style.left = `${base + (cfg.dx||0)*scale}px`;
+          el.style.top  = `${(cfg.dy||0)*scale}px`;
+        }
+        dirty=true;
+      }
+      if (k==='+' || k==='='){ cfg.sizeSp=(cfg.sizeSp||12)+1; el.style.fontSize=`${cfg.sizeSp}px`; dirty=true; }
+      if (k==='-'){ cfg.sizeSp=(cfg.sizeSp||12)-1; el.style.fontSize=`${cfg.sizeSp}px`; dirty=true; }
+      if (k===';'){ cfg.lineHeightSp=(cfg.lineHeightSp||(cfg.sizeSp||12))-1; el.style.lineHeight=`${cfg.lineHeightSp}px`; dirty=true; }
+      if (k==="'"){ cfg.lineHeightSp=(cfg.lineHeightSp||(cfg.sizeSp||12))+1; el.style.lineHeight=`${cfg.lineHeightSp}px`; dirty=true; }
+      if (k==='['){ cfg.maxWidthPercent=Math.max(0, +(cfg.maxWidthPercent||0)-0.01); el.style.maxWidth=`${cfg.maxWidthPercent*W}px`; dirty=true; }
+      if (k===']'){ cfg.maxWidthPercent=Math.min(1, +(cfg.maxWidthPercent||0)+0.01); el.style.maxWidth=`${cfg.maxWidthPercent*W}px`; dirty=true; }
 
-    // 복사 C
-    if (e.key.toLowerCase()==='c'){
-      const js = jsonSnippet(cfg, uses);
-      navigator.clipboard.writeText(js).then(()=>{ info.textContent = `✔ JSON 복사됨\n\n${js}`; });
-      return;
-    }
+      // 복사
+      if (k.toLowerCase()==='c'){
+        const ctrl=e.ctrlKey||e.metaKey, alt=e.altKey, shift=e.shiftKey;
+        if (alt && shift && !ctrl){ // Alt+Shift+C: 전체
+          const all = snippetAll(); if (all){ e.preventDefault(); copy(all, '전체 pages'); }
+        } else if (shift && !alt && !ctrl){ // Shift+C: 페이지
+          const js = snippetPage(selected.pageNum); if(js){ e.preventDefault(); copy(js, `페이지 ${selected.pageNum}`); }
+        } else if (!alt && !shift && !ctrl){ // C: 선택 라벨
+          e.preventDefault(); copy(snippetOne(selected.cfg), '선택 라벨');
+        }
+      }
 
-    if (dirty) updateHUD();
-  });
+      if (dirty) updateHUD();
+    }, true);
 
-  // 모드 배지
-  const tag = document.createElement('div');
-  tag.textContent = 'EDIT MODE';
-  tag.style.cssText = 'position:fixed;bottom:10px;right:10px;background:#f59e0b;color:#000;padding:4px 8px;border-radius:6px;font:11px/1 system-ui;z-index:99999';
-  document.body.appendChild(tag);
+    // 버튼 핸들러
+    document.getElementById('btn-copy-one') .addEventListener('click', ()=>{
+      if (!selected) { info.textContent='먼저 라벨을 선택하세요.'; return; }
+      copy(snippetOne(selected.cfg), '선택 라벨');
+    });
+    document.getElementById('btn-copy-page').addEventListener('click', ()=>{
+      if (!selected) { info.textContent='먼저 라벨을 하나 선택(이 페이지 판별용)하세요.'; return; }
+      const js = snippetPage(selected.pageNum); if (js) copy(js, `페이지 ${selected.pageNum}`);
+    });
+    document.getElementById('btn-copy-all') .addEventListener('click', ()=>{
+      const all = snippetAll(); if (all) copy(all, '전체 pages');
+    });
+
+    // 모드 배지
+    const tag = document.createElement('div');
+    tag.textContent = 'EDIT MODE';
+    tag.style.cssText = 'position:fixed;bottom:10px;right:10px;background:#f59e0b;color:#000;padding:4px 8px;border-radius:6px;font:11px/1 system-ui;z-index:99999';
+    document.body.appendChild(tag);
+  })();
 })();
 </script>
+
 
 </body>
 </html>
