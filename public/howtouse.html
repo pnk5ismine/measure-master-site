@@ -20,49 +20,64 @@
     h1{margin:8px 0 2px;font-size:22px}
     p.muted{color:var(--muted);margin:2px 0 0}
 
-   /* --- 사용법 그리드 --- */
-   .howto-grid{
-     display:grid;
-     grid-template-columns:repeat(3,1fr); /* 🔹 3열 */
-     gap:12px;
-   }
-   @media (max-width:1024px){
-     .howto-grid{ grid-template-columns:repeat(2,1fr);} /* 태블릿 이하: 2열 */
-   }
-   @media (max-width:640px){
-     .howto-grid{ grid-template-columns:1fr;}           /* 모바일: 1열 */
-   }
+    /* --- 사용법 그리드 --- */
+    .howtouse{ margin-top:10px; }
+    .howtouse-grid{
+      display:grid;
+      grid-template-columns:repeat(3,1fr); /* 3열 */
+      gap:12px;
+    }
+    @media (max-width:1024px){
+      .howtouse-grid{ grid-template-columns:repeat(2,1fr);}
+    }
+    @media (max-width:640px){
+      .howtouse-grid{ grid-template-columns:1fr;}
+    }
 
-   .howto-item{
-     display:block;
-     border-radius:10px;
-     overflow:hidden;
-     background:#0f1320;
-     aspect-ratio:1/2;    /* 🔹 폭:높이 = 1:2 */
-     border:1px solid var(--border);
-   }
+    .howtouse-item{
+      position:relative;            /* 오버레이 기준 */
+      display:block;
+      border-radius:10px;
+      overflow:hidden;
+      background:#0f1320;
+      aspect-ratio:1/2;             /* 폭:높이 = 1:2 */
+      border:1px solid var(--border);
+    }
+    .howtouse-item img{
+      width:100%;
+      height:100%;
+      object-fit:cover;
+      display:block;
+      image-rendering:auto;
+      transition:transform .2s ease-out, opacity .2s ease-out;
+      opacity:.98;
+    }
+    .howtouse-item:hover img{ transform:scale(1.02); opacity:1; }
 
-   .howto-item img{
-     width:100%;
-     height:100%;
-     object-fit:cover;
-     display:block;
-     image-rendering:auto;
-     transition:transform .2s ease-out, opacity .2s ease-out;
-     opacity:.98;
-   }
-   .howto-item:hover img{
-     transform:scale(1.02);
-     opacity:1;
-   }
- 
+    /* 오버레이 컨테이너 (카드 위) */
+    .overlay{
+      position:absolute; inset:0;
+      pointer-events:none;          /* 클릭은 이미지/링크로 통과 */
+    }
+    /* 개별 레이블 */
+    .olabel{
+      position:absolute;
+      white-space:pre-wrap;         /* 줄바꿈 반영 */
+      text-shadow: 0 1px 2px rgba(0,0,0,.7);
+      filter: drop-shadow(0 0 2px rgba(0,0,0,.35)); /* 가독성 보강 */
+    }
+    /* 정렬 기준점 */
+    .anchor-topstart  { transform: translate(0, 0); }
+    .anchor-topcenter { transform: translate(-50%, 0); left:50%; }
+    .anchor-topend    { transform: translate(-100%, 0); }
+
     footer{margin:30px auto 60px;text-align:center;color:var(--muted);font-size:14px}
   </style>
 </head>
 <body>
 <header>
   <div class="brand">
-    <img src="/image/mm_logo2.jpg" alt="Measure Master" class="logo-img" />
+    <img src="/images/mm_logo_small.jpg" alt="Measure Master" class="logo-img" loading="eager" fetchpriority="high" />
     <strong>Measure Master</strong>
   </div>
   <nav>
@@ -74,76 +89,99 @@
 </header>
 
 <main>
-  <section class="card">
+  <section class="card howtouse">
     <h1>사용법</h1>
     <p class="muted">총 22장 · 이미지를 탭하면 원본이 새 탭에서 열립니다.</p>
-    <div class="howto-grid">
-      <!-- 1 ~ 22 -->
-      <a class="howto-item" href="/image/howtouse/howtouse01.jpg" target="_blank" rel="noopener">
-        <img src="/image/howtouse/howtouse01.jpg" alt="사용법 1" loading="lazy">
+
+    <div id="howtoGrid" class="howtouse-grid">
+      <!-- 1 ~ 22 (경로 /images 로 통일) -->
+      <a class="howtouse-item" href="/images/howtouse/howtouse01.jpg" target="_blank" rel="noopener">
+        <img src="/images/howtouse/howtouse01.jpg" alt="사용법 1" loading="lazy">
+        <div class="overlay"></div>
       </a>
-      <a class="howto-item" href="/image/howtouse/howtouse02.jpg" target="_blank" rel="noopener">
-        <img src="/image/howtouse/howtouse02.jpg" alt="사용법 2" loading="lazy">
+      <a class="howtouse-item" href="/images/howtouse/howtouse02.jpg" target="_blank" rel="noopener">
+        <img src="/images/howtouse/howtouse02.jpg" alt="사용법 2" loading="lazy">
+        <div class="overlay"></div>
       </a>
-      <a class="howto-item" href="/image/howtouse/howtouse03.jpg" target="_blank" rel="noopener">
-        <img src="/image/howtouse/howtouse03.jpg" alt="사용법 3" loading="lazy">
+      <a class="howtouse-item" href="/images/howtouse/howtouse03.jpg" target="_blank" rel="noopener">
+        <img src="/images/howtouse/howtouse03.jpg" alt="사용법 3" loading="lazy">
+        <div class="overlay"></div>
       </a>
-      <a class="howto-item" href="/image/howtouse/howtouse04.jpg" target="_blank" rel="noopener">
-        <img src="/image/howtouse/howtouse04.jpg" alt="사용법 4" loading="lazy">
+      <a class="howtouse-item" href="/images/howtouse/howtouse04.jpg" target="_blank" rel="noopener">
+        <img src="/images/howtouse/howtouse04.jpg" alt="사용법 4" loading="lazy">
+        <div class="overlay"></div>
       </a>
-      <a class="howto-item" href="/image/howtouse/howtouse05.jpg" target="_blank" rel="noopener">
-        <img src="/image/howtouse/howtouse05.jpg" alt="사용법 5" loading="lazy">
+      <a class="howtouse-item" href="/images/howtouse/howtouse05.jpg" target="_blank" rel="noopener">
+        <img src="/images/howtouse/howtouse05.jpg" alt="사용법 5" loading="lazy">
+        <div class="overlay"></div>
       </a>
-      <a class="howto-item" href="/image/howtouse/howtouse06.jpg" target="_blank" rel="noopener">
-        <img src="/image/howtouse/howtouse06.jpg" alt="사용법 6" loading="lazy">
+      <a class="howtouse-item" href="/images/howtouse/howtouse06.jpg" target="_blank" rel="noopener">
+        <img src="/images/howtouse/howtouse06.jpg" alt="사용법 6" loading="lazy">
+        <div class="overlay"></div>
       </a>
-      <a class="howto-item" href="/image/howtouse/howtouse07.jpg" target="_blank" rel="noopener">
-        <img src="/image/howtouse/howtouse07.jpg" alt="사용법 7" loading="lazy">
+      <a class="howtouse-item" href="/images/howtouse/howtouse07.jpg" target="_blank" rel="noopener">
+        <img src="/images/howtouse/howtouse07.jpg" alt="사용법 7" loading="lazy">
+        <div class="overlay"></div>
       </a>
-      <a class="howto-item" href="/image/howtouse/howtouse08.jpg" target="_blank" rel="noopener">
-        <img src="/image/howtouse/howtouse08.jpg" alt="사용법 8" loading="lazy">
+      <a class="howtouse-item" href="/images/howtouse/howtouse08.jpg" target="_blank" rel="noopener">
+        <img src="/images/howtouse/howtouse08.jpg" alt="사용법 8" loading="lazy">
+        <div class="overlay"></div>
       </a>
-      <a class="howto-item" href="/image/howtouse/howtouse09.jpg" target="_blank" rel="noopener">
-        <img src="/image/howtouse/howtouse09.jpg" alt="사용법 9" loading="lazy">
+      <a class="howtouse-item" href="/images/howtouse/howtouse09.jpg" target="_blank" rel="noopener">
+        <img src="/images/howtouse/howtouse09.jpg" alt="사용법 9" loading="lazy">
+        <div class="overlay"></div>
       </a>
-      <a class="howto-item" href="/image/howtouse/howtouse10.jpg" target="_blank" rel="noopener">
-        <img src="/image/howtouse/howtouse10.jpg" alt="사용법 10" loading="lazy">
+      <a class="howtouse-item" href="/images/howtouse/howtouse10.jpg" target="_blank" rel="noopener">
+        <img src="/images/howtouse/howtouse10.jpg" alt="사용법 10" loading="lazy">
+        <div class="overlay"></div>
       </a>
-      <a class="howto-item" href="/image/howtouse/howtouse11.jpg" target="_blank" rel="noopener">
-        <img src="/image/howtouse/howtouse11.jpg" alt="사용법 11" loading="lazy">
+      <a class="howtouse-item" href="/images/howtouse/howtouse11.jpg" target="_blank" rel="noopener">
+        <img src="/images/howtouse/howtouse11.jpg" alt="사용법 11" loading="lazy">
+        <div class="overlay"></div>
       </a>
-      <a class="howto-item" href="/image/howtouse/howtouse12.jpg" target="_blank" rel="noopener">
-        <img src="/image/howtouse/howtouse12.jpg" alt="사용법 12" loading="lazy">
+      <a class="howtouse-item" href="/images/howtouse/howtouse12.jpg" target="_blank" rel="noopener">
+        <img src="/images/howtouse/howtouse12.jpg" alt="사용법 12" loading="lazy">
+        <div class="overlay"></div>
       </a>
-      <a class="howto-item" href="/image/howtouse/howtouse13.jpg" target="_blank" rel="noopener">
-        <img src="/image/howtouse/howtouse13.jpg" alt="사용법 13" loading="lazy">
+      <a class="howtouse-item" href="/images/howtouse/howtouse13.jpg" target="_blank" rel="noopener">
+        <img src="/images/howtouse/howtouse13.jpg" alt="사용법 13" loading="lazy">
+        <div class="overlay"></div>
       </a>
-      <a class="howto-item" href="/image/howtouse/howtouse14.jpg" target="_blank" rel="noopener">
-        <img src="/image/howtouse/howtouse14.jpg" alt="사용법 14" loading="lazy">
+      <a class="howtouse-item" href="/images/howtouse/howtouse14.jpg" target="_blank" rel="noopener">
+        <img src="/images/howtouse/howtouse14.jpg" alt="사용법 14" loading="lazy">
+        <div class="overlay"></div>
       </a>
-      <a class="howto-item" href="/image/howtouse/howtouse15.jpg" target="_blank" rel="noopener">
-        <img src="/image/howtouse/howtouse15.jpg" alt="사용법 15" loading="lazy">
+      <a class="howtouse-item" href="/images/howtouse/howtouse15.jpg" target="_blank" rel="noopener">
+        <img src="/images/howtouse/howtouse15.jpg" alt="사용법 15" loading="lazy">
+        <div class="overlay"></div>
       </a>
-      <a class="howto-item" href="/image/howtouse/howtouse16.jpg" target="_blank" rel="noopener">
-        <img src="/image/howtouse/howtouse16.jpg" alt="사용법 16" loading="lazy">
+      <a class="howtouse-item" href="/images/howtouse/howtouse16.jpg" target="_blank" rel="noopener">
+        <img src="/images/howtouse/howtouse16.jpg" alt="사용법 16" loading="lazy">
+        <div class="overlay"></div>
       </a>
-      <a class="howto-item" href="/image/howtouse/howtouse17.jpg" target="_blank" rel="noopener">
-        <img src="/image/howtouse/howtouse17.jpg" alt="사용법 17" loading="lazy">
+      <a class="howtouse-item" href="/images/howtouse/howtouse17.jpg" target="_blank" rel="noopener">
+        <img src="/images/howtouse/howtouse17.jpg" alt="사용법 17" loading="lazy">
+        <div class="overlay"></div>
       </a>
-      <a class="howto-item" href="/image/howtouse/howtouse18.jpg" target="_blank" rel="noopener">
-        <img src="/image/howtouse/howtouse18.jpg" alt="사용법 18" loading="lazy">
+      <a class="howtouse-item" href="/images/howtouse/howtouse18.jpg" target="_blank" rel="noopener">
+        <img src="/images/howtouse/howtouse18.jpg" alt="사용법 18" loading="lazy">
+        <div class="overlay"></div>
       </a>
-      <a class="howto-item" href="/image/howtouse/howtouse19.jpg" target="_blank" rel="noopener">
-        <img src="/image/howtouse/howtouse19.jpg" alt="사용법 19" loading="lazy">
+      <a class="howtouse-item" href="/images/howtouse/howtouse19.jpg" target="_blank" rel="noopener">
+        <img src="/images/howtouse/howtouse19.jpg" alt="사용법 19" loading="lazy">
+        <div class="overlay"></div>
       </a>
-      <a class="howto-item" href="/image/howtouse/howtouse20.jpg" target="_blank" rel="noopener">
-        <img src="/image/howtouse/howtouse20.jpg" alt="사용법 20" loading="lazy">
+      <a class="howtouse-item" href="/images/howtouse/howtouse20.jpg" target="_blank" rel="noopener">
+        <img src="/images/howtouse/howtouse20.jpg" alt="사용법 20" loading="lazy">
+        <div class="overlay"></div>
       </a>
-      <a class="howto-item" href="/image/howtouse/howtouse21.jpg" target="_blank" rel="noopener">
-        <img src="/image/howtouse/howtouse21.jpg" alt="사용법 21" loading="lazy">
+      <a class="howtouse-item" href="/images/howtouse/howtouse21.jpg" target="_blank" rel="noopener">
+        <img src="/images/howtouse/howtouse21.jpg" alt="사용법 21" loading="lazy">
+        <div class="overlay"></div>
       </a>
-      <a class="howto-item" href="/image/howtouse/howtouse22.jpg" target="_blank" rel="noopener">
-        <img src="/image/howtouse/howtouse22.jpg" alt="사용법 22" loading="lazy">
+      <a class="howtouse-item" href="/images/howtouse/howtouse22.jpg" target="_blank" rel="noopener">
+        <img src="/images/howtouse/howtouse22.jpg" alt="사용법 22" loading="lazy">
+        <div class="overlay"></div>
       </a>
     </div>
   </section>
@@ -154,7 +192,150 @@
 </footer>
 
 <script>
-  document.getElementById('year').textContent = new Date().getFullYear();
+  // ====== 경로 설정(필요시 조정) ======
+  const OVERLAYS_JSON = "/assets/data/howtouse_overlays.json";
+  const STRINGS_KO    = "/assets/data/strings_ko.json";
+
+  // ====== 유틸: 색상(AARRGGBB/0xAARRGGBB → rgba) ======
+  function parseColorHex(hex) {
+    if (!hex) return null;
+    let s = String(hex).trim();
+    if (s.startsWith("0x")) s = s.slice(2);
+    if (s.startsWith("#"))  s = s.slice(1);
+    // 기대: AARRGGBB 또는 RRGGBB
+    if (s.length === 8) {
+      const a = parseInt(s.slice(0,2),16)/255;
+      const r = parseInt(s.slice(2,4),16);
+      const g = parseInt(s.slice(4,6),16);
+      const b = parseInt(s.slice(6,8),16);
+      return `rgba(${r},${g},${b},${a.toFixed(3)})`;
+    } else if (s.length === 6) {
+      const r = parseInt(s.slice(0,2),16);
+      const g = parseInt(s.slice(2,4),16);
+      const b = parseInt(s.slice(4,6),16);
+      return `rgb(${r},${g},${b})`;
+    }
+    return null;
+  }
+
+  // ====== 유틸: 앵커 클래스 ======
+  function anchorClass(align) {
+    const a = (align||"TopStart").toLowerCase();
+    if (a.includes("center")) return "anchor-topcenter";
+    if (a.includes("end"))    return "anchor-topend";
+    return "anchor-topstart";
+  }
+
+  // ====== 레이아웃: dx/dy를 비율로 스케일(기준 높이 600) ======
+  function layoutLabels($item, labels) {
+    const $overlay = $item.querySelector(".overlay");
+    if (!$overlay || !labels?.length) return;
+
+    // 초기화
+    $overlay.innerHTML = "";
+
+    const rect = $item.getBoundingClientRect();
+    const W = rect.width, H = rect.height;
+    const BASE_H = 600;                 // 설계 기준(주신 dy 값 스케일 가정)
+    const scale = H / BASE_H;
+
+    labels.forEach(cfg => {
+      const $label = document.createElement("div");
+      $label.className = "olabel " + anchorClass(cfg.align);
+
+      // 텍스트 바인딩
+      const text = window.__STRINGS?.[cfg.key] || cfg.key;
+      $label.textContent = text;
+
+      // 공통 스타일
+      $label.style.fontWeight = (cfg.bold ? "700" : "400");
+      if (cfg.sizeSp)       $label.style.fontSize   = `${cfg.sizeSp}px`;
+      if (cfg.lineHeightSp) $label.style.lineHeight = `${cfg.lineHeightSp}px`;
+      if (cfg.textAlign)    $label.style.textAlign  = ({"Center":"center","End":"right","Start":"left"}[cfg.textAlign] || "left");
+      const col = parseColorHex(cfg.colorHex);
+      if (col) $label.style.color = col;
+
+      // 최대 폭 (컨테이너 폭 비율)
+      if (cfg.maxWidthPercent) $label.style.maxWidth = `${(cfg.maxWidthPercent*W)}px`;
+
+      // 위치 계산: xPercent/yPercent 우선, 아니면 dx/dy 스케일
+      if (typeof cfg.xPercent === "number" && typeof cfg.yPercent === "number") {
+        $label.style.left = `${cfg.xPercent*100}%`;
+        $label.style.top  = `${cfg.yPercent*100}%`;
+      } else {
+        // 기준 앵커: TopStart(좌상), TopCenter(중앙상), TopEnd(우상)
+        const dx = (cfg.dx||0) * scale;
+        const dy = (cfg.dy||0) * scale;
+
+        // 기본 좌표
+        let leftPx = 0;
+        if (/center/i.test(cfg.align||"")) leftPx = W/2 + dx;
+        else if (/end/i.test(cfg.align||"")) leftPx = W + dx;     // 우측 기준
+        else leftPx = 0 + dx;                                     // 좌측 기준
+
+        $label.style.left = `${leftPx}px`;
+        $label.style.top  = `${dy}px`;
+      }
+
+      $overlay.appendChild($label);
+    });
+  }
+
+  // ====== 페이지 번호 → 오버레이 그룹 매핑 ======
+  function buildOverlayMap(pages){
+    const map = {};
+    (pages||[]).forEach(group=>{
+      const any = group.find(it => /^htu(\d{2})_/.test(it.key));
+      if (any) {
+        const num = any.key.match(/^htu(\d{2})_/)[1]; // "01".."22"
+        map[num] = group;
+      }
+    });
+    return map;
+  }
+
+  // ====== 메인 초기화 ======
+  (async function(){
+    document.getElementById('year').textContent = new Date().getFullYear();
+
+    // 1) JSON 로드 (문구/오버레이)
+    let overlaysData, stringsKo;
+    try {
+      overlaysData = await fetch(OVERLAYS_JSON, { cache:"no-store" }).then(r=>r.json());
+    } catch(e){ console.warn("[howtouse] overlays load failed:", e); }
+    try {
+      stringsKo = await fetch(STRINGS_KO, { cache:"no-store" }).then(r=>r.json());
+    } catch(e){ console.warn("[howtouse] strings_ko load failed:", e); }
+
+    // 전역 보관
+    window.__STRINGS = stringsKo || {};
+
+    // 2) 매핑 표 작성
+    const map = overlaysData?.pages ? buildOverlayMap(overlaysData.pages) : {};
+
+    // 3) 각 카드에 오버레이 붙이기
+    const items = Array.from(document.querySelectorAll(".howtouse-item"));
+    const ro = new ResizeObserver(entries=>{
+      // 리사이즈 시 재레이아웃
+      entries.forEach(entry=>{
+        const el = entry.target;
+        const pageNum = (el.querySelector("img")?.src || "")
+          .match(/howtouse(\d{2})\.(?:jpg|png|jpeg|webp)/i)?.[1];
+        if (!pageNum) return;
+        const labels = map[pageNum]; // 해당 페이지의 라벨 그룹
+        if (!labels) return;         // 없으면 스킵(이미지만)
+        layoutLabels(el, labels);
+      });
+    });
+
+    items.forEach(item=>{
+      // 초기도 레이아웃
+      const pageNum = (item.querySelector("img")?.src || "")
+        .match(/howtouse(\d{2})\.(?:jpg|png|jpeg|webp)/i)?.[1];
+      if (pageNum && map[pageNum]) layoutLabels(item, map[pageNum]);
+      ro.observe(item);
+    });
+  })();
 </script>
 </body>
 </html>
