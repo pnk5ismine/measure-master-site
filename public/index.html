@@ -483,6 +483,15 @@ nav a.is-active{font-weight:700;text-decoration:underline}
   refreshAuthUI();
 })();
 </script>
+<script>
+(function(){
+  if (!('loading' in HTMLImageElement.prototype)) return;
+  document.querySelectorAll('img:not([loading]):not(.no-lazy)').forEach(function(img){
+    img.setAttribute('loading','lazy');
+    img.setAttribute('decoding','async');
+  });
+})();
+</script>
 
 </body>
 </html>
