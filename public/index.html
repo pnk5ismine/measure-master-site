@@ -139,7 +139,12 @@ nav a.is-active{font-weight:700;text-decoration:underline}
 <body>
 <header>
   <div class="brand">
-    <img src="/images/mm_logo_small.jpg" alt="Measure Master" class="logo-img" />
+    <img
+  src="/images/mm_logo_small.jpg"
+  alt="Measure Master"
+  class="logo-img"
+  onerror="this.onerror=null; this.src='/image/mm_logo_small.jpg';"
+/>
     <strong>Measure Master</strong>
     <span class="pill" style="background:#0f1320;border:1px solid var(--border);border-radius:999px;padding:4px 8px;">v1</span>
   </div>
@@ -190,7 +195,7 @@ nav a.is-active{font-weight:700;text-decoration:underline}
     <section id="auth" class="card right-col">
       <div class="auth-head">
         <h3 style="margin:0">회원가입 · 로그인</h3>
-        <span id="auth-status" class="muted" style="margin-left:auto">로그아웃 상태</span>
+        <span id="auth-status" class="muted" style="margin-left:auto" hidden></span>
       </div>
 
 <div class="auth-head">
@@ -302,22 +307,28 @@ nav a.is-active{font-weight:700;text-decoration:underline}
   // UI 갱신
   async function refreshAuthUI(){
     const { data:{ session } } = await sb.auth.getSession();
-    if(session?.user){
-      elStatus.textContent = `로그인: ${session.user.email}`;
-      elTabs.hidden = true;
-      elSignup.hidden = true;
-      elLogin.hidden  = false;
-      $("#login-email").value = session.user.email || "";
-      $("#login-form button.primary").style.display = "none";
-      elLogout.style.display = "inline-block";
-    }else{
-      elStatus.textContent = "로그아웃 상태";
-      elTabs.hidden = false;
-      showSignup();                 // 기본은 가입 폼
-      $("#login-form button.primary").style.display = "";
-      elLogout.style.display = "none";
-    }
+ if (session?.user) {
+  if (elStatus) {               // ✔ 로그인 시에만 상태 노출
+    elStatus.textContent = `로그인: ${session.user.email}`;
+    elStatus.hidden = false;
   }
+  if (elTabs)   elTabs.hidden = true;
+  if (elSignup) elSignup.hidden = true;
+  if (elLogin)  elLogin.hidden  = false;
+  const loginBtn = $("#login-form button.primary");
+  if (loginBtn) loginBtn.style.display = "none";
+  if (elLogout) elLogout.style.display = "inline-block";
+} else {
+  if (elStatus) {               // ✔ 로그아웃 시 상태 문구/표시 제거
+    elStatus.textContent = "";
+    elStatus.hidden = true;
+  }
+  if (elTabs)   elTabs.hidden = false;
+  showSignup();
+  const loginBtn = $("#login-form button.primary");
+  if (loginBtn) loginBtn.style.display = "";
+  if (elLogout) elLogout.style.display = "none";
+}
 
   // 가입
   elSignup.addEventListener("submit", async(e)=>{
