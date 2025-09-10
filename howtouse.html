@@ -1,11 +1,11 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="ko">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Measure Master — 사용법</title>
+  <title>Measure Master ???ъ슜踰?/title>
   <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-  <!-- 로고 프리로드 -->
+  <!-- 濡쒓퀬 ?꾨━濡쒕뱶 -->
   <link rel="preload" as="image" href="/images/mm_logo_small.jpg" />
   <style>
     :root { --bg:#0b0d12; --card:#121622; --muted:#9aa4b2; --pri:#5eead4; --border:#1e2230; }
@@ -22,7 +22,7 @@
     h1{margin:8px 0 2px;font-size:22px}
     p.muted{color:var(--muted);margin:2px 0 0}
 
-    /* --- 그리드 --- */
+    /* --- 洹몃━??--- */
     .howtouse{ margin-top:10px; }
     .howtouse-grid{
       display:grid;
@@ -48,9 +48,9 @@
     }
     .howtouse-item:hover img{ transform:scale(1.02); opacity:1; }
 
-    /* 오버레이 */
+    /* ?ㅻ쾭?덉씠 */
     .overlay{ position:absolute; inset:0; pointer-events:none; }
-    /* 단순 스타일(검정, 음영 없음) */
+    /* ?⑥닚 ?ㅽ???寃?? ?뚯쁺 ?놁쓬) */
     .olabel{
       position:absolute; white-space:pre-wrap;
       color:#000; text-shadow:none; filter:none;
@@ -59,7 +59,7 @@
     .anchor-topcenter { transform: translate(-50%,0); left:50%; }
     .anchor-topend    { transform: translate(-100%,0); }
 
-    /* 디버그 on: 텍스트 박스 윤곽선 */
+    /* ?붾쾭洹?on: ?띿뒪??諛뺤뒪 ?ㅺ낸??*/
     .debug .olabel { outline:1px dashed rgba(0,0,0,.35); }
     footer{margin:30px auto 60px;text-align:center;color:var(--muted);font-size:14px}
   </style>
@@ -67,7 +67,7 @@
 <body>
 <header>
   <div class="brand">
-    <!-- 로고: 확장자 폴백 + 최종 SVG 폴백 -->
+    <!-- 濡쒓퀬: ?뺤옣???대갚 + 理쒖쥌 SVG ?대갚 -->
 <img
   src="/images/mm_logo_small.jpg"
   alt="Measure Master"
@@ -79,35 +79,35 @@
     <strong>Measure Master</strong>
   </div>
   <nav>
-    <a href="/">홈</a>
-    <a href="/howtouse.html">사용법</a>
-    <a href="/reviews.html">사용후기</a>
-    <a href="/privacy.html">개인정보처리방침</a>
+    <a href="/">??/a>
+    <a href="/howtouse.html">?ъ슜踰?/a>
+    <a href="/reviews.html">?ъ슜?꾧린</a>
+    <a href="/privacy.html">媛쒖씤?뺣낫泥섎━諛⑹묠</a>
   </nav>
 </header>
 
 <main>
   <section class="card howtouse">
-    <h1>사용법</h1>
-    <p class="muted">총 22장 · 이미지를 탭하면 원본이 새 탭에서 열립니다.</p>
+    <h1>?ъ슜踰?/h1>
+    <p class="muted">珥?22??쨌 ?대?吏瑜???븯硫??먮낯??????뿉???대┰?덈떎.</p>
 
     <div id="howtoGrid" class="howtouse-grid"></div>
   </section>
 </main>
 
 <footer>
-  © <span id="year"></span> Measure Master. All rights reserved.
+  짤 <span id="year"></span> Measure Master. All rights reserved.
 </footer>
 
 <script>
-  // ===== 설정: _pc.json만 사용 =====
+  // ===== ?ㅼ젙: _pc.json留??ъ슜 =====
   const IMG_DIR       = "/images/howtouse";
   const IMG_PREFIX    = "howtouse";
   const IMG_EXTS      = ["jpg","png","jpeg","webp"];
   const TOTAL_PAGES   = 22;
 
-  const OVERLAYS_JSON = "/assets/data/howtouse_overlays_pc.json";
-  const STRINGS_KO    = "/assets/data/strings_ko_pc.json";
+  const OVERLAYS_JSON = "/assets/data/howtouse_overlays_pc.json?v=pc1";
+  const STRINGS_KO    = "/assets/data/strings_ko_pc.json?v=pc1";
 
   function showError(msg){
     let bar = document.getElementById("errbar");
@@ -149,7 +149,7 @@
   }
   function createImageWithFallback(num){
     const img = new Image();
-    img.alt = `사용법 ${num}`;
+    img.alt = `?ъ슜踰?${num}`;
     img.loading = "lazy";
     const base = `${IMG_DIR}/${IMG_PREFIX}${num}`;
     let i=0;
@@ -157,7 +157,7 @@
       if(i<IMG_EXTS.length){ img.src = `${base}.${IMG_EXTS[i++]}`; }
       else{
         img.onerror = null;
-        img.src='data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="600" height="1200"><rect width="100%" height="100%" fill="%230f1320"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="black" opacity="0.4" font-size="20">이미지 없음</text></svg>';
+        img.src='data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="600" height="1200"><rect width="100%" height="100%" fill="%230f1320"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="black" opacity="0.4" font-size="20">?대?吏 ?놁쓬</text></svg>';
       }
     };
     img.src = `${base}.${IMG_EXTS[i++]}`;
@@ -213,13 +213,13 @@
 
     let overlaysData=null, stringsKo=null;
     try{ overlaysData = await loadJson(OVERLAYS_JSON); }
-    catch(e){ showError(e.message); return; } // 오버레이 못 읽으면 진행 중단
+    catch(e){ showError(e.message); return; } // ?ㅻ쾭?덉씠 紐??쎌쑝硫?吏꾪뻾 以묐떒
     try{ stringsKo = await loadJson(STRINGS_KO); }
-    catch(e){ showError(e.message); /* 문자열 실패해도 key로 진행 */ }
+    catch(e){ showError(e.message); /* 臾몄옄???ㅽ뙣?대룄 key濡?吏꾪뻾 */ }
 
     window.__STRINGS = stringsKo || {};
     const map = overlaysData?.pages ? buildOverlayMap(overlaysData.pages) : null;
-    if(!map){ showError("오버레이 데이터 형식 오류: pages 배열이 없습니다."); return; }
+    if(!map){ showError("?ㅻ쾭?덉씠 ?곗씠???뺤떇 ?ㅻ쪟: pages 諛곗뿴???놁뒿?덈떎."); return; }
 
     const grid = document.getElementById("howtoGrid");
     grid.innerHTML = "";
@@ -241,7 +241,7 @@
         const warn = document.createElement("div");
         warn.className = "olabel anchor-topcenter";
         warn.style.cssText="left:50%;top:10px;font-size:14px;color:#d00";
-        warn.textContent = `⚠ 오버레이 없음 (htu${num}_* 키 확인)`;
+        warn.textContent = `???ㅻ쾭?덉씠 ?놁쓬 (htu${num}_* ???뺤씤)`;
         ol.appendChild(warn);
       }else{
         layoutLabels(a, labels);
@@ -252,3 +252,4 @@
 </script>
 </body>
 </html>
+
