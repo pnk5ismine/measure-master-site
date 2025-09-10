@@ -20,57 +20,45 @@
     h1{margin:8px 0 2px;font-size:22px}
     p.muted{color:var(--muted);margin:2px 0 0}
 
-    /* --- 사용법 그리드 --- */
+    /* --- 그리드 --- */
     .howtouse{ margin-top:10px; }
     .howtouse-grid{
       display:grid;
-      grid-template-columns:repeat(3,1fr); /* 3열 */
+      grid-template-columns:repeat(3,1fr);
       gap:12px;
     }
-    @media (max-width:1024px){
-      .howtouse-grid{ grid-template-columns:repeat(2,1fr);}
-    }
-    @media (max-width:640px){
-      .howtouse-grid{ grid-template-columns:1fr;}
-    }
+    @media (max-width:1024px){ .howtouse-grid{ grid-template-columns:repeat(2,1fr);} }
+    @media (max-width:640px){  .howtouse-grid{ grid-template-columns:1fr;} }
 
     .howtouse-item{
-      position:relative;            /* 오버레이 기준 */
+      position:relative;
       display:block;
       border-radius:10px;
       overflow:hidden;
       background:#0f1320;
-      aspect-ratio:1/2;             /* 폭:높이 = 1:2 */
+      aspect-ratio:1/2;
       border:1px solid var(--border);
     }
     .howtouse-item img{
-      width:100%;
-      height:100%;
-      object-fit:cover;
-      display:block;
-      image-rendering:auto;
-      transition:transform .2s ease-out, opacity .2s ease-out;
-      opacity:.98;
+      width:100%; height:100%;
+      object-fit:cover; display:block; image-rendering:auto;
+      transition:transform .2s ease-out, opacity .2s ease-out; opacity:.98;
     }
     .howtouse-item:hover img{ transform:scale(1.02); opacity:1; }
 
-    /* 오버레이 컨테이너 (카드 위) */
-    .overlay{
-      position:absolute; inset:0;
-      pointer-events:none;          /* 클릭은 이미지/링크로 통과 */
-    }
-    /* 개별 레이블 */
+    /* 오버레이 */
+    .overlay{ position:absolute; inset:0; pointer-events:none; }
     .olabel{
-      position:absolute;
-      white-space:pre-wrap;         /* 줄바꿈 반영 */
-      text-shadow: 0 1px 2px rgba(0,0,0,.7);
-      filter: drop-shadow(0 0 2px rgba(0,0,0,.35)); /* 가독성 보강 */
+      position:absolute; white-space:pre-wrap;
+      color:#fff; text-shadow:0 1px 2px rgba(0,0,0,.7);
+      filter: drop-shadow(0 0 2px rgba(0,0,0,.35));
     }
-    /* 정렬 기준점 */
-    .anchor-topstart  { transform: translate(0, 0); }
-    .anchor-topcenter { transform: translate(-50%, 0); left:50%; }
-    .anchor-topend    { transform: translate(-100%, 0); }
+    .anchor-topstart  { transform: translate(0,0); }
+    .anchor-topcenter { transform: translate(-50%,0); left:50%; }
+    .anchor-topend    { transform: translate(-100%,0); }
 
+    /* 디버그 on: 텍스트 박스 윤곽선 */
+    .debug .olabel { outline:1px dashed rgba(255,255,255,.4); }
     footer{margin:30px auto 60px;text-align:center;color:var(--muted);font-size:14px}
   </style>
 </head>
@@ -94,95 +82,8 @@
     <p class="muted">총 22장 · 이미지를 탭하면 원본이 새 탭에서 열립니다.</p>
 
     <div id="howtoGrid" class="howtouse-grid">
-      <!-- 1 ~ 22 (경로 /images 로 통일) -->
-      <a class="howtouse-item" href="/images/howtouse/howtouse01.jpg" target="_blank" rel="noopener">
-        <img src="/images/howtouse/howtouse01.jpg" alt="사용법 1" loading="lazy">
-        <div class="overlay"></div>
-      </a>
-      <a class="howtouse-item" href="/images/howtouse/howtouse02.jpg" target="_blank" rel="noopener">
-        <img src="/images/howtouse/howtouse02.jpg" alt="사용법 2" loading="lazy">
-        <div class="overlay"></div>
-      </a>
-      <a class="howtouse-item" href="/images/howtouse/howtouse03.jpg" target="_blank" rel="noopener">
-        <img src="/images/howtouse/howtouse03.jpg" alt="사용법 3" loading="lazy">
-        <div class="overlay"></div>
-      </a>
-      <a class="howtouse-item" href="/images/howtouse/howtouse04.jpg" target="_blank" rel="noopener">
-        <img src="/images/howtouse/howtouse04.jpg" alt="사용법 4" loading="lazy">
-        <div class="overlay"></div>
-      </a>
-      <a class="howtouse-item" href="/images/howtouse/howtouse05.jpg" target="_blank" rel="noopener">
-        <img src="/images/howtouse/howtouse05.jpg" alt="사용법 5" loading="lazy">
-        <div class="overlay"></div>
-      </a>
-      <a class="howtouse-item" href="/images/howtouse/howtouse06.jpg" target="_blank" rel="noopener">
-        <img src="/images/howtouse/howtouse06.jpg" alt="사용법 6" loading="lazy">
-        <div class="overlay"></div>
-      </a>
-      <a class="howtouse-item" href="/images/howtouse/howtouse07.jpg" target="_blank" rel="noopener">
-        <img src="/images/howtouse/howtouse07.jpg" alt="사용법 7" loading="lazy">
-        <div class="overlay"></div>
-      </a>
-      <a class="howtouse-item" href="/images/howtouse/howtouse08.jpg" target="_blank" rel="noopener">
-        <img src="/images/howtouse/howtouse08.jpg" alt="사용법 8" loading="lazy">
-        <div class="overlay"></div>
-      </a>
-      <a class="howtouse-item" href="/images/howtouse/howtouse09.jpg" target="_blank" rel="noopener">
-        <img src="/images/howtouse/howtouse09.jpg" alt="사용법 9" loading="lazy">
-        <div class="overlay"></div>
-      </a>
-      <a class="howtouse-item" href="/images/howtouse/howtouse10.jpg" target="_blank" rel="noopener">
-        <img src="/images/howtouse/howtouse10.jpg" alt="사용법 10" loading="lazy">
-        <div class="overlay"></div>
-      </a>
-      <a class="howtouse-item" href="/images/howtouse/howtouse11.jpg" target="_blank" rel="noopener">
-        <img src="/images/howtouse/howtouse11.jpg" alt="사용법 11" loading="lazy">
-        <div class="overlay"></div>
-      </a>
-      <a class="howtouse-item" href="/images/howtouse/howtouse12.jpg" target="_blank" rel="noopener">
-        <img src="/images/howtouse/howtouse12.jpg" alt="사용법 12" loading="lazy">
-        <div class="overlay"></div>
-      </a>
-      <a class="howtouse-item" href="/images/howtouse/howtouse13.jpg" target="_blank" rel="noopener">
-        <img src="/images/howtouse/howtouse13.jpg" alt="사용법 13" loading="lazy">
-        <div class="overlay"></div>
-      </a>
-      <a class="howtouse-item" href="/images/howtouse/howtouse14.jpg" target="_blank" rel="noopener">
-        <img src="/images/howtouse/howtouse14.jpg" alt="사용법 14" loading="lazy">
-        <div class="overlay"></div>
-      </a>
-      <a class="howtouse-item" href="/images/howtouse/howtouse15.jpg" target="_blank" rel="noopener">
-        <img src="/images/howtouse/howtouse15.jpg" alt="사용법 15" loading="lazy">
-        <div class="overlay"></div>
-      </a>
-      <a class="howtouse-item" href="/images/howtouse/howtouse16.jpg" target="_blank" rel="noopener">
-        <img src="/images/howtouse/howtouse16.jpg" alt="사용법 16" loading="lazy">
-        <div class="overlay"></div>
-      </a>
-      <a class="howtouse-item" href="/images/howtouse/howtouse17.jpg" target="_blank" rel="noopener">
-        <img src="/images/howtouse/howtouse17.jpg" alt="사용법 17" loading="lazy">
-        <div class="overlay"></div>
-      </a>
-      <a class="howtouse-item" href="/images/howtouse/howtouse18.jpg" target="_blank" rel="noopener">
-        <img src="/images/howtouse/howtouse18.jpg" alt="사용법 18" loading="lazy">
-        <div class="overlay"></div>
-      </a>
-      <a class="howtouse-item" href="/images/howtouse/howtouse19.jpg" target="_blank" rel="noopener">
-        <img src="/images/howtouse/howtouse19.jpg" alt="사용법 19" loading="lazy">
-        <div class="overlay"></div>
-      </a>
-      <a class="howtouse-item" href="/images/howtouse/howtouse20.jpg" target="_blank" rel="noopener">
-        <img src="/images/howtouse/howtouse20.jpg" alt="사용법 20" loading="lazy">
-        <div class="overlay"></div>
-      </a>
-      <a class="howtouse-item" href="/images/howtouse/howtouse21.jpg" target="_blank" rel="noopener">
-        <img src="/images/howtouse/howtouse21.jpg" alt="사용법 21" loading="lazy">
-        <div class="overlay"></div>
-      </a>
-      <a class="howtouse-item" href="/images/howtouse/howtouse22.jpg" target="_blank" rel="noopener">
-        <img src="/images/howtouse/howtouse22.jpg" alt="사용법 22" loading="lazy">
-        <div class="overlay"></div>
-      </a>
+      <!-- 1 ~ 22: /images 경로로 통일 + onerror 대체 -->
+      <!-- 복붙 가속을 위해 01~22 자동 생성은 JS에서 처리합니다 -->
     </div>
   </section>
 </main>
@@ -192,23 +93,29 @@
 </footer>
 
 <script>
-  // ====== 경로 설정(필요시 조정) ======
+  document.getElementById('year').textContent = new Date().getFullYear();
+
+  // ===== 설정(필요 시 경로 조정) =====
+  const IMG_DIR       = "/images/howtouse";           // 이미지 폴더
+  const IMG_PREFIX    = "howtouse";                   // 파일 접두
+  const IMG_EXTS      = ["jpg","png","jpeg","webp"];  // 폴백 순서
+  const TOTAL_PAGES   = 22;
+
   const OVERLAYS_JSON = "/assets/data/howtouse_overlays.json";
   const STRINGS_KO    = "/assets/data/strings_ko.json";
 
-  // ====== 유틸: 색상(AARRGGBB/0xAARRGGBB → rgba) ======
+  // ===== 유틸: 색상 변환 (#AARRGGBB / 0xAARRGGBB / RRGGBB) → rgba() =====
   function parseColorHex(hex) {
     if (!hex) return null;
     let s = String(hex).trim();
     if (s.startsWith("0x")) s = s.slice(2);
     if (s.startsWith("#"))  s = s.slice(1);
-    // 기대: AARRGGBB 또는 RRGGBB
     if (s.length === 8) {
       const a = parseInt(s.slice(0,2),16)/255;
       const r = parseInt(s.slice(2,4),16);
       const g = parseInt(s.slice(4,6),16);
       const b = parseInt(s.slice(6,8),16);
-      return `rgba(${r},${g},${b},${a.toFixed(3)})`;
+      return `rgba(${r},${g},${b},${a})`;
     } else if (s.length === 6) {
       const r = parseInt(s.slice(0,2),16);
       const g = parseInt(s.slice(2,4),16);
@@ -217,71 +124,85 @@
     }
     return null;
   }
-
-  // ====== 유틸: 앵커 클래스 ======
-  function anchorClass(align) {
-    const a = (align||"TopStart").toLowerCase();
+  function anchorClass(align="TopStart"){
+    const a = align.toLowerCase();
     if (a.includes("center")) return "anchor-topcenter";
     if (a.includes("end"))    return "anchor-topend";
     return "anchor-topstart";
   }
 
-  // ====== 레이아웃: dx/dy를 비율로 스케일(기준 높이 600) ======
+  // ===== 이미지 엘리먼트 생성(+폴백) =====
+  function createImageWithFallback(pageNum) {
+    const img = new Image();
+    img.alt   = `사용법 ${pageNum}`;
+    img.loading = "lazy";
+
+    // 순차 폴백
+    const base = `${IMG_DIR}/${IMG_PREFIX}${pageNum}`;
+    let idx = 0;
+    function tryNext() {
+      if (idx >= IMG_EXTS.length) {
+        // 모든 확장자 실패 → 투명 SVG로 대체(아이콘 대신 깨끗하게)
+        img.onerror = null;
+        img.src = 'data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="600" height="1200"><rect width="100%" height="100%" fill="%230f1320"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="white" opacity="0.4" font-size="20">이미지 없음</text></svg>';
+        console.warn(`[howtouse] image not found: ${base}.[${IMG_EXTS.join(",")}]`);
+        return;
+      }
+      img.src = `${base}.${IMG_EXTS[idx++]}`;
+    }
+    img.onerror = tryNext;
+    tryNext();
+    return img;
+  }
+
+  // ===== 오버레이 배치 =====
   function layoutLabels($item, labels) {
     const $overlay = $item.querySelector(".overlay");
     if (!$overlay || !labels?.length) return;
-
-    // 초기화
     $overlay.innerHTML = "";
 
     const rect = $item.getBoundingClientRect();
     const W = rect.width, H = rect.height;
-    const BASE_H = 600;                 // 설계 기준(주신 dy 값 스케일 가정)
+    const BASE_H = 600; // dy 기준
     const scale = H / BASE_H;
 
     labels.forEach(cfg => {
       const $label = document.createElement("div");
       $label.className = "olabel " + anchorClass(cfg.align);
 
-      // 텍스트 바인딩
+      // 텍스트
       const text = window.__STRINGS?.[cfg.key] || cfg.key;
       $label.textContent = text;
 
-      // 공통 스타일
-      $label.style.fontWeight = (cfg.bold ? "700" : "400");
+      // 스타일
+      if (cfg.bold) $label.style.fontWeight = "700";
       if (cfg.sizeSp)       $label.style.fontSize   = `${cfg.sizeSp}px`;
       if (cfg.lineHeightSp) $label.style.lineHeight = `${cfg.lineHeightSp}px`;
       if (cfg.textAlign)    $label.style.textAlign  = ({"Center":"center","End":"right","Start":"left"}[cfg.textAlign] || "left");
       const col = parseColorHex(cfg.colorHex);
       if (col) $label.style.color = col;
+      if (cfg.maxWidthPercent) $label.style.maxWidth = `${cfg.maxWidthPercent*W}px`;
 
-      // 최대 폭 (컨테이너 폭 비율)
-      if (cfg.maxWidthPercent) $label.style.maxWidth = `${(cfg.maxWidthPercent*W)}px`;
-
-      // 위치 계산: xPercent/yPercent 우선, 아니면 dx/dy 스케일
+      // 위치: percent 우선, 아니면 dx/dy 스케일
       if (typeof cfg.xPercent === "number" && typeof cfg.yPercent === "number") {
         $label.style.left = `${cfg.xPercent*100}%`;
         $label.style.top  = `${cfg.yPercent*100}%`;
       } else {
-        // 기준 앵커: TopStart(좌상), TopCenter(중앙상), TopEnd(우상)
         const dx = (cfg.dx||0) * scale;
         const dy = (cfg.dy||0) * scale;
-
-        // 기본 좌표
         let leftPx = 0;
-        if (/center/i.test(cfg.align||"")) leftPx = W/2 + dx;
-        else if (/end/i.test(cfg.align||"")) leftPx = W + dx;     // 우측 기준
-        else leftPx = 0 + dx;                                     // 좌측 기준
-
+        const a = (cfg.align||"").toLowerCase();
+        if (a.includes("center")) leftPx = W/2 + dx;
+        else if (a.includes("end")) leftPx = W + dx;
+        else leftPx = dx;
         $label.style.left = `${leftPx}px`;
         $label.style.top  = `${dy}px`;
       }
-
       $overlay.appendChild($label);
     });
   }
 
-  // ====== 페이지 번호 → 오버레이 그룹 매핑 ======
+  // ===== 페이지번호 → 라벨그룹 매핑 생성 =====
   function buildOverlayMap(pages){
     const map = {};
     (pages||[]).forEach(group=>{
@@ -294,47 +215,46 @@
     return map;
   }
 
-  // ====== 메인 초기화 ======
-  (async function(){
-    document.getElementById('year').textContent = new Date().getFullYear();
+  (async function init(){
+    // 디버그 모드
+    if (new URLSearchParams(location.search).get("debug") === "1") {
+      document.body.classList.add("debug");
+    }
 
-    // 1) JSON 로드 (문구/오버레이)
-    let overlaysData, stringsKo;
-    try {
-      overlaysData = await fetch(OVERLAYS_JSON, { cache:"no-store" }).then(r=>r.json());
-    } catch(e){ console.warn("[howtouse] overlays load failed:", e); }
-    try {
-      stringsKo = await fetch(STRINGS_KO, { cache:"no-store" }).then(r=>r.json());
-    } catch(e){ console.warn("[howtouse] strings_ko load failed:", e); }
-
-    // 전역 보관
+    // JSON 로드
+    let overlaysData = null, stringsKo = null;
+    try { overlaysData = await fetch(OVERLAYS_JSON, {cache:"no-store"}).then(r=>r.json()); } catch(e){ console.warn("overlays load failed", e); }
+    try { stringsKo    = await fetch(STRINGS_KO,    {cache:"no-store"}).then(r=>r.json()); } catch(e){ console.warn("strings load failed", e); }
     window.__STRINGS = stringsKo || {};
 
-    // 2) 매핑 표 작성
     const map = overlaysData?.pages ? buildOverlayMap(overlaysData.pages) : {};
 
-    // 3) 각 카드에 오버레이 붙이기
-    const items = Array.from(document.querySelectorAll(".howtouse-item"));
-    const ro = new ResizeObserver(entries=>{
-      // 리사이즈 시 재레이아웃
-      entries.forEach(entry=>{
-        const el = entry.target;
-        const pageNum = (el.querySelector("img")?.src || "")
-          .match(/howtouse(\d{2})\.(?:jpg|png|jpeg|webp)/i)?.[1];
-        if (!pageNum) return;
-        const labels = map[pageNum]; // 해당 페이지의 라벨 그룹
-        if (!labels) return;         // 없으면 스킵(이미지만)
-        layoutLabels(el, labels);
-      });
-    });
+    // 그리드 채우기(01~22 자동 생성)
+    const grid = document.getElementById("howtoGrid");
+    for (let i=1; i<=TOTAL_PAGES; i++){
+      const num = String(i).padStart(2,"0");
+      const a = document.createElement("a");
+      a.className = "howtouse-item";
+      a.target = "_blank";
+      a.rel = "noopener";
+      a.href = `${IMG_DIR}/${IMG_PREFIX}${num}.jpg`;
 
-    items.forEach(item=>{
-      // 초기도 레이아웃
-      const pageNum = (item.querySelector("img")?.src || "")
-        .match(/howtouse(\d{2})\.(?:jpg|png|jpeg|webp)/i)?.[1];
-      if (pageNum && map[pageNum]) layoutLabels(item, map[pageNum]);
-      ro.observe(item);
-    });
+      const img = createImageWithFallback(num);
+      const ol  = document.createElement("div");
+      ol.className = "overlay";
+
+      a.appendChild(img);
+      a.appendChild(ol);
+      grid.appendChild(a);
+
+      // 최초 배치 + 리사이즈 대응
+      const labels = map[num];
+      if (labels) layoutLabels(a, labels);
+      new ResizeObserver(()=> labels && layoutLabels(a, labels)).observe(a);
+    }
+
+    // 로고 등 연도 표시 유지
+    document.getElementById('year').textContent = new Date().getFullYear();
   })();
 </script>
 </body>
