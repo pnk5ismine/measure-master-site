@@ -2,10 +2,10 @@
 <html lang="ko">
 <head>
   <meta charset="utf-8" />
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Measure Master ???ъ슜踰?/title>
+  <title>Measure Master — 사용법</title>
   <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-  <!-- 濡쒓퀬 ?꾨━濡쒕뱶 -->
   <link rel="preload" as="image" href="/images/mm_logo_small.jpg" />
   <style>
     :root { --bg:#0b0d12; --card:#121622; --muted:#9aa4b2; --pri:#5eead4; --border:#1e2230; }
@@ -18,96 +18,69 @@
     .logo-img{width:28px;height:28px;border-radius:6px;object-fit:contain;background:#0e1422}
     nav a{margin-left:16px;color:#cfd6e4}
     .card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:22px}
-
     h1{margin:8px 0 2px;font-size:22px}
     p.muted{color:var(--muted);margin:2px 0 0}
-
-    /* --- 洹몃━??--- */
     .howtouse{ margin-top:10px; }
-    .howtouse-grid{
-      display:grid;
-      grid-template-columns:repeat(3,1fr);
-      gap:12px;
-    }
+    .howtouse-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:12px; }
     @media (max-width:1024px){ .howtouse-grid{ grid-template-columns:repeat(2,1fr);} }
     @media (max-width:640px){  .howtouse-grid{ grid-template-columns:1fr;} }
-
-    .howtouse-item{
-      position:relative;
-      display:block;
-      border-radius:10px;
-      overflow:hidden;
-      background:#0f1320;
-      aspect-ratio:1/2;
-      border:1px solid var(--border);
-    }
-    .howtouse-item img{
-      width:100%; height:100%;
-      object-fit:cover; display:block; image-rendering:auto;
-      transition:transform .2s ease-out, opacity .2s ease-out; opacity:.98;
-    }
+    .howtouse-item{ position:relative; display:block; border-radius:10px; overflow:hidden; background:#0f1320; aspect-ratio:1/2; border:1px solid var(--border); }
+    .howtouse-item img{ width:100%; height:100%; object-fit:cover; display:block; image-rendering:auto; transition:transform .2s ease-out, opacity .2s ease-out; opacity:.98; }
     .howtouse-item:hover img{ transform:scale(1.02); opacity:1; }
-
-    /* ?ㅻ쾭?덉씠 */
     .overlay{ position:absolute; inset:0; pointer-events:none; }
-    /* ?⑥닚 ?ㅽ???寃?? ?뚯쁺 ?놁쓬) */
-    .olabel{
-      position:absolute; white-space:pre-wrap;
-      color:#000; text-shadow:none; filter:none;
-    }
-    .anchor-topstart  { transform: translate(0,0); }
-    .anchor-topcenter { transform: translate(-50%,0); left:50%; }
-    .anchor-topend    { transform: translate(-100%,0); }
-
-    /* ?붾쾭洹?on: ?띿뒪??諛뺤뒪 ?ㅺ낸??*/
+    .olabel{ position:absolute; white-space:pre-wrap; color:#000; text-shadow:none; filter:none; }
+    .anchor-topstart{ transform: translate(0,0); }
+    .anchor-topcenter{ transform: translate(-50%,0); left:50%; }
+    .anchor-topend{ transform: translate(-100%,0); }
     .debug .olabel { outline:1px dashed rgba(0,0,0,.35); }
     footer{margin:30px auto 60px;text-align:center;color:var(--muted);font-size:14px}
+    /* JS 작동 확인용 토스트 */
+    #ping{position:fixed;top:8px;right:8px;background:#16a34a;color:#fff;padding:6px 10px;border-radius:8px;z-index:99999;font:12px/1 system-ui}
   </style>
 </head>
 <body>
 <header>
   <div class="brand">
-    <!-- 濡쒓퀬: ?뺤옣???대갚 + 理쒖쥌 SVG ?대갚 -->
-<img
-  src="/images/mm_logo_small.jpg"
-  alt="Measure Master"
-  class="logo-img"
-  width="28" height="28"
-  loading="eager" fetchpriority="high"
-  onerror="this.onerror=null; this.src='/images/mm_logo_small.png';"
-/>
+    <img src="/images/mm_logo_small.jpg" alt="Measure Master" class="logo-img" width="28" height="28"
+         loading="eager" fetchpriority="high"
+         onerror="this.onerror=null; this.src='/images/mm_logo_small.png';" />
     <strong>Measure Master</strong>
   </div>
   <nav>
-    <a href="/">??/a>
-    <a href="/howtouse.html">?ъ슜踰?/a>
-    <a href="/reviews.html">?ъ슜?꾧린</a>
-    <a href="/privacy.html">媛쒖씤?뺣낫泥섎━諛⑹묠</a>
+    <a href="/">홈</a>
+    <a href="/howtouse.html">사용법</a>
+    <a href="/reviews.html">사용후기</a>
+    <a href="/privacy.html">개인정보처리방침</a>
   </nav>
 </header>
 
 <main>
   <section class="card howtouse">
-    <h1>?ъ슜踰?/h1>
-    <p class="muted">珥?22??쨌 ?대?吏瑜???븯硫??먮낯??????뿉???대┰?덈떎.</p>
-
+    <h1>사용법</h1>
+    <p class="muted">총 22장 · 이미지를 탭하면 원본이 새 탭에서 열립니다.</p>
     <div id="howtoGrid" class="howtouse-grid"></div>
   </section>
 </main>
 
 <footer>
-  짤 <span id="year"></span> Measure Master. All rights reserved.
+  © <span id="year"></span> Measure Master. All rights reserved.
 </footer>
 
 <script>
-  // ===== ?ㅼ젙: _pc.json留??ъ슜 =====
+  // ===== 경로(절대경로, 캐시버스터) =====
   const IMG_DIR       = "/images/howtouse";
   const IMG_PREFIX    = "howtouse";
   const IMG_EXTS      = ["jpg","png","jpeg","webp"];
   const TOTAL_PAGES   = 22;
+  const OVERLAYS_JSON = "/assets/data/howtouse_overlays_pc.json?v=pc3";
+  const STRINGS_KO    = "/assets/data/strings_ko_pc.json?v=pc3";
 
-  const OVERLAYS_JSON = "/assets/data/howtouse_overlays_pc.json?v=pc1";
-  const STRINGS_KO    = "/assets/data/strings_ko_pc.json?v=pc1";
+  // JS 작동 토스트
+  document.addEventListener('DOMContentLoaded',()=>{ 
+    const ping=document.createElement('div'); ping.id='ping'; ping.textContent='JS OK';
+    document.body.appendChild(ping);
+    setTimeout(()=> ping.remove(), 2500);
+  });
 
   function showError(msg){
     let bar = document.getElementById("errbar");
@@ -136,7 +109,7 @@
     return null;
   }
   function anchorClass(align="TopStart"){
-    const a=align.toLowerCase();
+    const a=String(align||'').toLowerCase();
     if(a.includes("center")) return "anchor-topcenter";
     if(a.includes("end"))    return "anchor-topend";
     return "anchor-topstart";
@@ -149,7 +122,7 @@
   }
   function createImageWithFallback(num){
     const img = new Image();
-    img.alt = `?ъ슜踰?${num}`;
+    img.alt = `사용법 ${num}`;
     img.loading = "lazy";
     const base = `${IMG_DIR}/${IMG_PREFIX}${num}`;
     let i=0;
@@ -157,7 +130,7 @@
       if(i<IMG_EXTS.length){ img.src = `${base}.${IMG_EXTS[i++]}`; }
       else{
         img.onerror = null;
-        img.src='data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="600" height="1200"><rect width="100%" height="100%" fill="%230f1320"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="black" opacity="0.4" font-size="20">?대?吏 ?놁쓬</text></svg>';
+        img.src='data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="600" height="1200"><rect width="100%" height="100%" fill="%230f1320"/><text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" fill="black" opacity="0.4" font-size="20">이미지 없음</text></svg>';
       }
     };
     img.src = `${base}.${IMG_EXTS[i++]}`;
@@ -211,15 +184,16 @@
   (async function init(){
     document.getElementById('year').textContent = new Date().getFullYear();
 
+    // JSON 로드
     let overlaysData=null, stringsKo=null;
     try{ overlaysData = await loadJson(OVERLAYS_JSON); }
-    catch(e){ showError(e.message); return; } // ?ㅻ쾭?덉씠 紐??쎌쑝硫?吏꾪뻾 以묐떒
+    catch(e){ showError(e.message); return; }
     try{ stringsKo = await loadJson(STRINGS_KO); }
-    catch(e){ showError(e.message); /* 臾몄옄???ㅽ뙣?대룄 key濡?吏꾪뻾 */ }
+    catch(e){ showError(e.message); /* 문자열 실패해도 key로 진행 */ }
 
     window.__STRINGS = stringsKo || {};
     const map = overlaysData?.pages ? buildOverlayMap(overlaysData.pages) : null;
-    if(!map){ showError("?ㅻ쾭?덉씠 ?곗씠???뺤떇 ?ㅻ쪟: pages 諛곗뿴???놁뒿?덈떎."); return; }
+    if(!map){ showError("오버레이 데이터 형식 오류: pages 배열이 없습니다."); return; }
 
     const grid = document.getElementById("howtoGrid");
     grid.innerHTML = "";
@@ -232,7 +206,6 @@
 
       const img = createImageWithFallback(num);
       a.appendChild(img);
-
       const ol  = document.createElement("div"); ol.className="overlay"; a.appendChild(ol);
       grid.appendChild(a);
 
@@ -241,7 +214,7 @@
         const warn = document.createElement("div");
         warn.className = "olabel anchor-topcenter";
         warn.style.cssText="left:50%;top:10px;font-size:14px;color:#d00";
-        warn.textContent = `???ㅻ쾭?덉씠 ?놁쓬 (htu${num}_* ???뺤씤)`;
+        warn.textContent = `⚠ 오버레이 없음 (htu${num}_* 키 확인)`;
         ol.appendChild(warn);
       }else{
         layoutLabels(a, labels);
@@ -252,4 +225,3 @@
 </script>
 </body>
 </html>
-
