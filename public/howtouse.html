@@ -48,11 +48,13 @@
 
     /* 오버레이 */
     .overlay{ position:absolute; inset:0; pointer-events:none; }
-    .olabel{
-      position:absolute; white-space:pre-wrap;
-      color:#fff; text-shadow:0 1px 2px rgba(0,0,0,.7);
-      filter: drop-shadow(0 0 2px rgba(0,0,0,.35));
-    }
+  .olabel{
+  position:absolute;
+  white-space:pre-wrap;
+  color:#000;          /* 기본: 검정 */
+  text-shadow:none;    /* 음영 제거 */
+  filter:none;         /* 드랍섀도 제거 */
+}
     .anchor-topstart  { transform: translate(0,0); }
     .anchor-topcenter { transform: translate(-50%,0); left:50%; }
     .anchor-topend    { transform: translate(-100%,0); }
