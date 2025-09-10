@@ -225,36 +225,48 @@
 </script>
 
 <script>
-/* ===== Mini Overlay Editor (enable with ?edit=1) ===== */
+/* ===== Overlay Editor (enable with ?edit=1) ===== */
 (function(){
   const params = new URLSearchParams(location.search);
   if (params.get('edit') !== '1') return;
 
-  const OVERLAYS_JSON = "/assets/data/howtouse_overlays_pc.json?v=pc3";
+  // 편집 모드용 CSS: 라벨 클릭 허용 + 시각 피드백
+  document.body.classList.add('edit-mode');
+  const style = document.createElement('style');
+  style.textContent = `
+    .edit-mode .overlay { pointer-events: auto; }
+    .edit-mode .olabel  { cursor: pointer; outline: 1px dashed rgba(0,0,0,.35); }
+    .edit-mode .olabel:hover { outline: 2px solid #5eead4; }
+  `;
+  document.head.appendChild(style);
 
-  const BASE_H = 600;   // 기존 스케일 기준
+  // 카드 <a> 클릭 시 원본 이미지로 넘어가지 않도록 차단 (편집 모드 한정)
+  document.addEventListener('click', (e)=>{
+    const a = e.target.closest('.howtouse-item');
+    if (a) { e.preventDefault(); e.stopPropagation(); }
+  }, true);
+
+  // 설정(페이지에 쓰신 경로와 동일하게)
+  const OVERLAYS_JSON = "/assets/data/howtouse_overlays_pc.json?v=pc3";
+  const BASE_H = 600;
+
+  // HUD
   const hud = document.createElement('div');
   hud.style.cssText = "position:fixed;top:8px;right:8px;z-index:99999;background:#0b0d12dd;color:#fff;border:1px solid #1e2230;padding:10px 12px;border-radius:10px;font:12px/1.4 system-ui;max-width:36ch";
-  hud.innerHTML = `
-    <div style="font-weight:700;margin-bottom:6px">Overlay Editor</div>
-    <div id="ed-info" style="white-space:pre-wrap"></div>
-    <div style="margin-top:6px;opacity:.85">
-      ↑↓←→: 1px 이동 (Shift=5px)<br/>
-      +/-: 글자크기, ;/' : 줄간격, [ ]: 폭%<br/>
-      C: JSON 복사
-    </div>
-  `;
+  hud.innerHTML = `<div style="font-weight:700;margin-bottom:6px">Overlay Editor</div>
+  <div id="ed-info" style="white-space:pre-wrap"></div>
+  <div style="margin-top:6px;opacity:.85">
+    ↑↓←→: 1px 이동 (Shift=5px)<br/>
+    +/-: 글자크기, ;/' : 줄간격, [ ]: 폭%<br/>
+    C: JSON 복사
+  </div>`;
   document.body.appendChild(hud);
   const info = hud.querySelector('#ed-info');
 
-  let overlayData = null;   // { pages:[ [cfg,cfg..], ... ] }
-  let map = {};             // {'01': [cfgs...] }
-  let selected = null;      // {el, cfg, pageNum, card, uses:'percent'|'offset'}
-
-  // JSON 로드해서 key->cfg 매핑
+  // 오버레이 데이터 로드 → 페이지번호별 매핑
+  let map = {};
   fetch(OVERLAYS_JSON, {cache:'no-store'}).then(r=>r.json()).then(data=>{
-    overlayData = data;
-    (overlayData.pages||[]).forEach(group=>{
+    (data.pages||[]).forEach(group=>{
       const any = group.find(it=>/^htu(\d{2})_/.test(it.key));
       if (any) {
         const num = any.key.match(/^htu(\d{2})_/)[1];
@@ -263,46 +275,39 @@
     });
   });
 
-  // 카드/레이블 클릭 선택
+  let selected = null; // {el, cfg, pageNum, card, uses:'percent'|'offset'}
+
+  // 라벨 클릭→선택
   document.addEventListener('click', e=>{
     const label = e.target.closest('.olabel');
     if (!label) return;
 
-    e.preventDefault();
-    document.querySelectorAll('.olabel').forEach(n=>n.style.outline='');
+    document.querySelectorAll('.olabel').forEach(n=>n.style.outline='1px dashed rgba(0,0,0,.35)');
     label.style.outline = '2px solid #5eead4';
 
     const card = label.closest('.howtouse-item');
-    if (!card) return;
-
-    // 페이지 번호 추출: href .../howtouseNN.jpg
-    const a = card.tagName === 'A' ? card : card.closest('a');
+    const a = card?.tagName==='A' ? card : card?.closest('a');
     let pageNum = null;
-    if (a && a.href) {
+    if (a?.href) {
       const m = a.href.match(/howtouse(\d{2})\./);
       if (m) pageNum = m[1];
     }
-    // 대안: img alt="사용법 NN"
     if (!pageNum) {
-      const img = card.querySelector('img');
-      const m = img?.alt?.match(/(\d{2})/);
-      if (m) pageNum = m[1];
+      const m2 = card?.querySelector('img')?.alt?.match(/(\d{2})/);
+      if (m2) pageNum = m2[1];
     }
     if (!pageNum || !map[pageNum]) { info.textContent = '이 카드의 오버레이 그룹을 찾지 못했습니다.'; return; }
 
-    // key 매칭
-    const keyText = label.textContent.trim();
-    // 텍스트가 동일하지 않을 수 있으므로, 좌표가 가장 가까운 항목을 고르는 보정
+    // 가장 가까운 cfg 선택(현재 화면 좌표 기준)
     const rect = card.getBoundingClientRect();
-    const W = rect.width, H = rect.height;
-    const left = parseFloat(label.style.left) || 0;
-    const top  = parseFloat(label.style.top)  || 0;
+    const W=rect.width, H=rect.height;
+    const left = parseFloat(label.style.left)||0;
+    const top  = parseFloat(label.style.top)||0;
 
-    // 후보 중 현재 화면 좌표와 가장 가까운 cfg를 선택
-    let best = null, bestDist = Infinity;
-    for (const cfg of map[pageNum]) {
+    let best=null, bestDist=Infinity;
+    for(const cfg of map[pageNum]){
       let cx, cy;
-      if (typeof cfg.xPercent === 'number' && typeof cfg.yPercent === 'number') {
+      if (typeof cfg.xPercent==='number' && typeof cfg.yPercent==='number') {
         cx = cfg.xPercent*W; cy = cfg.yPercent*H;
       } else {
         const a = String(cfg.align||'').toLowerCase();
@@ -311,36 +316,35 @@
         cx = base + (cfg.dx||0)*scale;
         cy = (cfg.dy||0)*scale;
       }
-      const d = Math.hypot((left-cx),(top-cy));
-      if (d < bestDist) { bestDist = d; best = cfg; }
+      const d = Math.hypot(left-cx, top-cy);
+      if (d<bestDist){ bestDist=d; best=cfg; }
     }
 
-    if (!best) { info.textContent = '라벨 cfg를 찾지 못했습니다.'; return; }
+    if (!best){ info.textContent = '라벨 cfg를 찾지 못했습니다.'; return; }
 
     selected = {
       el: label,
       cfg: best,
       pageNum,
       card,
-      uses: (typeof best.xPercent === 'number' && typeof best.yPercent === 'number') ? 'percent' : 'offset'
+      uses: (typeof best.xPercent==='number' && typeof best.yPercent==='number') ? 'percent' : 'offset'
     };
     updateHUD();
   }, true);
 
   function updateHUD(){
-    if (!selected) { info.textContent = '라벨을 클릭해서 선택하세요.'; return; }
+    if (!selected){ info.textContent = '라벨을 클릭해서 선택하세요.'; return; }
     const {cfg, pageNum, uses} = selected;
-    const lines = [
-      `page: ${pageNum}`,
-      `key : ${cfg.key}`,
-      `mode: ${uses === 'percent' ? 'xPercent/yPercent' : 'dx/dy'}`,
-      `size: ${cfg.sizeSp ?? '(default)'}  line: ${cfg.lineHeightSp ?? '(default)'}`,
-      `maxW: ${cfg.maxWidthPercent ?? '(none)'}  align: ${cfg.align ?? 'TopStart'}`,
-      '',
-      'JSON:',
-      jsonSnippet(cfg, uses)
-    ];
-    info.textContent = lines.join('\n');
+    const snippet = jsonSnippet(cfg, uses);
+    info.textContent =
+`page: ${pageNum}
+key : ${cfg.key}
+mode: ${uses==='percent' ? 'xPercent/yPercent' : 'dx/dy'}
+size: ${cfg.sizeSp ?? '(default)'}  line: ${cfg.lineHeightSp ?? '(default)'}
+maxW: ${cfg.maxWidthPercent ?? '(none)'}  align: ${cfg.align ?? 'TopStart'}
+
+JSON:
+${snippet}`;
   }
 
   function jsonSnippet(cfg, uses){
@@ -353,14 +357,13 @@
       textAlign: cfg.textAlign || 'Start',
       maxWidthPercent: cfg.maxWidthPercent
     };
-    if (uses === 'percent') {
-      base.xPercent = +cfg.xPercent.toFixed(4);
-      base.yPercent = +cfg.yPercent.toFixed(4);
+    if (uses==='percent'){
+      base.xPercent = +(cfg.xPercent??0).toFixed(4);
+      base.yPercent = +(cfg.yPercent??0).toFixed(4);
     } else {
-      base.dx = Math.round(cfg.dx || 0);
-      base.dy = Math.round(cfg.dy || 0);
+      base.dx = Math.round(cfg.dx||0);
+      base.dy = Math.round(cfg.dy||0);
     }
-    // 깔끔한 JSON 조각
     return JSON.stringify(base, null, 2);
   }
 
@@ -370,58 +373,54 @@
     const step = e.shiftKey ? 5 : 1;
     const {el, card, cfg, uses} = selected;
     const rect = card.getBoundingClientRect();
-    const W = rect.width, H = rect.height;
-    const scale = H/BASE_H;
+    const W=rect.width, H=rect.height, scale=H/BASE_H;
 
-    let dirty = false;
+    let dirty=false;
 
     // 이동
-    if (['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(e.key)) {
+    if (['ArrowLeft','ArrowRight','ArrowUp','ArrowDown'].includes(e.key)){
       e.preventDefault();
-      const dxp = (e.key==='ArrowLeft'?-step:(e.key==='ArrowRight'?step:0));
-      const dyp = (e.key==='ArrowUp'?-step:(e.key==='ArrowDown'?step:0));
-      if (uses==='percent') {
-        cfg.xPercent = (cfg.xPercent ?? 0) + dxp/W;
-        cfg.yPercent = (cfg.yPercent ?? 0) + dyp/H;
+      const dxp = e.key==='ArrowLeft'?-step : e.key==='ArrowRight'?step : 0;
+      const dyp = e.key==='ArrowUp'  ?-step : e.key==='ArrowDown'?step : 0;
+      if (uses==='percent'){
+        cfg.xPercent = (cfg.xPercent||0) + dxp/W;
+        cfg.yPercent = (cfg.yPercent||0) + dyp/H;
         el.style.left = `${cfg.xPercent*100}%`;
         el.style.top  = `${cfg.yPercent*100}%`;
       } else {
-        cfg.dx = Math.round((cfg.dx ?? 0) + dxp/scale);
-        cfg.dy = Math.round((cfg.dy ?? 0) + dyp/scale);
-        // anchor 기준 좌표 재계산
+        cfg.dx = Math.round((cfg.dx||0) + dxp/scale);
+        cfg.dy = Math.round((cfg.dy||0) + dyp/scale);
         const a = String(cfg.align||'').toLowerCase();
         const base = a.includes('center') ? W/2 : a.includes('end') ? W : 0;
         el.style.left = `${base + (cfg.dx||0)*scale}px`;
         el.style.top  = `${(cfg.dy||0)*scale}px`;
       }
-      dirty = true;
+      dirty=true;
     }
 
     // 글자 크기
-    if (e.key==='+' || e.key==='='){ cfg.sizeSp = (cfg.sizeSp||12)+1; el.style.fontSize = `${cfg.sizeSp}px`; dirty=true; }
-    if (e.key==='-'){ cfg.sizeSp = (cfg.sizeSp||12)-1; el.style.fontSize = `${cfg.sizeSp}px`; dirty=true; }
+    if (e.key==='+' || e.key==='='){ cfg.sizeSp=(cfg.sizeSp||12)+1; el.style.fontSize=`${cfg.sizeSp}px`; dirty=true; }
+    if (e.key==='-'){ cfg.sizeSp=(cfg.sizeSp||12)-1; el.style.fontSize=`${cfg.sizeSp}px`; dirty=true; }
 
     // 줄 간격 ; / '
-    if (e.key===';'){ cfg.lineHeightSp = (cfg.lineHeightSp|| (cfg.sizeSp||12)) - 1; el.style.lineHeight = `${cfg.lineHeightSp}px`; dirty=true; }
-    if (e.key==="'"){ cfg.lineHeightSp = (cfg.lineHeightSp|| (cfg.sizeSp||12)) + 1; el.style.lineHeight = `${cfg.lineHeightSp}px`; dirty=true; }
+    if (e.key===';'){ cfg.lineHeightSp=(cfg.lineHeightSp||(cfg.sizeSp||12))-1; el.style.lineHeight=`${cfg.lineHeightSp}px`; dirty=true; }
+    if (e.key==="'"){ cfg.lineHeightSp=(cfg.lineHeightSp||(cfg.sizeSp||12))+1; el.style.lineHeight=`${cfg.lineHeightSp}px`; dirty=true; }
 
     // maxWidthPercent [ / ]
-    if (e.key==='['){ cfg.maxWidthPercent = Math.max(0, +(cfg.maxWidthPercent||0) - 0.01); el.style.maxWidth = `${cfg.maxWidthPercent*W}px`; dirty=true; }
-    if (e.key===']'){ cfg.maxWidthPercent = Math.min(1, +(cfg.maxWidthPercent||0) + 0.01); el.style.maxWidth = `${cfg.maxWidthPercent*W}px`; dirty=true; }
+    if (e.key==='['){ cfg.maxWidthPercent=Math.max(0, +(cfg.maxWidthPercent||0)-0.01); el.style.maxWidth=`${cfg.maxWidthPercent*W}px`; dirty=true; }
+    if (e.key===']'){ cfg.maxWidthPercent=Math.min(1, +(cfg.maxWidthPercent||0)+0.01); el.style.maxWidth=`${cfg.maxWidthPercent*W}px`; dirty=true; }
 
     // 복사 C
     if (e.key.toLowerCase()==='c'){
       const js = jsonSnippet(cfg, uses);
-      navigator.clipboard.writeText(js).then(()=>{
-        info.textContent = `✔ JSON 복사됨\n\n${js}`;
-      });
+      navigator.clipboard.writeText(js).then(()=>{ info.textContent = `✔ JSON 복사됨\n\n${js}`; });
       return;
     }
 
     if (dirty) updateHUD();
   });
 
-  // 에디터 모드 표시
+  // 모드 배지
   const tag = document.createElement('div');
   tag.textContent = 'EDIT MODE';
   tag.style.cssText = 'position:fixed;bottom:10px;right:10px;background:#f59e0b;color:#000;padding:4px 8px;border-radius:6px;font:11px/1 system-ui;z-index:99999';
