@@ -135,6 +135,8 @@ nav a.is-active{font-weight:700;text-decoration:underline}
 
   </style>
 
+<link rel="preload" as="image" href="/images/mm_logo_small.jpg">
+
 </head>
 <body>
 <header>
@@ -142,8 +144,9 @@ nav a.is-active{font-weight:700;text-decoration:underline}
     <img
   src="/images/mm_logo_small.jpg"
   alt="Measure Master"
-  class="logo-img"
-  onerror="this.onerror=null; this.src='/image/mm_logo_small.jpg';"
+  class="logo-img no-lazy"
+  loading="eager"
+  fetchpriority="high"
 />
     <strong>Measure Master</strong>
     <span class="pill" style="background:#0f1320;border:1px solid var(--border);border-radius:999px;padding:4px 8px;">v1</span>
