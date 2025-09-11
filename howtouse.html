@@ -82,8 +82,8 @@
   const IMG_PREFIX    = "howtouse";
   const IMG_EXTS      = ["jpg","png","jpeg","webp"];
   const TOTAL_PAGES   = 22;
-  const OVERLAYS_JSON = "/assets/data/howtouse_overlays_pc.json?v=pc11";
-  const STRINGS_KO    = "/assets/data/strings_ko_pc.json?v=pc11";
+  const OVERLAYS_JSON = "/assets/data/howtouse_overlays_pc.json?v=pc12";
+  const STRINGS_KO    = "/assets/data/strings_ko_pc.json?v=pc12";
   const BASE_H        = 600;  // dx/dy 기준 높이
 
   document.getElementById('year').textContent = new Date().getFullYear();
@@ -509,6 +509,31 @@ Alt+Shift+C = 전체 pages 복사`;
     document.addEventListener('DOMContentLoaded', install, { once: true });
     setTimeout(install, 500);
   }
+})();
+</script>
+<script>
+(function(){
+  const IMG_DIR="/images/howtouse", IMG_PREFIX="howtouse";
+  function rescue(){
+    const grid = document.getElementById('howtoGrid') || document.querySelector('.howto-grid');
+    if(!grid) return;
+    const now = grid.querySelectorAll('.howtouse-item').length;
+    for(let i=now+1;i<=22;i++){
+      const num = String(i).padStart(2,'0');
+      const a = document.createElement('a');
+      a.className = 'howtouse-item';
+      a.href = `${IMG_DIR}/${IMG_PREFIX}${num}.jpg`;
+      a.target = '_blank'; a.rel = 'noopener';
+      const img = new Image();
+      img.alt = `사용법 ${num}`;
+      img.loading = 'eager';
+      img.src = `${IMG_DIR}/${IMG_PREFIX}${num}.jpg`;
+      a.appendChild(img);
+      const ol = document.createElement('div'); ol.className='overlay'; a.appendChild(ol);
+      grid.appendChild(a);
+    }
+  }
+  window.addEventListener('load', ()=>{ setTimeout(rescue, 100); });
 })();
 </script>
 
