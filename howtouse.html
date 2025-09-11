@@ -342,33 +342,38 @@
 .olabel{ position:absolute; color:#000; font-weight:400; }
 .olabel.anchor-topcenter{ transform:translateX(-50%); }
 .olabel.anchor-topend{ transform:translateX(-100%); }
-
-/* 모바일 nav 정리: 가로 스크롤 + 말줄임 */
+</style>
+<style id="__mobile_nav_fix">
+/* 📱 모바일 전용: 메뉴를 칩 형태로 가지런히(말줄임 허용), PC 영향 없음 */
 @media (max-width:640px){
-  header{ flex-wrap: wrap; gap:8px; }
-  header nav{
-    order: 3;
-    display:flex; gap:8px;
-    overflow-x:auto; white-space:nowrap;
-    -webkit-overflow-scrolling:touch; padding-bottom:4px;
-    scrollbar-width:none;
-  }
-  header nav::-webkit-scrollbar{ display:none; }
+  header{ display:flex; flex-wrap:wrap; align-items:center; gap:8px; }
 
+  /* 헤더 내 배치 순서 고정 */
+  .brand{ order:1; }
+  .lang { order:2; margin-left:auto; }
+  header nav{ 
+    order:3; 
+    display:flex; 
+    flex-wrap:wrap;         /* 2줄 이상 자동 정렬 */
+    gap:8px; 
+    width:100%;
+  }
+
+  /* 🔧 기존 nav a { margin-left:16px } 를 무력화 */
   header nav a{
-    margin:0;                        /* 데스크톱용 margin-left 초기화 */
-    flex:0 0 auto;                   /* 한 칩씩 */
-    max-width:42vw;                  /* 긴 문구는 잘라서 … */
-    overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
-    padding:6px 10px; border:1px solid var(--border);
-    border-radius:999px; background:#0f1320; color:#e7edf5;
-    font-size:13px; line-height:1;
+    margin:0 !important;
+    flex:1 1 calc(50% - 8px); /* 2열로 반반 배치(폭 좁으면 자동 줄바꿈) */
+    min-width:140px;
+    max-width:100%;
+    display:inline-flex; align-items:center; justify-content:center;
+    padding:8px 10px;
+    border:1px solid var(--border,#1e2230);
+    border-radius:999px;
+    background:#0f1320; color:#e7edf5;
+    font-size:13px; line-height:1.2;
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis; /* 일부 텍스트 가려져도 깔끔하게 */
   }
-
-  .brand{order:1}
-  .lang{order:2; margin-left:auto;}
 }
-
 </style>
 
 </body>
