@@ -400,6 +400,51 @@
   header > .brand, header .brand{ order:1 !important; }
 }
 </style>
+<style id="__mobile_nav_only" nonce="mm">
+@media (max-width:640px){
+  /* 헤더를 줄바꿈 가능하게 */
+  header{ display:flex !important; flex-wrap:wrap !important; align-items:center !important; gap:8px !important; }
+
+  /* ① 언어 버튼을 '자기 줄'로 빼기  */
+  .lang{
+    order:2 !important;          /* 아래로 보내려면 4로 바꾸세요 */
+    width:100% !important;
+    display:flex !important;
+    justify-content:flex-end !important;
+    gap:6px !important;
+  }
+
+  /* ② 메뉴는 한 줄 정렬(넘치면 좌우 스크롤) */
+  header nav{
+    order:3 !important;          /* 언어를 아래로 보낼 땐 2로 */
+    width:100% !important;
+    display:flex !important;
+    flex-wrap:nowrap !important;
+    gap:8px !important;
+    overflow-x:auto !important;
+    white-space:nowrap !important;
+    -webkit-overflow-scrolling:touch;
+    scrollbar-width:none;
+  }
+  header nav::-webkit-scrollbar{ display:none; }
+
+  /* 데스크톱 기본 margin-left 제거 + 칩 형태 */
+  header nav a{
+    margin:0 !important;
+    flex:0 0 auto !important;
+    padding:8px 10px !important;
+    border:1px solid var(--border,#1e2230) !important;
+    border-radius:999px !important;
+    background:#0f1320 !important;
+    color:#e7edf5 !important;
+    font-size:13px !important; line-height:1.1 !important;
+    text-overflow:ellipsis; overflow:hidden;
+  }
+
+  /* 브랜드 순서 고정 */
+  .brand{ order:1 !important; }
+}
+</style>
 
 </body>
 </html>
