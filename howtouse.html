@@ -82,8 +82,8 @@
   const IMG_PREFIX    = "howtouse";
   const IMG_EXTS      = ["jpg","png","jpeg","webp"];
   const TOTAL_PAGES   = 22;
-  const OVERLAYS_JSON = "/assets/data/howtouse_overlays_pc.json?v=pc9";
-  const STRINGS_KO    = "/assets/data/strings_ko_pc.json?v=pc9";
+  const OVERLAYS_JSON = "/assets/data/howtouse_overlays_pc.json?v=pc11";
+  const STRINGS_KO    = "/assets/data/strings_ko_pc.json?v=pc11";
   const BASE_H        = 600;  // dx/dy 기준 높이
 
   document.getElementById('year').textContent = new Date().getFullYear();
@@ -203,7 +203,7 @@
     }
     if(!map){ showError("오버레이 데이터 형식 오류: pages 배열이 없습니다."); return; }
 
-    const grid = document.getElementById("howtoGrid");
+const grid = document.getElementById("howtoGrid") || document.querySelector(".howto-grid");
     grid.innerHTML = "";
     for(let i=1;i<=TOTAL_PAGES;i++){
       const num = String(i).padStart(2,"0");
