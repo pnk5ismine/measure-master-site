@@ -82,8 +82,8 @@
   const IMG_DIRS      = ["/images/howtouse", "/image/howtouse"]; // 우선순위대로 시도
   const IMG_PREFIX    = "howtouse";
   const IMG_EXTS      = ["jpg","png","jpeg","webp"];
-  const OVERLAYS_JSON = "/assets/data/howtouse_overlays_pc.json?v=pc25"; // ★ 캐시버스터 숫자 올렸습니다
-  const STRINGS_JSON  = "/assets/data/strings_ko_pc.json?v=pc25";
+  const OVERLAYS_JSON = "/assets/data/howtouse_overlays_pc.json?v=pc24"; // ★ 캐시버스터 숫자 올렸습니다
+  const STRINGS_JSON  = "/assets/data/strings_ko_pc.json?v=pc24";
   const BASE_H        = 600; // dy 스케일 기준
 
   function $(sel){ return document.getElementById(sel) || document.querySelector(sel); }
@@ -211,6 +211,23 @@
 
   window.addEventListener("load", init);
 })();
+
+/* 데스크톱/태블릿 기본: 3열 → 2열 */
+.howtouse-grid{
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+@media (max-width:1024px){
+  .howtouse-grid{ grid-template-columns: repeat(2, 1fr); }
+}
+
+/* 🔻 모바일: 1열(한 페이지씩 아래로 나열) */
+@media (max-width:640px){
+  .howtouse-grid{ grid-template-columns: 1fr; }
+  .howtouse-item{ width: 100%; }
+}
+
 </script>
 
 </body>
