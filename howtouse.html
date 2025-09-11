@@ -512,98 +512,176 @@ Alt+Shift+C = 전체 pages 복사`;
 })();
 </script>
 <script>
+/* ===== Rescue Overlay Renderer (03–06 dx/dy→% 변환 포함) ===== */
 (function(){
-  const IMG_DIR="/images/howtouse", IMG_PREFIX="howtouse";
-  function rescue(){
-    const grid = document.getElementById('howtoGrid') || document.querySelector('.howto-grid');
-    if(!grid) return;
-    const now = grid.querySelectorAll('.howtouse-item').length;
-    for(let i=now+1;i<=22;i++){
-      const num = String(i).padStart(2,'0');
-      const a = document.createElement('a');
-      a.className = 'howtouse-item';
-      a.href = `${IMG_DIR}/${IMG_PREFIX}${num}.jpg`;
-      a.target = '_blank'; a.rel = 'noopener';
-      const img = new Image();
-      img.alt = `사용법 ${num}`;
-      img.loading = 'eager';
-      img.src = `${IMG_DIR}/${IMG_PREFIX}${num}.jpg`;
-      a.appendChild(img);
-      const ol = document.createElement('div'); ol.className='overlay'; a.appendChild(ol);
-      grid.appendChild(a);
-    }
-  }
-  window.addEventListener('load', ()=>{ setTimeout(rescue, 100); });
-})();
-</script>
-<script>
-/* Drop-in: 03~06만 dx/dy → xPercent/yPercent (이미지 높이 0인 경우는 건너뛰고, 에러는 잡아 넘어감) */
-(function(){
-  const TARGETS = new Set(["03","04","05","06"]);
-  const BASE_H = 600; // 메인 스크립트의 BASE_H와 동일해야 함
+  const BASE_H = 600;
+  const TARGETS = new Set(["03","04","05","06"]); // 퍼센트 좌표로 강제 변환할 대상
+  // JSON 경로: 필요시 v=pc14 등으로 숫자만 바꾸세요.
+  const OVERLAYS = [
+    "/assets/data/howtouse_overlays_pc.json?v=pc15",
+    "/assets/data/howtouse_overlays_pc.json?nocache="+Date.now()
+  ];
+  const STRINGS = [
+    "/assets/data/strings_ko_pc.json?v=pc14",
+    "/assets/data/strings_ko_pc.json?nocache="+Date.now()
+  ];
 
-  function pageNumFromItem(item){
-    const a = item.closest('a.howtouse-item') || item;
-    const href = a?.getAttribute('href') || '';
-    let m = href.match(/howtouse(\d{2})\./);
-    if (m) return m[1];
-    const img = a.querySelector('img');
-    m = img?.alt?.match(/(\d{2})/);
-    return m ? m[1] : null;
+  // 컨테이너 탐색(당신의 마크업 모두 지원: id/howtouse-grid/howto-grid)
+  function getGrid(){
+    return document.getElementById("howtoGrid")
+        || document.querySelector(".howtouse-grid")
+        || document.querySelector(".howto-grid");
+  }
+
+  // 03~06만 크롭 해제(원본 비율 유지) CSS 주입 — 다른 페이지엔 영향 없음
+  (function injectCSS(){
+    const css = `
+      .howtouse-item.ratio-free{ aspect-ratio:unset !important; }
+      .howtouse-item.ratio-free img{ height:auto !important; object-fit:contain !important; }
+      .overlay{ position:absolute; inset:0; pointer-events:none; }
+      .olabel{ position:absolute; color:#000; font-weight:400; }
+      .olabel.anchor-topcenter{ transform:translateX(-50%); }
+      .olabel.anchor-topend{ transform:translateX(-100%); }
+    `;
+    const s=document.createElement('style'); s.textContent=css; document.head.appendChild(s);
+  })();
+
+  // JSON 불러오기(여러 후보 URL 중 첫 성공)
+  async function loadOne(cands){
+    for (const url of cands){
+      try{ const r = await fetch(url, {cache:"no-store"}); if (r.ok) return await r.json(); }catch(e){}
+    }
+    throw new Error("JSON 로드 실패: "+cands[0]);
+  }
+
+  function buildMap(pages){
+    const map={};
+    (pages||[]).forEach(group=>{
+      const any = group.find(x=>/^htu(\d{2})_/.test(x.key));
+      if (any){ const num = any.key.match(/^htu(\d{2})_/)[1]; map[num]=group; }
+    });
+    return map;
+  }
+
+  function anchorBasePercent(align){
+    const a = String(align||'TopStart').toLowerCase();
+    if (a.includes('center')) return 0.5;
+    if (a.includes('end'))    return 1;
+    return 0; // Start
   }
 
   function toPercentCfg(cfg, W, H){
-    // 이미 퍼센트면 그대로
-    if (typeof cfg.xPercent === 'number' && typeof cfg.yPercent === 'number') return cfg;
-    // 퍼센트로 바꿀 dx/dy가 없거나, 아직 이미지가 로드되지 않아 W/H가 0이면 그대로 둠(다음 호출에서 다시 시도)
-    if (!(('dx' in cfg) || ('dy' in cfg)) || !(W>0 && H>0)) return cfg;
-
-    const dx = +cfg.dx || 0, dy = +cfg.dy || 0;
-    const a  = String(cfg.align || 'TopStart').toLowerCase();
-    const basePct = a.includes('center') ? 0.5 : a.includes('end') ? 1 : 0; // Start=0, Center=0.5, End=1
-    const aspect  = W / H;
-
-    // 원래 렌더: top = dy*(H/BASE_H), left = base + dx*(H/BASE_H)
-    // 퍼센트 변환: y% = dy/BASE_H, x% = basePct + dx/(BASE_H*(W/H))
-    const yPct = dy / BASE_H;
-    const xPct = basePct + dx / (BASE_H * aspect);
-
-    const out = Object.assign({}, cfg, { xPercent: xPct, yPercent: yPct });
-    delete out.dx; delete out.dy; // 이후엔 퍼센트 경로로만 렌더
+    if (typeof cfg.xPercent==='number' && typeof cfg.yPercent==='number') return cfg;
+    if (!('dx' in cfg || 'dy' in cfg) || !(W>0 && H>0)) return cfg;
+    const dx = +cfg.dx||0, dy=+cfg.dy||0;
+    const basePct = anchorBasePercent(cfg.align);
+    const xPct = basePct + dx/(BASE_H*(W/H));
+    const yPct = dy/BASE_H;
+    const out = Object.assign({}, cfg, { xPercent:xPct, yPercent:yPct });
+    delete out.dx; delete out.dy;
     return out;
   }
 
-  function patchLabels(item, labels){
-    const num = pageNumFromItem(item);
-    if (!num || !TARGETS.has(num)) return labels; // 03~06 외에는 무변경
-    const rect = item.getBoundingClientRect();
+  function layoutLabels(card, labels){
+    let ol = card.querySelector('.overlay');
+    if (!ol){ ol = document.createElement('div'); ol.className='overlay'; card.appendChild(ol); }
+    ol.innerHTML='';
+
+    const rect = card.getBoundingClientRect();
     const W = rect.width, H = rect.height;
-    return (labels || []).map(cfg => toPercentCfg(cfg, W, H));
-  }
+    const scale = H/BASE_H;
 
-  function install(){
-    const orig = window.layoutLabels;
-    if (typeof orig !== 'function') return false;
-    if (window.__dx2pct_installed) return true;
-
-    window.layoutLabels = function(item, labels){
-      try{
-        // 03~06만 퍼센트 변환하여 렌더
-        return orig.call(this, item, patchLabels(item, labels));
-      }catch(e){
-        // 어떤 이유로든 실패해도 루프가 멈추지 않도록 원본 라벨로 한 번 더 시도
-        console.error('[dx→%] layoutLabels error:', e);
-        try { return orig.call(this, item, labels); } catch(_) {}
+    (labels||[]).forEach(cfg=>{
+      const el = document.createElement('div');
+      const align = String(cfg.align||'TopStart');
+      el.className = 'olabel ' + (
+        /Center/i.test(align) ? 'anchor-topcenter' :
+        /End/i.test(align)    ? 'anchor-topend'    : 'anchor-topstart'
+      );
+      // 텍스트
+      const key = cfg.key;
+      el.textContent = (window.__STRINGS && window.__STRINGS[key]) || key;
+      // 스타일
+      if (cfg.bold) el.style.fontWeight='700';
+      if (cfg.sizeSp) el.style.fontSize = cfg.sizeSp+'px';
+      if (cfg.lineHeightSp) el.style.lineHeight = cfg.lineHeightSp+'px';
+      if (cfg.textAlign){
+        el.style.textAlign = {Center:'center',End:'right',Start:'left'}[cfg.textAlign] || 'left';
       }
-    };
-    window.__dx2pct_installed = true;
-    return true;
+      if (cfg.maxWidthPercent) el.style.maxWidth = (cfg.maxWidthPercent*W)+'px';
+      // 위치
+      if (typeof cfg.xPercent==='number' && typeof cfg.yPercent==='number'){
+        el.style.left = (cfg.xPercent*100)+'%';
+        el.style.top  = (cfg.yPercent*100)+'%';
+      } else {
+        const dx=(+cfg.dx||0)*scale, dy=(+cfg.dy||0)*scale;
+        const aLow = align.toLowerCase();
+        const base = aLow.includes('center') ? W/2 : aLow.includes('end') ? W : 0;
+        el.style.left = (base + dx) + 'px';
+        el.style.top  = dy + 'px';
+      }
+      ol.appendChild(el);
+    });
   }
 
-  if (!install()){
-    document.addEventListener('DOMContentLoaded', install, { once: true });
-    setTimeout(install, 500);
+  async function run(){
+    const grid = getGrid();
+    if (!grid){ console.error('[rescue] grid not found'); return; }
+
+    // 데이터 로드
+    const [ov, ko] = await Promise.all([
+      loadOne(OVERLAYS),
+      loadOne(STRINGS).catch(()=>({}))  // strings는 없어도 진행
+    ]);
+    window.__STRINGS = ko||{};
+    const map = buildMap(ov.pages);
+
+    // 22개 카드 모두 처리
+    const cards = grid.querySelectorAll('.howtouse-item, .howto-item');
+    cards.forEach(card=>{
+      // 페이지 번호 추출
+      let href = card.getAttribute('href') || '';
+      const m = href.match(/howtouse(\d{2})\./);
+      if (!m){
+        const img = card.querySelector('img');
+        const m2 = img?.alt?.match(/(\d{2})/);
+        if (!m2) return;
+        href = `howtouse${m2[1]}.jpg`;
+      }
+      const num = (href.match(/howtouse(\d{2})\./)||[])[1];
+      if (!num) return;
+
+      // 03~06 크롭 해제(원본 비율 유지)
+      if (TARGETS.has(num)) card.classList.add('ratio-free');
+
+      const labels = map[num];
+      if (!labels){
+        // 경고 배지
+        let ol = card.querySelector('.overlay');
+        if (!ol){ ol=document.createElement('div'); ol.className='overlay'; card.appendChild(ol); }
+        const warn = document.createElement('div');
+        warn.className='olabel anchor-topcenter';
+        warn.style.cssText='left:50%;top:10px;font-size:14px;color:#d00';
+        warn.textContent = `⚠ 오버레이 없음 (htu${num}_*)`;
+        ol.appendChild(warn);
+        return;
+      }
+
+      // 03~06만 dx/dy → 퍼센트 변환
+      const rect = card.getBoundingClientRect();
+      const W = rect.width, H = rect.height;
+      const patched = TARGETS.has(num)
+        ? labels.map(cfg => toPercentCfg(cfg, W, H))
+        : labels;
+
+      layoutLabels(card, patched);
+
+      // 리사이즈/이미지 로드에 반응해 재배치
+      new ResizeObserver(()=> layoutLabels(card, patched)).observe(card);
+    });
   }
+
+  window.addEventListener('load', ()=>run().catch(e=>console.error('[rescue] failed', e)));
 })();
 </script>
 
