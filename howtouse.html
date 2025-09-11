@@ -105,16 +105,16 @@
 </footer>
 
 <script>
-/* howtouse: 최소 렌더러(22장 강제 렌더, JSON 실패해도 이미지 노출) */
+/* howtouse: 최소 렌더러 v=pc27 (prem1_* 키도 23페이지로 매핑) */
 (function(){
-  const GRID_ID       = "howtoGrid";                   // <div id="howtoGrid" ...>
-  const TOTAL_PAGES   = 23;
-  const IMG_DIRS      = ["/images/howtouse", "/image/howtouse"]; // 둘 다 시도
+  const GRID_ID       = "howtoGrid";
+  const TOTAL_PAGES   = 23;  // ✅ 23으로 유지
+  const IMG_DIRS      = ["/images/howtouse", "/image/howtouse"];
   const IMG_PREFIX    = "howtouse";
   const IMG_EXTS      = ["jpg","png","jpeg","webp"];
-  const OVERLAYS_JSON = "/assets/data/howtouse_overlays_pc.json?v=pc27"; // ★ 숫자만 올리면 캐시 무력화
+  const OVERLAYS_JSON = "/assets/data/howtouse_overlays_pc.json?v=pc27";
   const STRINGS_JSON  = "/assets/data/strings_ko_pc.json?v=pc27";
-  const BASE_H        = 600; // dy 스케일 기준
+  const BASE_H        = 600;
 
   function grid(){
     return document.getElementById(GRID_ID)
@@ -125,7 +125,7 @@
   function createImage(num){
     const img = new Image();
     img.alt = `사용법 ${num}`;
-    img.loading = "eager"; // 우선 즉시 로드(안정화 후 lazy로 바꿔도 됨)
+    img.loading = "eager";
     const cands = [];
     for(const d of IMG_DIRS) for(const e of IMG_EXTS) cands.push(`${d}/${IMG_PREFIX}${num}.${e}`);
     let i=0;
@@ -184,12 +184,33 @@
     });
   }
 
+  // ✅ 오버레이 매핑: htuNN_* 우선, 없으면 숫자 포함 키, 그래도 없으면 prem1_* -> 23
   function buildMap(pages){
-    const map={};
+    const map = {};
+    let premCandidate = null;
+
     (pages||[]).forEach(group=>{
-      const any = group.find(it=>/^htu(\d{2})_/.test(it.key));
-      if(any){ const num = any.key.match(/^htu(\d{2})_/)[1]; map[num]=group; }
+      const any = group.find(it=>it && typeof it.key === 'string');
+      const key = any ? any.key : '';
+
+      // 1) 정규 패턴 htuNN_
+      let m = key.match(/htu(\d{2})_/i);
+      if (m){ map[m[1]] = group; return; }
+
+      // 2) 키 어딘가에 두 자리 숫자가 있으면 그걸 페이지로 간주
+      const anyWithDigits = group.find(it=>/\d{2}/.test(it.key||''));
+      if (anyWithDigits){
+        const m2 = (anyWithDigits.key||'').match(/(\d{2})/);
+        if (m2){ map[m2[1]] = group; return; }
+      }
+
+      // 3) prem1_* 그룹은 23으로 매핑(한 번만)
+      if (!premCandidate && group.some(it=>/^prem1_/i.test(it.key||''))){
+        premCandidate = group;
+      }
     });
+
+    if (!map["23"] && premCandidate) map["23"] = premCandidate;
     return map;
   }
 
@@ -204,7 +225,6 @@
     if(!container){ console.error("[howtouse] grid container not found"); return; }
     container.innerHTML = "";
 
-    // JSON은 실패해도 이미지 렌더는 계속
     let overlays=null, strings=null;
     try{ [overlays, strings] = await Promise.all([loadJson(OVERLAYS_JSON), loadJson(STRINGS_JSON)]); }
     catch(e){ console.warn("[howtouse] JSON load warn:", e.message); }
@@ -216,7 +236,7 @@
         const a = document.createElement("a");
         a.className = "howtouse-item";
         a.target = "_blank"; a.rel="noopener";
-        a.href = `${IMG_DIRS[0]}/${IMG_PREFIX}${num}.jpg`; // 링크용
+        a.href = `${IMG_DIRS[0]}/${IMG_PREFIX}${num}.jpg`;
 
         const img = createImage(num);
         a.appendChild(img);
@@ -241,7 +261,7 @@
     }
   }
 
-  // 최소 스타일(없으면 추가)
+  // 최소 오버레이 CSS(없으면만 주입)
   (function injectCSS(){
     if (document.getElementById("__howtouse_min_css")) return;
     const s = document.createElement("style");
@@ -251,8 +271,7 @@
       .olabel{position:absolute;color:#000;font-weight:400}
       .olabel.anchor-topcenter{transform:translateX(-50%)}
       .olabel.anchor-topend{transform:translateX(-100%)}
-      .howtouse-item{position:relative;overflow:hidden;border:1px solid var(--border,#1e2230);border-radius:10px;background:#0f1320}
-      .howtouse-item img{width:100%;height:auto;object-fit:cover;display:block}
+      .howtouse-item{position:relative}
     `;
     document.head.appendChild(s);
   })();
@@ -261,310 +280,6 @@
 })();
 </script>
 
-<style id="__pc_rollback_css">
-/* PC/태블릿: 예전 레이아웃으로 복구(3열/2열, 고정비율+cover) */
-.howtouse-grid, .howto-grid { gap:12px; }
-
-@media (min-width:1025px){
-  .howtouse-grid, .howto-grid{ display:grid!important; grid-template-columns:repeat(3,1fr)!important; }
-}
-@media (min-width:641px) and (max-width:1024px){
-  .howtouse-grid, .howto-grid{ display:grid!important; grid-template-columns:repeat(2,1fr)!important; }
-}
-
-@media (min-width:641px){
-  .howtouse-item, .howto-item{
-    position:relative; overflow:hidden;
-    aspect-ratio:1/2!important;
-  }
-  .howtouse-item img, .howto-item img{
-    width:100%; height:100%!important; object-fit:cover!important; display:block;
-  }
-}
-
-/* 모바일: 1열(PC에 영향 없음) */
-@media (max-width:640px){
-  .howtouse-grid, .howto-grid{ display:grid!important; grid-template-columns:1fr!important; }
-  .howtouse-item, .howto-item{ aspect-ratio:auto!important; }
-  .howtouse-item img, .howto-item img{ height:auto!important; object-fit:contain!important; }
-}
-
-/* 오버레이 기본(없으면 추가) */
-.overlay{ position:absolute; inset:0; pointer-events:none; }
-.olabel{ position:absolute; color:#000; font-weight:400; }
-.olabel.anchor-topcenter{ transform:translateX(-50%); }
-.olabel.anchor-topend{ transform:translateX(-100%); }
-</style>
-<style id="__mobile_nav_fix">
-/* 기본: 데스크톱/태블릿 메이슨리, 모바일 1열 */
-@media (min-width: 641px){
-  /* ✅ 그리드를 끄고 컬럼 레이아웃으로 전환 (공백 없이 촘촘히) */
-  .howtouse-grid{
-    display: block !important;   /* grid → block */
-    column-count: 3;             /* 데스크톱 3열 */
-    column-gap: 12px;
-  }
-  @media (min-width: 641px) and (max-width: 1023px){
-    .howtouse-grid{ column-count: 2; }  /* 태블릿 2열 */
-  }
-
-  .howtouse-item{
-    display: block;
-    width: 100%;
-    margin: 0 0 12px;            /* 열 사이 간격 */
-    break-inside: avoid;         /* 항목 분리(줄 바꿈 금지) */
-    position: relative;          /* 오버레이 기준 */
-    overflow: hidden;
-    border: 1px solid var(--border, #1e2230);
-    border-radius: 10px;
-    background: #0f1320;
-  }
-  .howtouse-item img{
-    width: 100%;
-    height: auto;                /* ✅ 원본 비율 유지 */
-    object-fit: contain;         /* ✅ 크롭 금지 → 라벨 왜곡 방지 */
-    display: block;
-  }
-}
-
-/* 📱 모바일: 1열 */
-@media (max-width: 640px){
-  .howtouse-grid{
-    display: grid !important;
-  }
-  .howtouse-grid{ grid-template-columns: 1fr; gap: 12px; }
-  .howtouse-item{
-    position: relative;
-    overflow: hidden;
-    border: 1px solid var(--border, #1e2230);
-    border-radius: 10px;
-    background: #0f1320;
-  }
-  .howtouse-item img{
-    width: 100%;
-    height: auto;
-    object-fit: contain;         /* 모바일도 왜곡/크롭 방지 */
-    display: block;
-  }
-}
-
-/* 오버레이 기본 (없다면 추가) */
-.overlay{ position:absolute; inset:0; pointer-events:none; }
-.olabel{ position:absolute; color:#000; font-weight:400; }
-.olabel.anchor-topcenter{ transform:translateX(-50%); }
-.olabel.anchor-topend{    transform:translateX(-100%); }
-
-</style>
-
-<style id="__mobile_nav_force">
-@media (max-width:640px){
-  /* 헤더를 줄바꿈 가능하게 강제 */
-  header{ display:flex !important; flex-wrap:wrap !important; align-items:center !important; gap:8px !important; }
-
-  /* 언어줄: 자기 줄로(브랜드 아래) — 아래로 보내고 싶으면 order:4 로 변경 */
-  header > .lang, header .lang{
-    order:2 !important;              /* ↓ 아래로 내리고 싶으면 4 */
-    width:100% !important;
-    display:flex !important;
-    justify-content:flex-end !important;
-    gap:6px !important;
-  }
-
-  /* 메뉴: 한 줄, 넘치면 가로 스크롤 */
-  header > nav, header nav{
-    order:3 !important;              /* 언어를 아래로 보낼 땐 2 로 */
-    width:100% !important;
-    display:flex !important;
-    flex-wrap:nowrap !important;
-    gap:8px !important;
-    overflow-x:auto !important;
-    white-space:nowrap !important;
-    -webkit-overflow-scrolling:touch;
-    scrollbar-width:none;
-  }
-  header nav::-webkit-scrollbar{ display:none; }
-
-  /* 데스크톱 기본 margin-left 제거 + 칩 형태 */
-  header nav a{
-    margin:0 !important;
-    flex:0 0 auto !important;
-    padding:8px 10px !important;
-    border:1px solid var(--border,#1e2230) !important;
-    border-radius:999px !important;
-    background:#0f1320 !important;
-    color:#e7edf5 !important;
-    font-size:13px !important; line-height:1.1 !important;
-    text-overflow:ellipsis; overflow:hidden;
-  }
-
-  /* 브랜드는 첫 줄 왼쪽 정렬(선택) */
-  header > .brand, header .brand{ order:1 !important; }
-}
-</style>
-<style id="__mobile_nav_only" nonce="mm">
-@media (max-width:640px){
-  /* 헤더를 줄바꿈 가능하게 */
-  header{ display:flex !important; flex-wrap:wrap !important; align-items:center !important; gap:8px !important; }
-
-  /* ① 언어 버튼을 '자기 줄'로 빼기  */
-  .lang{
-    order:2 !important;          /* 아래로 보내려면 4로 바꾸세요 */
-    width:100% !important;
-    display:flex !important;
-    justify-content:flex-end !important;
-    gap:6px !important;
-  }
-
-  /* ② 메뉴는 한 줄 정렬(넘치면 좌우 스크롤) */
-  header nav{
-    order:3 !important;          /* 언어를 아래로 보낼 땐 2로 */
-    width:100% !important;
-    display:flex !important;
-    flex-wrap:nowrap !important;
-    gap:8px !important;
-    overflow-x:auto !important;
-    white-space:nowrap !important;
-    -webkit-overflow-scrolling:touch;
-    scrollbar-width:none;
-  }
-  header nav::-webkit-scrollbar{ display:none; }
-
-  /* 데스크톱 기본 margin-left 제거 + 칩 형태 */
-  header nav a{
-    margin:0 !important;
-    flex:0 0 auto !important;
-    padding:8px 10px !important;
-    border:1px solid var(--border,#1e2230) !important;
-    border-radius:999px !important;
-    background:#0f1320 !important;
-    color:#e7edf5 !important;
-    font-size:13px !important; line-height:1.1 !important;
-    text-overflow:ellipsis; overflow:hidden;
-  }
-
-  /* 브랜드 순서 고정 */
-  .brand{ order:1 !important; }
-}
-</style>
-<style id="__howto_preview_css">
-/* 미리보기 토글 전용 — 기존 레이아웃/크기값은 건드리지 않음 */
-#htp-bar{
-  position:fixed; z-index:9999; top:10px; right:10px;
-  display:flex; gap:6px; align-items:center;
-  padding:8px; border-radius:10px;
-  background:rgba(15,19,32,.95); border:1px solid var(--border,#1e2230);
-  color:#e7edf5; font:12px system-ui;
-}
-#htp-bar button, #htp-bar label{
-  border:1px solid var(--border,#1e2230); background:#0f1320; color:#e7edf5;
-  border-radius:8px; padding:6px 8px; cursor:pointer;
-}
-#htp-bar .muted{opacity:.8}
-.htp-highlight .olabel{ background:rgba(255,255,255,.9); color:#000!important; outline:1px dashed #000; }
-.htp-dim .howtouse-item img{ opacity:.6; }
-#htp-bar input[type="number"]{ width:60px; padding:4px 6px; border-radius:6px; border:1px solid var(--border,#1e2230); background:#0f1320; color:#e7edf5; }
-@media (max-width:640px){ #htp-bar{ top:auto; bottom:10px; right:10px; } }
-</style>
-<script>
-(function(){
-  const qs = new URLSearchParams(location.search);
-  if (!(qs.has('edit') || qs.has('preview'))) return;  // 일반 방문자에게는 비활성
-
-  // 카드에 페이지 번호 태깅
-  function tagPages(){
-    const cards = document.querySelectorAll('.howtouse-item, .howto-item');
-    let fallback = 1;
-    cards.forEach(card=>{
-      // href 또는 img.alt에서 번호 추출
-      const href = card.getAttribute('href') || '';
-      let m = href.match(/howtouse(\d{2})\./);
-      if(!m){
-        const alt = card.querySelector('img')?.alt || '';
-        m = alt.match(/(\d{2})/);
-      }
-      const num = m ? m[1] : String(fallback++).padStart(2,'0');
-      card.dataset.page = num;
-    });
-  }
-
-  function scrollToPage(num){
-    const sel = `.howtouse-item[data-page="${String(num).padStart(2,'0')}"], .howto-item[data-page="${String(num).padStart(2,'0')}"]`;
-    const el = document.querySelector(sel);
-    if(!el) return;
-    el.scrollIntoView({behavior:'smooth', block:'center'});
-    // 잠깐 하이라이트
-    el.style.outline='2px solid #5eead4'; el.style.outlineOffset='2px';
-    setTimeout(()=>{ el.style.outline=''; el.style.outlineOffset=''; }, 800);
-  }
-
-  function totalPages(){
-    return document.querySelectorAll('.howtouse-item, .howto-item').length;
-  }
-
-  function buildBar(){
-    if(document.getElementById('htp-bar')) return;
-    const bar = document.createElement('div'); bar.id='htp-bar';
-    bar.innerHTML = `
-      <button type="button" id="htp-prev">◀</button>
-      <label class="muted">page</label>
-      <input type="number" id="htp-goto" min="1" step="1" />
-      <span class="muted">/ <b id="htp-total"></b></span>
-      <button type="button" id="htp-next">▶</button>
-      <button type="button" id="htp-tog-hl">라벨 강조</button>
-      <button type="button" id="htp-tog-dim">배경 흐리기</button>
-    `;
-    document.body.appendChild(bar);
-
-    const total = totalPages();
-    document.getElementById('htp-total').textContent = total;
-    const input = document.getElementById('htp-goto');
-    input.value = 1;
-
-    document.getElementById('htp-prev').onclick = ()=>{
-      const n = Math.max(1, (+input.value||1)-1); input.value = n; scrollToPage(n);
-    };
-    document.getElementById('htp-next').onclick = ()=>{
-      const n = Math.min(total, (+input.value||1)+1); input.value = n; scrollToPage(n);
-    };
-    input.addEventListener('change', ()=>{
-      let n = +input.value||1; n = Math.min(Math.max(1,n), total);
-      input.value = n; scrollToPage(n);
-    });
-
-    document.getElementById('htp-tog-hl').onclick = ()=>{
-      document.body.classList.toggle('htp-highlight');
-    };
-    document.getElementById('htp-tog-dim').onclick = ()=>{
-      document.body.classList.toggle('htp-dim');
-    };
-
-    // 키보드 단축키(j/k 또는 ←/→)
-    window.addEventListener('keydown', (e)=>{
-      if (['INPUT','TEXTAREA'].includes((e.target.tagName||'').toUpperCase())) return;
-      if (e.key==='ArrowLeft' || e.key==='k'){
-        e.preventDefault(); document.getElementById('htp-prev').click();
-      } else if (e.key==='ArrowRight' || e.key==='j'){
-        e.preventDefault(); document.getElementById('htp-next').click();
-      }
-    });
-  }
-
-  // 초기화
-  function init(){
-    tagPages();
-    buildBar();
-    // 처음 로드시 #page=n 같은 해시가 있으면 이동
-    const hash = location.hash.match(/page=(\d{1,2})/);
-    if (hash){ scrollToPage(+hash[1]); document.getElementById('htp-goto').value = +hash[1]; }
-  }
-
-  if (document.readyState === 'complete' || document.readyState === 'interactive'){
-    setTimeout(init, 0);
-  } else {
-    window.addEventListener('DOMContentLoaded', init);
-  }
-})();
-</script>
 <style id="__howto_grid_lock">
 /* 데스크톱/태블릿: 3열/2열, 행 순서 고정 */
 @media (min-width:1025px){
