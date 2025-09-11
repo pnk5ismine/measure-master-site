@@ -261,6 +261,53 @@
 })();
 </script>
 
+/* ===== ROLLBACK: PC/태블릿은 예전처럼, 모바일만 1열 ===== */
+
+/* 공통: howtouse-grid / howto-grid 모두 지원 */
+.howtouse-grid, .howto-grid { gap: 12px; }
+
+/* ✅ PC/태블릿: 3열(>1024px), 2열(641~1024px), 고정 비율 + cover */
+@media (min-width: 1025px){
+  .howtouse-grid, .howto-grid { display: grid !important; grid-template-columns: repeat(3, 1fr) !important; }
+}
+@media (min-width: 641px) and (max-width: 1024px){
+  .howtouse-grid, .howto-grid { display: grid !important; grid-template-columns: repeat(2, 1fr) !important; }
+}
+
+/* 카드/이미지: 예전 상태로 강제(고정 비율, 이미지가 카드 꽉 채움) */
+@media (min-width: 641px){
+  .howtouse-item, .howto-item,
+  .howtouse-item.ratio-free, .howto-item.ratio-free{
+    position: relative;
+    overflow: hidden;
+    aspect-ratio: 1 / 2 !important;   /* ← 예전과 동일 비율 */
+  }
+  .howtouse-item img, .howto-item img,
+  .howtouse-item.ratio-free img, .howto-item.ratio-free img{
+    width: 100%;
+    height: 100% !important;
+    object-fit: cover !important;     /* ← 예전과 동일(크롭) */
+    display: block;
+  }
+}
+
+/* 📱 모바일: 1열 + 원본 비율 유지(PC에는 영향 없음) */
+@media (max-width: 640px){
+  .howtouse-grid, .howto-grid { display: grid !important; grid-template-columns: 1fr !important; }
+  .howtouse-item, .howto-item{
+    aspect-ratio: auto !important;
+  }
+  .howtouse-item img, .howto-item img{
+    height: auto !important;
+    object-fit: contain !important;
+  }
+}
+
+/* 오버레이 기본(없으면 유지/추가) */
+.overlay{ position:absolute; inset:0; pointer-events:none; }
+.olabel{ position:absolute; color:#000; font-weight:400; }
+.olabel.anchor-topcenter{ transform:translateX(-50%); }
+.olabel.anchor-topend{ transform:translateX(-100%); }
 
 </body>
 </html>
