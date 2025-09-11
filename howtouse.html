@@ -565,5 +565,27 @@
   }
 })();
 </script>
+<style id="__howto_grid_lock">
+/* 데스크톱/태블릿: 3열/2열, 행 순서 고정 */
+@media (min-width:1025px){
+  #howtoGrid.howtouse-grid{ display:grid !important; grid-template-columns:repeat(3,1fr) !important; gap:12px !important; }
+}
+@media (min-width:641px) and (max-width:1024px){
+  #howtoGrid.howtouse-grid{ display:grid !important; grid-template-columns:repeat(2,1fr) !important; gap:12px !important; }
+}
+/* 카드 높이/이미지: PC는 예전처럼 고정 비율 + cover */
+@media (min-width:641px){
+  #howtoGrid .howtouse-item{ aspect-ratio:1/2 !important; position:relative; overflow:hidden; }
+  #howtoGrid .howtouse-item img{ width:100%; height:100% !important; object-fit:cover !important; display:block; }
+}
+/* 모바일: 1열(기존 의도) */
+@media (max-width:640px){
+  #howtoGrid.howtouse-grid{ display:grid !important; grid-template-columns:1fr !important; gap:12px !important; }
+  #howtoGrid .howtouse-item{ aspect-ratio:auto !important; }
+  #howtoGrid .howtouse-item img{ height:auto !important; object-fit:contain !important; }
+}
+</style>
+
+
 </body>
 </html>
