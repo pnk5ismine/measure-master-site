@@ -342,6 +342,33 @@
 .olabel{ position:absolute; color:#000; font-weight:400; }
 .olabel.anchor-topcenter{ transform:translateX(-50%); }
 .olabel.anchor-topend{ transform:translateX(-100%); }
+
+/* 모바일 nav 정리: 가로 스크롤 + 말줄임 */
+@media (max-width:640px){
+  header{ flex-wrap: wrap; gap:8px; }
+  header nav{
+    order: 3;
+    display:flex; gap:8px;
+    overflow-x:auto; white-space:nowrap;
+    -webkit-overflow-scrolling:touch; padding-bottom:4px;
+    scrollbar-width:none;
+  }
+  header nav::-webkit-scrollbar{ display:none; }
+
+  header nav a{
+    margin:0;                        /* 데스크톱용 margin-left 초기화 */
+    flex:0 0 auto;                   /* 한 칩씩 */
+    max-width:42vw;                  /* 긴 문구는 잘라서 … */
+    overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+    padding:6px 10px; border:1px solid var(--border);
+    border-radius:999px; background:#0f1320; color:#e7edf5;
+    font-size:13px; line-height:1;
+  }
+
+  .brand{order:1}
+  .lang{order:2; margin-left:auto;}
+}
+
 </style>
 
 </body>
