@@ -108,12 +108,12 @@
 /* howtouse: 최소 렌더러(22장 강제 렌더, JSON 실패해도 이미지 노출) */
 (function(){
   const GRID_ID       = "howtoGrid";                   // <div id="howtoGrid" ...>
-  const TOTAL_PAGES   = 22;
+  const TOTAL_PAGES   = 23;
   const IMG_DIRS      = ["/images/howtouse", "/image/howtouse"]; // 둘 다 시도
   const IMG_PREFIX    = "howtouse";
   const IMG_EXTS      = ["jpg","png","jpeg","webp"];
-  const OVERLAYS_JSON = "/assets/data/howtouse_overlays_pc.json?v=pc26"; // ★ 숫자만 올리면 캐시 무력화
-  const STRINGS_JSON  = "/assets/data/strings_ko_pc.json?v=pc26";
+  const OVERLAYS_JSON = "/assets/data/howtouse_overlays_pc.json?v=pc27"; // ★ 숫자만 올리면 캐시 무력화
+  const STRINGS_JSON  = "/assets/data/strings_ko_pc.json?v=pc27";
   const BASE_H        = 600; // dy 스케일 기준
 
   function grid(){
@@ -355,6 +355,7 @@
 .olabel.anchor-topend{    transform:translateX(-100%); }
 
 </style>
+
 <style id="__mobile_nav_force">
 @media (max-width:640px){
   /* 헤더를 줄바꿈 가능하게 강제 */
@@ -445,6 +446,124 @@
   .brand{ order:1 !important; }
 }
 </style>
+<style id="__howto_preview_css">
+/* 미리보기 토글 전용 — 기존 레이아웃/크기값은 건드리지 않음 */
+#htp-bar{
+  position:fixed; z-index:9999; top:10px; right:10px;
+  display:flex; gap:6px; align-items:center;
+  padding:8px; border-radius:10px;
+  background:rgba(15,19,32,.95); border:1px solid var(--border,#1e2230);
+  color:#e7edf5; font:12px system-ui;
+}
+#htp-bar button, #htp-bar label{
+  border:1px solid var(--border,#1e2230); background:#0f1320; color:#e7edf5;
+  border-radius:8px; padding:6px 8px; cursor:pointer;
+}
+#htp-bar .muted{opacity:.8}
+.htp-highlight .olabel{ background:rgba(255,255,255,.9); color:#000!important; outline:1px dashed #000; }
+.htp-dim .howtouse-item img{ opacity:.6; }
+#htp-bar input[type="number"]{ width:60px; padding:4px 6px; border-radius:6px; border:1px solid var(--border,#1e2230); background:#0f1320; color:#e7edf5; }
+@media (max-width:640px){ #htp-bar{ top:auto; bottom:10px; right:10px; } }
+</style>
+<script>
+(function(){
+  const qs = new URLSearchParams(location.search);
+  if (!(qs.has('edit') || qs.has('preview'))) return;  // 일반 방문자에게는 비활성
 
+  // 카드에 페이지 번호 태깅
+  function tagPages(){
+    const cards = document.querySelectorAll('.howtouse-item, .howto-item');
+    let fallback = 1;
+    cards.forEach(card=>{
+      // href 또는 img.alt에서 번호 추출
+      const href = card.getAttribute('href') || '';
+      let m = href.match(/howtouse(\d{2})\./);
+      if(!m){
+        const alt = card.querySelector('img')?.alt || '';
+        m = alt.match(/(\d{2})/);
+      }
+      const num = m ? m[1] : String(fallback++).padStart(2,'0');
+      card.dataset.page = num;
+    });
+  }
+
+  function scrollToPage(num){
+    const sel = `.howtouse-item[data-page="${String(num).padStart(2,'0')}"], .howto-item[data-page="${String(num).padStart(2,'0')}"]`;
+    const el = document.querySelector(sel);
+    if(!el) return;
+    el.scrollIntoView({behavior:'smooth', block:'center'});
+    // 잠깐 하이라이트
+    el.style.outline='2px solid #5eead4'; el.style.outlineOffset='2px';
+    setTimeout(()=>{ el.style.outline=''; el.style.outlineOffset=''; }, 800);
+  }
+
+  function totalPages(){
+    return document.querySelectorAll('.howtouse-item, .howto-item').length;
+  }
+
+  function buildBar(){
+    if(document.getElementById('htp-bar')) return;
+    const bar = document.createElement('div'); bar.id='htp-bar';
+    bar.innerHTML = `
+      <button type="button" id="htp-prev">◀</button>
+      <label class="muted">page</label>
+      <input type="number" id="htp-goto" min="1" step="1" />
+      <span class="muted">/ <b id="htp-total"></b></span>
+      <button type="button" id="htp-next">▶</button>
+      <button type="button" id="htp-tog-hl">라벨 강조</button>
+      <button type="button" id="htp-tog-dim">배경 흐리기</button>
+    `;
+    document.body.appendChild(bar);
+
+    const total = totalPages();
+    document.getElementById('htp-total').textContent = total;
+    const input = document.getElementById('htp-goto');
+    input.value = 1;
+
+    document.getElementById('htp-prev').onclick = ()=>{
+      const n = Math.max(1, (+input.value||1)-1); input.value = n; scrollToPage(n);
+    };
+    document.getElementById('htp-next').onclick = ()=>{
+      const n = Math.min(total, (+input.value||1)+1); input.value = n; scrollToPage(n);
+    };
+    input.addEventListener('change', ()=>{
+      let n = +input.value||1; n = Math.min(Math.max(1,n), total);
+      input.value = n; scrollToPage(n);
+    });
+
+    document.getElementById('htp-tog-hl').onclick = ()=>{
+      document.body.classList.toggle('htp-highlight');
+    };
+    document.getElementById('htp-tog-dim').onclick = ()=>{
+      document.body.classList.toggle('htp-dim');
+    };
+
+    // 키보드 단축키(j/k 또는 ←/→)
+    window.addEventListener('keydown', (e)=>{
+      if (['INPUT','TEXTAREA'].includes((e.target.tagName||'').toUpperCase())) return;
+      if (e.key==='ArrowLeft' || e.key==='k'){
+        e.preventDefault(); document.getElementById('htp-prev').click();
+      } else if (e.key==='ArrowRight' || e.key==='j'){
+        e.preventDefault(); document.getElementById('htp-next').click();
+      }
+    });
+  }
+
+  // 초기화
+  function init(){
+    tagPages();
+    buildBar();
+    // 처음 로드시 #page=n 같은 해시가 있으면 이동
+    const hash = location.hash.match(/page=(\d{1,2})/);
+    if (hash){ scrollToPage(+hash[1]); document.getElementById('htp-goto').value = +hash[1]; }
+  }
+
+  if (document.readyState === 'complete' || document.readyState === 'interactive'){
+    setTimeout(init, 0);
+  } else {
+    window.addEventListener('DOMContentLoaded', init);
+  }
+})();
+</script>
 </body>
 </html>
