@@ -261,54 +261,6 @@
 })();
 </script>
 
-/* ===== ROLLBACK: PC/태블릿은 예전처럼, 모바일만 1열 ===== */
-
-/* 공통: howtouse-grid / howto-grid 모두 지원 */
-.howtouse-grid, .howto-grid { gap: 12px; }
-
-/* ✅ PC/태블릿: 3열(>1024px), 2열(641~1024px), 고정 비율 + cover */
-@media (min-width: 1025px){
-  .howtouse-grid, .howto-grid { display: grid !important; grid-template-columns: repeat(3, 1fr) !important; }
-}
-@media (min-width: 641px) and (max-width: 1024px){
-  .howtouse-grid, .howto-grid { display: grid !important; grid-template-columns: repeat(2, 1fr) !important; }
-}
-
-/* 카드/이미지: 예전 상태로 강제(고정 비율, 이미지가 카드 꽉 채움) */
-@media (min-width: 641px){
-  .howtouse-item, .howto-item,
-  .howtouse-item.ratio-free, .howto-item.ratio-free{
-    position: relative;
-    overflow: hidden;
-    aspect-ratio: 1 / 2 !important;   /* ← 예전과 동일 비율 */
-  }
-  .howtouse-item img, .howto-item img,
-  .howtouse-item.ratio-free img, .howto-item.ratio-free img{
-    width: 100%;
-    height: 100% !important;
-    object-fit: cover !important;     /* ← 예전과 동일(크롭) */
-    display: block;
-  }
-}
-
-/* 📱 모바일: 1열 + 원본 비율 유지(PC에는 영향 없음) */
-@media (max-width: 640px){
-  .howtouse-grid, .howto-grid { display: grid !important; grid-template-columns: 1fr !important; }
-  .howtouse-item, .howto-item{
-    aspect-ratio: auto !important;
-  }
-  .howtouse-item img, .howto-item img{
-    height: auto !important;
-    object-fit: contain !important;
-  }
-}
-
-/* 오버레이 기본(없으면 유지/추가) */
-.overlay{ position:absolute; inset:0; pointer-events:none; }
-.olabel{ position:absolute; color:#000; font-weight:400; }
-.olabel.anchor-topcenter{ transform:translateX(-50%); }
-.olabel.anchor-topend{ transform:translateX(-100%); }
-
 <style id="__pc_rollback_css">
 /* PC/태블릿: 예전 레이아웃으로 복구(3열/2열, 고정비율+cover) */
 .howtouse-grid, .howto-grid { gap:12px; }
@@ -344,36 +296,64 @@
 .olabel.anchor-topend{ transform:translateX(-100%); }
 </style>
 <style id="__mobile_nav_fix">
-/* 📱 모바일 전용: 메뉴를 칩 형태로 가지런히(말줄임 허용), PC 영향 없음 */
-@media (max-width:640px){
-  header{ display:flex; flex-wrap:wrap; align-items:center; gap:8px; }
-
-  /* 헤더 내 배치 순서 고정 */
-  .brand{ order:1; }
-  .lang { order:2; margin-left:auto; }
-  header nav{ 
-    order:3; 
-    display:flex; 
-    flex-wrap:wrap;         /* 2줄 이상 자동 정렬 */
-    gap:8px; 
-    width:100%;
+/* 기본: 데스크톱/태블릿 메이슨리, 모바일 1열 */
+@media (min-width: 641px){
+  /* ✅ 그리드를 끄고 컬럼 레이아웃으로 전환 (공백 없이 촘촘히) */
+  .howtouse-grid{
+    display: block !important;   /* grid → block */
+    column-count: 3;             /* 데스크톱 3열 */
+    column-gap: 12px;
+  }
+  @media (min-width: 641px) and (max-width: 1023px){
+    .howtouse-grid{ column-count: 2; }  /* 태블릿 2열 */
   }
 
-  /* 🔧 기존 nav a { margin-left:16px } 를 무력화 */
-  header nav a{
-    margin:0 !important;
-    flex:1 1 calc(50% - 8px); /* 2열로 반반 배치(폭 좁으면 자동 줄바꿈) */
-    min-width:140px;
-    max-width:100%;
-    display:inline-flex; align-items:center; justify-content:center;
-    padding:8px 10px;
-    border:1px solid var(--border,#1e2230);
-    border-radius:999px;
-    background:#0f1320; color:#e7edf5;
-    font-size:13px; line-height:1.2;
-    white-space:nowrap; overflow:hidden; text-overflow:ellipsis; /* 일부 텍스트 가려져도 깔끔하게 */
+  .howtouse-item{
+    display: block;
+    width: 100%;
+    margin: 0 0 12px;            /* 열 사이 간격 */
+    break-inside: avoid;         /* 항목 분리(줄 바꿈 금지) */
+    position: relative;          /* 오버레이 기준 */
+    overflow: hidden;
+    border: 1px solid var(--border, #1e2230);
+    border-radius: 10px;
+    background: #0f1320;
+  }
+  .howtouse-item img{
+    width: 100%;
+    height: auto;                /* ✅ 원본 비율 유지 */
+    object-fit: contain;         /* ✅ 크롭 금지 → 라벨 왜곡 방지 */
+    display: block;
   }
 }
+
+/* 📱 모바일: 1열 */
+@media (max-width: 640px){
+  .howtouse-grid{
+    display: grid !important;
+  }
+  .howtouse-grid{ grid-template-columns: 1fr; gap: 12px; }
+  .howtouse-item{
+    position: relative;
+    overflow: hidden;
+    border: 1px solid var(--border, #1e2230);
+    border-radius: 10px;
+    background: #0f1320;
+  }
+  .howtouse-item img{
+    width: 100%;
+    height: auto;
+    object-fit: contain;         /* 모바일도 왜곡/크롭 방지 */
+    display: block;
+  }
+}
+
+/* 오버레이 기본 (없다면 추가) */
+.overlay{ position:absolute; inset:0; pointer-events:none; }
+.olabel{ position:absolute; color:#000; font-weight:400; }
+.olabel.anchor-topcenter{ transform:translateX(-50%); }
+.olabel.anchor-topend{    transform:translateX(-100%); }
+
 </style>
 
 </body>
