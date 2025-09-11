@@ -75,19 +75,34 @@
 </footer>
 
 <script>
-/* howtouse: 최소 렌더러(22장 강제 렌더, 오류 격리, 편집/핫키/미리보기 없음) */
+/* howtouse: 최소 렌더러(22장 강제 렌더, JSON 실패해도 이미지 노출) */
 (function(){
-  const GRID_ID       = "howtoGrid";            // <div id="howtoGrid" ...>
+  const GRID_ID       = "howtoGrid";                   // <div id="howtoGrid" ...>
   const TOTAL_PAGES   = 22;
-  const IMG_DIRS      = ["/images/howtouse", "/image/howtouse"]; // 우선순위대로 시도
+  const IMG_DIRS      = ["/images/howtouse", "/image/howtouse"]; // 둘 다 시도
   const IMG_PREFIX    = "howtouse";
   const IMG_EXTS      = ["jpg","png","jpeg","webp"];
-  const OVERLAYS_JSON = "/assets/data/howtouse_overlays_pc.json?v=pc24"; // ★ 캐시버스터 숫자 올렸습니다
-  const STRINGS_JSON  = "/assets/data/strings_ko_pc.json?v=pc24";
+  const OVERLAYS_JSON = "/assets/data/howtouse_overlays_pc.json?v=pc26"; // ★ 숫자만 올리면 캐시 무력화
+  const STRINGS_JSON  = "/assets/data/strings_ko_pc.json?v=pc26";
   const BASE_H        = 600; // dy 스케일 기준
 
-  function $(sel){ return document.getElementById(sel) || document.querySelector(sel); }
-  function grid(){ return document.getElementById(GRID_ID) || document.querySelector(".howtouse-grid") || document.querySelector(".howto-grid"); }
+  function grid(){
+    return document.getElementById(GRID_ID)
+        || document.querySelector(".howtouse-grid")
+        || document.querySelector(".howto-grid");
+  }
+
+  function createImage(num){
+    const img = new Image();
+    img.alt = `사용법 ${num}`;
+    img.loading = "eager"; // 우선 즉시 로드(안정화 후 lazy로 바꿔도 됨)
+    const cands = [];
+    for(const d of IMG_DIRS) for(const e of IMG_EXTS) cands.push(`${d}/${IMG_PREFIX}${num}.${e}`);
+    let i=0;
+    img.onerror = ()=>{ if(++i<cands.length) img.src=cands[i]; else img.onerror=null; };
+    img.src = cands[i];
+    return img;
+  }
 
   function parseColorHex(hex){
     if(!hex) return null;
@@ -104,18 +119,6 @@
     if(a.includes("end"))    return "anchor-topend";
     return "anchor-topstart";
   }
-  function createImage(num){
-    const img = new Image();
-    img.alt = `사용법 ${num}`;
-    img.loading = "eager"; // 문제 배제용(안정화 후 lazy로 바꿔도 됨)
-    const cands = [];
-    for(const d of IMG_DIRS) for(const e of IMG_EXTS) cands.push(`${d}/${IMG_PREFIX}${num}.${e}`);
-    let i=0;
-    img.onerror = ()=>{ if(++i<cands.length) img.src=cands[i]; else img.onerror=null; };
-    img.src = cands[i];
-    return img;
-  }
-
   function layoutLabels(card, labels, STR){
     let ol = card.querySelector(".overlay");
     if(!ol){ ol=document.createElement("div"); ol.className="overlay"; card.appendChild(ol); }
@@ -171,7 +174,7 @@
     if(!container){ console.error("[howtouse] grid container not found"); return; }
     container.innerHTML = "";
 
-    // 데이터 로드(문제 생겨도 이미지 렌더는 계속함)
+    // JSON은 실패해도 이미지 렌더는 계속
     let overlays=null, strings=null;
     try{ [overlays, strings] = await Promise.all([loadJson(OVERLAYS_JSON), loadJson(STRINGS_JSON)]); }
     catch(e){ console.warn("[howtouse] JSON load warn:", e.message); }
@@ -204,31 +207,30 @@
         }
       }catch(err){
         console.error("[howtouse] render error @", num, err);
-        // 실패해도 다음 페이지는 계속
       }
     }
   }
 
+  // 최소 스타일(없으면 추가)
+  (function injectCSS(){
+    if (document.getElementById("__howtouse_min_css")) return;
+    const s = document.createElement("style");
+    s.id="__howtouse_min_css";
+    s.textContent = `
+      .overlay{position:absolute;inset:0;pointer-events:none}
+      .olabel{position:absolute;color:#000;font-weight:400}
+      .olabel.anchor-topcenter{transform:translateX(-50%)}
+      .olabel.anchor-topend{transform:translateX(-100%)}
+      .howtouse-item{position:relative;overflow:hidden;border:1px solid var(--border,#1e2230);border-radius:10px;background:#0f1320}
+      .howtouse-item img{width:100%;height:auto;object-fit:cover;display:block}
+    `;
+    document.head.appendChild(s);
+  })();
+
   window.addEventListener("load", init);
 })();
-
-/* 데스크톱/태블릿 기본: 3열 → 2열 */
-.howtouse-grid{
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
-}
-@media (max-width:1024px){
-  .howtouse-grid{ grid-template-columns: repeat(2, 1fr); }
-}
-
-/* 🔻 모바일: 1열(한 페이지씩 아래로 나열) */
-@media (max-width:640px){
-  .howtouse-grid{ grid-template-columns: 1fr; }
-  .howtouse-item{ width: 100%; }
-}
-
 </script>
+
 
 </body>
 </html>
