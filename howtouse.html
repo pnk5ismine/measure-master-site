@@ -21,9 +21,39 @@
     h1{margin:8px 0 2px;font-size:22px}
     p.muted{color:var(--muted);margin:2px 0 0}
     .howtouse{ margin-top:10px; }
-    .howtouse-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:12px; }
-    @media (max-width:1024px){ .howtouse-grid{ grid-template-columns:repeat(2,1fr);} }
-    @media (max-width:640px){  .howtouse-grid{ grid-template-columns:1fr;} }
+
+/* 그리드 기본(데스크톱 3열, 태블릿 2열) */
+.howtouse-grid{
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+@media (max-width:1024px){
+  .howtouse-grid{ grid-template-columns: repeat(2, 1fr); }
+}
+
+/* ✅ 데스크톱/태블릿: 카드 높이 고정(행 균일) */
+@media (min-width:641px){
+  .howtouse-item{ 
+    display:block;            /* 안전 */
+    aspect-ratio: 1 / 2;      /* 필요하면 3/4, 4/5 등으로 조절 가능 */
+    position: relative;
+    overflow: hidden;
+  }
+  .howtouse-item img{
+    width:100%;
+    height:100%;              /* 카드 높이에 맞춤 */
+    object-fit: cover;        /* 크롭해서 균일 높이 유지 */
+    display:block;
+  }
+}
+
+/* 📱 모바일: 1열, 원본 비율 */
+@media (max-width:640px){
+  .howtouse-grid{ grid-template-columns: 1fr; }
+  .howtouse-item{ aspect-ratio: auto; }
+  .howtouse-item img{ height:auto; object-fit: contain; }
+}
     .howtouse-item{ position:relative; display:block; border-radius:10px; overflow:hidden; background:#0f1320; aspect-ratio:1/2; border:1px solid var(--border); }
     .howtouse-item img{ width:100%; height:100%; object-fit:cover; display:block; image-rendering:auto; transition:transform .2s ease-out, opacity .2s ease-out; opacity:.98; }
     .howtouse-item:hover img{ transform:scale(1.02); opacity:1; }
