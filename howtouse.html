@@ -309,5 +309,40 @@
 .olabel.anchor-topcenter{ transform:translateX(-50%); }
 .olabel.anchor-topend{ transform:translateX(-100%); }
 
+<style id="__pc_rollback_css">
+/* PC/태블릿: 예전 레이아웃으로 복구(3열/2열, 고정비율+cover) */
+.howtouse-grid, .howto-grid { gap:12px; }
+
+@media (min-width:1025px){
+  .howtouse-grid, .howto-grid{ display:grid!important; grid-template-columns:repeat(3,1fr)!important; }
+}
+@media (min-width:641px) and (max-width:1024px){
+  .howtouse-grid, .howto-grid{ display:grid!important; grid-template-columns:repeat(2,1fr)!important; }
+}
+
+@media (min-width:641px){
+  .howtouse-item, .howto-item{
+    position:relative; overflow:hidden;
+    aspect-ratio:1/2!important;
+  }
+  .howtouse-item img, .howto-item img{
+    width:100%; height:100%!important; object-fit:cover!important; display:block;
+  }
+}
+
+/* 모바일: 1열(PC에 영향 없음) */
+@media (max-width:640px){
+  .howtouse-grid, .howto-grid{ display:grid!important; grid-template-columns:1fr!important; }
+  .howtouse-item, .howto-item{ aspect-ratio:auto!important; }
+  .howtouse-item img, .howto-item img{ height:auto!important; object-fit:contain!important; }
+}
+
+/* 오버레이 기본(없으면 추가) */
+.overlay{ position:absolute; inset:0; pointer-events:none; }
+.olabel{ position:absolute; color:#000; font-weight:400; }
+.olabel.anchor-topcenter{ transform:translateX(-50%); }
+.olabel.anchor-topend{ transform:translateX(-100%); }
+</style>
+
 </body>
 </html>
