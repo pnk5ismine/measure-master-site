@@ -518,7 +518,7 @@ Alt+Shift+C = 전체 pages 복사`;
   const TARGETS = new Set(["03","04","05","06"]); // 퍼센트 좌표로 강제 변환할 대상
   // JSON 경로: 필요시 v=pc14 등으로 숫자만 바꾸세요.
   const OVERLAYS = [
-    "/assets/data/howtouse_overlays_pc.json?v=pc15",
+    "/assets/data/howtouse_overlays_pc.json?v=pc16",
     "/assets/data/howtouse_overlays_pc.json?nocache="+Date.now()
   ];
   const STRINGS = [
@@ -684,6 +684,77 @@ Alt+Shift+C = 전체 pages 복사`;
   window.addEventListener('load', ()=>run().catch(e=>console.error('[rescue] failed', e)));
 })();
 </script>
+<script>
+/* ===== HowTo: self-contained renderer (forces 22 pages) + dx/dy→% for 03–06 ===== */
+(function(){
+  const TOTAL = 22;
+  const DIRS  = ["/image/howtouse", "/images/howtouse"]; // 둘 다 시도(서버 구조 변화 대비)
+  const EXTS  = ["jpg","png","jpeg","webp"];
+  const PREFIX = "howtouse";
+  const BASE_H = 600;
+  const PCT_PAGES = new Set(["03","04","05","06"]); // 퍼센트 좌표 강제 대상
+  const OVERS = ["/assets/data/howtouse_overlays_pc.json?v=pc15", "/assets/data/howtouse_overlays_pc.json?nocache="+Date.now()];
+  const STRS  = ["/assets/data/strings_ko_pc.json?v=pc15",        "/assets/data/strings_ko_pc.json?nocache="+Date.now()];
+
+  // 최소 CSS 주입(기존 스타일과 충돌 없이 동작)
+  (function injectCSS(){
+    const css = `
+      .overlay{position:absolute;inset:0;pointer-events:none}
+      .olabel{position:absolute;color:#000;font-weight:400}
+      .olabel.anchor-topcenter{transform:translateX(-50%)}
+      .olabel.anchor-topend{transform:translateX(-100%)}
+      .howtouse-item.ratio-free{aspect-ratio:unset !important}
+      .howtouse-item.ratio-free img{height:auto !important;object-fit:contain !important}
+    `;
+    const s=document.createElement('style'); s.textContent=css; document.head.appendChild(s);
+  })();
+
+  function gridEl(){
+    return document.getElementById("howtoGrid")
+        || document.querySelector(".howtouse-grid")
+        || document.querySelector(".howto-grid");
+  }
+  async function loadFirst(urls){
+    for (const u of urls){
+      try{ const r=await fetch(u,{cache:"no-store"}); if(r.ok) return await r.json(); }catch(e){}
+    }
+    return null;
+  }
+  function buildMap(pages){
+    const map={};
+    (pages||[]).forEach(group=>{
+      const any = group.find(x=>/^htu(\d{2})_/.test(x.key));
+      if(any){ const num = any.key.match(/^htu(\d{2})_/)[1]; map[num]=group; }
+    });
+    return map;
+  }
+  function anchorClass(align="TopStart"){
+    const a=String(align).toLowerCase();
+    if(a.includes("center")) return "anchor-topcenter";
+    if(a.includes("end"))    return "anchor-topend";
+    return "anchor-topstart";
+  }
+  function toPercentCfg(cfg, W, H){
+    if (typeof cfg.xPercent==='number' && typeof cfg.yPercent==='number') return cfg;
+    if (!('dx' in cfg || 'dy' in cfg) || !(W>0 && H>0)) return cfg;
+    const dx=+cfg.dx||0, dy=+cfg.dy||0;
+    const a = String(cfg.align||'TopStart').toLowerCase();
+    const basePct = a.includes('center')?0.5: a.includes('end')?1:0;
+    const xPct = basePct + dx/(BASE_H*(W/H));
+    const yPct = dy/BASE_H;
+    const out = Object.assign({}, cfg, {xPercent:xPct, yPercent:yPct});
+    delete out.dx; delete out.dy;
+    return out;
+  }
+  function createImg(num){
+    const img = new Image();
+    img.alt = `사용법 ${num}`;
+    img.loading = "eager"; // 문제 배제용(원하면 lazy로 변경 가능)
+    // 후보 src 목록(디렉터리×확장자)
+    const cands = [];
+    for(const d of DIRS) for(const ext of EXTS) cands.push(`${d}/${PREFIX}${num}.${ext}`);
+    let i=0;
+    img.onerror
 
 </body>
 </html>
