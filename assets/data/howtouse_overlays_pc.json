@@ -27,9 +27,9 @@
     ],
 [
 {"key":"htu03_1_tmu","align":"TopCenter","textAlign":"Center","bold":true,"sizeSp":27,"lineHeightSp":17,"dx":0,"dy":35},
-{"key":"htu03_2_hom","align":"TopStart","textAlign":"End","bold":false,"sizeSp":14,"lineHeightSp":16,"xPercent":0.55,"xPercent":0.55,"yPercent":0.35},
-{"key":"htu03_3_mai","align":"TopStart","textAlign":"Start","bold":false,"sizeSp":14,"lineHeightSp":14,"xPercent":0.50,"yPercent":0.5},
-{"key":"htu03_4_sub","align":"TopStart","textAlign":"Start","bold":false,"sizeSp":12,"lineHeightSp":13,"xPercent":0.55,"yPercent":0.57},
+{"key":"htu03_2_hom","align":"TopStart","textAlign":"Start","bold":false,"sizeSp":14,"lineHeightSp":16,"xPercent":0.45, "yPercent":0.38},
+{"key":"htu03_3_mai","align":"TopStart","textAlign":"Start","bold":false,"sizeSp":14,"lineHeightSp":14,"xPercent":0.50," yPercent":0.51},
+{"key":"htu03_4_sub","align":"TopStart","textAlign":"Start","bold":false,"sizeSp":12,"lineHeightSp":13,"xPercent":0.55,"yPercent":0.58},
 {"key":"htu03_5_rel","align":"TopStart","textAlign":"Start","bold":false,"sizeSp":14,"lineHeightSp":14,"xPercent":0.5,"yPercent":0.64},
 {"key":"htu03_6_set","align":"TopStart","textAlign":"Start","bold":false,"sizeSp":12,"lineHeightSp":16,"xPercent":0.5,"yPercent":0.72},
 {"key":"htu03_7_sid","align":"TopStart","textAlign":"Start","bold":false,"sizeSp":12,"lineHeightSp":16,"xPercent":0.5,"yPercent":0.82}
@@ -37,13 +37,13 @@
 
 [
 {"key":"htu04_1_sub","align":"TopCenter","textAlign":"Center","bold":true,"sizeSp":27,"lineHeightSp":30,"dx":0,"dy":30},
-{"key":"htu04_2_sav","align":"TopStart","textAlign":"End","bold":false,"sizeSp":12,"lineHeightSp":13,"xPercent":0.87,"yPercent":0.32},
-{"key":"htu04_3_loa","align":"TopStart","textAlign":"End","bold":false,"sizeSp":12,"lineHeightSp":13,"xPercent":0.85,"yPercent":0.42},
-{"key":"htu04_4_red","align":"TopStart","textAlign":"End","bold":false,"sizeSp":12,"lineHeightSp":13,"xPercent":0.76,"yPercent":0.52},
-{"key":"htu04_5_und","align":"TopStart","textAlign":"End","bold":false,"sizeSp":12,"lineHeightSp":13,"xPercent":0.67,"yPercent":0.60},
-{"key":"htu04_6_res","align":"TopStart","textAlign":"End","bold":false,"sizeSp":12,"lineHeightSp":13,"xPercent":0.57,"yPercent":0.66},
-{"key":"htu04_7_mov","align":"TopStart","textAlign":"End","bold":false,"sizeSp":12,"lineHeightSp":13,"xPercent":0.5,"yPercent":0.76},
-{"key":"htu04_8_pai","align":"TopStart","textAlign":"End","bold":false,"sizeSp":12,"lineHeightSp":13,"xPercent":0.4,"yPercent":0.81},
+{"key":"htu04_2_sav","align":"TopStart","textAlign":"End","bold":false,"sizeSp":12,"lineHeightSp":13,"xPercent":0.87,"yPercent":0.36},
+{"key":"htu04_3_loa","align":"TopStart","textAlign":"End","bold":false,"sizeSp":12,"lineHeightSp":13,"xPercent":0.82,"yPercent":0.43},
+{"key":"htu04_4_red","align":"TopStart","textAlign":"End","bold":false,"sizeSp":12,"lineHeightSp":13,"xPercent":0.76,"yPercent":0.51},
+{"key":"htu04_5_und","align":"TopStart","textAlign":"End","bold":false,"sizeSp":12,"lineHeightSp":13,"xPercent":0.67,"yPercent":0.59},
+{"key":"htu04_6_res","align":"TopStart","textAlign":"End","bold":false,"sizeSp":12,"lineHeightSp":13,"xPercent":0.57,"yPercent":0.67},
+{"key":"htu04_7_mov","align":"TopStart","textAlign":"End","bold":false,"sizeSp":12,"lineHeightSp":13,"xPercent":0.5,"yPercent":0.74},
+{"key":"htu04_8_pai","align":"TopStart","textAlign":"End","bold":false,"sizeSp":12,"lineHeightSp":13,"xPercent":0.4,"yPercent":0.82},
 {"key":"htu04_9_str","align":"TopStart","textAlign":"End","bold":false,"sizeSp":12,"lineHeightSp":13,"xPercent":0.35,"yPercent":0.86}
 ],
 
@@ -60,7 +60,7 @@
 
 [
 {"key":"htu06_1_rec","align":"TopCenter","textAlign":"Center","bold":true,"sizeSp":27,"lineHeightSp":30,"dx":0,"dy":30},
-{"key":"htu06_2_mai","align":"TopStart","textAlign":"End","bold":false,"sizeSp":12,"lineHeightSp":13,"xPercent":0.27,"yPercent":0.37},
+{"key":"htu06_2_mai","align":"TopStart","textAlign":"End","bold":false,"sizeSp":12,"lineHeightSp":13,"xPercent":0.28,"yPercent":0.37},
 {"key":"htu06_3_rel","align":"TopStart","textAlign":"End","bold":false,"sizeSp":12,"lineHeightSp":13,"xPercent":0.47,"yPercent":0.44}
 ],
     [
