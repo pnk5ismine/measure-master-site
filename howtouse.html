@@ -452,6 +452,65 @@ Alt+Shift+C = 전체 pages 복사`;
 })();
 </script>
 
+<script>
+/* Drop-in patch: 03~06만 dx/dy → xPercent/yPercent 변환 (원본 코드 무변경) */
+(function(){
+  const TARGETS = new Set(["03","04","05","06"]);
+  const BASE_H = 600; // 메인 스크립트의 BASE_H와 동일해야 합니다.
+
+  function getPageNumFromItem(item){
+    const a = item.closest('a.howtouse-item') || item;
+    const href = a.getAttribute('href') || '';
+    let m = href.match(/howtouse(\d{2})\./);
+    if (m) return m[1];
+    const img = a.querySelector('img');
+    m = img?.alt?.match(/(\d{2})/);
+    return m ? m[1] : null;
+  }
+
+  function toPercentCfg(cfg, W, H){
+    if (typeof cfg.xPercent === 'number' && typeof cfg.yPercent === 'number') return cfg; // 이미 퍼센트면 그대로
+    const dx = +cfg.dx || 0, dy = +cfg.dy || 0;
+    const align = String(cfg.align||'TopStart').toLowerCase();
+    const basePct = align.includes('center') ? 0.5 : align.includes('end') ? 1 : 0; // Start=0, Center=0.5, End=1
+    const aspect = (W / H) || 1;
+
+    // 원래 렌더: top = dy * (H/BASE_H), left = base + dx * (H/BASE_H)
+    // 퍼센트 변환: y% = top/H = dy/BASE_H,  x% = left/W = basePct + dx/(BASE_H * (W/H))
+    const yPct = dy / BASE_H;
+    const xPct = basePct + dx / (BASE_H * aspect);
+
+    const out = Object.assign({}, cfg, { xPercent: xPct, yPercent: yPct });
+    delete out.dx; delete out.dy; // 퍼센트 경로를 강제 사용
+    return out;
+  }
+
+  function patchLabels(item, labels){
+    const num = getPageNumFromItem(item);
+    if (!num || !TARGETS.has(num)) return labels; // 03~06 외에는 그대로
+    const rect = item.getBoundingClientRect();
+    const W = rect.width, H = rect.height;
+    return (labels || []).map(cfg => (('dx' in cfg || 'dy' in cfg) ? toPercentCfg(cfg, W, H) : cfg));
+  }
+
+  function install(){
+    if (typeof window.layoutLabels !== 'function') return false;
+    if (window.__labelsPatched) return true;
+    const orig = window.layoutLabels;
+    window.layoutLabels = function(item, labels){
+      const patched = patchLabels(item, labels);
+      return orig.call(this, item, patched);
+    };
+    window.__labelsPatched = true;
+    return true;
+  }
+
+  if (!install()){
+    document.addEventListener('DOMContentLoaded', install, { once: true });
+    setTimeout(install, 500);
+  }
+})();
+</script>
 
 </body>
 </html>
