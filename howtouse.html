@@ -37,6 +37,14 @@
     /* JS 작동 확인용 토스트 */
     #ping{position:fixed;top:8px;right:8px;background:#16a34a;color:#fff;padding:6px 10px;border-radius:8px;z-index:99999;font:12px/1 system-ui}
   </style>
+<style>
+  /* 03~06만 원본 비율 유지(크롭 금지) */
+  .howtouse-item.ratio-free{ aspect-ratio: unset !important; }
+  .howtouse-item.ratio-free img{
+    height: auto !important;
+    object-fit: contain !important; /* cover → contain */
+  }
+</style>
 </head>
 <body>
 <header>
@@ -74,8 +82,8 @@
   const IMG_PREFIX    = "howtouse";
   const IMG_EXTS      = ["jpg","png","jpeg","webp"];
   const TOTAL_PAGES   = 22;
-  const OVERLAYS_JSON = "/assets/data/howtouse_overlays_pc.json?v=pc5";
-  const STRINGS_KO    = "/assets/data/strings_ko_pc.json?v=pc5";
+  const OVERLAYS_JSON = "/assets/data/howtouse_overlays_pc.json?v=pc9";
+  const STRINGS_KO    = "/assets/data/strings_ko_pc.json?v=pc9";
   const BASE_H        = 600;  // dx/dy 기준 높이
 
   document.getElementById('year').textContent = new Date().getFullYear();
@@ -199,6 +207,9 @@
     grid.innerHTML = "";
     for(let i=1;i<=TOTAL_PAGES;i++){
       const num = String(i).padStart(2,"0");
+
+      if (["03","04","05","06"].includes(num)) a.classList.add("ratio-free");
+
       const a = document.createElement("a");
       a.className = "howtouse-item";
       a.target="_blank"; a.rel="noopener";
