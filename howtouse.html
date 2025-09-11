@@ -82,8 +82,8 @@
   const IMG_PREFIX    = "howtouse";
   const IMG_EXTS      = ["jpg","png","jpeg","webp"];
   const TOTAL_PAGES   = 22;
-  const OVERLAYS_JSON = "/assets/data/howtouse_overlays_pc.json?v=pc12";
-  const STRINGS_KO    = "/assets/data/strings_ko_pc.json?v=pc12";
+  const OVERLAYS_JSON = "/assets/data/howtouse_overlays_pc.json?v=pc13";
+  const STRINGS_KO    = "/assets/data/strings_ko_pc.json?v=pc13";
   const BASE_H        = 600;  // dx/dy 기준 높이
 
   document.getElementById('year').textContent = new Date().getFullYear();
@@ -534,6 +534,76 @@ Alt+Shift+C = 전체 pages 복사`;
     }
   }
   window.addEventListener('load', ()=>{ setTimeout(rescue, 100); });
+})();
+</script>
+<script>
+/* Drop-in: 03~06만 dx/dy → xPercent/yPercent (이미지 높이 0인 경우는 건너뛰고, 에러는 잡아 넘어감) */
+(function(){
+  const TARGETS = new Set(["03","04","05","06"]);
+  const BASE_H = 600; // 메인 스크립트의 BASE_H와 동일해야 함
+
+  function pageNumFromItem(item){
+    const a = item.closest('a.howtouse-item') || item;
+    const href = a?.getAttribute('href') || '';
+    let m = href.match(/howtouse(\d{2})\./);
+    if (m) return m[1];
+    const img = a.querySelector('img');
+    m = img?.alt?.match(/(\d{2})/);
+    return m ? m[1] : null;
+  }
+
+  function toPercentCfg(cfg, W, H){
+    // 이미 퍼센트면 그대로
+    if (typeof cfg.xPercent === 'number' && typeof cfg.yPercent === 'number') return cfg;
+    // 퍼센트로 바꿀 dx/dy가 없거나, 아직 이미지가 로드되지 않아 W/H가 0이면 그대로 둠(다음 호출에서 다시 시도)
+    if (!(('dx' in cfg) || ('dy' in cfg)) || !(W>0 && H>0)) return cfg;
+
+    const dx = +cfg.dx || 0, dy = +cfg.dy || 0;
+    const a  = String(cfg.align || 'TopStart').toLowerCase();
+    const basePct = a.includes('center') ? 0.5 : a.includes('end') ? 1 : 0; // Start=0, Center=0.5, End=1
+    const aspect  = W / H;
+
+    // 원래 렌더: top = dy*(H/BASE_H), left = base + dx*(H/BASE_H)
+    // 퍼센트 변환: y% = dy/BASE_H, x% = basePct + dx/(BASE_H*(W/H))
+    const yPct = dy / BASE_H;
+    const xPct = basePct + dx / (BASE_H * aspect);
+
+    const out = Object.assign({}, cfg, { xPercent: xPct, yPercent: yPct });
+    delete out.dx; delete out.dy; // 이후엔 퍼센트 경로로만 렌더
+    return out;
+  }
+
+  function patchLabels(item, labels){
+    const num = pageNumFromItem(item);
+    if (!num || !TARGETS.has(num)) return labels; // 03~06 외에는 무변경
+    const rect = item.getBoundingClientRect();
+    const W = rect.width, H = rect.height;
+    return (labels || []).map(cfg => toPercentCfg(cfg, W, H));
+  }
+
+  function install(){
+    const orig = window.layoutLabels;
+    if (typeof orig !== 'function') return false;
+    if (window.__dx2pct_installed) return true;
+
+    window.layoutLabels = function(item, labels){
+      try{
+        // 03~06만 퍼센트 변환하여 렌더
+        return orig.call(this, item, patchLabels(item, labels));
+      }catch(e){
+        // 어떤 이유로든 실패해도 루프가 멈추지 않도록 원본 라벨로 한 번 더 시도
+        console.error('[dx→%] layoutLabels error:', e);
+        try { return orig.call(this, item, labels); } catch(_) {}
+      }
+    };
+    window.__dx2pct_installed = true;
+    return true;
+  }
+
+  if (!install()){
+    document.addEventListener('DOMContentLoaded', install, { once: true });
+    setTimeout(install, 500);
+  }
 })();
 </script>
 
