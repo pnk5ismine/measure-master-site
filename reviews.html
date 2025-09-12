@@ -289,14 +289,20 @@ const username =
   (session.user.email ? session.user.email.split('@')[0] : null) ||
   '익명';
 
+// insert 직전
+const nickname =
+  (session.user.user_metadata?.full_name)
+  || (session.user.email ? session.user.email.split('@')[0] : null)
+  || '익명';
 
-// 기존 insert에 username 필드를 추가
+
+// 기존 insert에 nickname 추가
 const ins = await sb.from("reviews").insert({
   title, content,
   image_path, image_url,
   user_id: session.user.id,
   author_email: session.user.email,
-  username                      // ← 추가
+  nickname                 // ✅ 추가
 }).select().single();
 
     if(ins.error){ formStatus.textContent = "등록 실패: " + ins.error.message; return; }
