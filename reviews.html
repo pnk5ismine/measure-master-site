@@ -93,6 +93,12 @@
   .btn.secondary{ background:#f9fafb; color:#111; border:1px solid #e5e7eb; }
 </style>
 
+<style id="reviews-img-80">
+  .item-img{ width:80%; max-width:80%; margin:10px auto 0; display:block; }
+  /* 작성 폼 미리보기도 동일 */
+  .thumb{ width:80%; max-width:80%; margin:10px auto 0; display:block; }
+</style>
+
 </head>
 <body>
 <header>
@@ -284,26 +290,21 @@
       image_url = pub.data.publicUrl; // 버킷을 public으로 만들었을 때
     }
 
-const username =
-  (session.user.user_metadata?.full_name) ||
-  (session.user.email ? session.user.email.split('@')[0] : null) ||
-  '익명';
-
-// insert 직전
+// 기존 submit 핸들러 안, insert 직전에 추가
 const nickname =
   (session.user.user_metadata?.full_name)
   || (session.user.email ? session.user.email.split('@')[0] : null)
   || '익명';
 
-
-// 기존 insert에 nickname 추가
+// INSERT payload에 nickname 추가
 const ins = await sb.from("reviews").insert({
   title, content,
   image_path, image_url,
   user_id: session.user.id,
   author_email: session.user.email,
-  nickname                 // ✅ 추가
+  nickname                      // ✅ 추가
 }).select().single();
+
 
     if(ins.error){ formStatus.textContent = "등록 실패: " + ins.error.message; return; }
     formStatus.textContent = "등록 완료!";
@@ -329,6 +330,33 @@ const ins = await sb.from("reviews").insert({
     $("#listStatus").textContent = data.length < PAGE_SIZE ? "마지막 페이지" : "";
     $("#more").disabled = data.length < PAGE_SIZE;
   }
+
+function displayName(row){
+  return row.nickname || (row.author_email ? maskEmail(row.author_email) : "익명");
+}
+// 사용처:
+<div class="item-meta">${displayName(row)} · ${fmtDate(row.created_at)}</div>
+
+// 등록 성공 직후에 추가
+formStatus.textContent = "등록 완료!";
+form.hidden = true;           // ✅ 작성 폼 숨기기
+document.querySelector('h2.section-title + .section-sub')?.scrollIntoView({behavior:'smooth', block:'start'});
+
+// 페이지 초기화 직후 한 번
+(function addListOnlyButton(){
+  const listCard = document.querySelectorAll('section.card')[1];
+  if(!listCard) return;
+  const btn = document.createElement('button');
+  btn.textContent = '목록만 보기';
+  btn.className = 'btn secondary';
+  btn.style.marginLeft = '8px';
+  listCard.querySelector('.section-title')?.insertAdjacentElement('afterend', btn);
+  btn.addEventListener('click', ()=>{
+    form.hidden = true; loginBox.hidden = true;
+    listCard.scrollIntoView({behavior:'smooth', block:'start'});
+  });
+})();
+
 
   function ownerButtons(row, currentUser){
     if(!currentUser || row.user_id !== currentUser.id) return "";
@@ -413,6 +441,31 @@ const ins = await sb.from("reviews").insert({
     await refreshAuthUI();
     await loadList();
   })();
+
+async function fileToImage(file){
+  return new Promise((res, rej)=>{
+    const img = new Image();
+    img.onload = ()=> res(img);
+    img.onerror = rej;
+    img.src = URL.createObjectURL(file);
+  });
+}
+
+async function compressImage(file, {maxW=1600, quality=0.85, mime='image/jpeg'}={}){
+  const img = await fileToImage(file);
+  const scale = Math.min(1, maxW / img.naturalWidth);
+  if (scale === 1) return file; // 이미 충분히 작음
+
+  const canvas = document.createElement('canvas');
+  canvas.width = Math.round(img.naturalWidth * scale);
+  canvas.height = Math.round(img.naturalHeight * scale);
+  const ctx = canvas.getContext('2d');
+  ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+  const blob = await new Promise(r=> canvas.toBlob(r, mime, quality));
+  return new File([blob], file.name.replace(/\.\w+$/, '.jpg'), {type:mime});
+}
+
 </script>
 </body>
 </html>
