@@ -64,6 +64,35 @@
     .item-actions{display:flex;gap:8px;margin-top:10px}
     .danger{border-color:#7f1d1d;background:#2d1414;color:#fbb}
   </style>
+
+<style id="white-cards-theme">
+  /* 카드/목록을 화이트로, 본문 배경은 기존 다크 유지 */
+  .card{
+    background:#fff !important; color:#111 !important;
+    border:1px solid #e5e7eb !important; border-radius:16px;
+    box-shadow:0 1px 2px rgba(0,0,0,.08);
+  }
+  .item{
+    background:#fff !important; color:#111 !important;
+    border:1px solid #e5e7eb !important; border-radius:14px;
+    box-shadow:0 1px 2px rgba(0,0,0,.06);
+  }
+  .item-title{ color:#111 !important; }
+  .item-body{ color:#111 !important; }
+  .item-img{ background:#fff !important; }
+
+  /* 입력 요소도 화이트로 */
+  input[type="text"], input[type="email"], input[type="password"], textarea{
+    background:#fff !important; color:#111 !important; border:1px solid #e5e7eb !important;
+  }
+  .thumb{ background:#fff !important; border:1px dashed #e5e7eb !important; }
+
+  /* 버튼은 대비 유지(선택적으로 조정) */
+  .btn{ background:#111; color:#fff; border:1px solid #111; }
+  .btn:hover{ background:#222; }
+  .btn.secondary{ background:#f9fafb; color:#111; border:1px solid #e5e7eb; }
+</style>
+
 </head>
 <body>
 <header>
@@ -255,12 +284,20 @@
       image_url = pub.data.publicUrl; // 버킷을 public으로 만들었을 때
     }
 
-    const ins = await sb.from("reviews").insert({
-      title, content,
-      image_path, image_url,
-      user_id: session.user.id,
-      author_email: session.user.email
-    }).select().single();
+const username =
+  (session.user.user_metadata?.full_name) ||
+  (session.user.email ? session.user.email.split('@')[0] : null) ||
+  '익명';
+
+
+// 기존 insert에 username 필드를 추가
+const ins = await sb.from("reviews").insert({
+  title, content,
+  image_path, image_url,
+  user_id: session.user.id,
+  author_email: session.user.email,
+  username                      // ← 추가
+}).select().single();
 
     if(ins.error){ formStatus.textContent = "등록 실패: " + ins.error.message; return; }
     formStatus.textContent = "등록 완료!";
