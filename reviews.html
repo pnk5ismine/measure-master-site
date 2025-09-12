@@ -1,203 +1,375 @@
 <!doctype html>
-<html lang="ko" data-lang="ko">
+<html lang="ko">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title data-i18n="meta.title">사용후기 · Measure Master</title>
-  <meta name="description" content="Measure Master 사용자 후기 게시판" data-i18n-attr="content=meta.description" />
-  <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+  <title>Measure Master — 사용후기</title>
+  <meta name="description" content="Measure Master 사용자들이 올린 후기와 사진" />
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
   <style>
     :root { --bg:#0b0d12; --card:#121622; --muted:#9aa4b2; --pri:#5eead4; --border:#1e2230; }
     *{box-sizing:border-box}
     body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,'Noto Sans KR',sans-serif;background:var(--bg);color:#e7edf5}
     a{color:var(--pri);text-decoration:none} a:hover{text-decoration:underline}
-    header,main,footer{max-width:1000px;margin:0 auto;padding:16px}
+    header,main,footer{max-width:1100px;margin:0 auto;padding:16px}
     header{display:flex;align-items:center;justify-content:space-between;gap:12px}
     .brand{display:flex;align-items:center;gap:10px}
-    .logo{width:26px;height:26px;border-radius:8px;background:linear-gradient(135deg,#26f,#0bf);box-shadow:0 0 24px rgba(94,234,212,.25)}
-    .lang{display:flex;gap:6px;align-items:center}
-    .lang button{border:1px solid var(--border);background:#0f1320;color:#e7edf5;border-radius:999px;padding:6px 10px;cursor:pointer}
-    .lang button.active{outline:2px solid #2dd; font-weight:600}
+    .logo-img{width:28px;height:28px;border-radius:6px;object-fit:contain;background:#0e1422}
+    nav a{margin-left:16px;color:#cfd6e4}
     .muted{color:var(--muted)}
-    .wrap{display:grid;grid-template-columns:1fr;gap:18px;margin-top:10px}
-    @media(min-width:980px){.wrap{grid-template-columns:.9fr .6fr}}
-    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:18px}
-    .card h3{margin:0 0 8px;font-size:20px}
-    .row{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
-    .sp{flex:1 1 auto}
-    .pill{font:inherit;background:#0f1320;border:1px solid var(--border);border-radius:999px;padding:6px 10px}
-    .field{display:flex;flex-direction:column;gap:6px;margin:10px 0 2px}
-    input,textarea{width:100%;padding:10px 12px;border-radius:12px;border:1px solid var(--border);background:#0f1320;color:#e7edf5}
-    textarea{min-height:120px;resize:vertical}
-    button.primary{margin-top:10px;padding:10px 14px;background:#1d2639;color:#e7edf5;border:1px solid var(--border);border-radius:12px;cursor:pointer}
-    button.primary:hover{background:#223049}
-    ul.reviews{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:12px}
-    .review{padding:12px;border:1px solid var(--border);border-radius:12px;background:#0f1320}
+    .pill{background:#0f1320;border:1px solid var(--border);border-radius:999px;padding:4px 8px}
     footer{margin:30px auto 60px;text-align:center;color:var(--muted);font-size:14px}
+
+    /* 모바일 헤더 정리(메뉴 뭉침 방지) */
+    @media (max-width:640px){
+      header{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+      .brand{order:1}
+      .lang{order:2;margin-left:auto;width:100%;display:flex;justify-content:flex-end;gap:6px}
+      header nav{order:3;width:100%;display:flex;flex-wrap:nowrap;gap:8px;overflow-x:auto;white-space:nowrap;-webkit-overflow-scrolling:touch}
+      header nav::-webkit-scrollbar{display:none}
+      header nav a{margin:0;flex:0 0 auto;padding:8px 10px;border:1px solid var(--border);border-radius:999px;background:#0f1320;color:#e7edf5;font-size:13px;line-height:1.1;overflow:hidden;text-overflow:ellipsis}
+    }
+
+    /* 페이지 레이아웃 */
+    .layout{display:grid;grid-template-columns:1fr;gap:18px}
+    @media (min-width:1024px){ .layout{grid-template-columns:1fr .9fr;align-items:start} }
+
+    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:22px}
+    .section-title{margin:0 0 8px;font-size:20px}
+    .section-sub{margin:0 0 14px;color:var(--muted);font-size:14px}
+
+    /* 작성 폼 */
+    .field{display:flex;flex-direction:column;gap:6px;margin:10px 0 2px}
+    input[type="text"], textarea{
+      width:100%;padding:10px 12px;border-radius:12px;border:1px solid var(--border);
+      background:#0f1320;color:#e7edf5
+    }
+    textarea{min-height:120px;resize:vertical;white-space:pre-wrap}
+    .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+    .hint{font-size:12px;color:var(--muted)}
+    .btn{padding:10px 14px;background:#1d2639;color:#e7edf5;border:1px solid var(--border);border-radius:12px;cursor:pointer}
+    .btn:hover{background:#223049}
+    .btn.secondary{background:#0f1320}
+    .status{font-size:13px;color:var(--muted);margin-top:6px}
+    .thumb{width:100%;max-height:360px;object-fit:contain;border:1px dashed var(--border);border-radius:12px;background:#0f1320}
+
+    /* 목록 */
+    .list{display:grid;grid-template-columns:1fr;gap:12px}
+    .item{background:#0f1320;border:1px solid var(--border);border-radius:14px;padding:14px}
+    .item-head{display:flex;gap:8px;align-items:baseline}
+    .item-title{margin:0;font-size:18px}
+    .item-meta{margin-left:auto;font-size:12px;color:var(--muted)}
+    .item-body{white-space:pre-wrap;margin:8px 0 0}
+    .item-img{width:100%;max-height:500px;object-fit:contain;border-radius:10px;margin-top:10px;background:#0b0d12}
+    .item-actions{display:flex;gap:8px;margin-top:10px}
+    .danger{border-color:#7f1d1d;background:#2d1414;color:#fbb}
   </style>
 </head>
 <body>
 <header>
   <div class="brand">
-    <div class="logo" aria-hidden="true"></div>
+    <img src="/images/mm_logo_small.jpg" alt="Measure Master" class="logo-img" />
     <strong>Measure Master</strong>
+    <span class="pill">후기</span>
   </div>
   <nav>
-    <a href="/index.html" data-i18n="nav.home">홈</a>
-    <a href="/privacy.html" data-i18n="nav.privacy">개인정보처리방침</a>
+    <a href="/">홈</a>
+    <a href="/howtouse.html">사용법</a>
+    <a href="/reviews.html">사용후기</a>
+    <a href="/privacy.html">개인정보처리방침</a>
   </nav>
   <div class="lang">
-    <button type="button" data-lang-btn="ko">🇰🇷 한국어</button>
-    <button type="button" data-lang-btn="en">🇬🇧 English</button>
+    <button type="button" class="btn secondary" style="padding:6px 10px">🇰🇷</button>
+    <button type="button" class="btn secondary" style="padding:6px 10px">🇬🇧</button>
   </div>
 </header>
 
 <main>
-  <div class="wrap">
-    <!-- 후기 목록 -->
+  <div class="layout">
+    <!-- 작성 카드 -->
     <section class="card">
-      <div class="row">
-        <h3 class="sp" data-i18n="reviews.title">최신 후기</h3>
-        <span class="pill" title="Live" data-i18n="reviews.live">LIVE</span>
-      </div>
-      <ul class="reviews" id="reviews-list">
-        <li class="review muted" data-i18n="reviews.loading">불러오는 중…</li>
-      </ul>
-    </section>
+      <h2 class="section-title">후기 작성</h2>
+      <p class="section-sub">의견과 현장 사진을 올려주세요. (이미지는 선택사항)</p>
 
-    <!-- 작성/로그인 -->
-    <section class="card">
-      <div class="row">
-        <h3 class="sp" data-i18n="write.title">후기 작성</h3>
-        <span id="auth-status" class="muted" data-i18n="auth.logged_out">로그아웃 상태</span>
-      </div>
+      <div id="auth-info" class="status">로그인 상태 확인 중…</div>
 
-      <form id="review-form" style="display:none">
+      <form id="form" hidden>
         <div class="field">
-          <label for="username" data-i18n="write.nickname">닉네임</label>
-          <input id="username" name="username" placeholder="예: 현장왕" required
-                 data-i18n-attr="placeholder=write.nickname_ph">
+          <label for="title">제목</label>
+          <input id="title" name="title" type="text" maxlength="100" required placeholder="제목을 입력하세요">
         </div>
+
         <div class="field">
-          <label for="content" data-i18n="write.content">후기 내용</label>
-          <textarea id="content" name="content" placeholder="앱을 써 보신 소감을 남겨 주세요" required
-                    data-i18n-attr="placeholder=write.content_ph"></textarea>
+          <label for="content">내용</label>
+          <textarea id="content" name="content" maxlength="5000" placeholder="사용 경험, 개선 의견 등을 자세히 적어주세요"></textarea>
         </div>
-        <button type="submit" class="primary" data-i18n="write.submit">등록</button>
+
+        <div class="field">
+          <label for="image">사진 (최대 1장, JPG/PNG, 3MB 이하)</label>
+          <div class="row">
+            <input id="image" name="image" type="file" accept="image/*">
+            <button type="button" id="clearImg" class="btn secondary">삭제</button>
+          </div>
+          <img id="preview" class="thumb" alt="" hidden>
+          <div class="hint">저작권 문제 없는 이미지만 업로드하세요.</div>
+        </div>
+
+        <div class="row">
+          <button type="submit" class="btn">등록</button>
+          <button type="button" id="logout" class="btn secondary" hidden>로그아웃</button>
+        </div>
+        <div id="formStatus" class="status"></div>
       </form>
 
-      <div id="login-box">
-        <p class="muted" data-i18n="write.need_login">로그인 후 후기를 작성할 수 있습니다.</p>
-        <form id="login-form" autocomplete="on">
-          <div class="field">
-            <label for="login-email" data-i18n="auth.email">이메일</label>
-            <input id="login-email" name="email" type="email" required
-                   placeholder="you@example.com"
-                   data-i18n-attr="placeholder=auth.email_ph">
-          </div>
-          <div class="field">
-            <label for="login-password" data-i18n="auth.password">비밀번호</label>
-            <input id="login-password" name="password" type="password" required minlength="8"
-                   data-i18n-attr="placeholder=auth.password_ph">
-          </div>
-          <button type="submit" class="primary" data-i18n="auth.login">로그인</button>
-          <button type="button" id="logout-btn" style="display:none;margin-left:8px" data-i18n="auth.logout">로그아웃</button>
-        </form>
-        <p class="muted" style="margin-top:8px" data-i18n="write.no_account">
-          아직 계정이 없으신가요? <a href="/index.html#auth">회원가입</a>
-        </p>
+      <div id="loginBox" hidden>
+        <p class="muted">로그인 후 작성하실 수 있어요.</p>
+        <div class="row" style="gap:6px">
+          <input id="login-email" type="email" placeholder="you@example.com" style="min-width:240px">
+          <input id="login-password" type="password" placeholder="비밀번호" style="min-width:160px">
+          <button id="btn-login" class="btn">로그인</button>
+          <button id="btn-signup" class="btn secondary">가입</button>
+        </div>
+        <div id="loginStatus" class="status"></div>
+      </div>
+    </section>
+
+    <!-- 목록 카드 -->
+    <section class="card">
+      <h2 class="section-title">사용자 후기</h2>
+      <p class="section-sub">최신순 · 비로그인도 열람 가능</p>
+      <div id="list" class="list" aria-live="polite"></div>
+      <div class="row" style="margin-top:8px">
+        <button id="more" class="btn secondary">더보기</button>
+        <div id="listStatus" class="status"></div>
       </div>
     </section>
   </div>
 </main>
 
-<footer>© <span id="year"></span> Measure Master — <span data-i18n="footer.all">All rights reserved.</span></footer>
+<footer>
+  © <span id="year"></span> Measure Master. All rights reserved.
+</footer>
 
 <!-- Supabase -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-<!-- i18n 공통 유틸 (index와 동일) -->
-<script src="/i18n.js"></script>
-
 <script>
-  // ===== TODO: 본인 Supabase 값으로 교체 =====
+  // === 본인 프로젝트 값으로 교체 가능(지금은 index.html과 동일 값 사용) ===
   const SUPABASE_URL  = "https://snxjcbaaysgfunpsohzg.supabase.co";
   const SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNueGpjYmFheXNnZnVucHNvaHpnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY1OTk3MzQsImV4cCI6MjA3MjE3NTczNH0.T8b9PpabXkCvwW2W57Qbr-h--JLZB6errlyP5IwsYyk";
-  // ===========================================
-  const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+  const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
 
-  const $ = (s)=>document.querySelector(s);
-  const elStatus = $("#auth-status");
-  const elLogin  = $("#login-form");
-  const elLogout = $("#logout-btn");
-  const elLoginBox = $("#login-box");
-  const elReviewForm = $("#review-form");
-  const elReviews = $("#reviews-list");
+  const $ = s => document.querySelector(s);
+  const list = $("#list");
+  const form = $("#form");
+  const loginBox = $("#loginBox");
+  const authInfo = $("#auth-info");
+  const formStatus = $("#formStatus");
+  const loginStatus = $("#loginStatus");
+  const preview = $("#preview");
+  const imageInput = $("#image");
+  $("#year").textContent = new Date().getFullYear();
 
-  function escapeHtml(t){return String(t).replace(/[&<>"']/g,(m)=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]))}
+  // 목록 페이징
+  const PAGE_SIZE = 10;
+  let pageFrom = 0;
 
+  // 유틸
+  function maskEmail(email=""){
+    const m = String(email).split("@");
+    if(m.length<2) return email;
+    return m[0].slice(0,2) + "***@" + m[1];
+  }
+  function fmtDate(s){ try{ return new Date(s).toLocaleString("ko-KR"); }catch{ return s; } }
+
+  // 이미지 미리보기
+  imageInput.addEventListener("change", (e)=>{
+    const f = e.target.files?.[0];
+    if(!f){ preview.hidden = true; preview.src=""; return; }
+    if(!/^image\//.test(f.type)){ alert("이미지 파일만 가능합니다."); imageInput.value=""; return; }
+    if(f.size > 3*1024*1024){ alert("3MB 이하만 가능합니다."); imageInput.value=""; return; }
+    const url = URL.createObjectURL(f);
+    preview.src = url; preview.hidden = false;
+  });
+  $("#clearImg").addEventListener("click", ()=>{
+    imageInput.value = ""; preview.hidden = true; preview.src = "";
+  });
+
+  // 인증 UI
   async function refreshAuthUI(){
-    const { data:{ session } } = await supabase.auth.getSession();
+    const { data:{ session } } = await sb.auth.getSession();
     if(session?.user){
-      elStatus.innerHTML = t("auth.logged_in",{email:session.user.email});
-      elLoginBox.style.display = "none";
-      elReviewForm.style.display = "block";
-      elLogout.style.display = "inline-block";
+      authInfo.textContent = `로그인: ${session.user.email}`;
+      form.hidden = false; loginBox.hidden = true;
+      $("#logout").hidden = false;
     }else{
-      elStatus.textContent = t("auth.logged_out");
-      elLoginBox.style.display = "block";
-      elReviewForm.style.display = "none";
-      elLogout.style.display = "none";
+      authInfo.textContent = "로그아웃 상태";
+      form.hidden = true; loginBox.hidden = false;
+      $("#logout").hidden = true;
     }
   }
 
-  elLogin.addEventListener("submit", async(e)=>{
+  // 로그인/가입/로그아웃
+  $("#btn-login").addEventListener("click", async ()=>{
+    loginStatus.textContent = "로그인 중…";
+    const email = $("#login-email").value.trim();
+    const password = $("#login-password").value;
+    const { error } = await sb.auth.signInWithPassword({ email, password });
+    loginStatus.textContent = error ? `로그인 실패: ${error.message}` : "로그인 성공";
+    await refreshAuthUI();
+  });
+  $("#btn-signup").addEventListener("click", async ()=>{
+    loginStatus.textContent = "가입 중…";
+    const email = $("#login-email").value.trim();
+    const password = $("#login-password").value;
+    if(password.length < 8){ loginStatus.textContent = "비밀번호는 8자 이상"; return; }
+    const { error } = await sb.auth.signUp({ email, password });
+    loginStatus.textContent = error ? `가입 실패: ${error.message}` : "가입 완료(메일 인증 설정시 메일 확인)";
+  });
+  $("#logout").addEventListener("click", async ()=>{
+    await sb.auth.signOut(); await refreshAuthUI();
+  });
+
+  // 후기 등록
+  form.addEventListener("submit", async (e)=>{
     e.preventDefault();
-    const email = e.target.email.value.trim();
-    const password = e.target.password.value;
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-    alert(error ? t("msg.login_err",{msg:error.message}) : t("msg.login_ok"));
-    refreshAuthUI();
+    formStatus.textContent = "등록 중…";
+    const { data:{ session } } = await sb.auth.getSession();
+    if(!session?.user){ alert("로그인이 필요합니다."); return; }
+
+    const title = $("#title").value.trim();
+    const content = $("#content").value.trim();
+    if(!title || !content){ formStatus.textContent = "제목과 내용을 입력하세요."; return; }
+
+    let image_path = null, image_url = null;
+
+    const file = imageInput.files?.[0] || null;
+    if(file){
+      const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
+      const safeExt = ["jpg","jpeg","png","webp","gif"].includes(ext) ? ext : "jpg";
+      const key = `${session.user.id}/${Date.now()}_${Math.random().toString(36).slice(2)}.${safeExt}`;
+
+      const up = await sb.storage.from("reviews").upload(key, file, { upsert:false, cacheControl:"3600" });
+      if(up.error){ formStatus.textContent = "이미지 업로드 실패: " + up.error.message; return; }
+      image_path = key;
+      const pub = sb.storage.from("reviews").getPublicUrl(key);
+      image_url = pub.data.publicUrl; // 버킷을 public으로 만들었을 때
+    }
+
+    const ins = await sb.from("reviews").insert({
+      title, content,
+      image_path, image_url,
+      user_id: session.user.id,
+      author_email: session.user.email
+    }).select().single();
+
+    if(ins.error){ formStatus.textContent = "등록 실패: " + ins.error.message; return; }
+    formStatus.textContent = "등록 완료!";
+    // 폼 초기화
+    $("#title").value = ""; $("#content").value = ""; imageInput.value=""; preview.hidden=true; preview.src="";
+    // 목록 맨 앞에 추가
+    prependItem(ins.data, session.user);
   });
 
-  elLogout.addEventListener("click", async()=>{
-    await supabase.auth.signOut();
-    refreshAuthUI();
-  });
+  // 후기 목록 로드
+  async function loadList(){
+    $("#listStatus").textContent = "불러오는 중…";
+    const to = pageFrom + PAGE_SIZE - 1;
+    const { data, error } = await sb
+      .from("reviews")
+      .select("*")
+      .order("created_at", { ascending:false })
+      .range(pageFrom, to);
 
-  async function loadReviews(){
-    const { data, error } = await supabase.from("reviews").select("*").order("created_at",{ascending:false}).limit(100);
-    if(error){ elReviews.innerHTML = `<li class="review">${escapeHtml(t("reviews.loading"))} (${escapeHtml(error.message)})</li>`; return; }
-    if(!data || data.length===0){ elReviews.innerHTML = `<li class="review muted">${escapeHtml(t("reviews.loading"))}</li>`; return; }
-    elReviews.innerHTML = data.map(r=>`
-      <li class="review">
-        <div class="row" style="justify-content:space-between">
-          <b>${escapeHtml(r.username)}</b>
-          <small class="muted">${new Date(r.created_at).toLocaleString()}</small>
-        </div>
-        <div style="margin-top:6px;line-height:1.7">${escapeHtml(r.content)}</div>
-      </li>
-    `).join("");
+    if(error){ $("#listStatus").textContent = "불러오기 실패: " + error.message; return; }
+    data.forEach(row => appendItem(row));
+    pageFrom += data.length;
+    $("#listStatus").textContent = data.length < PAGE_SIZE ? "마지막 페이지" : "";
+    $("#more").disabled = data.length < PAGE_SIZE;
   }
 
-  elReviewForm.addEventListener("submit", async(e)=>{
-    e.preventDefault();
-    const { data:{ session } } = await supabase.auth.getSession();
-    if(!session?.user){ alert(t("msg.need_login")); return; }
-    const username = e.target.username.value.trim();
-    const content  = e.target.content.value.trim();
-    if(username.length<2 || content.length<3){ alert(t("msg.short")); return; }
-    const { error } = await supabase.from("reviews").insert([{ user_id: session.user.id, username, content }]);
-    if(error){ alert(t("msg.post_err",{msg:error.message})); return; }
-    e.target.reset();
-    await loadReviews();
-  });
+  function ownerButtons(row, currentUser){
+    if(!currentUser || row.user_id !== currentUser.id) return "";
+    return `<button data-id="${row.id}" class="btn danger js-del">삭제</button>`;
+  }
 
-  supabase.channel("reviews-realtime")
-    .on("postgres_changes",{event:"INSERT",schema:"public",table:"reviews"}, loadReviews)
-    .subscribe();
+  function appendItem(row){
+    const div = document.createElement("div");
+    div.className = "item";
+    div.dataset.id = row.id;
+    div.innerHTML = `
+      <div class="item-head">
+        <h3 class="item-title">${escapeHtml(row.title)}</h3>
+        <div class="item-meta">${maskEmail(row.author_email)} · ${fmtDate(row.created_at)}</div>
+      </div>
+      <div class="item-body">${escapeHtml(row.content)}</div>
+      ${row.image_url ? `<img class="item-img" src="${row.image_url}" alt="">` : ``}
+      <div class="item-actions"></div>
+    `;
+    list.appendChild(div);
+    attachOwnerActions(div, row);
+  }
 
-  refreshAuthUI().then(loadReviews);
+  function prependItem(row, currentUser){
+    const div = document.createElement("div");
+    div.className = "item";
+    div.dataset.id = row.id;
+    div.innerHTML = `
+      <div class="item-head">
+        <h3 class="item-title">${escapeHtml(row.title)}</h3>
+        <div class="item-meta">${maskEmail(row.author_email)} · 방금 전</div>
+      </div>
+      <div class="item-body">${escapeHtml(row.content)}</div>
+      ${row.image_url ? `<img class="item-img" src="${row.image_url}" alt="">` : ``}
+      <div class="item-actions">${ownerButtons(row, currentUser)}</div>
+    `;
+    list.prepend(div);
+    bindDelete(div);
+  }
+
+  function attachOwnerActions(div, row){
+    sb.auth.getSession().then(({data:{session}})=>{
+      const user = session?.user;
+      div.querySelector(".item-actions").innerHTML = ownerButtons(row, user);
+      bindDelete(div);
+    });
+  }
+
+  function bindDelete(container){
+    const btn = container.querySelector(".js-del");
+    if(!btn) return;
+    btn.addEventListener("click", async ()=>{
+      if(!confirm("정말 삭제하시겠습니까?")) return;
+      btn.disabled = true;
+      const id = btn.getAttribute("data-id");
+      // 1) 레코드 조회해서 이미지 경로 알아내기
+      const { data: row } = await sb.from("reviews").select("image_path").eq("id", id).single();
+      // 2) 레코드 삭제(소유자만 허용하는 RLS 필요)
+      const del = await sb.from("reviews").delete().eq("id", id);
+      if(del.error){ alert("삭제 실패: " + del.error.message); btn.disabled=false; return; }
+      // 3) 이미지가 있으면 스토리지에서도 삭제(권한 정책 필요)
+      if(row?.image_path){
+        await sb.storage.from("reviews").remove([row.image_path]);
+      }
+      container.remove();
+    });
+  }
+
+  function escapeHtml(s=""){
+    return String(s)
+      .replace(/&/g,"&amp;")
+      .replace(/</g,"&lt;")
+      .replace(/>/g,"&gt;")
+      .replace(/"/g,"&quot;")
+      .replace(/'/g,"&#39;");
+  }
+
+  $("#more").addEventListener("click", loadList);
+
+  // 초기화
+  (async function(){
+    await refreshAuthUI();
+    await loadList();
+  })();
 </script>
 </body>
 </html>
