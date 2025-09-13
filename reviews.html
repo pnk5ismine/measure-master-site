@@ -36,9 +36,14 @@
     .btn.secondary{background:#f9fafb;color:#111;border:1px solid var(--border)}
     .status{font-size:12px;color:var(--muted);margin-top:4px}
 
-    /* 미리보기(카드 폭의 80%) */
-    .thumb{display:block;width:80%;max-width:80%;margin:10px auto;border-radius:12px;background:#fff;border:1px dashed var(--border)}
-  </style>
+  /* 읽기/미리보기 이미지 규칙 */
+.image, .thumb{
+  display:block; height:auto; margin:10px auto; /* 가운데 정렬 */
+}
+.image.landscape, .thumb.landscape{ width:70%; max-width:70%; }
+.image.portrait,  .thumb.portrait { width:30%; max-width:30%; }
+
+</style>
 </head>
 <body>
 <header>
@@ -56,6 +61,57 @@
 </header>
 
 <main>
+<div class="layout">
+<section class="card" id="leftAuth">
+  <h2 class="section-title">로그인 · 회원가입</h2>
+  <div id="authStatus" class="status">상태 확인 중…</div>
+
+  <div id="authTabs" class="tabbar" hidden>
+    <button type="button" id="tab-login" class="active">로그인</button>
+    <button type="button" id="tab-signup">가입</button>
+  </div>
+
+  <!-- 로그인 -->
+  <form id="loginForm" hidden>
+    <div class="field">
+      <label for="login-email">이메일</label>
+      <input id="login-email" type="email" placeholder="you@example.com" required>
+    </div>
+    <div class="field">
+      <label for="login-password">비밀번호</label>
+      <input id="login-password" type="password" placeholder="8자 이상" required minlength="8">
+    </div>
+    <div class="row">
+      <button class="btn" id="btn-login">로그인</button>
+      <button class="btn secondary" type="button" id="btn-logout" hidden>로그아웃</button>
+    </div>
+    <div id="loginStatus" class="status"></div>
+  </form>
+
+  <!-- 가입 -->
+  <form id="signupForm" hidden>
+    <div class="field">
+      <label for="signup-email">이메일</label>
+      <input id="signup-email" type="email" placeholder="you@example.com" required>
+    </div>
+    <div class="field">
+      <label for="signup-password">비밀번호</label>
+      <input id="signup-password" type="password" placeholder="8자 이상" required minlength="8">
+    </div>
+    <div class="field">
+      <label for="signup-password2">비밀번호 확인</label>
+      <input id="signup-password2" type="password" placeholder="다시 입력" required minlength="8">
+    </div>
+    <div class="row">
+      <button class="btn" id="btn-signup">가입</button>
+    </div>
+    <div id="signupStatus" class="status"></div>
+  </form>
+
+  <!-- 배너(남는 공간 채우기) -->
+  <div class="banner-flex" style="margin-top:16px"></div>
+</section>
+
   <section class="card">
     <h1>후기 작성</h1>
     <p class="muted" id="authInfo">로그인 상태 확인 중…</p>
@@ -90,6 +146,7 @@
       로그인이 필요합니다. <a href="/reviews.html">후기 목록</a>에서 먼저 로그인해 주세요.
     </div>
   </section>
+</div>
 </main>
 
 <footer>
@@ -124,6 +181,42 @@
       img.src = URL.createObjectURL(file);
     });
   }
+function applyImgClass(el){
+  if(!el) return;
+  const set = ()=>{
+    el.classList.remove('landscape','portrait');
+    if(el.naturalWidth > el.naturalHeight) el.classList.add('landscape');
+    else el.classList.add('portrait');
+  };
+  if(el.complete && el.naturalWidth) set();
+  else el.addEventListener('load', set, {once:true});
+}
+
+async function loadOne(id){
+  const { data, error } = await sb
+    .from("reviews")
+    .select("title, content, created_at, nickname, author_email, image_url")
+    .eq("id", id)
+    .single();
+
+  if(error){
+    article.innerHTML = `<p class="muted">불러오기 실패: ${escapeHtml(error.message)}</p>`;
+    return;
+  }
+  const name = displayName(data);
+  const imgHTML = data.image_url ? `<img id="readImg" class="image" src="${data.image_url}" alt="">` : "";
+  article.innerHTML = `
+    <h3>${escapeHtml(data.title || "(제목 없음)")}</h3>
+    <div class="meta">${escapeHtml(name)} · ${fmtDate(data.created_at)}</div>
+    <div class="body" style="white-space:pre-wrap;word-break:break-word">
+      ${escapeHtml(data.content || "")}
+    </div>
+    ${imgHTML}
+  `;
+  applyImgClass(document.getElementById('readImg'));
+}
+
+
   async function compressImage(file, {maxW=1600, quality=0.85, mime='image/jpeg'}={}){
     const img = await fileToImage(file);
     const scale = Math.min(1, maxW / img.naturalWidth);
@@ -143,6 +236,7 @@
     const url = URL.createObjectURL(file0);
     previewImg.src = url;
     previewImg.hidden = false;
+    applyImgClass(previewImg); 
   });
 
   // ===== 로그인 체크 =====
@@ -216,6 +310,7 @@
       return;
     }
   });
+  getComputedStyle(document.querySelector('.layout')).gridTemplateColumns
 </script>
 </body>
 </html>
