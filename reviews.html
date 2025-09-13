@@ -9,25 +9,27 @@
   <style>
     :root { --bg:#0b0d12; --border:#e5e7eb; --muted:#666; --text:#111; --pri:#111; }
     *{box-sizing:border-box}
-    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,'Noto Sans KR',sans-serif;background:var(--bg);color:#e7edf5;min-height:100vh;display:flex;flex-direction:column}
-    header,main,footer{max-width:900px;margin:0 auto;padding:16px}
+    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,'Noto Sans KR',sans-serif;background:#0b0d12;color:#e7edf5;min-height:100vh;display:flex;flex-direction:column}
+    header,main,footer{max-width:1100px;margin:0 auto;padding:16px}
     header{display:flex;align-items:center;justify-content:space-between;gap:12px}
     .brand{display:flex;align-items:center;gap:10px}
     .logo-img{width:28px;height:28px;border-radius:6px;object-fit:contain;background:#0e1422}
     nav a{margin-left:16px;color:#cfd6e4;text-decoration:none}
     nav a:hover{text-decoration:underline}
     footer{margin:30px auto 60px;text-align:center;color:#9aa4b2;font-size:14px}
-    main{flex:1;display:flex}
+
+    /* === 핵심: 좌/우 레이아웃 그리드 === */
+    main{flex:1;} /* ← 불필요한 display:flex 제거 */
+    .layout{display:grid;grid-template-columns:1fr;gap:18px;align-items:stretch}
+    @media (min-width:1024px){ .layout{grid-template-columns:1fr 3fr} }
 
     /* 카드(화이트) */
-    .card{background:#fff;color:var(--text);border:1px solid var(--border);border-radius:16px;padding:18px;box-shadow:0 1px 2px rgba(0,0,0,.06);width:100%}
+    .card{background:#fff;color:var(--text);border:1px solid var(--border);border-radius:16px;padding:18px;box-shadow:0 1px 2px rgba(0,0,0,.06);height:100%;display:flex;flex-direction:column}
     h1{margin:0 0 8px;font-size:20px}
     .muted{color:var(--muted)}
-
-    /* 폼 */
-    .field{display:flex;flex-direction:column;gap:6px;margin:12px 0}
     .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
-    input[type="text"], textarea{
+    .field{display:flex;flex-direction:column;gap:6px;margin:12px 0}
+    input[type="text"], input[type="email"], input[type="password"], textarea{
       width:100%;padding:10px 12px;border-radius:12px;border:1px solid var(--border);background:#fff;color:#111
     }
     textarea{min-height:180px;resize:vertical}
@@ -36,19 +38,18 @@
     .btn.secondary{background:#f9fafb;color:#111;border:1px solid var(--border)}
     .status{font-size:12px;color:var(--muted);margin-top:4px}
 
-  /* 읽기/미리보기 이미지 규칙 */
-.image, .thumb{
-  display:block; height:auto; margin:10px auto; /* 가운데 정렬 */
-}
-.image.landscape, .thumb.landscape{ width:70%; max-width:70%; }
-.image.portrait,  .thumb.portrait { width:30%; max-width:30%; }
+    /* 좌측 배너가 남는 세로 공간 채우도록 */
+    #leftAuth .banner-flex{flex:1;border:1px dashed var(--border);border-radius:12px;background:#fff;margin-top:16px}
 
-</style>
+    /* 읽기/미리보기 이미지 규칙(가로 70% / 세로 30%) */
+    .image, .thumb{display:block;height:auto;margin:10px auto}
+    .image.landscape, .thumb.landscape{width:70%;max-width:70%}
+    .image.portrait,  .thumb.portrait {width:30%;max-width:30%}
+  </style>
 </head>
 <body>
 <header>
   <div class="brand">
-    <!-- howtouse.html과 동일 로고 경로 -->
     <img src="/images/mm_logo2.jpg" alt="Measure Master" class="logo-img" />
     <strong>Measure Master</strong>
     <span style="margin-left:8px;opacity:.8">후기 작성</span>
@@ -61,92 +62,92 @@
 </header>
 
 <main>
-<div class="layout">
-<section class="card" id="leftAuth">
-  <h2 class="section-title">로그인 · 회원가입</h2>
-  <div id="authStatus" class="status">상태 확인 중…</div>
+  <div class="layout">
+    <!-- 좌: 로그인/가입 -->
+    <section class="card" id="leftAuth">
+      <h2 class="section-title">로그인 · 회원가입</h2>
+      <div id="authStatus" class="status">상태 확인 중…</div>
 
-  <div id="authTabs" class="tabbar" hidden>
-    <button type="button" id="tab-login" class="active">로그인</button>
-    <button type="button" id="tab-signup">가입</button>
+      <div id="authTabs" class="tabbar" hidden>
+        <button type="button" id="tab-login" class="active">로그인</button>
+        <button type="button" id="tab-signup">가입</button>
+      </div>
+
+      <!-- 로그인 -->
+      <form id="loginForm" hidden>
+        <div class="field">
+          <label for="login-email">이메일</label>
+          <input id="login-email" type="email" placeholder="you@example.com" required>
+        </div>
+        <div class="field">
+          <label for="login-password">비밀번호</label>
+          <input id="login-password" type="password" placeholder="8자 이상" required minlength="8">
+        </div>
+        <div class="row">
+          <button class="btn" id="btn-login">로그인</button>
+          <button class="btn secondary" type="button" id="btn-logout" hidden>로그아웃</button>
+        </div>
+        <div id="loginStatus" class="status"></div>
+      </form>
+
+      <!-- 가입 -->
+      <form id="signupForm" hidden>
+        <div class="field">
+          <label for="signup-email">이메일</label>
+          <input id="signup-email" type="email" placeholder="you@example.com" required>
+        </div>
+        <div class="field">
+          <label for="signup-password">비밀번호</label>
+          <input id="signup-password" type="password" placeholder="8자 이상" required minlength="8">
+        </div>
+        <div class="field">
+          <label for="signup-password2">비밀번호 확인</label>
+          <input id="signup-password2" type="password" placeholder="다시 입력" required minlength="8">
+        </div>
+        <div class="row">
+          <button class="btn" id="btn-signup">가입</button>
+        </div>
+        <div id="signupStatus" class="status"></div>
+      </form>
+
+      <div class="banner-flex"></div>
+    </section>
+
+    <!-- 우: 후기 작성 -->
+    <section class="card" id="rightCard">
+      <h1>후기 작성</h1>
+      <p class="muted" id="authInfo">로그인 상태 확인 중…</p>
+
+      <form id="writeForm" hidden>
+        <div class="field">
+          <label for="title">제목</label>
+          <input id="title" type="text" placeholder="제목을 입력하세요" required>
+        </div>
+
+        <div class="field">
+          <label for="content">내용</label>
+          <textarea id="content" placeholder="자유롭게 작성해 주세요" required></textarea>
+        </div>
+
+        <div class="field">
+          <label for="image">이미지(선택)</label>
+          <input id="image" type="file" accept="image/*">
+          <img id="preview" class="thumb" alt="" hidden>
+          <div class="status">큰 이미지는 업로드 전에 자동 축소(가로 최대 1600px).</div>
+        </div>
+
+        <div class="row">
+          <button class="btn" id="btn-submit">등록</button>
+          <a class="btn secondary" href="/reviews.html">목록으로</a>
+          <span id="formStatus" class="status"></span>
+        </div>
+      </form>
+
+      <div id="needLogin" class="muted" hidden>
+        로그인이 필요합니다. <a href="/reviews.html">후기 목록</a>에서 먼저 로그인해 주세요.
+      </div>
+    </section>
   </div>
-
-  <!-- 로그인 -->
-  <form id="loginForm" hidden>
-    <div class="field">
-      <label for="login-email">이메일</label>
-      <input id="login-email" type="email" placeholder="you@example.com" required>
-    </div>
-    <div class="field">
-      <label for="login-password">비밀번호</label>
-      <input id="login-password" type="password" placeholder="8자 이상" required minlength="8">
-    </div>
-    <div class="row">
-      <button class="btn" id="btn-login">로그인</button>
-      <button class="btn secondary" type="button" id="btn-logout" hidden>로그아웃</button>
-    </div>
-    <div id="loginStatus" class="status"></div>
-  </form>
-
-  <!-- 가입 -->
-  <form id="signupForm" hidden>
-    <div class="field">
-      <label for="signup-email">이메일</label>
-      <input id="signup-email" type="email" placeholder="you@example.com" required>
-    </div>
-    <div class="field">
-      <label for="signup-password">비밀번호</label>
-      <input id="signup-password" type="password" placeholder="8자 이상" required minlength="8">
-    </div>
-    <div class="field">
-      <label for="signup-password2">비밀번호 확인</label>
-      <input id="signup-password2" type="password" placeholder="다시 입력" required minlength="8">
-    </div>
-    <div class="row">
-      <button class="btn" id="btn-signup">가입</button>
-    </div>
-    <div id="signupStatus" class="status"></div>
-  </form>
-
-  <!-- 배너(남는 공간 채우기) -->
-  <div class="banner-flex" style="margin-top:16px"></div>
-</section>
-
-  <section class="card" id="rightCard">
-    <h1>후기 작성</h1>
-    <p class="muted" id="authInfo">로그인 상태 확인 중…</p>
-
-    <form id="writeForm" hidden>
-      <div class="field">
-        <label for="title">제목</label>
-        <input id="title" type="text" placeholder="제목을 입력하세요" required>
-      </div>
-
-      <div class="field">
-        <label for="content">내용</label>
-        <textarea id="content" placeholder="자유롭게 작성해 주세요" required></textarea>
-      </div>
-
-      <div class="field">
-        <label for="image">이미지(선택)</label>
-        <input id="image" type="file" accept="image/*">
-        <img id="preview" class="thumb" alt="" hidden>
-        <div class="status">큰 이미지는 업로드 전에 자동으로 축소(가로 최대 1600px)됩니다.</div>
-      </div>
-
-      <div class="row">
-        <button class="btn" id="btn-submit">등록</button>
-        <a class="btn secondary" href="/reviews.html">목록으로</a>
-        <span id="formStatus" class="status"></span>
-      </div>
-    </form>
-
-    <!-- 비로그인 안내 -->
-    <div id="needLogin" class="muted" hidden>
-      로그인이 필요합니다. <a href="/reviews.html">후기 목록</a>에서 먼저 로그인해 주세요.
-    </div>
-  </section>
-</div>
 </main>
 
 <footer>
@@ -156,432 +157,152 @@
 <!-- Supabase -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-  // === 프로젝트 값(기존과 동일) ===
+  // === Supabase 프로젝트 값 ===
   const SUPABASE_URL  = "https://snxjcbaaysgfunpsohzg.supabase.co";
   const SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNueGpjYmFheXNnZnVucHNvaHpnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY1OTk3MzQsImV4cCI6MjA3MjE3NTczNH0.T8b9PpabXkCvwW2W57Qbr-h--JLZB6errlyP5IwsYyk";
   const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
   document.getElementById('year').textContent = new Date().getFullYear();
 
-  const authInfo   = document.getElementById('authInfo');
-  const writeForm  = document.getElementById('writeForm');
-  const needLogin  = document.getElementById('needLogin');
-  const fTitle     = document.getElementById('title');
-  const fContent   = document.getElementById('content');
+  // === 이미지 가로/세로 판별 (가로 70% / 세로 30%) ===
+  function applyImgClass(el){
+    if(!el) return;
+    const set = ()=>{
+      el.classList.remove('landscape','portrait');
+      (el.naturalWidth > el.naturalHeight) ? el.classList.add('landscape') : el.classList.add('portrait');
+    };
+    (el.complete && el.naturalWidth) ? set() : el.addEventListener('load', set, {once:true});
+  }
+
+  // === 좌측 인증 UI ===
+  const authStatus  = document.getElementById('authStatus');
+  const authTabs    = document.getElementById('authTabs');
+  const fLogin      = document.getElementById('loginForm');
+  const fSignup     = document.getElementById('signupForm');
+  const loginStatus = document.getElementById('loginStatus');
+  const signupStatus= document.getElementById('signupStatus');
+
+  function setTab(which){
+    document.getElementById('tab-login')?.classList.toggle('active', which==='login');
+    document.getElementById('tab-signup')?.classList.toggle('active', which==='signup');
+    if(fLogin)  fLogin.hidden  = (which!=='login');
+    if(fSignup) fSignup.hidden = (which!=='signup');
+  }
+  document.getElementById('tab-login')?.addEventListener('click', ()=>setTab('login'));
+  document.getElementById('tab-signup')?.addEventListener('click', ()=>setTab('signup'));
+
+  async function refreshAuthUI(){
+    const { data:{ session } } = await sb.auth.getSession();
+    const authInfo = document.getElementById('authInfo');
+    const writeForm= document.getElementById('writeForm');
+    const needLogin= document.getElementById('needLogin');
+
+    if(session?.user){
+      authStatus.textContent = `로그인: ${session.user.email}`;
+      authTabs.hidden = true;
+      fLogin.hidden = false;
+      document.getElementById('btn-login').style.display = 'none';
+      document.getElementById('btn-logout').hidden = false;
+
+      authInfo.textContent = `로그인: ${session.user.email}`;
+      writeForm.hidden = false;
+      needLogin.hidden = true;
+    }else{
+      authStatus.textContent = "로그아웃 상태";
+      authTabs.hidden = false;
+      fLogin.hidden = true;
+      fSignup.hidden = false;
+      document.getElementById('btn-logout').hidden = true;
+      document.getElementById('btn-login').style.display = '';
+      authInfo.textContent = "로그아웃 상태";
+      writeForm.hidden = true;
+      needLogin.hidden = false;
+      setTab('login');
+    }
+  }
+
+  document.getElementById('btn-login')?.addEventListener('click', async (e)=>{
+    e.preventDefault();
+    loginStatus.textContent = "로그인 중…";
+    const email = document.getElementById('login-email').value.trim();
+    const pw    = document.getElementById('login-password').value;
+    const { error } = await sb.auth.signInWithPassword({ email, password: pw });
+    loginStatus.textContent = error ? ("로그인 실패: " + error.message) : "로그인 성공";
+    await refreshAuthUI();
+  });
+
+  document.getElementById('btn-logout')?.addEventListener('click', async (e)=>{
+    e.preventDefault();
+    await sb.auth.signOut();
+    await refreshAuthUI();
+  });
+
+  document.getElementById('btn-signup')?.addEventListener('click', async (e)=>{
+    e.preventDefault();
+    signupStatus.textContent = "가입 중…";
+    const email = document.getElementById('signup-email').value.trim();
+    const pw1   = document.getElementById('signup-password').value;
+    const pw2   = document.getElementById('signup-password2').value;
+    if(pw1 !== pw2){ signupStatus.textContent = "비밀번호 확인이 일치하지 않습니다."; return; }
+    if((pw1||'').length < 8){ signupStatus.textContent = "비밀번호는 8자 이상"; return; }
+    const { data, error } = await sb.auth.signUp({ email, password: pw1 });
+    if(error){ signupStatus.textContent = "가입 실패: " + error.message; return; }
+    signupStatus.textContent = data.session ? "가입+로그인 완료" : "가입 완료";
+    await refreshAuthUI();
+  });
+
+  // === 후기 작성 ===
   const fImage     = document.getElementById('image');
   const previewImg = document.getElementById('preview');
   const btnSubmit  = document.getElementById('btn-submit');
   const formStatus = document.getElementById('formStatus');
 
-  // ===== 이미지 미리보기 + 업로드 전 축소(가로 최대 1600px) =====
-  function fileToImage(file){
-    return new Promise((res, rej)=>{
-      const img = new Image();
-      img.onload = ()=> res(img);
-      img.onerror = rej;
-      img.src = URL.createObjectURL(file);
-    });
-  }
-function applyImgClass(el){
-  if(!el) return;
-  const set = ()=>{
-    el.classList.remove('landscape','portrait');
-    if(el.naturalWidth > el.naturalHeight) el.classList.add('landscape');
-    else el.classList.add('portrait');
-  };
-  if(el.complete && el.naturalWidth) set();
-  else el.addEventListener('load', set, {once:true});
-}
-
-async function loadOne(id){
-  const { data, error } = await sb
-    .from("reviews")
-    .select("title, content, created_at, nickname, author_email, image_url")
-    .eq("id", id)
-    .single();
-
-  if(error){
-    article.innerHTML = `<p class="muted">불러오기 실패: ${escapeHtml(error.message)}</p>`;
-    return;
-  }
-  const name = displayName(data);
-  const imgHTML = data.image_url ? `<img id="readImg" class="image" src="${data.image_url}" alt="">` : "";
-  article.innerHTML = `
-    <h3>${escapeHtml(data.title || "(제목 없음)")}</h3>
-    <div class="meta">${escapeHtml(name)} · ${fmtDate(data.created_at)}</div>
-    <div class="body" style="white-space:pre-wrap;word-break:break-word">
-      ${escapeHtml(data.content || "")}
-    </div>
-    ${imgHTML}
-  `;
-  applyImgClass(document.getElementById('readImg'));
-}
-
-
-  async function compressImage(file, {maxW=1600, quality=0.85, mime='image/jpeg'}={}){
-    const img = await fileToImage(file);
-    const scale = Math.min(1, maxW / img.naturalWidth);
-    if (scale === 1) return file; // 이미 충분히 작음
-    const canvas = document.createElement('canvas');
-    canvas.width = Math.round(img.naturalWidth * scale);
-    canvas.height = Math.round(img.naturalHeight * scale);
-    const ctx = canvas.getContext('2d');
-    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-    const blob = await new Promise(r=> canvas.toBlob(r, mime, quality));
-    return new File([blob], file.name.replace(/\.\w+$/, '.jpg'), {type:mime});
-  }
-  fImage.addEventListener('change', async ()=>{
+  fImage?.addEventListener('change', ()=>{
     const file0 = fImage.files?.[0];
     if(!file0){ previewImg.hidden = true; return; }
-    // 간단 미리보기(원본 기준)
     const url = URL.createObjectURL(file0);
     previewImg.src = url;
     previewImg.hidden = false;
-    applyImgClass(previewImg); 
+    applyImgClass(previewImg); // 70%/30% 규칙 적용
   });
 
-  // ===== 로그인 체크 =====
-  let session = null;
-  (async function init(){
-    const got = await sb.auth.getSession();
-    session = got.data.session;
-    if(session?.user){
-      authInfo.textContent = `로그인: ${session.user.email}`;
-      writeForm.hidden = false;
-      needLogin.hidden = true;
-    }else{
-      authInfo.textContent = "로그아웃 상태";
-      writeForm.hidden = true;
-      needLogin.hidden = false;
-    }
-  })();
-
-  // ===== 등록 처리 =====
-  document.getElementById('btn-submit').addEventListener('click', async (e)=>{
+  document.getElementById('writeForm')?.addEventListener('submit', async (e)=>{
     e.preventDefault();
-    formStatus.textContent = "";
-    if(!session?.user){ alert("로그인이 필요합니다."); return; }
+    const { data:{ session } } = await sb.auth.getSession();
+    if(!session?.user){ alert('로그인이 필요합니다.'); return; }
 
-    const title = fTitle.value.trim();
-    const content = fContent.value.trim();
+    const title   = document.getElementById('title').value.trim();
+    const content = document.getElementById('content').value.trim();
     if(!title || !content){ formStatus.textContent = "제목/내용을 입력하세요."; return; }
 
-    btnSubmit.disabled = true;
-    btnSubmit.textContent = "등록 중…";
-
+    btnSubmit.disabled = true; btnSubmit.textContent = "등록 중…";
     try{
-      // 닉네임: full_name → 이메일 앞부분 → '익명'
-      const nickname =
-        (session.user.user_metadata?.full_name) ||
-        (session.user.email ? session.user.email.split('@')[0] : null) ||
-        '익명';
-
-      // (선택) 이미지 업로드
-      let image_path = null, image_url = null;
-      const file0 = fImage.files?.[0] || null;
+      const nickname = (session.user.user_metadata?.full_name) || (session.user.email?.split('@')[0]) || '익명';
+      let image_path=null, image_url=null;
+      const file0 = fImage?.files?.[0] || null;
       if(file0){
-        const file = await compressImage(file0, {maxW:1600, quality:0.85});
-        const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
+        const ext = (file0.name.split('.').pop()||'jpg').toLowerCase();
         const safeExt = ["jpg","jpeg","png","webp","gif"].includes(ext) ? ext : "jpg";
         const key = `${session.user.id}/${Date.now()}_${Math.random().toString(36).slice(2)}.${safeExt}`;
-        const up = await sb.storage.from("reviews").upload(key, file, { upsert:false, cacheControl:"3600" });
-        if(up.error){ throw new Error("이미지 업로드 실패: " + up.error.message); }
+        const up  = await sb.storage.from("reviews").upload(key, file0, { upsert:false, cacheControl:"3600" });
+        if(up.error) throw new Error("이미지 업로드 실패: "+up.error.message);
         image_path = key;
-        image_url = sb.storage.from("reviews").getPublicUrl(key).data.publicUrl;
+        image_url  = sb.storage.from("reviews").getPublicUrl(key).data.publicUrl;
       }
 
-      // DB insert
       const ins = await sb.from("reviews").insert({
-        title, content,
-        user_id: session.user.id,
-        author_email: session.user.email,
-        nickname,
-        image_path, image_url
+        title, content, user_id: session.user.id, author_email: session.user.email,
+        nickname, image_path, image_url
       }).select("id").single();
-
-      if(ins.error){ throw new Error(ins.error.message); }
-
-      // 완료 → 읽기 화면으로 이동
-      formStatus.textContent = "등록 완료!";
+      if(ins.error) throw new Error(ins.error.message);
       location.href = `/reviews.html?id=${ins.data.id}`;
     }catch(err){
-      formStatus.textContent = String(err.message || err);
-      btnSubmit.disabled = false;
-      btnSubmit.textContent = "등록";
-      return;
+      formStatus.textContent = String(err.message||err);
+      btnSubmit.disabled = false; btnSubmit.textContent = "등록";
     }
   });
-  getComputedStyle(document.querySelector('.layout')).gridTemplateColumns
 
-/* === 강제 표시 & 레이아웃 안전망 === */
-.layout{display:grid;grid-template-columns:1fr;gap:18px;height:100%}
-@media (min-width:1024px){ .layout{grid-template-columns:1fr 3fr;align-items:stretch} }
-.card{background:#fff;color:#111;border:1px solid #e5e7eb;border-radius:16px;padding:18px;height:100%;display:flex;flex-direction:column}
-
-/* 좌측 카드가 무조건 보이도록(디버그용) */
-#leftAuth{display:block !important; visibility:visible !important; opacity:1 !important;}
-#leftAuth .banner-flex{flex:1;border:1px dashed #e5e7eb;border-radius:12px;background:#fff;margin-top:16px}
-
-/* 읽기/미리보기 이미지 규칙(가로/세로 비율에 따라 70%/30%) */
-.image, .thumb{display:block;height:auto;margin:10px auto}
-.image.landscape, .thumb.landscape{width:70%;max-width:70%}
-.image.portrait,  .thumb.portrait {width:30%;max-width:30%}
-
-<script>
-/* === 레이아웃/섹션 자동 복구 === */
-(function ensureLayout(){
-  const main = document.querySelector('main');
-  if(!main) return;
-
-  // 1) .layout 래퍼 보장
-  let layout = main.querySelector(':scope > .layout');
-  if(!layout){
-    layout = document.createElement('div');
-    layout.className = 'layout';
-    // 기존 main 내용 보존: 기존 자식들 중 #leftAuth/#rightCard를 나중에 이동
-    const oldChildren = Array.from(main.children);
-    main.innerHTML = '';
-    main.appendChild(layout);
-    oldChildren.forEach(ch => {
-      if(ch.id === 'leftAuth' || ch.id === 'rightCard') layout.appendChild(ch);
-    });
-  }
-
-  // 2) 좌/우 섹션 확보
-  let left  = document.getElementById('leftAuth');
-  let right = document.getElementById('rightCard');
-
-  // 2-a) 좌측 섹션이 없으면 최소 마크업 생성
-  if(!left){
-    layout.insertAdjacentHTML('afterbegin', `
-      <section class="card" id="leftAuth">
-        <h2 class="section-title">로그인 · 회원가입</h2>
-        <div id="authStatus" class="status">상태 확인 중…</div>
-        <div id="authTabs" class="tabbar" hidden>
-          <button type="button" id="tab-login" class="active">로그인</button>
-          <button type="button" id="tab-signup">가입</button>
-        </div>
-        <form id="loginForm" hidden>
-          <div class="field">
-            <label for="login-email">이메일</label>
-            <input id="login-email" type="email" placeholder="you@example.com" required>
-          </div>
-          <div class="field">
-            <label for="login-password">비밀번호</label>
-            <input id="login-password" type="password" placeholder="8자 이상" required minlength="8">
-          </div>
-          <div class="row">
-            <button class="btn" id="btn-login">로그인</button>
-            <button class="btn secondary" type="button" id="btn-logout" hidden>로그아웃</button>
-          </div>
-          <div id="loginStatus" class="status"></div>
-        </form>
-        <form id="signupForm" hidden>
-          <div class="field">
-            <label for="signup-email">이메일</label>
-            <input id="signup-email" type="email" placeholder="you@example.com" required>
-          </div>
-          <div class="field">
-            <label for="signup-password">비밀번호</label>
-            <input id="signup-password" type="password" placeholder="8자 이상" required minlength="8">
-          </div>
-          <div class="field">
-            <label for="signup-password2">비밀번호 확인</label>
-            <input id="signup-password2" type="password" placeholder="다시 입력" required minlength="8">
-          </div>
-          <div class="row"><button class="btn" id="btn-signup">가입</button></div>
-          <div id="signupStatus" class="status"></div>
-        </form>
-        <div class="banner-flex"></div>
-      </section>
-    `);
-    left = document.getElementById('leftAuth');
-  }
-
-  // 2-b) 우측 섹션이 있으면 .layout로 이동
-  if(right && right.parentElement !== layout) layout.appendChild(right);
-  if(left  && left.parentElement  !== layout) layout.insertBefore(left, layout.firstChild);
-
-  // 3) 혹시라도 hidden 속성이 있으면 제거
-  left?.removeAttribute('hidden');
-})();
-
-/* === 이미지 가로/세로 판별 클래스 부여 === */
-function applyImgClass(el){
-  if(!el) return;
-  const set = ()=>{
-    el.classList.remove('landscape','portrait');
-    if(el.naturalWidth > el.naturalHeight) el.classList.add('landscape');
-    else el.classList.add('portrait');
-  };
-  if(el.complete && el.naturalWidth) set();
-  else el.addEventListener('load', set, {once:true});
-}
-/* === 레이아웃/카드 기본 === */
-.layout{display:grid;grid-template-columns:1fr;gap:18px;height:100%}
-@media (min-width:1024px){ .layout{grid-template-columns:1fr 3fr;align-items:stretch} }
-.card{background:#fff;color:#111;border:1px solid #e5e7eb;border-radius:16px;padding:18px;height:100%;display:flex;flex-direction:column}
-
-/* 좌측 배너가 남는 공간을 채우도록 */
-#leftAuth .banner-flex{flex:1;border:1px dashed #e5e7eb;border-radius:12px;background:#fff}
-
-/* 읽기/미리보기 이미지 규칙(가로 70% / 세로 30%) */
-.image,.thumb{display:block;height:auto;margin:10px auto}
-.image.landscape,.thumb.landscape{width:70%;max-width:70%}
-.image.portrait,.thumb.portrait{width:30%;max-width:30%}
-
+  // init
+  refreshAuthUI();
 </script>
-
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script>
-/* === Supabase 설정 (기존과 동일 값 사용) === */
-const SUPABASE_URL  = "https://snxjcbaaysgfunpsohzg.supabase.co";
-const SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNueGpjYmFheXNnZnVucHNvaHpnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY1OTk3MzQsImV4cCI6MjA3MjE3NTczNH0.T8b9PpabXkCvwW2W57Qbr-h--JLZB6errlyP5IwsYyk";
-const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
-
-/* === 유틸 === */
-function applyImgClass(el){
-  if(!el) return;
-  const set=()=>{
-    el.classList.remove('landscape','portrait');
-    (el.naturalWidth > el.naturalHeight) ? el.classList.add('landscape') : el.classList.add('portrait');
-  };
-  if(el.complete && el.naturalWidth) set(); else el.addEventListener('load', set, {once:true});
-}
-
-/* === 좌측 인증 UI === */
-const authStatus  = document.getElementById('authStatus');
-const authTabs    = document.getElementById('authTabs');
-const fLogin      = document.getElementById('loginForm');
-const fSignup     = document.getElementById('signupForm');
-const loginStatus = document.getElementById('loginStatus');
-const signupStatus= document.getElementById('signupStatus');
-
-function setTab(which){
-  document.getElementById('tab-login')?.classList.toggle('active', which==='login');
-  document.getElementById('tab-signup')?.classList.toggle('active', which==='signup');
-  if(fLogin)  fLogin.hidden  = (which!=='login');
-  if(fSignup) fSignup.hidden = (which!=='signup');
-}
-document.getElementById('tab-login')?.addEventListener('click', ()=>setTab('login'));
-document.getElementById('tab-signup')?.addEventListener('click', ()=>setTab('signup'));
-
-async function refreshAuthUI(){
-  const { data:{ session } } = await sb.auth.getSession();
-  const authInfo = document.getElementById('authInfo');      // 우측 상단 상태 문구
-  const writeForm= document.getElementById('writeForm');
-  const needLogin= document.getElementById('needLogin');
-
-  if(session?.user){
-    if(authStatus) authStatus.textContent = `로그인: ${session.user.email}`;
-    if(authTabs)   authTabs.hidden = true;
-    if(fLogin){ fLogin.hidden = false; document.getElementById('btn-login')?.style && (document.getElementById('btn-login').style.display='none'); }
-    document.getElementById('btn-logout')?.removeAttribute('hidden');
-    if(authInfo)  authInfo.textContent = `로그인: ${session.user.email}`;
-    if(writeForm) writeForm.hidden = false;
-    if(needLogin) needLogin.hidden = true;
-  }else{
-    if(authStatus) authStatus.textContent = "로그아웃 상태";
-    if(authTabs)   authTabs.hidden = false;
-    if(fLogin)     fLogin.hidden = true;
-    if(fSignup)    fSignup.hidden = false; // 가입 폼 보이기
-    document.getElementById('btn-logout')?.setAttribute('hidden','');
-    document.getElementById('btn-login')?.style && (document.getElementById('btn-login').style.display='');
-    if(authInfo)  authInfo.textContent = "로그아웃 상태";
-    if(writeForm) writeForm.hidden = true;
-    if(needLogin) needLogin.hidden = false;
-    setTab('login');
-  }
-}
-
-/* 로그인/로그아웃/가입 */
-document.getElementById('btn-login')?.addEventListener('click', async (e)=>{
-  e.preventDefault();
-  if(loginStatus) loginStatus.textContent = "로그인 중…";
-  const email = document.getElementById('login-email')?.value.trim();
-  const pw    = document.getElementById('login-password')?.value;
-  const { error } = await sb.auth.signInWithPassword({ email, password: pw });
-  if(loginStatus) loginStatus.textContent = error ? ("로그인 실패: "+error.message) : "로그인 성공";
-  await refreshAuthUI();
-});
-document.getElementById('btn-logout')?.addEventListener('click', async (e)=>{
-  e.preventDefault();
-  await sb.auth.signOut();
-  await refreshAuthUI();
-});
-document.getElementById('btn-signup')?.addEventListener('click', async (e)=>{
-  e.preventDefault();
-  if(signupStatus) signupStatus.textContent = "가입 중…";
-  const email = document.getElementById('signup-email')?.value.trim();
-  const pw1   = document.getElementById('signup-password')?.value;
-  const pw2   = document.getElementById('signup-password2')?.value;
-  if(pw1 !== pw2){ if(signupStatus) signupStatus.textContent="비밀번호 확인이 일치하지 않습니다."; return; }
-  if((pw1||'').length < 8){ if(signupStatus) signupStatus.textContent="비밀번호는 8자 이상"; return; }
-  const { data, error } = await sb.auth.signUp({ email, password: pw1 });
-  if(error){ if(signupStatus) signupStatus.textContent = "가입 실패: "+error.message; return; }
-  if(signupStatus) signupStatus.textContent = data.session ? "가입+로그인 완료" : "가입 완료";
-  await refreshAuthUI();
-});
-
-/* === 우측: 후기 작성 === */
-const fImage     = document.getElementById('image');
-const previewImg = document.getElementById('preview');
-const btnSubmit  = document.getElementById('btn-submit');
-const formStatus = document.getElementById('formStatus');
-
-fImage?.addEventListener('change', ()=>{
-  const file0 = fImage.files?.[0];
-  if(!file0){ if(previewImg) previewImg.hidden = true; return; }
-  const url = URL.createObjectURL(file0);
-  if(previewImg){
-    previewImg.src = url;
-    previewImg.hidden = false;
-    applyImgClass(previewImg); // ✅ 가로/세로에 따라 70%/30%
-  }
-});
-
-document.getElementById('writeForm')?.addEventListener('submit', async (e)=>{
-  e.preventDefault();
-  if(!btnSubmit) return;
-  const { data:{ session } } = await sb.auth.getSession();
-  if(!session?.user){ alert('로그인이 필요합니다.'); return; }
-
-  const title   = document.getElementById('title')?.value.trim();
-  const content = document.getElementById('content')?.value.trim();
-  if(!title || !content){ if(formStatus) formStatus.textContent="제목/내용을 입력하세요."; return; }
-
-  btnSubmit.disabled = true; btnSubmit.textContent = "등록 중…";
-  try{
-    const nickname = (session.user.user_metadata?.full_name) || (session.user.email?.split('@')[0]) || '익명';
-    let image_path=null, image_url=null;
-    const file0 = fImage?.files?.[0] || null;
-    if(file0){
-      // (선택) 그대로 업로드 — 필요 시 압축 로직 추가 가능
-      const ext = (file0.name.split('.').pop()||'jpg').toLowerCase();
-      const safeExt = ["jpg","jpeg","png","webp","gif"].includes(ext) ? ext : "jpg";
-      const key = `${session.user.id}/${Date.now()}_${Math.random().toString(36).slice(2)}.${safeExt}`;
-      const up  = await sb.storage.from("reviews").upload(key, file0, { upsert:false, cacheControl:"3600" });
-      if(up.error) throw new Error("이미지 업로드 실패: "+up.error.message);
-      image_path = key;
-      image_url  = sb.storage.from("reviews").getPublicUrl(key).data.publicUrl;
-    }
-
-    const ins = await sb.from("reviews").insert({
-      title, content,
-      user_id: session.user.id,
-      author_email: session.user.email,
-      nickname, image_path, image_url
-    }).select("id").single();
-    if(ins.error) throw new Error(ins.error.message);
-    location.href = `/reviews.html?id=${ins.data.id}`;
-  }catch(err){
-    if(formStatus) formStatus.textContent = String(err.message||err);
-    btnSubmit.disabled = false; btnSubmit.textContent = "등록";
-  }
-});
-
-/* 초기화 */
-refreshAuthUI();
-</script>
-
 </body>
 </html>
