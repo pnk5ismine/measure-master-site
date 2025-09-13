@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Measure Master — 사용후기</title>
-  <meta name="description" content="Measure Master 사용자들이 올린 후기와 사진" />
+  <meta name="description" content="Measure Master 사용자들이 올린 후기" />
   <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
   <style>
     :root { --bg:#0b0d12; --card:#121622; --muted:#9aa4b2; --pri:#5eead4; --border:#1e2230; }
@@ -16,89 +16,55 @@
     .brand{display:flex;align-items:center;gap:10px}
     .logo-img{width:28px;height:28px;border-radius:6px;object-fit:contain;background:#0e1422}
     nav a{margin-left:16px;color:#cfd6e4}
-    .muted{color:var(--muted)}
     .pill{background:#0f1320;border:1px solid var(--border);border-radius:999px;padding:4px 8px}
     footer{margin:30px auto 60px;text-align:center;color:var(--muted);font-size:14px}
 
-    /* 모바일 헤더 정리(메뉴 뭉침 방지) */
+    /* 모바일 헤더 정리 */
     @media (max-width:640px){
-      header{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
+      header{display:flex;flex-wrap:wrap;gap:8px}
       .brand{order:1}
-      .lang{order:2;margin-left:auto;width:100%;display:flex;justify-content:flex-end;gap:6px}
-      header nav{order:3;width:100%;display:flex;flex-wrap:nowrap;gap:8px;overflow-x:auto;white-space:nowrap;-webkit-overflow-scrolling:touch}
-      header nav::-webkit-scrollbar{display:none}
-      header nav a{margin:0;flex:0 0 auto;padding:8px 10px;border:1px solid var(--border);border-radius:999px;background:#0f1320;color:#e7edf5;font-size:13px;line-height:1.1;overflow:hidden;text-overflow:ellipsis}
+      header nav{order:3;width:100%;display:flex;gap:8px;overflow-x:auto;white-space:nowrap}
+      header nav a{margin:0;flex:0 0 auto;padding:8px 10px;border:1px solid var(--border);border-radius:999px;background:#0f1320;color:#e7edf5;font-size:13px}
     }
 
-    /* 페이지 레이아웃 */
+    /* 레이아웃: 좌 1/4, 우 3/4 */
     .layout{display:grid;grid-template-columns:1fr;gap:18px}
-    @media (min-width:1024px){ .layout{grid-template-columns:1fr .9fr;align-items:start} }
+    @media (min-width:1024px){ .layout{grid-template-columns:1fr 3fr;align-items:start} }
 
-    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:22px}
-    .section-title{margin:0 0 8px;font-size:20px}
-    .section-sub{margin:0 0 14px;color:var(--muted);font-size:14px}
+    /* 카드 영역은 화이트 */
+    .card{background:#fff;color:#111;border:1px solid #e5e7eb;border-radius:16px;padding:18px}
 
-    /* 작성 폼 */
+    /* 좌측: 인증 카드 + 배너 자리 */
+    .section-title{margin:0 0 8px;font-size:18px}
+    .muted{color:#666}
     .field{display:flex;flex-direction:column;gap:6px;margin:10px 0 2px}
-    input[type="text"], textarea{
-      width:100%;padding:10px 12px;border-radius:12px;border:1px solid var(--border);
-      background:#0f1320;color:#e7edf5
+    input[type="email"],input[type="password"]{
+      width:100%;padding:10px 12px;border-radius:10px;border:1px solid #e5e7eb;background:#fff;color:#111
     }
-    textarea{min-height:120px;resize:vertical;white-space:pre-wrap}
-    .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
-    .hint{font-size:12px;color:var(--muted)}
-    .btn{padding:10px 14px;background:#1d2639;color:#e7edf5;border:1px solid var(--border);border-radius:12px;cursor:pointer}
-    .btn:hover{background:#223049}
-    .btn.secondary{background:#0f1320}
-    .status{font-size:13px;color:var(--muted);margin-top:6px}
-    .thumb{width:100%;max-height:360px;object-fit:contain;border:1px dashed var(--border);border-radius:12px;background:#0f1320}
+    .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+    .btn{padding:10px 14px;border-radius:10px;border:1px solid #111;background:#111;color:#fff;cursor:pointer}
+    .btn.secondary{background:#f9fafb;color:#111;border:1px solid #e5e7eb}
+    .tabbar{display:flex;gap:8px;margin:6px 0 10px}
+    .tabbar button{border:1px solid #e5e7eb;background:#f9fafb;color:#111;border-radius:999px;padding:6px 10px;cursor:pointer}
+    .tabbar button.active{outline:2px solid #5eead4}
+    .status{font-size:12px;color:#666;margin-top:6px}
 
-    /* 목록 */
-    .list{display:grid;grid-template-columns:1fr;gap:12px}
-    .item{background:#0f1320;border:1px solid var(--border);border-radius:14px;padding:14px}
-    .item-head{display:flex;gap:8px;align-items:baseline}
-    .item-title{margin:0;font-size:18px}
-    .item-meta{margin-left:auto;font-size:12px;color:var(--muted)}
-    .item-body{white-space:pre-wrap;margin:8px 0 0}
-    .item-img{width:100%;max-height:500px;object-fit:contain;border-radius:10px;margin-top:10px;background:#0b0d12}
-    .item-actions{display:flex;gap:8px;margin-top:10px}
-    .danger{border-color:#7f1d1d;background:#2d1414;color:#fbb}
+    /* 우측: 표(List) */
+    .table-wrap{overflow:auto}
+    table{width:100%;border-collapse:collapse}
+    th, td{border-bottom:1px solid #eee;padding:10px 8px;text-align:left;vertical-align:top}
+    th{font-weight:600;background:#fafafa;position:sticky;top:0}
+    td.content{white-space:pre-wrap;word-break:break-word}
+    tr:hover{background:#fafafa;cursor:pointer}
+    .right-head{display:flex;align-items:baseline;gap:10px;margin-bottom:8px}
+    .right-head .title{margin:0;font-size:20px}
+    .right-head .sub{color:#666;font-size:13px}
+
+    /* 읽기 화면 */
+    .article h3{margin:0 0 6px}
+    .meta{color:#666;font-size:13px;margin-bottom:10px}
+    .article .image{max-width:80%;margin:10px 0;border-radius:10px;display:block}
   </style>
-
-<style id="white-cards-theme">
-  /* 카드/목록을 화이트로, 본문 배경은 기존 다크 유지 */
-  .card{
-    background:#fff !important; color:#111 !important;
-    border:1px solid #e5e7eb !important; border-radius:16px;
-    box-shadow:0 1px 2px rgba(0,0,0,.08);
-  }
-  .item{
-    background:#fff !important; color:#111 !important;
-    border:1px solid #e5e7eb !important; border-radius:14px;
-    box-shadow:0 1px 2px rgba(0,0,0,.06);
-  }
-  .item-title{ color:#111 !important; }
-  .item-body{ color:#111 !important; }
-  .item-img{ background:#fff !important; }
-
-  /* 입력 요소도 화이트로 */
-  input[type="text"], input[type="email"], input[type="password"], textarea{
-    background:#fff !important; color:#111 !important; border:1px solid #e5e7eb !important;
-  }
-  .thumb{ background:#fff !important; border:1px dashed #e5e7eb !important; }
-
-  /* 버튼은 대비 유지(선택적으로 조정) */
-  .btn{ background:#111; color:#fff; border:1px solid #111; }
-  .btn:hover{ background:#222; }
-  .btn.secondary{ background:#f9fafb; color:#111; border:1px solid #e5e7eb; }
-</style>
-
-<style id="reviews-img-80">
-  .item-img{ width:80%; max-width:80%; margin:10px auto 0; display:block; }
-  /* 작성 폼 미리보기도 동일 */
-  .thumb{ width:80%; max-width:80%; margin:10px auto 0; display:block; }
-</style>
-
 </head>
 <body>
 <header>
@@ -113,69 +79,93 @@
     <a href="/reviews.html">사용후기</a>
     <a href="/privacy.html">개인정보처리방침</a>
   </nav>
-  <div class="lang">
-    <button type="button" class="btn secondary" style="padding:6px 10px">🇰🇷</button>
-    <button type="button" class="btn secondary" style="padding:6px 10px">🇬🇧</button>
-  </div>
 </header>
 
 <main>
   <div class="layout">
-    <!-- 작성 카드 -->
-    <section class="card">
-      <h2 class="section-title">후기 작성</h2>
-      <p class="section-sub">의견과 현장 사진을 올려주세요. (이미지는 선택사항)</p>
+    <!-- 좌측 1/4: 로그인/가입 -->
+    <section class="card" id="leftAuth">
+      <h2 class="section-title">로그인 · 회원가입</h2>
+      <div id="authStatus" class="status">상태 확인 중…</div>
 
-      <div id="auth-info" class="status">로그인 상태 확인 중…</div>
+      <div id="authTabs" class="tabbar" hidden>
+        <button type="button" id="tab-login" class="active">로그인</button>
+        <button type="button" id="tab-signup">가입</button>
+      </div>
 
-      <form id="form" hidden>
+      <!-- 로그인 -->
+      <form id="loginForm" hidden>
         <div class="field">
-          <label for="title">제목</label>
-          <input id="title" name="title" type="text" maxlength="100" required placeholder="제목을 입력하세요">
+          <label for="login-email">이메일</label>
+          <input id="login-email" type="email" placeholder="you@example.com" required>
         </div>
-
         <div class="field">
-          <label for="content">내용</label>
-          <textarea id="content" name="content" maxlength="5000" placeholder="사용 경험, 개선 의견 등을 자세히 적어주세요"></textarea>
+          <label for="login-password">비밀번호</label>
+          <input id="login-password" type="password" placeholder="8자 이상" required minlength="8">
         </div>
-
-        <div class="field">
-          <label for="image">사진 (최대 1장, JPG/PNG, 3MB 이하)</label>
-          <div class="row">
-            <input id="image" name="image" type="file" accept="image/*">
-            <button type="button" id="clearImg" class="btn secondary">삭제</button>
-          </div>
-          <img id="preview" class="thumb" alt="" hidden>
-          <div class="hint">저작권 문제 없는 이미지만 업로드하세요.</div>
-        </div>
-
         <div class="row">
-          <button type="submit" class="btn">등록</button>
-          <button type="button" id="logout" class="btn secondary" hidden>로그아웃</button>
-        </div>
-        <div id="formStatus" class="status"></div>
-      </form>
-
-      <div id="loginBox" hidden>
-        <p class="muted">로그인 후 작성하실 수 있어요.</p>
-        <div class="row" style="gap:6px">
-          <input id="login-email" type="email" placeholder="you@example.com" style="min-width:240px">
-          <input id="login-password" type="password" placeholder="비밀번호" style="min-width:160px">
-          <button id="btn-login" class="btn">로그인</button>
-          <button id="btn-signup" class="btn secondary">가입</button>
+          <button class="btn" id="btn-login">로그인</button>
+          <button class="btn secondary" type="button" id="btn-logout" hidden>로그아웃</button>
         </div>
         <div id="loginStatus" class="status"></div>
-      </div>
+      </form>
+
+      <!-- 가입 -->
+      <form id="signupForm" hidden>
+        <div class="field">
+          <label for="signup-email">이메일</label>
+          <input id="signup-email" type="email" placeholder="you@example.com" required>
+        </div>
+        <div class="field">
+          <label for="signup-password">비밀번호</label>
+          <input id="signup-password" type="password" placeholder="8자 이상" required minlength="8">
+        </div>
+        <div class="field">
+          <label for="signup-password2">비밀번호 확인</label>
+          <input id="signup-password2" type="password" placeholder="다시 입력" required minlength="8">
+        </div>
+        <div class="row">
+          <button class="btn" id="btn-signup">가입</button>
+        </div>
+        <div id="signupStatus" class="status"></div>
+      </form>
+
+      <!-- 하단 배너 자리(비워둠) -->
+      <div style="margin-top:16px;border:1px dashed #e5e7eb;border-radius:12px;height:160px;background:#fff"></div>
     </section>
 
-    <!-- 목록 카드 -->
-    <section class="card">
-      <h2 class="section-title">사용자 후기</h2>
-      <p class="section-sub">최신순 · 비로그인도 열람 가능</p>
-      <div id="list" class="list" aria-live="polite"></div>
-      <div class="row" style="margin-top:8px">
-        <button id="more" class="btn secondary">더보기</button>
-        <div id="listStatus" class="status"></div>
+    <!-- 우측 3/4: 게시판 -->
+    <section class="card" id="rightCard">
+      <div class="right-head">
+        <h2 class="title">사용자 후기</h2>
+        <span class="sub">최신순 · 행 클릭 시 읽기 화면으로 이동</span>
+      </div>
+
+      <!-- 목록 모드 -->
+      <div id="listMode">
+        <div class="table-wrap">
+          <table id="reviewTable" aria-label="후기 목록">
+            <thead>
+              <tr>
+                <th style="width:70px">번호</th>
+                <th style="width:140px">닉네임</th>
+                <th>내용</th>
+                <th style="width:160px">작성시각</th>
+              </tr>
+            </thead>
+            <tbody id="tbody"></tbody>
+          </table>
+        </div>
+        <div class="row" style="margin-top:8px">
+          <button class="btn secondary" id="btn-more">더보기</button>
+          <span id="listStatus" class="status"></span>
+        </div>
+      </div>
+
+      <!-- 읽기 모드 -->
+      <div id="readMode" hidden>
+        <button class="btn secondary" id="btn-back">← 목록으로</button>
+        <article class="article" id="article" style="margin-top:10px"></article>
       </div>
     </section>
   </div>
@@ -188,244 +178,142 @@
 <!-- Supabase -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-  // === 본인 프로젝트 값으로 교체 가능(지금은 index.html과 동일 값 사용) ===
+  // === 프로젝트 값(기존과 동일) ===
   const SUPABASE_URL  = "https://snxjcbaaysgfunpsohzg.supabase.co";
   const SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNueGpjYmFheXNnZnVucHNvaHpnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY1OTk3MzQsImV4cCI6MjA3MjE3NTczNH0.T8b9PpabXkCvwW2W57Qbr-h--JLZB6errlyP5IwsYyk";
   const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
 
   const $ = s => document.querySelector(s);
-  const list = $("#list");
-  const form = $("#form");
-  const loginBox = $("#loginBox");
-  const authInfo = $("#auth-info");
-  const formStatus = $("#formStatus");
-  const loginStatus = $("#loginStatus");
-  const preview = $("#preview");
-  const imageInput = $("#image");
+  const $$ = s => Array.from(document.querySelectorAll(s));
   $("#year").textContent = new Date().getFullYear();
 
-  // 목록 페이징
-  const PAGE_SIZE = 10;
-  let pageFrom = 0;
+  // ===== 좌측 인증 UI =====
+  const authStatus = $("#authStatus");
+  const authTabs   = $("#authTabs");
+  const fLogin     = $("#loginForm");
+  const fSignup    = $("#signupForm");
+  const loginStatus= $("#loginStatus");
+  const signupStatus=$("#signupStatus");
+  const btnLogout  = $("#btn-logout");
 
-  // 유틸
-  function maskEmail(email=""){
-    const m = String(email).split("@");
-    if(m.length<2) return email;
-    return m[0].slice(0,2) + "***@" + m[1];
+  function setTab(which){
+    $("#tab-login").classList.toggle("active", which==="login");
+    $("#tab-signup").classList.toggle("active", which==="signup");
+    fLogin.hidden  = which!=="login";
+    fSignup.hidden = which!=="signup";
   }
-  function fmtDate(s){ try{ return new Date(s).toLocaleString("ko-KR"); }catch{ return s; } }
+  $("#tab-login")?.addEventListener("click", ()=>setTab("login"));
+  $("#tab-signup")?.addEventListener("click", ()=>setTab("signup"));
 
-  // 이미지 미리보기
-  imageInput.addEventListener("change", (e)=>{
-    const f = e.target.files?.[0];
-    if(!f){ preview.hidden = true; preview.src=""; return; }
-    if(!/^image\//.test(f.type)){ alert("이미지 파일만 가능합니다."); imageInput.value=""; return; }
-    if(f.size > 3*1024*1024){ alert("3MB 이하만 가능합니다."); imageInput.value=""; return; }
-    const url = URL.createObjectURL(f);
-    preview.src = url; preview.hidden = false;
-  });
-  $("#clearImg").addEventListener("click", ()=>{
-    imageInput.value = ""; preview.hidden = true; preview.src = "";
-  });
-
-  // 인증 UI
   async function refreshAuthUI(){
     const { data:{ session } } = await sb.auth.getSession();
     if(session?.user){
-      authInfo.textContent = `로그인: ${session.user.email}`;
-      form.hidden = false; loginBox.hidden = true;
-      $("#logout").hidden = false;
+      authStatus.textContent = `로그인: ${session.user.email}`;
+      authTabs.hidden = true;
+      fLogin.hidden = false; // 로그아웃 버튼만 쓰기 위해 표시
+      $("#btn-login").style.display = "none";
+      btnLogout.hidden = false;
     }else{
-      authInfo.textContent = "로그아웃 상태";
-      form.hidden = true; loginBox.hidden = false;
-      $("#logout").hidden = true;
+      authStatus.textContent = "로그아웃 상태";
+      authTabs.hidden = false;
+      $("#btn-login").style.display = "";
+      btnLogout.hidden = true;
+      setTab("login");
     }
   }
 
-  // 로그인/가입/로그아웃
-  $("#btn-login").addEventListener("click", async ()=>{
+  $("#btn-login").addEventListener("click", async (e)=>{
+    e.preventDefault();
     loginStatus.textContent = "로그인 중…";
     const email = $("#login-email").value.trim();
     const password = $("#login-password").value;
     const { error } = await sb.auth.signInWithPassword({ email, password });
-    loginStatus.textContent = error ? `로그인 실패: ${error.message}` : "로그인 성공";
+    loginStatus.textContent = error ? ("로그인 실패: " + error.message) : "로그인 성공";
     await refreshAuthUI();
   });
-  $("#btn-signup").addEventListener("click", async ()=>{
-    loginStatus.textContent = "가입 중…";
-    const email = $("#login-email").value.trim();
-    const password = $("#login-password").value;
-    if(password.length < 8){ loginStatus.textContent = "비밀번호는 8자 이상"; return; }
-    const { error } = await sb.auth.signUp({ email, password });
-    loginStatus.textContent = error ? `가입 실패: ${error.message}` : "가입 완료(메일 인증 설정시 메일 확인)";
-  });
-  $("#logout").addEventListener("click", async ()=>{
-    await sb.auth.signOut(); await refreshAuthUI();
-  });
 
-  // 후기 등록
-  form.addEventListener("submit", async (e)=>{
+  $("#btn-logout").addEventListener("click", async (e)=>{
     e.preventDefault();
-    formStatus.textContent = "등록 중…";
-    const { data:{ session } } = await sb.auth.getSession();
-    if(!session?.user){ alert("로그인이 필요합니다."); return; }
-
-    const title = $("#title").value.trim();
-    const content = $("#content").value.trim();
-    if(!title || !content){ formStatus.textContent = "제목과 내용을 입력하세요."; return; }
-
-    let image_path = null, image_url = null;
-
-const file0 = imageInput.files?.[0] || null;
-if(file0){
-  // ✅ 압축 버전으로 교체 (원본 그대로 쓰려면 아래 줄을 file0로 바꾸세요)
-  const file = await compressImage(file0, {maxW:1600, quality:0.85});
-  const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
-  const safeExt = ["jpg","jpeg","png","webp","gif"].includes(ext) ? ext : "jpg";
-  const key = `${session.user.id}/${Date.now()}_${Math.random().toString(36).slice(2)}.${safeExt}`;
-
-  const up = await sb.storage.from("reviews").upload(key, file, { upsert:false, cacheControl:"3600" });
-  if(up.error){ formStatus.textContent = "이미지 업로드 실패: " + up.error.message; return; }
-  image_path = key;
-  const pub = sb.storage.from("reviews").getPublicUrl(key);
-  image_url = pub.data.publicUrl;
-}
-
-// 기존 submit 핸들러 안, insert 직전에 추가
-const nickname =
-  (session.user.user_metadata?.full_name)
-  || (session.user.email ? session.user.email.split('@')[0] : null)
-  || '익명';
-
-// INSERT payload에 nickname 추가
-const ins = await sb.from("reviews").insert({
-  title, content,
-  image_path, image_url,
-  user_id: session.user.id,
-  author_email: session.user.email,
-  nickname                      // ✅ 추가
-}).select().single();
-
-
-    if(ins.error){ formStatus.textContent = "등록 실패: " + ins.error.message; return; }
-    formStatus.textContent = "등록 완료!";
-    // 폼 초기화
-    $("#title").value = ""; $("#content").value = ""; imageInput.value=""; preview.hidden=true; preview.src="";
-    // 목록 맨 앞에 추가
-    prependItem(ins.data, session.user);
+    await sb.auth.signOut();
+    await refreshAuthUI();
   });
 
-  // 후기 목록 로드
+  $("#btn-signup").addEventListener("click", async (e)=>{
+    e.preventDefault();
+    signupStatus.textContent = "가입 중…";
+    const email = $("#signup-email").value.trim();
+    const pw1 = $("#signup-password").value;
+    const pw2 = $("#signup-password2").value;
+    if(pw1 !== pw2){ signupStatus.textContent = "비밀번호 확인이 일치하지 않습니다."; return; }
+    if(pw1.length < 8){ signupStatus.textContent = "비밀번호는 8자 이상"; return; }
+
+    const { data, error } = await sb.auth.signUp({ email, password: pw1 });
+    if(error){ signupStatus.textContent = "가입 실패: " + error.message; return; }
+    signupStatus.textContent = data.session ? "가입+로그인 완료" : "가입 완료";
+    await refreshAuthUI();
+  });
+
+  // ===== 우측 게시판: 목록 & 읽기 =====
+  const tbody = $("#tbody");
+  const listStatus = $("#listStatus");
+  const listMode = $("#listMode");
+  const readMode = $("#readMode");
+  const article = $("#article");
+  const PAGE_SIZE = 20;
+  let offset = 0, reachedEnd = false;
+
+  function fmtDate(s){ try{ return new Date(s).toLocaleString("ko-KR"); }catch{ return s; } }
+  function displayName(row){ return row.nickname || (row.author_email ? row.author_email.split("@")[0] : "익명"); }
+
   async function loadList(){
-    $("#listStatus").textContent = "불러오는 중…";
-    const to = pageFrom + PAGE_SIZE - 1;
-    const { data, error } = await sb
-      .from("reviews")
-      .select("*")
+    if(reachedEnd) return;
+    listStatus.textContent = "불러오는 중…";
+    const to = offset + PAGE_SIZE - 1;
+    const { data, error } = await sb.from("reviews")
+      .select("id, nickname, author_email, content, created_at")
       .order("created_at", { ascending:false })
-      .range(pageFrom, to);
+      .range(offset, to);
 
-    if(error){ $("#listStatus").textContent = "불러오기 실패: " + error.message; return; }
-    data.forEach(row => appendItem(row));
-    pageFrom += data.length;
-    $("#listStatus").textContent = data.length < PAGE_SIZE ? "마지막 페이지" : "";
-    $("#more").disabled = data.length < PAGE_SIZE;
+    if(error){ listStatus.textContent = "불러오기 실패: " + error.message; return; }
+    if(!data || data.length===0){ reachedEnd = true; listStatus.textContent = "마지막입니다"; return; }
+
+    data.forEach((row, idx)=>{
+      const tr = document.createElement("tr");
+      const no = offset + idx + 1;
+      tr.innerHTML = `
+        <td>${no}</td>
+        <td>${escapeHtml(displayName(row))}</td>
+        <td class="content">${escapeHtml(row.content||"")}</td>
+        <td>${fmtDate(row.created_at)}</td>
+      `;
+      tr.addEventListener("click", ()=>{ location.href = `/reviews.html?id=${row.id}`; });
+      tbody.appendChild(tr);
+    });
+    offset += data.length;
+    listStatus.textContent = data.length < PAGE_SIZE ? "마지막입니다" : "";
+    if(data.length < PAGE_SIZE) reachedEnd = true;
   }
 
-function displayName(row){
-  return row.nickname || (row.author_email ? maskEmail(row.author_email) : "익명");
-}
-// 사용처:
-<div class="item-meta">${displayName(row)} · ${fmtDate(row.created_at)}</div>
+  $("#btn-more").addEventListener("click", loadList);
 
-// 등록 성공 직후에 추가
-formStatus.textContent = "등록 완료!";
-form.hidden = true;           // ✅ 작성 폼 숨기기
-document.querySelector('h2.section-title + .section-sub')?.scrollIntoView({behavior:'smooth', block:'start'});
+  async function loadOne(id){
+    const { data, error } = await sb.from("reviews").select("*").eq("id", id).single();
+    if(error){ article.innerHTML = `<p class="muted">불러오기 실패: ${escapeHtml(error.message)}</p>`; return; }
+    const name = displayName(data);
+    const img = data.image_url ? `<img class="image" src="${data.image_url}" alt="">` : "";
+    article.innerHTML = `
+      <h3>${escapeHtml(data.title || "(제목 없음)")}</h3>
+      <div class="meta">${escapeHtml(name)} · ${fmtDate(data.created_at)}</div>
+      <div class="body" style="white-space:pre-wrap;word-break:break-word">${escapeHtml(data.content||"")}</div>
+      ${img}
+    `;
+  }
 
-// 페이지 초기화 직후 한 번
-(function addListOnlyButton(){
-  const listCard = document.querySelectorAll('section.card')[1];
-  if(!listCard) return;
-  const btn = document.createElement('button');
-  btn.textContent = '목록만 보기';
-  btn.className = 'btn secondary';
-  btn.style.marginLeft = '8px';
-  listCard.querySelector('.section-title')?.insertAdjacentElement('afterend', btn);
-  btn.addEventListener('click', ()=>{
-    form.hidden = true; loginBox.hidden = true;
-    listCard.scrollIntoView({behavior:'smooth', block:'start'});
+  $("#btn-back").addEventListener("click", ()=>{
+    const url = new URL(location.href);
+    url.searchParams.delete("id");
+    location.href = url.toString();
   });
-})();
-
-
-  function ownerButtons(row, currentUser){
-    if(!currentUser || row.user_id !== currentUser.id) return "";
-    return `<button data-id="${row.id}" class="btn danger js-del">삭제</button>`;
-  }
-
-  function appendItem(row){
-    const div = document.createElement("div");
-    div.className = "item";
-    div.dataset.id = row.id;
-    div.innerHTML = `
-      <div class="item-head">
-        <h3 class="item-title">${escapeHtml(row.title)}</h3>
-        <div class="item-meta">${maskEmail(row.author_email)} · ${fmtDate(row.created_at)}</div>
-      </div>
-      <div class="item-body">${escapeHtml(row.content)}</div>
-      ${row.image_url ? `<img class="item-img" src="${row.image_url}" alt="">` : ``}
-      <div class="item-actions"></div>
-    `;
-    list.appendChild(div);
-    attachOwnerActions(div, row);
-  }
-
-  function prependItem(row, currentUser){
-    const div = document.createElement("div");
-    div.className = "item";
-    div.dataset.id = row.id;
-    div.innerHTML = `
-      <div class="item-head">
-        <h3 class="item-title">${escapeHtml(row.title)}</h3>
-        <div class="item-meta">${maskEmail(row.author_email)} · 방금 전</div>
-      </div>
-      <div class="item-body">${escapeHtml(row.content)}</div>
-      ${row.image_url ? `<img class="item-img" src="${row.image_url}" alt="">` : ``}
-      <div class="item-actions">${ownerButtons(row, currentUser)}</div>
-    `;
-    list.prepend(div);
-    bindDelete(div);
-  }
-
-  function attachOwnerActions(div, row){
-    sb.auth.getSession().then(({data:{session}})=>{
-      const user = session?.user;
-      div.querySelector(".item-actions").innerHTML = ownerButtons(row, user);
-      bindDelete(div);
-    });
-  }
-
-  function bindDelete(container){
-    const btn = container.querySelector(".js-del");
-    if(!btn) return;
-    btn.addEventListener("click", async ()=>{
-      if(!confirm("정말 삭제하시겠습니까?")) return;
-      btn.disabled = true;
-      const id = btn.getAttribute("data-id");
-      // 1) 레코드 조회해서 이미지 경로 알아내기
-      const { data: row } = await sb.from("reviews").select("image_path").eq("id", id).single();
-      // 2) 레코드 삭제(소유자만 허용하는 RLS 필요)
-      const del = await sb.from("reviews").delete().eq("id", id);
-      if(del.error){ alert("삭제 실패: " + del.error.message); btn.disabled=false; return; }
-      // 3) 이미지가 있으면 스토리지에서도 삭제(권한 정책 필요)
-      if(row?.image_path){
-        await sb.storage.from("reviews").remove([row.image_path]);
-      }
-      container.remove();
-    });
-  }
 
   function escapeHtml(s=""){
     return String(s)
@@ -436,38 +324,21 @@ document.querySelector('h2.section-title + .section-sub')?.scrollIntoView({behav
       .replace(/'/g,"&#39;");
   }
 
-  $("#more").addEventListener("click", loadList);
-
-  // 초기화
-  (async function(){
+  // 모드 전환
+  (async function init(){
     await refreshAuthUI();
-    await loadList();
+    const params = new URLSearchParams(location.search);
+    const id = params.get("id");
+    if(id){
+      listMode.hidden = true;
+      readMode.hidden = false;
+      await loadOne(id);
+    }else{
+      listMode.hidden = false;
+      readMode.hidden = true;
+      await loadList();
+    }
   })();
-
-async function fileToImage(file){
-  return new Promise((res, rej)=>{
-    const img = new Image();
-    img.onload = ()=> res(img);
-    img.onerror = rej;
-    img.src = URL.createObjectURL(file);
-  });
-}
-
-async function compressImage(file, {maxW=1600, quality=0.85, mime='image/jpeg'}={}){
-  const img = await fileToImage(file);
-  const scale = Math.min(1, maxW / img.naturalWidth);
-  if (scale === 1) return file; // 이미 충분히 작음
-
-  const canvas = document.createElement('canvas');
-  canvas.width = Math.round(img.naturalWidth * scale);
-  canvas.height = Math.round(img.naturalHeight * scale);
-  const ctx = canvas.getContext('2d');
-  ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-
-  const blob = await new Promise(r=> canvas.toBlob(r, mime, quality));
-  return new File([blob], file.name.replace(/\.\w+$/, '.jpg'), {type:mime});
-}
-
 </script>
 </body>
 </html>
