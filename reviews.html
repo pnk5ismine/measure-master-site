@@ -112,7 +112,7 @@
   <div class="banner-flex" style="margin-top:16px"></div>
 </section>
 
-  <section class="card">
+  <section class="card" id="rightCard">
     <h1>후기 작성</h1>
     <p class="muted" id="authInfo">로그인 상태 확인 중…</p>
 
@@ -326,6 +326,262 @@ async function loadOne(id){
 .image.landscape, .thumb.landscape{width:70%;max-width:70%}
 .image.portrait,  .thumb.portrait {width:30%;max-width:30%}
 
+<script>
+/* === 레이아웃/섹션 자동 복구 === */
+(function ensureLayout(){
+  const main = document.querySelector('main');
+  if(!main) return;
+
+  // 1) .layout 래퍼 보장
+  let layout = main.querySelector(':scope > .layout');
+  if(!layout){
+    layout = document.createElement('div');
+    layout.className = 'layout';
+    // 기존 main 내용 보존: 기존 자식들 중 #leftAuth/#rightCard를 나중에 이동
+    const oldChildren = Array.from(main.children);
+    main.innerHTML = '';
+    main.appendChild(layout);
+    oldChildren.forEach(ch => {
+      if(ch.id === 'leftAuth' || ch.id === 'rightCard') layout.appendChild(ch);
+    });
+  }
+
+  // 2) 좌/우 섹션 확보
+  let left  = document.getElementById('leftAuth');
+  let right = document.getElementById('rightCard');
+
+  // 2-a) 좌측 섹션이 없으면 최소 마크업 생성
+  if(!left){
+    layout.insertAdjacentHTML('afterbegin', `
+      <section class="card" id="leftAuth">
+        <h2 class="section-title">로그인 · 회원가입</h2>
+        <div id="authStatus" class="status">상태 확인 중…</div>
+        <div id="authTabs" class="tabbar" hidden>
+          <button type="button" id="tab-login" class="active">로그인</button>
+          <button type="button" id="tab-signup">가입</button>
+        </div>
+        <form id="loginForm" hidden>
+          <div class="field">
+            <label for="login-email">이메일</label>
+            <input id="login-email" type="email" placeholder="you@example.com" required>
+          </div>
+          <div class="field">
+            <label for="login-password">비밀번호</label>
+            <input id="login-password" type="password" placeholder="8자 이상" required minlength="8">
+          </div>
+          <div class="row">
+            <button class="btn" id="btn-login">로그인</button>
+            <button class="btn secondary" type="button" id="btn-logout" hidden>로그아웃</button>
+          </div>
+          <div id="loginStatus" class="status"></div>
+        </form>
+        <form id="signupForm" hidden>
+          <div class="field">
+            <label for="signup-email">이메일</label>
+            <input id="signup-email" type="email" placeholder="you@example.com" required>
+          </div>
+          <div class="field">
+            <label for="signup-password">비밀번호</label>
+            <input id="signup-password" type="password" placeholder="8자 이상" required minlength="8">
+          </div>
+          <div class="field">
+            <label for="signup-password2">비밀번호 확인</label>
+            <input id="signup-password2" type="password" placeholder="다시 입력" required minlength="8">
+          </div>
+          <div class="row"><button class="btn" id="btn-signup">가입</button></div>
+          <div id="signupStatus" class="status"></div>
+        </form>
+        <div class="banner-flex"></div>
+      </section>
+    `);
+    left = document.getElementById('leftAuth');
+  }
+
+  // 2-b) 우측 섹션이 있으면 .layout로 이동
+  if(right && right.parentElement !== layout) layout.appendChild(right);
+  if(left  && left.parentElement  !== layout) layout.insertBefore(left, layout.firstChild);
+
+  // 3) 혹시라도 hidden 속성이 있으면 제거
+  left?.removeAttribute('hidden');
+})();
+
+/* === 이미지 가로/세로 판별 클래스 부여 === */
+function applyImgClass(el){
+  if(!el) return;
+  const set = ()=>{
+    el.classList.remove('landscape','portrait');
+    if(el.naturalWidth > el.naturalHeight) el.classList.add('landscape');
+    else el.classList.add('portrait');
+  };
+  if(el.complete && el.naturalWidth) set();
+  else el.addEventListener('load', set, {once:true});
+}
+/* === 레이아웃/카드 기본 === */
+.layout{display:grid;grid-template-columns:1fr;gap:18px;height:100%}
+@media (min-width:1024px){ .layout{grid-template-columns:1fr 3fr;align-items:stretch} }
+.card{background:#fff;color:#111;border:1px solid #e5e7eb;border-radius:16px;padding:18px;height:100%;display:flex;flex-direction:column}
+
+/* 좌측 배너가 남는 공간을 채우도록 */
+#leftAuth .banner-flex{flex:1;border:1px dashed #e5e7eb;border-radius:12px;background:#fff}
+
+/* 읽기/미리보기 이미지 규칙(가로 70% / 세로 30%) */
+.image,.thumb{display:block;height:auto;margin:10px auto}
+.image.landscape,.thumb.landscape{width:70%;max-width:70%}
+.image.portrait,.thumb.portrait{width:30%;max-width:30%}
+
 </script>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+/* === Supabase 설정 (기존과 동일 값 사용) === */
+const SUPABASE_URL  = "https://snxjcbaaysgfunpsohzg.supabase.co";
+const SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNueGpjYmFheXNnZnVucHNvaHpnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY1OTk3MzQsImV4cCI6MjA3MjE3NTczNH0.T8b9PpabXkCvwW2W57Qbr-h--JLZB6errlyP5IwsYyk";
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+
+/* === 유틸 === */
+function applyImgClass(el){
+  if(!el) return;
+  const set=()=>{
+    el.classList.remove('landscape','portrait');
+    (el.naturalWidth > el.naturalHeight) ? el.classList.add('landscape') : el.classList.add('portrait');
+  };
+  if(el.complete && el.naturalWidth) set(); else el.addEventListener('load', set, {once:true});
+}
+
+/* === 좌측 인증 UI === */
+const authStatus  = document.getElementById('authStatus');
+const authTabs    = document.getElementById('authTabs');
+const fLogin      = document.getElementById('loginForm');
+const fSignup     = document.getElementById('signupForm');
+const loginStatus = document.getElementById('loginStatus');
+const signupStatus= document.getElementById('signupStatus');
+
+function setTab(which){
+  document.getElementById('tab-login')?.classList.toggle('active', which==='login');
+  document.getElementById('tab-signup')?.classList.toggle('active', which==='signup');
+  if(fLogin)  fLogin.hidden  = (which!=='login');
+  if(fSignup) fSignup.hidden = (which!=='signup');
+}
+document.getElementById('tab-login')?.addEventListener('click', ()=>setTab('login'));
+document.getElementById('tab-signup')?.addEventListener('click', ()=>setTab('signup'));
+
+async function refreshAuthUI(){
+  const { data:{ session } } = await sb.auth.getSession();
+  const authInfo = document.getElementById('authInfo');      // 우측 상단 상태 문구
+  const writeForm= document.getElementById('writeForm');
+  const needLogin= document.getElementById('needLogin');
+
+  if(session?.user){
+    if(authStatus) authStatus.textContent = `로그인: ${session.user.email}`;
+    if(authTabs)   authTabs.hidden = true;
+    if(fLogin){ fLogin.hidden = false; document.getElementById('btn-login')?.style && (document.getElementById('btn-login').style.display='none'); }
+    document.getElementById('btn-logout')?.removeAttribute('hidden');
+    if(authInfo)  authInfo.textContent = `로그인: ${session.user.email}`;
+    if(writeForm) writeForm.hidden = false;
+    if(needLogin) needLogin.hidden = true;
+  }else{
+    if(authStatus) authStatus.textContent = "로그아웃 상태";
+    if(authTabs)   authTabs.hidden = false;
+    if(fLogin)     fLogin.hidden = true;
+    if(fSignup)    fSignup.hidden = false; // 가입 폼 보이기
+    document.getElementById('btn-logout')?.setAttribute('hidden','');
+    document.getElementById('btn-login')?.style && (document.getElementById('btn-login').style.display='');
+    if(authInfo)  authInfo.textContent = "로그아웃 상태";
+    if(writeForm) writeForm.hidden = true;
+    if(needLogin) needLogin.hidden = false;
+    setTab('login');
+  }
+}
+
+/* 로그인/로그아웃/가입 */
+document.getElementById('btn-login')?.addEventListener('click', async (e)=>{
+  e.preventDefault();
+  if(loginStatus) loginStatus.textContent = "로그인 중…";
+  const email = document.getElementById('login-email')?.value.trim();
+  const pw    = document.getElementById('login-password')?.value;
+  const { error } = await sb.auth.signInWithPassword({ email, password: pw });
+  if(loginStatus) loginStatus.textContent = error ? ("로그인 실패: "+error.message) : "로그인 성공";
+  await refreshAuthUI();
+});
+document.getElementById('btn-logout')?.addEventListener('click', async (e)=>{
+  e.preventDefault();
+  await sb.auth.signOut();
+  await refreshAuthUI();
+});
+document.getElementById('btn-signup')?.addEventListener('click', async (e)=>{
+  e.preventDefault();
+  if(signupStatus) signupStatus.textContent = "가입 중…";
+  const email = document.getElementById('signup-email')?.value.trim();
+  const pw1   = document.getElementById('signup-password')?.value;
+  const pw2   = document.getElementById('signup-password2')?.value;
+  if(pw1 !== pw2){ if(signupStatus) signupStatus.textContent="비밀번호 확인이 일치하지 않습니다."; return; }
+  if((pw1||'').length < 8){ if(signupStatus) signupStatus.textContent="비밀번호는 8자 이상"; return; }
+  const { data, error } = await sb.auth.signUp({ email, password: pw1 });
+  if(error){ if(signupStatus) signupStatus.textContent = "가입 실패: "+error.message; return; }
+  if(signupStatus) signupStatus.textContent = data.session ? "가입+로그인 완료" : "가입 완료";
+  await refreshAuthUI();
+});
+
+/* === 우측: 후기 작성 === */
+const fImage     = document.getElementById('image');
+const previewImg = document.getElementById('preview');
+const btnSubmit  = document.getElementById('btn-submit');
+const formStatus = document.getElementById('formStatus');
+
+fImage?.addEventListener('change', ()=>{
+  const file0 = fImage.files?.[0];
+  if(!file0){ if(previewImg) previewImg.hidden = true; return; }
+  const url = URL.createObjectURL(file0);
+  if(previewImg){
+    previewImg.src = url;
+    previewImg.hidden = false;
+    applyImgClass(previewImg); // ✅ 가로/세로에 따라 70%/30%
+  }
+});
+
+document.getElementById('writeForm')?.addEventListener('submit', async (e)=>{
+  e.preventDefault();
+  if(!btnSubmit) return;
+  const { data:{ session } } = await sb.auth.getSession();
+  if(!session?.user){ alert('로그인이 필요합니다.'); return; }
+
+  const title   = document.getElementById('title')?.value.trim();
+  const content = document.getElementById('content')?.value.trim();
+  if(!title || !content){ if(formStatus) formStatus.textContent="제목/내용을 입력하세요."; return; }
+
+  btnSubmit.disabled = true; btnSubmit.textContent = "등록 중…";
+  try{
+    const nickname = (session.user.user_metadata?.full_name) || (session.user.email?.split('@')[0]) || '익명';
+    let image_path=null, image_url=null;
+    const file0 = fImage?.files?.[0] || null;
+    if(file0){
+      // (선택) 그대로 업로드 — 필요 시 압축 로직 추가 가능
+      const ext = (file0.name.split('.').pop()||'jpg').toLowerCase();
+      const safeExt = ["jpg","jpeg","png","webp","gif"].includes(ext) ? ext : "jpg";
+      const key = `${session.user.id}/${Date.now()}_${Math.random().toString(36).slice(2)}.${safeExt}`;
+      const up  = await sb.storage.from("reviews").upload(key, file0, { upsert:false, cacheControl:"3600" });
+      if(up.error) throw new Error("이미지 업로드 실패: "+up.error.message);
+      image_path = key;
+      image_url  = sb.storage.from("reviews").getPublicUrl(key).data.publicUrl;
+    }
+
+    const ins = await sb.from("reviews").insert({
+      title, content,
+      user_id: session.user.id,
+      author_email: session.user.email,
+      nickname, image_path, image_url
+    }).select("id").single();
+    if(ins.error) throw new Error(ins.error.message);
+    location.href = `/reviews.html?id=${ins.data.id}`;
+  }catch(err){
+    if(formStatus) formStatus.textContent = String(err.message||err);
+    btnSubmit.disabled = false; btnSubmit.textContent = "등록";
+  }
+});
+
+/* 초기화 */
+refreshAuthUI();
+</script>
+
 </body>
 </html>
