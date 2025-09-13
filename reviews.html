@@ -277,18 +277,20 @@
 
     let image_path = null, image_url = null;
 
-    const file = imageInput.files?.[0] || null;
-    if(file){
-      const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
-      const safeExt = ["jpg","jpeg","png","webp","gif"].includes(ext) ? ext : "jpg";
-      const key = `${session.user.id}/${Date.now()}_${Math.random().toString(36).slice(2)}.${safeExt}`;
+const file0 = imageInput.files?.[0] || null;
+if(file0){
+  // ✅ 압축 버전으로 교체 (원본 그대로 쓰려면 아래 줄을 file0로 바꾸세요)
+  const file = await compressImage(file0, {maxW:1600, quality:0.85});
+  const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
+  const safeExt = ["jpg","jpeg","png","webp","gif"].includes(ext) ? ext : "jpg";
+  const key = `${session.user.id}/${Date.now()}_${Math.random().toString(36).slice(2)}.${safeExt}`;
 
-      const up = await sb.storage.from("reviews").upload(key, file, { upsert:false, cacheControl:"3600" });
-      if(up.error){ formStatus.textContent = "이미지 업로드 실패: " + up.error.message; return; }
-      image_path = key;
-      const pub = sb.storage.from("reviews").getPublicUrl(key);
-      image_url = pub.data.publicUrl; // 버킷을 public으로 만들었을 때
-    }
+  const up = await sb.storage.from("reviews").upload(key, file, { upsert:false, cacheControl:"3600" });
+  if(up.error){ formStatus.textContent = "이미지 업로드 실패: " + up.error.message; return; }
+  image_path = key;
+  const pub = sb.storage.from("reviews").getPublicUrl(key);
+  image_url = pub.data.publicUrl;
+}
 
 // 기존 submit 핸들러 안, insert 직전에 추가
 const nickname =
