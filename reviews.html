@@ -426,7 +426,7 @@ writeForm?.addEventListener('submit', async (e)=>{
     }
     const ins=await sb.from("reviews").insert({title,content,user_id:session.user.id,author_email:session.user.email,nickname,image_path,image_url}).select("id").single();
     if(ins.error) throw new Error(ins.error.message);
-    location.href=`/reviews.html?id=${ins.data.id}`;
+    location.href = '/reviews.html'; // 저장 후 목록으로
   }catch(err){
     formStatus.textContent=String(err.message||err);
     btnSubmit.disabled=false; btnSubmit.textContent="저장";
