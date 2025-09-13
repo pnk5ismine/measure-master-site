@@ -4,88 +4,72 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Measure Master — 사용후기</title>
-  <meta name="description" content="Measure Master 사용자들이 올린 후기" />
+  <meta name="description" content="Measure Master 사용자 후기 게시판" />
   <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
   <style>
-    :root { --bg:#0b0d12; --card:#121622; --muted:#9aa4b2; --pri:#5eead4; --border:#1e2230; }
+    :root { --bg:#0b0d12; --border:#e5e7eb; --text:#111; --muted:#666; --pri:#111; }
     *{box-sizing:border-box}
-    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,'Noto Sans KR',sans-serif;background:var(--bg);color:#e7edf5}
-    a{color:var(--pri);text-decoration:none} a:hover{text-decoration:underline}
+    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,'Noto Sans KR',sans-serif;background:#0b0d12;color:#e7edf5;min-height:100vh;display:flex;flex-direction:column}
     header,main,footer{max-width:1100px;margin:0 auto;padding:16px}
     header{display:flex;align-items:center;justify-content:space-between;gap:12px}
     .brand{display:flex;align-items:center;gap:10px}
     .logo-img{width:28px;height:28px;border-radius:6px;object-fit:contain;background:#0e1422}
-    nav a{margin-left:16px;color:#cfd6e4}
-    .pill{background:#0f1320;border:1px solid var(--border);border-radius:999px;padding:4px 8px}
-    footer{margin:30px auto 60px;text-align:center;color:var(--muted);font-size:14px}
+    nav a{margin-left:16px;color:#cfd6e4;text-decoration:none}
+    nav a:hover{text-decoration:underline}
+    .pill{background:#0f1320;border:1px solid #1e2230;border-radius:999px;padding:4px 8px}
+    footer{margin:30px auto 60px;text-align:center;color:#9aa4b2;font-size:14px}
+    main{flex:1}
 
     /* 모바일 헤더 정리 */
     @media (max-width:640px){
-      header{display:flex;flex-wrap:wrap;gap:8px}
+      header{flex-wrap:wrap;gap:8px}
       .brand{order:1}
       header nav{order:3;width:100%;display:flex;gap:8px;overflow-x:auto;white-space:nowrap}
-      header nav a{margin:0;flex:0 0 auto;padding:8px 10px;border:1px solid var(--border);border-radius:999px;background:#0f1320;color:#e7edf5;font-size:13px}
+      header nav a{margin:0;flex:0 0 auto;padding:8px 10px;border:1px solid #1e2230;border-radius:999px;background:#0f1320;color:#e7edf5;font-size:13px}
     }
 
     /* 레이아웃: 좌 1/4, 우 3/4 */
-    .layout{display:grid;grid-template-columns:1fr;gap:18px}
-    @media (min-width:1024px){ .layout{grid-template-columns:1fr 3fr;align-items:start} }
+    .layout{display:grid;grid-template-columns:1fr;gap:18px;height:100%}
+    @media (min-width:1024px){ .layout{grid-template-columns:1fr 3fr;align-items:stretch} }
 
-    /* 카드 영역은 화이트 */
-    .card{background:#fff;color:#111;border:1px solid #e5e7eb;border-radius:16px;padding:18px}
-
-    /* 좌측: 인증 카드 + 배너 자리 */
+    /* 카드: 화이트, 내부 세로 배치 */
+    .card{background:#fff;color:var(--text);border:1px solid var(--border);border-radius:16px;padding:18px;height:100%;display:flex;flex-direction:column;box-shadow:0 1px 2px rgba(0,0,0,.06)}
     .section-title{margin:0 0 8px;font-size:18px}
-    .muted{color:#666}
-    .field{display:flex;flex-direction:column;gap:6px;margin:10px 0 2px}
-    input[type="email"],input[type="password"]{
-      width:100%;padding:10px 12px;border-radius:10px;border:1px solid #e5e7eb;background:#fff;color:#111
-    }
-    .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
-    .btn{padding:10px 14px;border-radius:10px;border:1px solid #111;background:#111;color:#fff;cursor:pointer}
-    .btn.secondary{background:#f9fafb;color:#111;border:1px solid #e5e7eb}
-    .tabbar{display:flex;gap:8px;margin:6px 0 10px}
-    .tabbar button{border:1px solid #e5e7eb;background:#f9fafb;color:#111;border-radius:999px;padding:6px 10px;cursor:pointer}
-    .tabbar button.active{outline:2px solid #5eead4}
-    .status{font-size:12px;color:#666;margin-top:6px}
+    .muted{color:var(--muted)}
 
-    /* 우측: 표(List) */
-    .table-wrap{overflow:auto}
+    /* 좌측 인증 */
+    .field{display:flex;flex-direction:column;gap:6px;margin:10px 0 2px}
+    input[type="email"],input[type="password"]{width:100%;padding:10px 12px;border-radius:10px;border:1px solid var(--border);background:#fff;color:#111}
+    .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+    .btn{padding:10px 14px;border-radius:10px;border:1px solid var(--pri);background:var(--pri);color:#fff;cursor:pointer}
+    .btn.secondary{background:#f9fafb;color:#111;border:1px solid var(--border)}
+    .tabbar{display:flex;gap:8px;margin:6px 0 10px}
+    .tabbar button{border:1px solid var(--border);background:#f9fafb;color:#111;border-radius:999px;padding:6px 10px;cursor:pointer}
+    .tabbar button.active{outline:2px solid #5eead4}
+    .status{font-size:12px;color:var(--muted);margin-top:6px}
+    #leftAuth .banner-flex{flex:1;border:1px dashed var(--border);border-radius:12px;background:#fff;margin-top:16px}
+
+    /* 우측 표 영역(스크롤) */
+    .right-head{display:flex;align-items:baseline;gap:10px;margin-bottom:8px}
+    .right-head .title{margin:0;font-size:20px}
+    .right-head .sub{color:var(--muted);font-size:13px}
+    .table-wrap{flex:1;min-height:0;overflow:auto}
     table{width:100%;border-collapse:collapse}
     th, td{border-bottom:1px solid #eee;padding:10px 8px;text-align:left;vertical-align:top}
     th{font-weight:600;background:#fafafa;position:sticky;top:0}
-    td.content{white-space:pre-wrap;word-break:break-word}
+    tr{background:#fff}
     tr:hover{background:#fafafa;cursor:pointer}
-    .right-head{display:flex;align-items:baseline;gap:10px;margin-bottom:8px}
-    .right-head .title{margin:0;font-size:20px}
-    .right-head .sub{color:#666;font-size:13px}
-
-    /* 읽기 화면 */
+    td.content{white-space:pre-wrap;word-break:break-word}
+    .list-endline{border-top:1px solid #eee;margin-top:8px}
     .article h3{margin:0 0 6px}
-    .meta{color:#666;font-size:13px;margin-bottom:10px}
-    .article .image{max-width:80%;margin:10px 0;border-radius:10px;display:block}
-/* === 높이 & 스크롤 레이아웃 보강 === */
-body{min-height:100vh;display:flex;flex-direction:column}
-main{flex:1}
-.layout{height:100%}
-@media (min-width:1024px){ .layout{align-items:stretch} } /* 같은 줄 카드 동일 높이 */
-.card{height:100%;display:flex;flex-direction:column}
-
-/* 좌측 카드의 배너 박스가 남는 공간을 채우도록 */
-#leftAuth .banner-flex{flex:1}
-
-/* 우측 카드: 표 영역이 남는 공간을 채우고 스크롤 되도록 */
-#rightCard .table-wrap{flex:1;min-height:0;overflow:auto}
-
-/* 목록 마감줄 */
-.list-endline{border-top:1px solid #eee;margin-top:8px}
-
+    .meta{color:var(--muted);font-size:13px;margin-bottom:10px}
   </style>
 </head>
 <body>
 <header>
   <div class="brand">
-    <img src="/images/mm_logo_small.jpg" alt="Measure Master" class="logo-img" />
+    <!-- 로고: howtouse.html과 동일 경로로 조정 -->
+    <img src="/images/mm_logo2.jpg" alt="Measure Master" class="logo-img" />
     <strong>Measure Master</strong>
     <span class="pill">후기</span>
   </div>
@@ -99,7 +83,7 @@ main{flex:1}
 
 <main>
   <div class="layout">
-    <!-- 좌측 1/4: 로그인/가입 -->
+    <!-- 좌 1/4: 로그인/가입 -->
     <section class="card" id="leftAuth">
       <h2 class="section-title">로그인 · 회원가입</h2>
       <div id="authStatus" class="status">상태 확인 중…</div>
@@ -146,19 +130,18 @@ main{flex:1}
         <div id="signupStatus" class="status"></div>
       </form>
 
-      <!-- 하단 배너 자리(비워둠) -->
-      <div style="margin-top:16px;border:1px dashed #e5e7eb;border-radius:12px;height:160px;background:#fff"></div>
-      <div class="banner-flex" style="margin-top:16px;border:1px dashed #e5e7eb;border-radius:12px;height:160px;background:#fff"></div>
-  </section>
+      <!-- 하단 배너 (비워둠, 남는 공간 채움) -->
+      <div class="banner-flex"></div>
+    </section>
 
-    <!-- 우측 3/4: 게시판 -->
+    <!-- 우 3/4: 목록/읽기 -->
     <section class="card" id="rightCard">
       <div class="right-head">
         <h2 class="title">사용자 후기</h2>
-        <span class="sub">최신순 · 행 클릭 시 읽기 화면으로 이동</span>
+        <span class="sub">최신순 · 행 클릭 시 읽기 화면</span>
       </div>
 
-      <!-- 목록 모드 -->
+      <!-- 목록 -->
       <div id="listMode">
         <div class="table-wrap">
           <table id="reviewTable" aria-label="후기 목록">
@@ -173,25 +156,24 @@ main{flex:1}
             <tbody id="tbody"></tbody>
           </table>
         </div>
-	<!-- ✅ 리스트 마감줄 -->
-	<div class="list-endline"></div>
 
-	<!-- ✅ 좌측 정렬 글쓰기 버튼 -->
-	<div class="row" style="margin-top:8px;justify-content:flex-start">
-	  <button class="btn" id="btn-write">글쓰기</button>
-	</div>
+        <div class="list-endline"></div>
 
-	<!-- (기존) 더보기 행은 아래에 그대로 유지 -->
-	<div class="row" style="margin-top:8px">
-  	<button class="btn secondary" id="btn-more">더보기</button>
-  	<span id="listStatus" class="status"></span>
-	</div>
-          </div>
-      </div><!-- 목록 모드 끝-->
+        <!-- 우측 정렬: 글쓰기/더보기 -->
+        <div class="row" style="margin-top:8px;justify-content:flex-end">
+          <button class="btn" id="btn-write">글쓰기</button>
+        </div>
+        <div class="row" style="margin-top:8px;justify-content:flex-end">
+          <button class="btn secondary" id="btn-more">더보기</button>
+          <span id="listStatus" class="status"></span>
+        </div>
+      </div>
 
-      <!-- 읽기 모드 -->
+      <!-- 읽기 -->
       <div id="readMode" hidden>
-        <button class="btn secondary" id="btn-back">← 목록으로</button>
+        <div class="row" style="justify-content:flex-start">
+          <button class="btn secondary" id="btn-back">← 목록으로</button>
+        </div>
         <article class="article" id="article" style="margin-top:10px"></article>
       </div>
     </section>
@@ -205,23 +187,22 @@ main{flex:1}
 <!-- Supabase -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-  // === 프로젝트 값(기존과 동일) ===
+  // === Supabase 프로젝트 값(기존과 동일) ===
   const SUPABASE_URL  = "https://snxjcbaaysgfunpsohzg.supabase.co";
   const SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNueGpjYmFheXNnZnVucHNvaHpnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY1OTk3MzQsImV4cCI6MjA3MjE3NTczNH0.T8b9PpabXkCvwW2W57Qbr-h--JLZB6errlyP5IwsYyk";
   const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
 
-  const $ = s => document.querySelector(s);
-  const $$ = s => Array.from(document.querySelectorAll(s));
+  const $  = s => document.querySelector(s);
   $("#year").textContent = new Date().getFullYear();
 
   // ===== 좌측 인증 UI =====
-  const authStatus = $("#authStatus");
-  const authTabs   = $("#authTabs");
-  const fLogin     = $("#loginForm");
-  const fSignup    = $("#signupForm");
-  const loginStatus= $("#loginStatus");
-  const signupStatus=$("#signupStatus");
-  const btnLogout  = $("#btn-logout");
+  const authStatus   = $("#authStatus");
+  const authTabs     = $("#authTabs");
+  const fLogin       = $("#loginForm");
+  const fSignup      = $("#signupForm");
+  const loginStatus  = $("#loginStatus");
+  const signupStatus = $("#signupStatus");
+  const btnLogout    = $("#btn-logout");
 
   function setTab(which){
     $("#tab-login").classList.toggle("active", which==="login");
@@ -237,7 +218,7 @@ main{flex:1}
     if(session?.user){
       authStatus.textContent = `로그인: ${session.user.email}`;
       authTabs.hidden = true;
-      fLogin.hidden = false; // 로그아웃 버튼만 쓰기 위해 표시
+      fLogin.hidden = false;
       $("#btn-login").style.display = "none";
       btnLogout.hidden = false;
     }else{
@@ -273,7 +254,6 @@ main{flex:1}
     const pw2 = $("#signup-password2").value;
     if(pw1 !== pw2){ signupStatus.textContent = "비밀번호 확인이 일치하지 않습니다."; return; }
     if(pw1.length < 8){ signupStatus.textContent = "비밀번호는 8자 이상"; return; }
-
     const { data, error } = await sb.auth.signUp({ email, password: pw1 });
     if(error){ signupStatus.textContent = "가입 실패: " + error.message; return; }
     signupStatus.textContent = data.session ? "가입+로그인 완료" : "가입 완료";
@@ -291,6 +271,7 @@ main{flex:1}
 
   function fmtDate(s){ try{ return new Date(s).toLocaleString("ko-KR"); }catch{ return s; } }
   function displayName(row){ return row.nickname || (row.author_email ? row.author_email.split("@")[0] : "익명"); }
+  function escapeHtml(s=""){ return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;").replace(/'/g,"&#39;"); }
 
   async function loadList(){
     if(reachedEnd) return;
@@ -321,35 +302,42 @@ main{flex:1}
     if(data.length < PAGE_SIZE) reachedEnd = true;
   }
 
-  $("#btn-more").addEventListener("click", loadList);
+  document.getElementById('btn-more').addEventListener('click', loadList);
 
   async function loadOne(id){
-    const { data, error } = await sb.from("reviews").select("*").eq("id", id).single();
-    if(error){ article.innerHTML = `<p class="muted">불러오기 실패: ${escapeHtml(error.message)}</p>`; return; }
+    const { data, error } = await sb
+      .from("reviews")
+      .select("title, content, created_at, nickname, author_email")
+      .eq("id", id)
+      .single();
+
+    if(error){
+      article.innerHTML = `<p class="muted">불러오기 실패: ${escapeHtml(error.message)}</p>`;
+      return;
+    }
     const name = displayName(data);
-    const img = data.image_url ? `<img class="image" src="${data.image_url}" alt="">` : "";
     article.innerHTML = `
       <h3>${escapeHtml(data.title || "(제목 없음)")}</h3>
       <div class="meta">${escapeHtml(name)} · ${fmtDate(data.created_at)}</div>
-      <div class="body" style="white-space:pre-wrap;word-break:break-word">${escapeHtml(data.content||"")}</div>
-      ${img}
+      <div class="body" style="white-space:pre-wrap;word-break:break-word">
+        ${escapeHtml(data.content || "")}
+      </div>
     `;
   }
 
-  $("#btn-back").addEventListener("click", ()=>{
+  document.getElementById('btn-back').addEventListener('click', ()=>{
     const url = new URL(location.href);
     url.searchParams.delete("id");
     location.href = url.toString();
   });
 
-  function escapeHtml(s=""){
-    return String(s)
-      .replace(/&/g,"&amp;")
-      .replace(/</g,"&lt;")
-      .replace(/>/g,"&gt;")
-      .replace(/"/g,"&quot;")
-      .replace(/'/g,"&#39;");
-  }
+  // 글쓰기 버튼(임시): 로그인 필요 안내만
+  document.getElementById('btn-write').addEventListener('click', async ()=>{
+    const { data:{ session } } = await sb.auth.getSession();
+    if(!session?.user){ alert('로그인 후 작성 가능합니다.'); return; }
+    alert('글쓰기 화면 연결은 다음 단계에서 추가합니다.');
+    // location.href = '/reviews_write.html';  // 준비되면 연결
+  });
 
   // 모드 전환
   (async function init(){
@@ -366,18 +354,6 @@ main{flex:1}
       await loadList();
     }
   })();
-// 글쓰기 버튼: 로그인만 가능(다음 단계에서 실제 작성 화면 연결)
-document.getElementById('btn-write')?.addEventListener('click', async ()=>{
-  const { data:{ session } } = await sb.auth.getSession();
-  if(!session?.user){
-    alert('로그인 후 작성 가능합니다.');
-    return;
-  }
-  alert('글쓰기 화면은 다음 단계에서 연결합니다.');
-  // 준비되면 여기서 작성 페이지로 이동하거나(?compose=1 등) 모달 열기 연결
-  // location.href = '/reviews_write.html';
-});
-
 </script>
 </body>
 </html>
