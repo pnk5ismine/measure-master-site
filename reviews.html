@@ -64,6 +64,22 @@
     .article h3{margin:0 0 6px}
     .meta{color:#666;font-size:13px;margin-bottom:10px}
     .article .image{max-width:80%;margin:10px 0;border-radius:10px;display:block}
+/* === 높이 & 스크롤 레이아웃 보강 === */
+body{min-height:100vh;display:flex;flex-direction:column}
+main{flex:1}
+.layout{height:100%}
+@media (min-width:1024px){ .layout{align-items:stretch} } /* 같은 줄 카드 동일 높이 */
+.card{height:100%;display:flex;flex-direction:column}
+
+/* 좌측 카드의 배너 박스가 남는 공간을 채우도록 */
+#leftAuth .banner-flex{flex:1}
+
+/* 우측 카드: 표 영역이 남는 공간을 채우고 스크롤 되도록 */
+#rightCard .table-wrap{flex:1;min-height:0;overflow:auto}
+
+/* 목록 마감줄 */
+.list-endline{border-top:1px solid #eee;margin-top:8px}
+
   </style>
 </head>
 <body>
@@ -132,7 +148,8 @@
 
       <!-- 하단 배너 자리(비워둠) -->
       <div style="margin-top:16px;border:1px dashed #e5e7eb;border-radius:12px;height:160px;background:#fff"></div>
-    </section>
+      <div class="banner-flex" style="margin-top:16px;border:1px dashed #e5e7eb;border-radius:12px;height:160px;background:#fff"></div>
+  </section>
 
     <!-- 우측 3/4: 게시판 -->
     <section class="card" id="rightCard">
@@ -156,11 +173,21 @@
             <tbody id="tbody"></tbody>
           </table>
         </div>
-        <div class="row" style="margin-top:8px">
-          <button class="btn secondary" id="btn-more">더보기</button>
-          <span id="listStatus" class="status"></span>
-        </div>
-      </div>
+	<!-- ✅ 리스트 마감줄 -->
+	<div class="list-endline"></div>
+
+	<!-- ✅ 좌측 정렬 글쓰기 버튼 -->
+	<div class="row" style="margin-top:8px;justify-content:flex-start">
+	  <button class="btn" id="btn-write">글쓰기</button>
+	</div>
+
+	<!-- (기존) 더보기 행은 아래에 그대로 유지 -->
+	<div class="row" style="margin-top:8px">
+  	<button class="btn secondary" id="btn-more">더보기</button>
+  	<span id="listStatus" class="status"></span>
+	</div>
+          </div>
+      </div><!-- 목록 모드 끝-->
 
       <!-- 읽기 모드 -->
       <div id="readMode" hidden>
@@ -339,6 +366,18 @@
       await loadList();
     }
   })();
+// 글쓰기 버튼: 로그인만 가능(다음 단계에서 실제 작성 화면 연결)
+document.getElementById('btn-write')?.addEventListener('click', async ()=>{
+  const { data:{ session } } = await sb.auth.getSession();
+  if(!session?.user){
+    alert('로그인 후 작성 가능합니다.');
+    return;
+  }
+  alert('글쓰기 화면은 다음 단계에서 연결합니다.');
+  // 준비되면 여기서 작성 페이지로 이동하거나(?compose=1 등) 모달 열기 연결
+  // location.href = '/reviews_write.html';
+});
+
 </script>
 </body>
 </html>
