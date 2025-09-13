@@ -75,6 +75,14 @@
 .image.landscape,.thumb.landscape{width:70%;max-width:70%}
 .image.portrait,.thumb.portrait{width:30%;max-width:30%}
 
+/* 읽기뷰 상단 액션바 */
+.top-actions{
+  border-bottom:1px solid #e5e7eb;
+  padding-bottom:10px; margin-bottom:12px;
+  display:flex; justify-content:space-between; align-items:center; gap:8px;
+}
+/* 폼 하단 액션바: 우측 정렬(저장만) */
+.form-actions.end{ justify-content:flex-end }
   </style>
 </head>
 <body>
@@ -258,27 +266,35 @@ document.getElementById('tab-signup')?.addEventListener('click', ()=>setTab('sig
 
 async function refreshAuthUI(){
   const { data:{ session } } = await sb.auth.getSession();
+  const authInfo = document.getElementById('authInfo');
+  const writeForm= document.getElementById('writeForm');
+  const needLogin= document.getElementById('needLogin');
+  const loggedBar= document.getElementById('loggedBar');
+
   if(session?.user){
+    // 상단 상태 + 로그아웃바 ON
     authStatus.textContent = `로그인: ${session.user.email}`;
     authTabs.hidden = true;
-    fLogin.hidden = false;
-    document.getElementById('btn-login').style.display='none';
-    document.getElementById('btn-logout').hidden=false;
+    fLogin.hidden = true;   // 로그인 폼 숨김
+    fSignup.hidden = true;  // 가입 폼 숨김
+    loggedBar.hidden = false;
 
-    authInfo.textContent = `로그인: ${session.user.email}`;
+    if(authInfo)  authInfo.textContent = `로그인: ${session.user.email}`;
+    // 쓰기 화면 접근은 라우팅에서 별도 제어(여긴 단순 상태)
     needLogin.hidden = true;
   }else{
     authStatus.textContent = "로그아웃 상태";
     authTabs.hidden = false;
     fLogin.hidden = true;
     fSignup.hidden = false;
-    document.getElementById('btn-logout').hidden = true;
-    document.getElementById('btn-login').style.display='';
-    authInfo.textContent = "로그아웃 상태";
-    needLogin.hidden = false;
+    loggedBar.hidden = true;
+
+    if(authInfo)  authInfo.textContent = "로그아웃 상태";
+    needLogin.hidden = false;  // 기본 안내문 노출(목록 화면일 때)
     setTab('login');
   }
 }
+
 document.getElementById('btn-login')?.addEventListener('click', async (e)=>{
   e.preventDefault();
   loginStatus.textContent="로그인 중…";
@@ -293,18 +309,27 @@ document.getElementById('btn-logout')?.addEventListener('click', async (e)=>{
   await sb.auth.signOut();
   await refreshAuthUI();
 });
-document.getElementById('btn-signup')?.addEventListener('click', async (e)=>{
+document.getElementById('btn-logout-top')?.addEventListener('click', async (e)=>{
   e.preventDefault();
-  signupStatus.textContent="가입 중…";
-  const email = document.getElementById('signup-email').value.trim();
-  const pw1   = document.getElementById('signup-password').value;
-  const pw2   = document.getElementById('signup-password2').value;
-  if(pw1!==pw2){ signupStatus.textContent="비밀번호 확인이 일치하지 않습니다."; return; }
-  if((pw1||'').length<8){ signupStatus.textContent="비밀번호는 8자 이상"; return; }
-  const { data, error } = await sb.auth.signUp({ email, password: pw1 });
-  if(error){ signupStatus.textContent="가입 실패: "+error.message; return; }
-  signupStatus.textContent = data.session ? "가입+로그인 완료" : "가입 완료";
+  await sb.auth.signOut();
   await refreshAuthUI();
+  // 로그아웃 후 compose=1로 들어왔다면 목록으로 강제
+  if(new URLSearchParams(location.search).get('compose')==='1'){
+    history.replaceState(null,'','/reviews.html');
+    showList(); await loadList();
+  }
+});
+
+btnCompose?.addEventListener('click', async ()=>{
+  const { data:{ session } } = await sb.auth.getSession();
+  if(!session?.user){
+    alert('글쓰기를 하려면 회원가입/로그인이 필요합니다.');
+    // 좌측 로그인 탭으로 유도
+    setTab('login');
+    document.getElementById('leftAuth')?.scrollIntoView({behavior:'smooth', block:'start'});
+    return;
+  }
+  location.href = '/reviews.html?compose=1';
 });
 
 /* === 라우팅: 기본=list, id=read, compose=write === */
@@ -346,19 +371,28 @@ async function loadOne(id){
   if(error){ readView.innerHTML = `<p class="muted">불러오기 실패: ${escapeHtml(error.message)}</p>`; return; }
   const name = displayName(data);
   const imgHTML = data.image_url ? `<img id="readImg" class="image" src="${data.image_url}" alt="">` : "";
-  readView.innerHTML = `
-    <h3 style="margin:0 0 6px">${escapeHtml(data.title || "(제목 없음)")}</h3>
-    <div class="muted" style="margin-bottom:10px">${escapeHtml(name)} · ${fmtDate(data.created_at)}</div>
-    <div style="white-space:pre-wrap;word-break:break-word">${escapeHtml(data.content || "")}</div>
-    ${imgHTML}
-    <div class="form-actions">
-      <a class="btn secondary" href="/reviews.html">목록으로</a>
-      <button class="btn" type="button" id="btn-to-compose">글쓰기</button>
-    </div>
-  `;
+readView.innerHTML = `
+  <div class="top-actions">
+    <a class="btn secondary" href="/reviews.html">목록보기</a>
+    <button class="btn" type="button" id="btn-to-compose">글쓰기</button>
+  </div>
+  <h3 style="margin:0 0 6px">${escapeHtml(data.title || "(제목 없음)")}</h3>
+  <div class="muted" style="margin-bottom:10px">${escapeHtml(name)} · ${fmtDate(data.created_at)}</div>
+  <div style="white-space:pre-wrap;word-break:break-word">${escapeHtml(data.content || "")}</div>
+  ${imgHTML}
+`;
+
   applyImgClass(document.getElementById('readImg'));
-  document.getElementById('btn-to-compose')?.addEventListener('click', ()=>{ location.href='/reviews.html?compose=1'; });
-}
+document.getElementById('btn-to-compose')?.addEventListener('click', async ()=>{
+  const { data:{ session } } = await sb.auth.getSession();
+  if(!session?.user){
+    alert('글쓰기를 하려면 회원가입/로그인이 필요합니다.');
+    setTab('login');
+    document.getElementById('leftAuth')?.scrollIntoView({behavior:'smooth', block:'start'});
+    return;
+  }
+  location.href='/reviews.html?compose=1';
+});
 
 /* === 쓰기: 미리보기 === */
 fImage?.addEventListener('change', ()=>{
@@ -375,7 +409,7 @@ writeForm?.addEventListener('submit', async (e)=>{
   if(!session?.user){ alert('로그인이 필요합니다.'); return; }
   const title = fTitle.value.trim();
   const content = fContent.value.trim();
-  if(!title || !content){ formStatus.textContent = "제목/내용을 입력하세요."; return; }
+  if(!content){ formStatus.textContent = "내용을 입력하세요."; return; }
 
   btnSubmit.disabled=true; btnSubmit.textContent="저장 중…";
   try{
@@ -408,12 +442,23 @@ writeForm?.addEventListener('submit', async (e)=>{
   const id=q.get('id');
   const compose=q.get('compose');
 
-  if(compose==='1'){ showWrite(); return; }
-  if(id){ showRead(); await loadOne(id); return; }
+  // 로그아웃 상태에서 compose 진입 불가
+  if(compose==='1'){
+    const { data:{ session } } = await sb.auth.getSession();
+    if(!session?.user){
+      // 진입 차단 → 목록으로
+      history.replaceState(null,'','/reviews.html');
+      showList(); await loadList();
+      return;
+    }
+    showWrite(); // 로그인 상태면 쓰기 허용
+    return;
+  }
 
-  // 기본: 목록
-  showList(); await loadList();
+  if(id){ showRead(); await loadOne(id); return; }
+  showList(); await loadList(); // 기본 목록
 })();
+
 </script>
 </body>
 </html>
