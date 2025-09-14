@@ -88,7 +88,7 @@
 <body>
 <header>
   <div class="brand">
-    <img src="/images/mm_logo_small.jpg" alt="Measure Master" class="logo-img" />
+    <img src="/images/mm_logo2.jpg?v=logo3" alt="Measure Master" class="logo-img" />
     <strong>Measure Master</strong>
     <span style="margin-left:8px;opacity:.8">후기 작성</span>
   </div>
@@ -264,37 +264,8 @@ function setTab(which){
 document.getElementById('tab-login')?.addEventListener('click', ()=>setTab('login'));
 document.getElementById('tab-signup')?.addEventListener('click', ()=>setTab('signup'));
 
-async function refreshAuthUI(){
-  const { data:{ session } } = await sb.auth.getSession();
-  const authInfo = document.getElementById('authInfo');
-  const writeForm= document.getElementById('writeForm');
-  const needLogin= document.getElementById('needLogin');
-  const loggedBar= document.getElementById('loggedBar');
 
-  if(session?.user){
-    // 상단 상태 + 로그아웃바 ON
-    authStatus.textContent = `로그인: ${session.user.email}`;
-    authTabs.hidden = true;
-    fLogin.hidden = true;   // 로그인 폼 숨김
-    fSignup.hidden = true;  // 가입 폼 숨김
-    loggedBar.hidden = false;
-
-    if(authInfo)  authInfo.textContent = `로그인: ${session.user.email}`;
-    // 쓰기 화면 접근은 라우팅에서 별도 제어(여긴 단순 상태)
-    needLogin.hidden = true;
-  }else{
-    authStatus.textContent = "로그아웃 상태";
-    authTabs.hidden = false;
-    fLogin.hidden = true;
-    fSignup.hidden = false;
-    loggedBar.hidden = true;
-
-    if(authInfo)  authInfo.textContent = "로그아웃 상태";
-    needLogin.hidden = false;  // 기본 안내문 노출(목록 화면일 때)
-    setTab('login');
-  }
-}
-
+// 로그인/로
 document.getElementById('btn-login')?.addEventListener('click', async (e)=>{
   e.preventDefault();
   loginStatus.textContent="로그인 중…";
@@ -432,6 +403,7 @@ writeForm?.addEventListener('submit', async (e)=>{
     btnSubmit.disabled=false; btnSubmit.textContent="저장";
   }
 });
+</script>
 
 /* === 초기 진입 === */
 <script>
@@ -476,10 +448,8 @@ writeForm?.addEventListener('submit', async (e)=>{
 })();
 </script>
 
-
-</script>
 <script>
-// === AUTH 실패/지연시 강제 폴백 ===
+// Supabase 클라이언트가 없으면 바로 폴백
 function authFallback(reason){
   console.warn('[auth fallback]', reason);
   const authInfo = document.getElementById('authInfo');
@@ -489,25 +459,58 @@ function authFallback(reason){
   const loggedBar= document.getElementById('loggedBar');
   const needLogin= document.getElementById('needLogin');
 
-  document.getElementById('authStatus').textContent = "로그아웃 상태";
-  authTabs && (authTabs.hidden = false);
-  fLogin && (fLogin.hidden = true);
-  fSignup && (fSignup.hidden = false);
-  loggedBar && (loggedBar.hidden = true);
-  authInfo && (authInfo.textContent = "로그아웃 상태");
-  needLogin && (needLogin.hidden = false);
-  // 좌측 탭을 로그인으로
-  typeof setTab === 'function' && setTab('login');
+  const s = document.getElementById('authStatus');
+  if(s) s.textContent = '로그아웃 상태';
+  if(authTabs) authTabs.hidden = false;
+  if(fLogin)   fLogin.hidden   = true;
+  if(fSignup)  fSignup.hidden  = false;
+  if(loggedBar) loggedBar.hidden = true;
+  if(authInfo) authInfo.textContent = '로그아웃 상태';
+  if(needLogin) needLogin.hidden = false;
+  if(typeof setTab === 'function') setTab('login');
 }
-</script>
-<script>
-sb.auth.onAuthStateChange((_event, _session) => {
-  // 로그인/로그아웃 즉시 UI 반영
-  refreshAuthUI().catch(err => {
-    console.error('[refreshAuthUI error]', err);
-    authFallback(err?.message || 'onAuthStateChange');
+
+async function refreshAuthUI(){
+  if(!window.supabase || !window.sb){ authFallback('supabase not loaded'); return; }
+  try{
+    const { data:{ session } } = await sb.auth.getSession();
+    const authInfo = document.getElementById('authInfo');
+    const authTabs = document.getElementById('authTabs');
+    const fLogin   = document.getElementById('loginForm');
+    const fSignup  = document.getElementById('signupForm');
+    const loggedBar= document.getElementById('loggedBar');
+    const needLogin= document.getElementById('needLogin');
+
+    if(session?.user){
+      document.getElementById('authStatus')?.textContent = `로그인: ${session.user.email}`;
+      if(authTabs) authTabs.hidden = true;
+      if(fLogin)   fLogin.hidden   = true;
+      if(fSignup)  fSignup.hidden  = true;
+      if(loggedBar) loggedBar.hidden = false;
+      if(authInfo) authInfo.textContent = `로그인: ${session.user.email}`;
+      if(needLogin) needLogin.hidden = true;
+    }else{
+      document.getElementById('authStatus')?.textContent = '로그아웃 상태';
+      if(authTabs) authTabs.hidden = false;
+      if(fLogin)   fLogin.hidden   = true;
+      if(fSignup)  fSignup.hidden  = false;
+      if(loggedBar) loggedBar.hidden = true;
+      if(authInfo) authInfo.textContent = '로그아웃 상태';
+      if(needLogin) needLogin.hidden = false;
+      if(typeof setTab === 'function') setTab('login');
+    }
+  }catch(e){
+    console.error('[refreshAuthUI]', e);
+    authFallback(e?.message || e);
+  }
+}
+
+// 로그인/로그아웃 변동 시 즉시 UI 갱신
+if(window.sb?.auth){
+  sb.auth.onAuthStateChange(()=> {
+    refreshAuthUI().catch(err=> authFallback(err?.message || 'onAuthStateChange'));
   });
-});
+}
 </script>
 
 </body>
