@@ -70,11 +70,12 @@
 <header>
   <div class="brand">
 <img
-  src="/images/mm_logo_small.jpg?v=logo4"
+  src="/images/mm_logo_small.jpg?v=logo5"
   alt="Measure Master"
   class="logo-img"
-  onerror="this.onerror=null;this.src='/images/mm_logo2.jpg?v=fallback';"
+  onerror="this.onerror=null;this.src='/images/mm_logo2.jpg?v=logo5';"
 />
+
     <strong>Measure Master</strong>
     <span style="margin-left:8px;opacity:.8">사용자 후기</span>
   </div>
@@ -483,5 +484,117 @@ writeForm?.addEventListener('submit', async (e)=>{
   showList(); await loadList(); // 기본: 목록
 })();
 </script>
+<!-- HOTFIX: auth & logo (paste right before </body>) -->
+<script>
+(function(){
+  // 0) 로고 강제 갱신(캐시 무력화) — 헤더 HTML 수정이 어려울 때도 반영되도록
+  const logo = document.querySelector('.logo-img');
+  if (logo) {
+    const ver = Date.now().toString().slice(-6);
+    if (!/^\/images\//.test(logo.getAttribute('src')||'')) {
+      logo.src = '/images/mm_logo_small.jpg?v='+ver;
+    } else {
+      // 이미 절대경로라면 쿼리만 갱신
+      const u = new URL(logo.src, location.origin);
+      u.searchParams.set('v', ver);
+      logo.src = u.pathname + '?' + u.searchParams.toString();
+    }
+    logo.onerror = function(){ this.onerror=null; this.src='/images/mm_logo2.jpg?v='+ver; };
+  }
+
+  // 1) 좌측 인증 박스에 "로그인 바"가 없으면 주입 (이메일 + 로그아웃)
+  const statusEl = document.getElementById('authStatus');
+  if (statusEl && !document.getElementById('loggedBar')) {
+    const bar = document.createElement('div');
+    bar.id = 'loggedBar';
+    bar.className = 'row';
+    bar.hidden = true;
+    bar.innerHTML =
+      '<span id="loggedEmail" class="status" style="flex:1"></span>' +
+      '<button class="btn secondary" type="button" id="btn-logout-main">로그아웃</button>';
+    statusEl.insertAdjacentElement('afterend', bar);
+  }
+
+  // 2) 안전한 인증 UI 갱신(기존 함수 덮어쓰기)
+  async function refreshAuthUI2(){
+    try{
+      const { data:{ session } } = await sb.auth.getSession();
+      const authInfo    = document.getElementById('authInfo');
+      const needLogin   = document.getElementById('needLogin');
+      const authTabs    = document.getElementById('authTabs');
+      const fLogin      = document.getElementById('loginForm');
+      const fSignup     = document.getElementById('signupForm');
+      const loggedBar   = document.getElementById('loggedBar');
+      const loggedEmail = document.getElementById('loggedEmail');
+
+      if(session?.user){
+        document.getElementById('authStatus')?.textContent = `로그인: ${session.user.email}`;
+        authInfo && (authInfo.textContent = `로그인: ${session.user.email}`);
+        needLogin && (needLogin.hidden = true);
+        authTabs && authTabs.setAttribute('hidden','');
+        fLogin && fLogin.setAttribute('hidden','');
+        fSignup && fSignup.setAttribute('hidden','');
+        if (loggedBar){
+          loggedBar.hidden = false;
+          loggedEmail && (loggedEmail.textContent = session.user.email);
+        }
+      }else{
+        document.getElementById('authStatus')?.textContent = '로그아웃 상태';
+        authInfo && (authInfo.textContent = '로그아웃 상태');
+        needLogin && (needLogin.hidden = false);
+        authTabs && authTabs.removeAttribute('hidden');
+        fLogin && fLogin.removeAttribute('hidden');
+        fSignup && fSignup.setAttribute('hidden','');
+        if (typeof setTab === 'function') setTab('login');
+        const lb = document.getElementById('loggedBar');
+        lb && (lb.hidden = true);
+      }
+    }catch(e){
+      console.error('[refreshAuthUI2]', e);
+    }
+  }
+  // 전역에 덮어쓰기(기존 코드가 호출해도 이 버전으로 동작)
+  window.refreshAuthUI = refreshAuthUI2;
+
+  // 3) 로그인/로그아웃 바인딩(중복 안전)
+  document.getElementById('btn-login')?.addEventListener('click', async (e)=>{
+    e.preventDefault();
+    const btn = e.currentTarget;
+    const status = document.getElementById('loginStatus');
+    try{
+      btn.disabled = true;
+      status && (status.textContent = '로그인 중…');
+      const email = document.getElementById('login-email')?.value.trim();
+      const pw    = document.getElementById('login-password')?.value;
+      const { error } = await sb.auth.signInWithPassword({ email, password: pw });
+      status && (status.textContent = error ? ('로그인 실패: '+error.message) : '로그인 성공');
+      await refreshAuthUI2();
+    } finally { btn.disabled = false; }
+  });
+
+  const bindLogout = (id) => {
+    const el = document.getElementById(id);
+    if(!el) return;
+    el.addEventListener('click', async (e)=>{
+      e.preventDefault();
+      try{ await sb.auth.signOut(); }
+      finally{ await refreshAuthUI2(); }
+    });
+  };
+  bindLogout('btn-logout-main'); // 우리가 주입한 상단 바
+  bindLogout('btn-logout');      // 폼 안에 남아있을 수도 있는 버튼
+
+  // 4) 세션 변동 즉시 반영
+  sb.auth.onAuthStateChange(()=> { refreshAuthUI2(); });
+
+  // 5) 최초 1회 실행
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', refreshAuthUI2);
+  } else {
+    refreshAuthUI2();
+  }
+})();
+</script>
+
 </body>
 </html>
