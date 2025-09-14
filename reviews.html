@@ -434,31 +434,81 @@ writeForm?.addEventListener('submit', async (e)=>{
 });
 
 /* === 초기 진입 === */
+<script>
 (async function init(){
-  document.getElementById('year') && (document.getElementById('year').textContent=new Date().getFullYear());
-  await refreshAuthUI();
+  try{
+    // 1) 인증 UI 먼저 시도하되, 4초 넘으면 폴백으로 진행
+    await Promise.race([
+      (async()=>{ await refreshAuthUI(); })(),
+      new Promise(res => setTimeout(()=>{ authFallback('timeout'); res(); }, 4000))
+    ]);
+  }catch(err){
+    console.error('[init auth] error', err);
+    authFallback(err?.message || 'init-error');
+  }
 
-  const q=new URLSearchParams(location.search);
-  const id=q.get('id');
-  const compose=q.get('compose');
+  // 2) 라우팅: 기본=목록, id=읽기, compose=쓰기(로그인 필요)
+  const q = new URLSearchParams(location.search);
+  const id = q.get('id');
+  const compose = q.get('compose');
 
-  // 로그아웃 상태에서 compose 진입 불가
-  if(compose==='1'){
+  if(compose === '1'){
     const { data:{ session } } = await sb.auth.getSession();
     if(!session?.user){
-      // 진입 차단 → 목록으로
-      history.replaceState(null,'','/reviews.html');
+      // 비로그인 시 쓰기 진입 금지 → 목록으로
+      history.replaceState(null, '', '/reviews.html');
       showList(); await loadList();
       return;
     }
-    showWrite(); // 로그인 상태면 쓰기 허용
+    showWrite();
     return;
   }
 
-  if(id){ showRead(); await loadOne(id); return; }
-  showList(); await loadList(); // 기본 목록
+  if(id){
+    showRead();
+    await loadOne(id);
+    return;
+  }
+
+  // 기본: 목록
+  showList();
+  await loadList();
 })();
+</script>
+
 
 </script>
+<script>
+// === AUTH 실패/지연시 강제 폴백 ===
+function authFallback(reason){
+  console.warn('[auth fallback]', reason);
+  const authInfo = document.getElementById('authInfo');
+  const authTabs = document.getElementById('authTabs');
+  const fLogin   = document.getElementById('loginForm');
+  const fSignup  = document.getElementById('signupForm');
+  const loggedBar= document.getElementById('loggedBar');
+  const needLogin= document.getElementById('needLogin');
+
+  document.getElementById('authStatus').textContent = "로그아웃 상태";
+  authTabs && (authTabs.hidden = false);
+  fLogin && (fLogin.hidden = true);
+  fSignup && (fSignup.hidden = false);
+  loggedBar && (loggedBar.hidden = true);
+  authInfo && (authInfo.textContent = "로그아웃 상태");
+  needLogin && (needLogin.hidden = false);
+  // 좌측 탭을 로그인으로
+  typeof setTab === 'function' && setTab('login');
+}
+</script>
+<script>
+sb.auth.onAuthStateChange((_event, _session) => {
+  // 로그인/로그아웃 즉시 UI 반영
+  refreshAuthUI().catch(err => {
+    console.error('[refreshAuthUI error]', err);
+    authFallback(err?.message || 'onAuthStateChange');
+  });
+});
+</script>
+
 </body>
 </html>
