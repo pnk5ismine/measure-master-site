@@ -69,7 +69,12 @@
 <body>
 <header>
   <div class="brand">
-    <img src="/images/mm_logo_small.jpg?v=logo3" alt="Measure Master" class="logo-img" />
+<img
+  src="/images/mm_logo_small.jpg?v=logo4"
+  alt="Measure Master"
+  class="logo-img"
+  onerror="this.onerror=null;this.src='/images/mm_logo2.jpg?v=fallback';"
+/>
     <strong>Measure Master</strong>
     <span style="margin-left:8px;opacity:.8">사용자 후기</span>
   </div>
@@ -86,7 +91,10 @@
     <section class="card" id="leftAuth">
       <h2 class="section-title">로그인 · 회원가입</h2>
       <div id="authStatus" class="status">로그인 상태 확인 중…</div>
-
+<div id="loggedBar" class="row" hidden>
+  <span id="loggedEmail" class="status" style="flex:1"></span>
+  <button class="btn secondary" type="button" id="btn-logout-main">로그아웃</button>
+</div>
       <div id="authTabs" class="tabbar" hidden>
         <button type="button" id="tab-login" class="active">로그인</button>
         <button type="button" id="tab-signup">가입</button>
@@ -102,10 +110,9 @@
           <label for="login-password">비밀번호</label>
           <input id="login-password" type="password" placeholder="8자 이상" required minlength="8">
         </div>
-        <div class="row">
-          <button class="btn" id="btn-login">로그인</button>
-          <button class="btn secondary" type="button" id="btn-logout" hidden>로그아웃</button>
-        </div>
+<div class="row">
+  <button class="btn" id="btn-login">로그인</button>
+</div>
         <div id="loginStatus" class="status"></div>
       </form>
 
@@ -244,28 +251,42 @@ function authFallback(reason){
 async function refreshAuthUI(){
   try{
     const { data:{ session } } = await sb.auth.getSession();
-    const authInfo = $('#authInfo');
-    const needLogin= $('#needLogin');
+    const authInfo   = document.getElementById('authInfo');
+    const needLogin  = document.getElementById('needLogin');
+    const loggedBar  = document.getElementById('loggedBar');
+    const loggedEmail= document.getElementById('loggedEmail');
 
     if(session?.user){
-      if(authStatus) authStatus.textContent = `로그인: ${session.user.email}`;
-      if(authTabs)   authTabs.hidden = true;
-      if(fLogin)     fLogin.hidden = false; // 폼은 내부 버튼 숨김 처리
-      if(fSignup)    fSignup.hidden = true;
-      $('#btn-login')?.style && ($('#btn-login').style.display='none');
-      $('#btn-logout')?.removeAttribute('hidden');
-      if(authInfo)   authInfo.textContent = `로그인: ${session.user.email}`;
-      if(needLogin)  needLogin.hidden = true;
+      // 헤더/상태
+      document.getElementById('authStatus')?.textContent = `로그인: ${session.user.email}`;
+      if(authInfo)  authInfo.textContent = `로그인: ${session.user.email}`;
+      if(needLogin) needLogin.hidden = true;
+
+      // 탭/폼 감추기
+      document.getElementById('authTabs')?.setAttribute('hidden','');
+      document.getElementById('loginForm')?.setAttribute('hidden','');
+      document.getElementById('signupForm')?.setAttribute('hidden','');
+
+      // 로그인 바 표시
+      if(loggedBar){
+        loggedEmail.textContent = session.user.email;
+        loggedBar.hidden = false;
+      }
     }else{
-      if(authStatus) authStatus.textContent = '로그아웃 상태';
-      if(authTabs)   authTabs.hidden = false;
-      if(fLogin)     fLogin.hidden = true;
-      if(fSignup)    fSignup.hidden = false;
-      $('#btn-logout')?.setAttribute('hidden','');
-      $('#btn-login')?.style && ($('#btn-login').style.display='');
-      if(authInfo)   authInfo.textContent = '로그아웃 상태';
-      if(needLogin)  needLogin.hidden = false;
-      setTab('login');
+      // 로그아웃 상태
+      document.getElementById('authStatus')?.textContent = '로그아웃 상태';
+      if(authInfo)  authInfo.textContent = '로그아웃 상태';
+      if(needLogin) needLogin.hidden = false;
+
+      // 탭/폼 보여주기(기본: 로그인 탭)
+      document.getElementById('authTabs')?.removeAttribute('hidden');
+      document.getElementById('loginForm')?.removeAttribute('hidden');
+      document.getElementById('signupForm')?.setAttribute('hidden','');
+      if(typeof setTab==='function') setTab('login');
+
+      // 로그인 바 숨김
+      const loggedBar = document.getElementById('loggedBar');
+      if(loggedBar) loggedBar.hidden = true;
     }
   }catch(e){
     console.error('[refreshAuthUI]', e);
@@ -274,20 +295,30 @@ async function refreshAuthUI(){
 }
 
 // 로그인/로그아웃(좌측 폼)
-$('#btn-login')?.addEventListener('click', async (e)=>{
-  e.preventDefault();
-  if(loginStatus) loginStatus.textContent="로그인 중…";
-  const email = $('#login-email')?.value.trim();
-  const pw    = $('#login-password')?.value;
-  const { error } = await sb.auth.signInWithPassword({ email, password: pw });
-  if(loginStatus) loginStatus.textContent = error ? ("로그인 실패: "+error.message) : "로그인 성공";
-  await refreshAuthUI();
-});
-$('#btn-logout')?.addEventListener('click', async (e)=>{
+
+document.getElementById('btn-logout-main')?.addEventListener('click', async (e)=>{
   e.preventDefault();
   await sb.auth.signOut();
   await refreshAuthUI();
 });
+
+document.getElementById('btn-login')?.addEventListener('click', async (e)=>{
+  e.preventDefault();
+  const btn = e.currentTarget;
+  const status = document.getElementById('loginStatus');
+  try{
+    btn.disabled = true;
+    if(status) status.textContent = "로그인 중…";
+    const email = document.getElementById('login-email')?.value.trim();
+    const pw    = document.getElementById('login-password')?.value;
+    const { error } = await sb.auth.signInWithPassword({ email, password: pw });
+    if(status) status.textContent = error ? ("로그인 실패: "+error.message) : "로그인 성공";
+  }finally{
+    btn.disabled = false;
+    await refreshAuthUI();
+  }
+});
+
 $('#btn-signup')?.addEventListener('click', async (e)=>{
   e.preventDefault();
   if(signupStatus) signupStatus.textContent="가입 중…";
