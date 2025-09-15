@@ -195,487 +195,167 @@
 <!-- Supabase SDK -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-// ====== 환경 ======
+(()=>{
+// ===== 설정 =====
 const SUPABASE_URL  = "https://snxjcbaaysgfunpsohzg.supabase.co";
 const SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNueGpjYmFheXNnZnVucHNvaHpnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY1OTk3MzQsImV4cCI6MjA3MjE3NTczNH0.T8b9PpabXkCvwW2W57Qbr-h--JLZB6errlyP5IwsYyk";
-window.sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
 
-// ====== DOM 헬퍼 ======
+// ===== DOM 빠른 참조 & 유틸 =====
 const $ = s => document.querySelector(s);
+const listView = $('#listView'), readView = $('#readView'), writeForm = $('#writeForm');
+const listBody = $('#listBody'), needLogin = $('#needLogin'), authInfo = $('#authInfo');
+const btnCompose = $('#btn-compose'), btnSubmit = $('#btn-submit'), formStatus = $('#formStatus');
+const fTitle = $('#title'), fContent = $('#content'), fImage = $('#image'), preview = $('#preview');
+document.getElementById('year') && (document.getElementById('year').textContent = new Date().getFullYear());
+
+const REST_HEADERS = { apikey: SUPABASE_ANON, Authorization: `Bearer ${SUPABASE_ANON}` };
 function escapeHtml(s){return (s??'').replace(/[&<>"']/g,m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m]))}
-function fmtDate(iso){try{const d=new Date(iso);return d.toLocaleString('ko-KR',{year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'})}catch{return iso||''}}
-function displayName(row){return row?.nickname || (row?.author_email?row.author_email.split('@')[0]:'익명')}
+function fmtDate(iso){ try{const d=new Date(iso);return d.toLocaleString('ko-KR',{year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'})}catch{return iso||''} }
+function displayName(r){ return r?.nickname || (r?.author_email ? r.author_email.split('@')[0] : '익명'); }
 function applyImgClass(el){ if(!el) return; const set=()=>{ el.classList.remove('landscape','portrait'); (el.naturalWidth>el.naturalHeight?el.classList.add('landscape'):el.classList.add('portrait')); }; (el.complete&&el.naturalWidth)?set():el.addEventListener('load',set,{once:true}); }
 
-// ====== 공용 참조 ======
-const authInfo   = $('#authInfo');
-const needLogin  = $('#needLogin');
-const authStatus = $('#authStatus');
-const authTabs   = $('#authTabs');
-const fLogin     = $('#loginForm');
-const fSignup    = $('#signupForm');
-const loginStatus= $('#loginStatus');
-const signupStatus=$('#signupStatus');
+// ===== 라우팅 표시 =====
+function showList(){ if(listView) listView.hidden=false; if(readView) readView.hidden=true; if(writeForm) writeForm.hidden=true; }
+function showRead(){ if(listView) listView.hidden=true; if(readView) readView.hidden=false; if(writeForm) writeForm.hidden=true; }
+function showWrite(){if(listView) listView.hidden=true; if(readView) readView.hidden=true; if(writeForm) writeForm.hidden=false; }
 
-const listView = $('#listView');
-const readView = $('#readView');
-const writeForm= $('#writeForm');
-const listBody = $('#listBody');
-const btnCompose = $('#btn-compose');
-const btnSubmit  = $('#btn-submit');
-const formStatus = $('#formStatus');
-const fTitle   = $('#title');
-const fContent = $('#content');
-const fImage   = $('#image');
-const preview  = $('#preview');
-
-// ====== 탭 제어 ======
-function setTab(which){
-  $('#tab-login')?.classList.toggle('active', which==='login');
-  $('#tab-signup')?.classList.toggle('active', which==='signup');
-  if(fLogin)  fLogin.hidden  = (which!=='login');
-  if(fSignup) fSignup.hidden = (which!=='signup');
+// ===== 인증: 타임아웃 가드(대기 방지) =====
+async function getSessionFast(ms=2500){
+  try{
+    const r = await Promise.race([
+      sb.auth.getSession(),
+      new Promise((_,rej)=>setTimeout(()=>rej(new Error('auth-timeout')), ms))
+    ]);
+    return r?.data?.session || null;
+  }catch{ return null; }
 }
-$('#tab-login')?.addEventListener('click', ()=>setTab('login'));
-$('#tab-signup')?.addEventListener('click', ()=>setTab('signup'));
-
-// ====== 좌측 로그인 UI ======
 async function refreshAuthUI(){
-  const { data:{ session } } = await sb.auth.getSession();
-  if(session?.user){
-    authStatus && (authStatus.textContent = `로그인: ${session.user.email}`);
-    authTabs   && authTabs.setAttribute('hidden','');
-    fLogin     && fLogin.setAttribute('hidden','');
-    fSignup    && fSignup.setAttribute('hidden','');
-    authInfo   && (authInfo.textContent = `로그인: ${session.user.email}`);
-    needLogin  && (needLogin.hidden = true);
-    // 상단 로그아웃 바 없으면 주입
-    if(!$('#loggedBar')){
-      const bar = document.createElement('div');
-      bar.id='loggedBar'; bar.className='row';
-      bar.innerHTML = '<span class="status" style="flex:1" id="loggedEmail"></span><button class="btn secondary" type="button" id="btn-logout-main">로그아웃</button>';
-      authStatus?.insertAdjacentElement('afterend', bar);
-      $('#btn-logout-main')?.addEventListener('click', async (e)=>{ e.preventDefault(); await sb.auth.signOut(); await refreshAuthUI(); });
-    }
-    $('#loggedEmail') && ($('#loggedEmail').textContent=session.user.email);
-    $('#loggedBar') && ($('#loggedBar').hidden=false);
-  }else{
-    authStatus && (authStatus.textContent = '로그아웃 상태');
-    authTabs   && authTabs.removeAttribute('hidden');
-    fLogin     && fLogin.removeAttribute('hidden');
-    fSignup    && fSignup.setAttribute('hidden','');
-    authInfo   && (authInfo.textContent = '로그아웃 상태');
-    needLogin  && (needLogin.hidden = false);
-    $('#loggedBar') && ($('#loggedBar').hidden=true);
-    setTab('login');
-  }
+  const ses = await getSessionFast();
+  if(authInfo) authInfo.textContent = ses?.user ? `로그인: ${ses.user.email}` : '로그아웃 상태';
+  if(needLogin) needLogin.hidden = !!ses?.user;
 }
-$('#btn-login')?.addEventListener('click', async (e)=>{
-  e.preventDefault();
-  loginStatus && (loginStatus.textContent='로그인 중…');
-  const email = $('#login-email')?.value?.trim();
-  const pw    = $('#login-password')?.value;
-  const { error } = await sb.auth.signInWithPassword({ email, password: pw });
-  loginStatus && (loginStatus.textContent = error ? ('로그인 실패: '+error.message) : '로그인 성공');
-  await refreshAuthUI();
-});
-$('#btn-logout')?.addEventListener('click', async (e)=>{ e.preventDefault(); await sb.auth.signOut(); await refreshAuthUI(); });
-$('#btn-signup')?.addEventListener('click', async (e)=>{
-  e.preventDefault();
-  signupStatus && (signupStatus.textContent='가입 중…');
-  const email = $('#signup-email')?.value?.trim();
-  const pw1   = $('#signup-password')?.value;
-  const pw2   = $('#signup-password2')?.value;
-  if(pw1!==pw2){ signupStatus.textContent='비밀번호 확인이 일치하지 않습니다.'; return; }
-  if((pw1||'').length<8){ signupStatus.textContent='비밀번호는 8자 이상'; return; }
-  const { data, error } = await sb.auth.signUp({ email, password: pw1 });
-  signupStatus && (signupStatus.textContent = error ? ('가입 실패: '+error.message) : (data.session?'가입+로그인 완료':'가입 완료'));
-  await refreshAuthUI();
-});
-sb.auth.onAuthStateChange(()=> refreshAuthUI());
 
-// ====== 라우팅 ======
-function showList(){ listView.hidden=false; readView.hidden=true;  writeForm.hidden=true; }
-function showRead(){ listView.hidden=true;  readView.hidden=false; writeForm.hidden=true; }
-function showWrite(){listView.hidden=true;  readView.hidden=true;  writeForm.hidden=false; }
-
-// ====== 목록 ======
+// ===== 목록: REST로 즉시 로드(대기 없음) =====
 async function loadList(){
-  const { data, error } = await sb.from('reviews')
-    .select('id, title, content, nickname, author_email, created_at')
-    .order('created_at', { ascending:false }).limit(100);
-  if(error){ listBody.innerHTML = `<tr><td colspan="4" class="muted">목록 로드 실패: ${escapeHtml(error.message)}</td></tr>`; return; }
-  if(!data?.length){ listBody.innerHTML = `<tr><td colspan="4" class="muted">등록된 후기가 없습니다.</td></tr>`; return; }
-  listBody.innerHTML = data.map((row, idx)=>`
-    <tr data-id="${row.id}" class="row-item" style="cursor:pointer">
-      <td class="cell-no">${idx+1}</td>
-      <td class="cell-nick">${escapeHtml(displayName(row))}</td>
-      <td class="cell-body">${escapeHtml((row.title?`[${row.title}] `:'') + (row.content||''))}</td>
-      <td class="cell-time">${fmtDate(row.created_at)}</td>
-    </tr>
-  `).join('');
-  listBody.querySelectorAll('tr.row-item').forEach(tr=>{
-    tr.addEventListener('click',()=> location.href=`/reviews.html?id=${tr.dataset.id}`);
-  });
-}
-btnCompose?.addEventListener('click', async ()=>{
-  const { data:{ session } } = await sb.auth.getSession();
-  if(!session?.user){
-    alert('글쓰기를 하려면 회원가입/로그인이 필요합니다.');
-    setTab('login'); $('#leftAuth')?.scrollIntoView({behavior:'smooth', block:'start'});
-    return;
-  }
-  location.href='/reviews.html?compose=1';
-});
-
-// ====== 단건 읽기 ======
-async function loadOne(id){
-  const { data, error } = await sb.from('reviews')
-    .select('title, content, created_at, nickname, author_email, image_url')
-    .eq('id', id).single();
-  if(error){ readView.innerHTML = `<p class="muted">불러오기 실패: ${escapeHtml(error.message)}</p>`; return; }
-  const name = displayName(data);
-  const imgHTML = data.image_url ? `<img id="readImg" class="image" src="${data.image_url}" alt="">` : "";
-  readView.innerHTML = `
-    <div class="top-actions">
-      <a class="btn secondary" href="/reviews.html">목록보기</a>
-      <button class="btn" type="button" id="btn-to-compose">글쓰기</button>
-    </div>
-    <h3 style="margin:0 0 6px">${escapeHtml(data.title || "(제목 없음)")}</h3>
-    <div class="muted" style="margin-bottom:10px">${escapeHtml(name)} · ${fmtDate(data.created_at)}</div>
-    <div style="white-space:pre-wrap;word-break:break-word">${escapeHtml(data.content || "")}</div>
-    ${imgHTML}
-  `;
-  applyImgClass(document.getElementById('readImg'));
-  document.getElementById('btn-to-compose')?.addEventListener('click', async ()=>{
-    const { data:{ session } } = await sb.auth.getSession();
-    if(!session?.user){
-      alert('글쓰기를 하려면 회원가입/로그인이 필요합니다.');
-      setTab('login'); $('#leftAuth')?.scrollIntoView({behavior:'smooth', block:'start'});
+  if(!listBody) return;
+  listBody.innerHTML = `<tr><td colspan="4" class="muted">불러오는 중…</td></tr>`;
+  try{
+    const url = `${SUPABASE_URL}/rest/v1/reviews?select=id,title,content,nickname,author_email,created_at&order=created_at.desc&limit=100`;
+    const r = await fetch(url, { headers: REST_HEADERS });
+    if(!r.ok) throw new Error(`HTTP ${r.status}`);
+    const rows = await r.json();
+    if(!rows.length){
+      listBody.innerHTML = `<tr><td colspan="4" class="muted">등록된 후기가 없습니다.</td></tr>`;
       return;
     }
-    location.href='/reviews.html?compose=1';
-  });
+    listBody.innerHTML = rows.map((row, i)=>`
+      <tr data-id="${row.id}" class="row-item" style="cursor:pointer">
+        <td class="cell-no">${i+1}</td>
+        <td class="cell-nick">${escapeHtml(displayName(row))}</td>
+        <td class="cell-body">${escapeHtml((row.title?`[${row.title}] `:'') + (row.content||''))}</td>
+        <td class="cell-time">${fmtDate(row.created_at)}</td>
+      </tr>
+    `).join('');
+    listBody.querySelectorAll('tr.row-item').forEach(tr=>{
+      tr.addEventListener('click',()=> location.href=`/reviews.html?id=${tr.dataset.id}`);
+    });
+  }catch(e){
+    listBody.innerHTML = `<tr><td colspan="4" class="muted">목록 로드 실패: ${escapeHtml(String(e.message||e))}</td></tr>`;
+  }
 }
 
-// ====== 쓰기(미리보기/저장) ======
+// ===== 읽기: REST 1건 =====
+async function loadOne(id){
+  if(!readView) return;
+  readView.innerHTML = `<p class="muted">불러오는 중…</p>`;
+  try{
+    const url = `${SUPABASE_URL}/rest/v1/reviews?select=title,content,created_at,nickname,author_email,image_url&id=eq.${encodeURIComponent(id)}&limit=1`;
+    const r = await fetch(url, { headers: REST_HEADERS });
+    if(!r.ok) throw new Error(`HTTP ${r.status}`);
+    const rows = await r.json();
+    const data = rows?.[0];
+    if(!data){ readView.innerHTML = `<p class="muted">데이터가 없습니다.</p>`; return; }
+    const img = data.image_url ? `<img id="readImg" class="image" src="${data.image_url}" alt="">` : '';
+    readView.innerHTML = `
+      <div class="top-actions">
+        <a class="btn secondary" href="/reviews.html">목록보기</a>
+        <button class="btn" type="button" id="btn-to-compose">글쓰기</button>
+      </div>
+      <h3 style="margin:0 0 6px">${escapeHtml(data.title || "(제목 없음)")}</h3>
+      <div class="muted" style="margin-bottom:10px">${escapeHtml(displayName(data))} · ${fmtDate(data.created_at)}</div>
+      <div style="white-space:pre-wrap;word-break:break-word">${escapeHtml(data.content || "")}</div>
+      ${img}
+    `;
+    applyImgClass(document.getElementById('readImg'));
+    document.getElementById('btn-to-compose')?.addEventListener('click', async ()=>{
+      const ses = await getSessionFast();
+      if(!ses){ alert('글쓰기를 하려면 로그인해주세요.'); location.href='/reviews.html'; return; }
+      location.href='/reviews.html?compose=1';
+    });
+  }catch(e){
+    readView.innerHTML = `<p class="muted">불러오기 실패: ${escapeHtml(String(e.message||e))}</p>`;
+  }
+}
+
+// ===== 쓰기: 미리보기 & 저장 =====
 fImage?.addEventListener('change', ()=>{
-  const file0 = fImage.files?.[0];
-  if(!file0){ preview.hidden=true; return; }
-  const url = URL.createObjectURL(file0);
-  preview.src = url; preview.hidden=false; applyImgClass(preview);
+  const f = fImage.files?.[0];
+  if(!f){ preview.hidden=true; return; }
+  preview.src = URL.createObjectURL(f); preview.hidden=false; applyImgClass(preview);
 });
 writeForm?.addEventListener('submit', async (e)=>{
   e.preventDefault();
-  const { data:{ session } } = await sb.auth.getSession();
-  if(!session?.user){ alert('로그인이 필요합니다.'); return; }
-  const title = fTitle.value.trim();
-  const content = fContent.value.trim();
+  const ses = await getSessionFast();
+  if(!ses){ alert('로그인이 필요합니다.'); return; }
+  const title = fTitle.value.trim(), content = fContent.value.trim();
   if(!content){ formStatus.textContent='내용을 입력하세요.'; return; }
   btnSubmit.disabled=true; btnSubmit.textContent='저장 중…';
   try{
-    const nickname = (session.user.user_metadata?.full_name) || (session.user.email?.split('@')[0]) || '익명';
     let image_path=null, image_url=null;
-    const file0 = fImage.files?.[0] || null;
+    const file0 = fImage.files?.[0]||null;
     if(file0){
       const ext=(file0.name.split('.').pop()||'jpg').toLowerCase();
-      const safeExt=["jpg","jpeg","png","webp","gif"].includes(ext)?ext:"jpg";
-      const key=`${session.user.id}/${Date.now()}_${Math.random().toString(36).slice(2)}.${safeExt}`;
+      const safe=["jpg","jpeg","png","webp","gif"].includes(ext)?ext:"jpg";
+      const key=`${ses.user.id}/${Date.now()}_${Math.random().toString(36).slice(2)}.${safe}`;
       const up=await sb.storage.from('reviews').upload(key,file0,{upsert:false,cacheControl:'3600'});
       if(up.error) throw new Error('이미지 업로드 실패: '+up.error.message);
       image_path=key; image_url=sb.storage.from('reviews').getPublicUrl(key).data.publicUrl;
     }
-    const ins = await sb.from('reviews').insert({
-      title, content, user_id:session.user.id, author_email:session.user.email, nickname, image_path, image_url
+    const nickname = (ses.user.user_metadata?.full_name) || (ses.user.email?.split('@')[0]) || '익명';
+    const ins=await sb.from('reviews').insert({
+      title, content, user_id:ses.user.id, author_email:ses.user.email, nickname, image_path, image_url
     }).select('id').single();
     if(ins.error) throw new Error(ins.error.message);
-    location.href='/reviews.html';
+    location.href='/reviews.html'; // 저장 후 목록으로
   }catch(err){
     formStatus.textContent=String(err.message||err);
     btnSubmit.disabled=false; btnSubmit.textContent='저장';
   }
 });
 
-// ====== 초기 진입 ======
+// ===== “글쓰기” 버튼: 로그인 확인 후 이동 =====
+btnCompose?.addEventListener('click', async ()=>{
+  const ses = await getSessionFast();
+  if(!ses){ alert('글쓰기를 하려면 로그인해주세요.'); return; }
+  location.href='/reviews.html?compose=1';
+});
+
+// ===== 초기 진입 =====
 (async function init(){
-  await refreshAuthUI();
+  await refreshAuthUI();       // UI 문구만 갱신(대기 제한)
   const q = new URLSearchParams(location.search);
   const id = q.get('id');
   const compose = q.get('compose');
+
+  if(id){ showRead(); await loadOne(id); return; }
   if(compose==='1'){
-    const { data:{ session } } = await sb.auth.getSession();
-    if(!session?.user){ history.replaceState(null,'','/reviews.html'); showList(); await loadList(); return; }
+    const ses = await getSessionFast();
+    if(!ses){ alert('로그인이 필요합니다.'); location.replace('/reviews.html'); return; }
     showWrite(); return;
   }
-  if(id){ showRead(); await loadOne(id); return; }
-  showList(); await loadList();
+  showList(); loadList();      // 목록은 즉시 REST로 로드(대기 없음)
 })();
-</script>
-
-</script>
-<!-- READ VIEW HOTFIX: paste just before </body> -->
-<script>
-(function(){
-  // 1) Supabase 클라이언트 확보
-  const sb = window.sb || (window.supabase && window.supabase.createClient?.(
-    "https://snxjcbaaysgfunpsohzg.supabase.co",
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNueGpjYmFheXNnZnVucHNvaHpnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY1OTk3MzQsImV4cCI6MjA3MjE3NTczNH0.T8b9PpabXkCvwW2W57Qbr-h--JLZB6errlyP5IwsYyk"
-  ));
-  if(!sb){ console.error("Supabase not ready"); return; }
-
-  // 2) 뷰 토글(중복 안전)
-  const listView = document.getElementById('listView');
-  const readView = document.getElementById('readView');
-  const writeForm= document.getElementById('writeForm');
-  const showList = ()=>{ if(listView) listView.hidden=false; if(readView) readView.hidden=true;  if(writeForm) writeForm.hidden=true;  };
-  const showRead = ()=>{ if(listView) listView.hidden=true;  if(readView) readView.hidden=false; if(writeForm) writeForm.hidden=true; };
-
-  // 3) 안전한 단건 로더(기존 loadOne과 무관하게 동작)
-  function esc(s){return (s??'').replace(/[&<>"']/g,m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m]))}
-  async function loadOneSafe(id){
-    if(!readView) return;
-    readView.innerHTML = '<p class="muted">불러오는 중…</p>';
-    try{
-      const { data, error } = await sb.from('reviews')
-        .select('title, content, created_at, nickname, author_email, image_url')
-        .eq('id', id).single();
-      if(error) throw error;
-
-      const name = data.nickname || (data.author_email ? data.author_email.split('@')[0] : '익명');
-      const img  = data.image_url ? `<img id="readImg" class="image" src="${data.image_url}" alt="">` : '';
-      readView.innerHTML = `
-        <div class="top-actions">
-          <a class="btn secondary" href="/reviews.html">목록보기</a>
-          <button class="btn" type="button" id="btn-to-compose">글쓰기</button>
-        </div>
-        <h3 style="margin:0 0 6px">${esc(data.title||'(제목 없음)')}</h3>
-        <div class="muted" style="margin-bottom:10px">${esc(name)} · ${new Date(data.created_at).toLocaleString('ko-KR')}</div>
-        <div style="white-space:pre-wrap;word-break:break-word">${esc(data.content||'')}</div>
-        ${img}
-      `;
-      const ri=document.getElementById('readImg');
-      if(ri){
-        const set=()=>{ri.classList.remove('landscape','portrait'); (ri.naturalWidth>ri.naturalHeight?ri.classList.add('landscape'):ri.classList.add('portrait'));};
-        ri.complete?set():ri.addEventListener('load',set,{once:true});
-      }
-      document.getElementById('btn-to-compose')?.addEventListener('click', async ()=>{
-        const { data:{ session } } = await sb.auth.getSession();
-        if(!session?.user){ alert('글쓰기를 하려면 회원가입/로그인이 필요합니다.'); document.getElementById('tab-login')?.click(); document.getElementById('leftAuth')?.scrollIntoView({behavior:'smooth'}); return; }
-        location.href='/reviews.html?compose=1';
-      });
-    }catch(err){
-      readView.innerHTML = `<p class="muted">불러오기 실패: ${esc(err.message||err)}</p>`;
-    }
-  }
-
-  // 4) 쿼리 라우팅(인증 대기 없이 바로 처리)
-  const q = new URLSearchParams(location.search);
-  const id = q.get('id');
-  if(id){ showRead(); loadOneSafe(id); }
-})();
-</script>
-<!-- AUTH + ROUTER HOTFIX (paste just before </body>) -->
-<script>
-(function(){
-  /* ===== 안전 유틸 ===== */
-  const $ = (s)=>document.querySelector(s);
-  const escapeHtml=(s)=> (s??'').replace(/[&<>"']/g,m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m]));
-  const fmtDate=(iso)=>{ try{const d=new Date(iso);return d.toLocaleString('ko-KR',{year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'})}catch{return iso||''} };
-  const setStatus=(t)=>{ const a=$('#authStatus'); if(a) a.textContent=t; const b=$('#authInfo'); if(b) b.textContent=t; };
-
-  /* ===== Supabase 준비(없으면 바로 로그아웃 UI) ===== */
-  const URL="https://snxjcbaaysgfunpsohzg.supabase.co";
-  const KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNueGpjYmFheXNnZnVucHNvaHpnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY1OTk3MzQsImV4cCI6MjA3MjE3NTczNH0.T8b9PpabXkCvwW2W57Qbr-h--JLZB6errlyP5IwsYyk";
-  if (window.supabase && !window.sb) window.sb = window.supabase.createClient(URL, KEY);
-
-  /* ===== 로그인/로그아웃 UI 즉시 반영 (세션 대기 X) ===== */
-  function showLoggedOut(){
-    setStatus('로그아웃 상태');
-    $('#authTabs')?.removeAttribute('hidden');
-    $('#loginForm')?.removeAttribute('hidden');
-    $('#signupForm')?.setAttribute('hidden','');
-    $('#needLogin') && ($('#needLogin').hidden=false);
-    $('#btn-logout')?.setAttribute('hidden','');
-    const lb=$('#loggedBar'); if(lb) lb.hidden=true;
-    if (typeof window.setTab==='function') window.setTab('login');
-  }
-  function showLoggedIn(email){
-    setStatus('로그인: '+email);
-    $('#authTabs')?.setAttribute('hidden','');
-    $('#loginForm')?.setAttribute('hidden','');
-    $('#signupForm')?.setAttribute('hidden','');
-    $('#needLogin') && ($('#needLogin').hidden=true);
-    $('#btn-logout')?.removeAttribute('hidden');
-    const lb=$('#loggedBar'); if(lb){ lb.hidden=false; const le=$('#loggedEmail'); if(le) le.textContent=email; }
-  }
-
-  async function refreshAuthUI(){
-    if(!window.sb){ showLoggedOut(); return; }
-    try{
-      // 세션 조회 최대 1.5초, 넘으면 비로그인 UI로
-      const res = await Promise.race([
-        window.sb.auth.getSession(),
-        new Promise(r=>setTimeout(()=>r({data:{session:null}}),1500))
-      ]);
-      const session = res?.data?.session || null;
-      session?.user ? showLoggedIn(session.user.email) : showLoggedOut();
-    }catch(e){
-      console.warn('[auth hotfix] getSession fail:', e);
-      showLoggedOut();
-    }
-  }
-
-  /* ===== 로그인/로그아웃 바인딩(중복 안전) ===== */
-  $('#btn-login')?.addEventListener('click', async (e)=>{
-    e.preventDefault();
-    const st=$('#loginStatus'); st && (st.textContent='로그인 중…');
-    try{
-      const email=$('#login-email')?.value?.trim();
-      const pw=$('#login-password')?.value;
-      const {error}= await window.sb.auth.signInWithPassword({ email, password: pw });
-      st && (st.textContent = error ? ('로그인 실패: '+error.message) : '로그인 성공');
-    }catch(err){ st && (st.textContent=String(err.message||err)); }
-    await refreshAuthUI();
-  });
-  const doLogout = async (e)=>{ e?.preventDefault?.(); try{ await window.sb?.auth.signOut(); } finally { await refreshAuthUI(); } };
-  $('#btn-logout')?.addEventListener('click', doLogout);
-  $('#btn-logout-main')?.addEventListener('click', doLogout);
-  try{ window.sb?.auth.onAuthStateChange(()=> refreshAuthUI()); }catch{}
-
-  /* ===== 라우팅: 인증과 무관하게 즉시 렌더 ===== */
-  function showList(){ $('#listView').hidden=false; $('#readView').hidden=true;  $('#writeForm').hidden=true; }
-  function showRead(){ $('#listView').hidden=true;  $('#readView').hidden=false; $('#writeForm').hidden=true; }
-  function showWrite(){$('#listView').hidden=true;  $('#readView').hidden=true;  $('#writeForm').hidden=false; }
-
-  async function loadList(){
-    if(!window.sb){ $('#listBody').innerHTML='<tr><td colspan="4" class="muted">서버 준비 중(익명 보기만 가능)</td></tr>'; return; }
-    const { data, error } = await window.sb.from('reviews')
-      .select('id,title,content,nickname,author_email,created_at')
-      .order('created_at',{ascending:false}).limit(100);
-    if(error){ $('#listBody').innerHTML = `<tr><td colspan="4" class="muted">목록 로드 실패: ${escapeHtml(error.message)}</td></tr>`; return; }
-    if(!data?.length){ $('#listBody').innerHTML = `<tr><td colspan="4" class="muted">등록된 후기가 없습니다.</td></tr>`; return; }
-    $('#listBody').innerHTML = data.map((row,idx)=>`
-      <tr data-id="${row.id}" class="row-item" style="cursor:pointer">
-        <td class="cell-no">${idx+1}</td>
-        <td class="cell-nick">${escapeHtml(row.nickname || (row.author_email?row.author_email.split('@')[0]:'익명'))}</td>
-        <td class="cell-body">${escapeHtml((row.title?`[${row.title}] `:'') + (row.content||''))}</td>
-        <td class="cell-time">${fmtDate(row.created_at)}</td>
-      </tr>`).join('');
-    document.querySelectorAll('#listBody tr.row-item').forEach(tr=>{
-      tr.addEventListener('click',()=> location.href=`/reviews.html?id=${tr.dataset.id}`);
-    });
-  }
-
-  async function loadOne(id){
-    if(!window.sb){ $('#readView').innerHTML='<p class="muted">서버 준비 중입니다. 잠시 후 다시 시도해 주세요.</p>'; return; }
-    const { data, error } = await window.sb.from('reviews')
-      .select('title,content,created_at,nickname,author_email,image_url')
-      .eq('id',id).single();
-    if(error){ $('#readView').innerHTML = `<p class="muted">불러오기 실패: ${escapeHtml(error.message)}</p>`; return; }
-    const name = data.nickname || (data.author_email?data.author_email.split('@')[0]:'익명');
-    const imgHTML = data.image_url ? `<img id="readImg" class="image" src="${data.image_url}" alt="">` : '';
-    $('#readView').innerHTML = `
-      <div class="top-actions">
-        <a class="btn secondary" href="/reviews.html">목록보기</a>
-        <button class="btn" type="button" id="btn-to-compose">글쓰기</button>
-      </div>
-      <h3 style="margin:0 0 6px">${escapeHtml(data.title || "(제목 없음)")}</h3>
-      <div class="muted" style="margin-bottom:10px">${escapeHtml(name)} · ${fmtDate(data.created_at)}</div>
-      <div style="white-space:pre-wrap;word-break:break-word">${escapeHtml(data.content || "")}</div>
-      ${imgHTML}
-    `;
-    const img=$('#readImg');
-    if(img){
-      const fit=()=>{ const land=img.naturalWidth>img.naturalHeight; img.classList.toggle('landscape',land); img.classList.toggle('portrait',!land); };
-      img.complete?fit():img.addEventListener('load',fit,{once:true});
-    }
-    $('#btn-to-compose')?.addEventListener('click', async ()=>{
-      const ses = await window.sb.auth.getSession();
-      if(!ses?.data?.session?.user){ alert('글쓰기를 하려면 회원가입/로그인이 필요합니다.'); $('#leftAuth')?.scrollIntoView({behavior:'smooth'}); return; }
-      location.href='/reviews.html?compose=1';
-    });
-  }
-
-  async function init(){
-    // 1) 라우트 즉시 렌더 (세션 대기 없음)
-    const q=new URLSearchParams(location.search);
-    const id=q.get('id'); const compose=q.get('compose');
-    if(compose==='1'){
-      if(window.sb){
-        const ses=await window.sb.auth.getSession();
-        if(!ses?.data?.session?.user){ history.replaceState(null,'','/reviews.html'); showList(); await loadList(); }
-        else showWrite();
-      }else{ history.replaceState(null,'','/reviews.html'); showList(); await loadList(); }
-    }else if(id){ showRead(); await loadOne(id); }
-    else{ showList(); await loadList(); }
-
-    // 2) 인증 패널은 백그라운드 갱신
-    refreshAuthUI();
-  }
-
-  document.readyState==='loading' ? document.addEventListener('DOMContentLoaded',init) : init();
-})();
-</script>
-<!-- LIST FIRST AID: show list even when auth is pending -->
-<script>
-(function(){
-  // 1) 무조건 목록 뷰가 보이도록 강제
-  var listView = document.getElementById('listView');
-  var readView = document.getElementById('readView');
-  var writeForm= document.getElementById('writeForm');
-  if(listView){ listView.hidden = false; listView.removeAttribute('hidden'); }
-  if(readView){ readView.hidden = true; }
-  if(writeForm){ writeForm.hidden = true; }
-
-  // 2) 안전한 HTML escape
-  function esc(s){ return (s??'').replace(/[&<>"']/g, m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m])); }
-  function when(t,fn){ if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',fn,{once:true}); else fn(); }
-
-  // 3) 목록 로더( Supabase 있으면 실제 데이터, 없으면 안내문 )
-  async function loadListNow(){
-    var tbody = document.getElementById('listBody');
-    if(!tbody) return;
-
-    // Supabase 클라이언트 없으면 안내만
-    if(!(window.sb && window.sb.from)){
-      tbody.innerHTML = '<tr><td colspan="4" class="muted">서버 준비 중입니다…</td></tr>';
-      return;
-    }
-
-    try{
-      const { data, error } = await window.sb
-        .from('reviews')
-        .select('id,title,content,nickname,author_email,created_at')
-        .order('created_at', { ascending:false })
-        .limit(100);
-
-      if(error) throw error;
-      if(!data || !data.length){
-        tbody.innerHTML = '<tr><td colspan="4" class="muted">등록된 후기가 없습니다.</td></tr>';
-        return;
-      }
-
-      tbody.innerHTML = data.map((row, idx)=>`
-        <tr data-id="${row.id}" class="row-item" style="cursor:pointer">
-          <td class="cell-no">${idx+1}</td>
-          <td class="cell-nick">${esc(row.nickname || (row.author_email? row.author_email.split('@')[0] : '익명'))}</td>
-          <td class="cell-body">${esc((row.title?`[${row.title}] `:'') + (row.content||''))}</td>
-          <td class="cell-time">${new Date(row.created_at).toLocaleString('ko-KR',{year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'})}</td>
-        </tr>
-      `).join('');
-
-      // 클릭 → 읽기 페이지로 이동
-      document.querySelectorAll('#listBody tr.row-item').forEach(tr=>{
-        tr.addEventListener('click', ()=> { location.href = '/reviews.html?id=' + tr.dataset.id; });
-      });
-    }catch(e){
-      tbody.innerHTML = `<tr><td colspan="4" class="muted">목록 로드 실패: ${esc(e.message||e)}</td></tr>`;
-    }
-  }
-
-  // 4) 즉시 시도 + 약간 지연 재시도(인증 SDK 늦게 뜰 때 대비)
-  when('dom', loadListNow);
-  setTimeout(loadListNow, 800);  // SDK 늦게 붙을 때 한 번 더
 })();
 </script>
 
