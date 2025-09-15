@@ -616,6 +616,68 @@ writeForm?.addEventListener('submit', async (e)=>{
   document.readyState==='loading' ? document.addEventListener('DOMContentLoaded',init) : init();
 })();
 </script>
+<!-- LIST FIRST AID: show list even when auth is pending -->
+<script>
+(function(){
+  // 1) 무조건 목록 뷰가 보이도록 강제
+  var listView = document.getElementById('listView');
+  var readView = document.getElementById('readView');
+  var writeForm= document.getElementById('writeForm');
+  if(listView){ listView.hidden = false; listView.removeAttribute('hidden'); }
+  if(readView){ readView.hidden = true; }
+  if(writeForm){ writeForm.hidden = true; }
+
+  // 2) 안전한 HTML escape
+  function esc(s){ return (s??'').replace(/[&<>"']/g, m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m])); }
+  function when(t,fn){ if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',fn,{once:true}); else fn(); }
+
+  // 3) 목록 로더( Supabase 있으면 실제 데이터, 없으면 안내문 )
+  async function loadListNow(){
+    var tbody = document.getElementById('listBody');
+    if(!tbody) return;
+
+    // Supabase 클라이언트 없으면 안내만
+    if(!(window.sb && window.sb.from)){
+      tbody.innerHTML = '<tr><td colspan="4" class="muted">서버 준비 중입니다…</td></tr>';
+      return;
+    }
+
+    try{
+      const { data, error } = await window.sb
+        .from('reviews')
+        .select('id,title,content,nickname,author_email,created_at')
+        .order('created_at', { ascending:false })
+        .limit(100);
+
+      if(error) throw error;
+      if(!data || !data.length){
+        tbody.innerHTML = '<tr><td colspan="4" class="muted">등록된 후기가 없습니다.</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = data.map((row, idx)=>`
+        <tr data-id="${row.id}" class="row-item" style="cursor:pointer">
+          <td class="cell-no">${idx+1}</td>
+          <td class="cell-nick">${esc(row.nickname || (row.author_email? row.author_email.split('@')[0] : '익명'))}</td>
+          <td class="cell-body">${esc((row.title?`[${row.title}] `:'') + (row.content||''))}</td>
+          <td class="cell-time">${new Date(row.created_at).toLocaleString('ko-KR',{year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'})}</td>
+        </tr>
+      `).join('');
+
+      // 클릭 → 읽기 페이지로 이동
+      document.querySelectorAll('#listBody tr.row-item').forEach(tr=>{
+        tr.addEventListener('click', ()=> { location.href = '/reviews.html?id=' + tr.dataset.id; });
+      });
+    }catch(e){
+      tbody.innerHTML = `<tr><td colspan="4" class="muted">목록 로드 실패: ${esc(e.message||e)}</td></tr>`;
+    }
+  }
+
+  // 4) 즉시 시도 + 약간 지연 재시도(인증 SDK 늦게 뜰 때 대비)
+  when('dom', loadListNow);
+  setTimeout(loadListNow, 800);  // SDK 늦게 붙을 때 한 번 더
+})();
+</script>
 
 </body>
 </html>
