@@ -64,6 +64,20 @@
     .image,.thumb{display:block;height:auto;margin:10px auto}
     .image.landscape,.thumb.landscape{width:70%;max-width:70%}
     .image.portrait,.thumb.portrait{width:30%;max-width:30%}
+
+/* 반응바 */
+.reaction-bar{display:flex;gap:8px;align-items:center;margin:12px 0}
+.reaction-bar .btn-chip{padding:6px 10px;border:1px solid #e5e7eb;border-radius:999px;background:#f9fafb;color:#111;cursor:pointer}
+.reaction-bar .btn-chip.active{background:#111;color:#fff}
+
+/* 댓글 */
+.comments{margin-top:16px}
+.comment-item{border-top:1px solid #e5e7eb;padding:10px 0}
+.comment-head{font-size:13px;color:#666;display:flex;justify-content:space-between;gap:8px}
+.comment-body{white-space:pre-wrap;word-break:break-word;margin-top:6px}
+.comment-form{display:flex;gap:8px;margin-top:10px}
+.comment-form textarea{flex:1;min-height:60px}
+
   </style>
 </head>
 <body>
@@ -364,6 +378,7 @@ async function loadList(){
 
 // ====== 단건 읽기 ======
 async function loadOne(id){
+  // 후기 본문 조회
   const { data, error } = await sb
     .from("reviews")
     .select("id, user_id, title, content, created_at, nickname, author_email, image_url, image_path")
@@ -375,8 +390,9 @@ async function loadOne(id){
     return;
   }
 
-  const { data: sessData } = await sb.auth.getSession();
-  const me = sessData?.session?.user || null;
+  // 세션 & 소유자 여부
+  const { data: sess } = await sb.auth.getSession();
+  const me = sess?.session?.user || null;
   const isOwner = !!(me && data.user_id && me.id === data.user_id);
 
   const name = displayName(data);
@@ -390,48 +406,212 @@ async function loadOne(id){
         ${isOwner ? `<button class="btn secondary" type="button" id="btn-delete">삭제</button>` : ``}
       </div>
     </div>
+
     <h3 style="margin:0 0 6px">${escapeHtml(data.title || "(제목 없음)")}</h3>
     <div class="muted" style="margin-bottom:10px">${escapeHtml(name)} · ${fmtDate(data.created_at)}</div>
     <div style="white-space:pre-wrap;word-break:break-word">${escapeHtml(data.content || "")}</div>
     ${imgHTML}
+
+    <div class="reaction-bar" id="reactBar">
+      <!-- 좋아요/싫어요 버튼이 여기 렌더링됩니다 -->
+    </div>
+
+    <div class="comments" id="commentsBox">
+      <h4 style="margin:16px 0 8px">댓글</h4>
+      <div id="commentList"></div>
+      <form id="commentForm" class="comment-form" hidden>
+        <textarea id="commentText" placeholder="댓글을 입력해 주세요"></textarea>
+        <button class="btn" id="btnComment">등록</button>
+      </form>
+      <div id="commentLoginHint" class="muted">댓글을 쓰려면 로그인하세요.</div>
+    </div>
   `;
 
   applyImgClass(document.getElementById('readImg'));
 
-  // 글쓰기 이동
+  // 상단 버튼
   document.getElementById('btn-to-compose')?.addEventListener('click', async ()=>{
     const { data:{ session } } = await sb.auth.getSession();
     if(!session?.user){
       alert('글쓰기를 하려면 회원가입/로그인이 필요합니다.');
-      if (typeof setTab === 'function') setTab('login');
+      setTab && setTab('login');
       document.getElementById('leftAuth')?.scrollIntoView({behavior:'smooth', block:'start'});
       return;
     }
     history.replaceState(null,'','/reviews.html?compose=1');
-    if (typeof showWrite === 'function') showWrite();
+    showWrite && showWrite();
   });
 
-  // 삭제 (작성자에게만 보임)
   document.getElementById('btn-delete')?.addEventListener('click', async ()=>{
     if(!confirm('정말 삭제할까요? 이 작업은 되돌릴 수 없습니다.')) return;
-    try {
-      // 1) 글 삭제 (RLS: 본인만 가능)
+    try{
       const del = await sb.from('reviews').delete().eq('id', id);
-      if (del.error) throw new Error(del.error.message);
-
-      // 2) 이미지 삭제(있으면). 실패해도 글 삭제는 유지
-      if (data.image_path) {
+      if(del.error) throw new Error(del.error.message);
+      // 이미지 제거(있으면)
+      if(data.image_path){
         const rm = await sb.storage.from('reviews').remove([data.image_path]);
-        if (rm.error) console.warn('이미지 삭제 실패:', rm.error.message);
+        if(rm.error) console.warn('이미지 삭제 실패:', rm.error.message);
       }
-
       alert('삭제되었습니다.');
-      location.href = '/reviews.html';  // 목록으로
-    } catch (err) {
-      alert('삭제 실패: ' + (err.message || err));
+      location.href='/reviews.html';
+    }catch(err){
+      alert('삭제 실패: ' + (err.message||err));
     }
   });
+
+  // 반응 & 댓글 렌더
+  await renderReactions(id);
+  await renderComments(id);
 }
+
+/* ========== 좋아요/싫어요 ========== */
+async function getMyReaction(reviewId){
+  const { data:{ session } } = await sb.auth.getSession();
+  const uid = session?.user?.id;
+  if(!uid) return null;
+  const { data, error } = await sb
+    .from('reactions')
+    .select('kind')
+    .eq('review_id', reviewId)
+    .eq('user_id', uid)
+    .limit(1);
+  if(error) return null;
+  return (data && data[0]) ? data[0].kind : null;
+}
+async function countReaction(reviewId, kind){
+  const { count, error } = await sb
+    .from('reactions')
+    .select('*', { count:'exact', head:true })
+    .eq('review_id', reviewId)
+    .eq('kind', kind);
+  return error ? 0 : (count||0);
+}
+async function toggleReaction(reviewId, kind){
+  const { data:{ session } } = await sb.auth.getSession();
+  if(!session?.user){ alert('로그인이 필요합니다.'); return; }
+  const uid = session.user.id;
+
+  // 현재 내 반응
+  const { data: curRows } = await sb
+    .from('reactions')
+    .select('id, kind')
+    .eq('review_id', reviewId).eq('user_id', uid).limit(1);
+
+  const cur = curRows?.[0] || null;
+
+  if(cur && cur.kind === kind){
+    // 같은 걸 다시 누르면 토글 OFF = 삭제
+    await sb.from('reactions').delete().eq('review_id', reviewId).eq('user_id', uid);
+  }else if(cur && cur.kind !== kind){
+    // 종류 변경
+    await sb.from('reactions').update({ kind }).eq('review_id', reviewId).eq('user_id', uid);
+  }else{
+    // 새로 추가
+    await sb.from('reactions').insert({ review_id: reviewId, user_id: uid, kind });
+  }
+  await renderReactions(reviewId);
+}
+async function renderReactions(reviewId){
+  const bar = document.getElementById('reactBar');
+  if(!bar) return;
+
+  const [likes, dislikes, mine] = await Promise.all([
+    countReaction(reviewId, 'like'),
+    countReaction(reviewId, 'dislike'),
+    getMyReaction(reviewId)
+  ]);
+
+  bar.innerHTML = `
+    <button type="button" class="btn-chip ${mine==='like'?'active':''}" id="btnLike">👍 좋아요 ${likes}</button>
+    <button type="button" class="btn-chip ${mine==='dislike'?'active':''}" id="btnDislike">👎 싫어요 ${dislikes}</button>
+  `;
+
+  document.getElementById('btnLike')?.addEventListener('click', ()=> toggleReaction(reviewId, 'like'));
+  document.getElementById('btnDislike')?.addEventListener('click', ()=> toggleReaction(reviewId, 'dislike'));
+}
+
+/* ========== 댓글 ========== */
+async function renderComments(reviewId){
+  const list = document.getElementById('commentList');
+  const form = document.getElementById('commentForm');
+  const hint = document.getElementById('commentLoginHint');
+  if(!list) return;
+
+  // 목록 로드
+  const { data, error } = await sb
+    .from('comments')
+    .select('id, user_id, nickname, author_email, content, created_at')
+    .eq('review_id', reviewId)
+    .order('created_at', { ascending: true });
+
+  if(error){
+    list.innerHTML = `<div class="muted">댓글 로드 실패: ${escapeHtml(error.message)}</div>`;
+  }else if(!data?.length){
+    list.innerHTML = `<div class="muted">아직 댓글이 없습니다.</div>`;
+  }else{
+    const { data:{ session } } = await sb.auth.getSession();
+    const myId = session?.user?.id || null;
+    list.innerHTML = data.map(c=>{
+      const name = c.nickname || (c.author_email ? c.author_email.split('@')[0] : '익명');
+      const canDel = myId && c.user_id && (myId === c.user_id);
+      return `
+        <div class="comment-item" data-id="${c.id}">
+          <div class="comment-head">
+            <span>${escapeHtml(name)} · ${fmtDate(c.created_at)}</span>
+            ${canDel ? `<button class="btn secondary btn-sm" data-del="${c.id}">삭제</button>` : ``}
+          </div>
+          <div class="comment-body">${escapeHtml(c.content||'')}</div>
+        </div>
+      `;
+    }).join('');
+    // 삭제 위임 핸들러
+    list.querySelectorAll('[data-del]').forEach(btn=>{
+      btn.addEventListener('click', async (e)=>{
+        e.preventDefault();
+        const id = btn.getAttribute('data-del');
+        if(!confirm('댓글을 삭제할까요?')) return;
+        const del = await sb.from('comments').delete().eq('id', id);
+        if(del.error) return alert('삭제 실패: '+del.error.message);
+        await renderComments(reviewId);
+      });
+    });
+  }
+
+  // 작성 폼 표시 제어
+  const { data:{ session } } = await sb.auth.getSession();
+  const loggedIn = !!session?.user;
+  if(form) form.hidden = !loggedIn;
+  if(hint) hint.hidden = loggedIn;
+
+  if(form && !form._bound){
+    form._bound = true;
+    form.addEventListener('submit', async (e)=>{
+      e.preventDefault();
+      const ta = document.getElementById('commentText');
+      const text = (ta?.value||'').trim();
+      if(!text) return;
+
+      const { data:{ session } } = await sb.auth.getSession();
+      if(!session?.user){ alert('로그인이 필요합니다.'); return; }
+
+      const nick = session.user.user_metadata?.full_name
+                || (session.user.email ? session.user.email.split('@')[0] : '익명');
+
+      const ins = await sb.from('comments').insert({
+        review_id: reviewId,
+        user_id: session.user.id,
+        author_email: session.user.email,
+        nickname: nick,
+        content: text
+      });
+      if(ins.error) return alert('등록 실패: '+ins.error.message);
+
+      ta.value = '';
+      await renderComments(reviewId);
+    });
+  }
+}
+
 
 // ====== 글쓰기: 미리보기/저장 ======
 fImage?.addEventListener('change', ()=>{
