@@ -270,8 +270,31 @@ async function refreshAuthUI(){
     loginForm  && loginForm.removeAttribute('hidden');
     signupForm && signupForm.setAttribute('hidden','');
     setTab('login');
+    ensureAuthVisible();
   }
 }
+
+function ensureAuthVisible(){
+  const get = id => document.getElementById(id);
+  const loginForm = get('loginForm');
+  const authTabs  = get('authTabs');
+  const signupForm= get('signupForm');
+
+  if (!loginForm || !authTabs) return;
+
+  // hidden/스타일로 가려져 있으면 강제로 켠다
+  const cs = getComputedStyle(loginForm);
+  const needsShow = loginForm.hidden || cs.display === 'none' || cs.visibility === 'hidden';
+  if (needsShow) {
+    authTabs.hidden = false;
+    loginForm.hidden = false;
+    loginForm.style.display = '';
+    loginForm.style.visibility = '';
+    if (signupForm) { signupForm.hidden = true; }
+    if (typeof setTab === 'function') setTab('login');
+  }
+}
+
 
 // 인증 상태 변화 후크
 sb.auth.onAuthStateChange(()=> refreshAuthUI());
@@ -430,6 +453,8 @@ async function init(){
   // 기본: 목록
   showList();
   await loadList();
+await refreshAuthUI();
+ensureAuthVisible(); 
 }
 
 document.addEventListener('DOMContentLoaded', init);
