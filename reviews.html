@@ -217,7 +217,7 @@
 // ====== 기본 설정 ======
 const SUPABASE_URL  = "https://snxjcbaaysgfunpsohzg.supabase.co";
 const SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNueGpjYmFheXNnZnVucHNvaHpnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY1OTk3MzQsImV4cCI6MjA3MjE3NTczNH0.T8b9PpabXkCvwW2W57Qbr-h--JLZB6errlyP5IwsYyk";
-const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON, {
+const sb = window.supabase.createClient(SUPABASE_URL, field_ANON, {
   auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
 });
 
@@ -237,6 +237,7 @@ const loginEmailField = $('#login-email')?.closest('.field');
 const loginPwField    = $('#login-password')?.closest('.field');
 const btnLogin        = $('#btn-login');
 const btnLogout       = $('#btn-logout');
+const listLoginHint   = $('#listLoginHint'); // 이미 추가하셨다면 유지
 // 목록 하단 안내
 const listLoginHint   = $('#listLoginHint');
 
@@ -281,11 +282,12 @@ async function refreshAuthUI(){
   if(session?.user){
     authStatus && (authStatus.textContent = `로그인: ${session.user.email}`);
     authInfo   && (authInfo.textContent  = `로그인: ${session.user.email}`);
-    needLogin    && (needLogin.hidden = true);
+    needLogin     && (needLogin.hidden = true);
     listLoginHint&& (listLoginHint.hidden = true);
     // 탭은 숨김, 가입 폼 숨김
-    authTabs     && authTabs.setAttribute('hidden','');
-    signupForm   && signupForm.setAttribute('hidden','');
+   authTabs      && authTabs.setAttribute('hidden','');      // 탭 숨김
+   signupForm    && signupForm.setAttribute('hidden','');    // 가입 폼 숨김
+
     // 로그인 폼 컨테이너는 보여두고, 내부 입력/로그인 버튼만 감춤 → 로그아웃 버튼 노출
     if (loginForm) {
       loginForm.hidden = false;
@@ -300,18 +302,15 @@ async function refreshAuthUI(){
     authInfo   && (authInfo.textContent  = '로그아웃 상태');
     needLogin     && (needLogin.hidden = false);
     listLoginHint && (listLoginHint.hidden = false);
-    // 로그인 UI 복원
-    authTabs      && authTabs.removeAttribute('hidden');
-    signupForm    && signupForm.setAttribute('hidden','');
-    if (loginForm) {
-      loginForm.hidden = false;
+    authTabs      && authTabs.removeAttribute('hidden');      // 탭 보이기
+    signupForm    && signupForm.setAttribute('hidden','');    // 가입 폼 숨김 유지
+    if (loginForm) loginForm.hidden = false;
       loginEmailField && (loginEmailField.hidden = false);
       loginPwField    && (loginPwField.hidden = false);
       btnLogin        && (btnLogin.hidden = false);
       btnLogout       && (btnLogout.hidden = true);
-    }
-    setTab('login');
-    ensureAuthVisible();
+     setTab('login');
+     ensureAuthVisible();  
   }
 }
 
