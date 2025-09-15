@@ -195,167 +195,97 @@
 <!-- Supabase SDK -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-(()=>{
-// ===== 설정 =====
-const SUPABASE_URL  = "https://snxjcbaaysgfunpsohzg.supabase.co";
-const SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNueGpjYmFheXNnZnVucHNvaHpnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY1OTk3MzQsImV4cCI6MjA3MjE3NTczNH0.T8b9PpabXkCvwW2W57Qbr-h--JLZB6errlyP5IwsYyk";
-const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+/* ===== Left Auth Panel — canonical single source ===== */
+(() => {
+  const $ = s => document.querySelector(s);
+  const SUPABASE_URL  = "https://snxjcbaaysgfunpsohzg.supabase.co";
+  const SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNueGpjYmFheXNnZnVucHNvaHpnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY1OTk3MzQsImV4cCI6MjA3MjE3NTczNH0.T8b9PpabXkCvwW2W57Qbr-h--JLZB6errlyP5IwsYyk";
+  if (!window.sb && window.supabase) window.sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
 
-// ===== DOM 빠른 참조 & 유틸 =====
-const $ = s => document.querySelector(s);
-const listView = $('#listView'), readView = $('#readView'), writeForm = $('#writeForm');
-const listBody = $('#listBody'), needLogin = $('#needLogin'), authInfo = $('#authInfo');
-const btnCompose = $('#btn-compose'), btnSubmit = $('#btn-submit'), formStatus = $('#formStatus');
-const fTitle = $('#title'), fContent = $('#content'), fImage = $('#image'), preview = $('#preview');
-document.getElementById('year') && (document.getElementById('year').textContent = new Date().getFullYear());
+  // 로그인 바(이메일 + 로그아웃) 없으면 생성
+  (function ensureLoggedBar(){
+    if ($('#loggedBar')) return;
+    const status = $('#authStatus');
+    if (!status) return;
+    const bar = document.createElement('div');
+    bar.id = 'loggedBar';
+    bar.className = 'row';
+    bar.hidden = true;
+    bar.innerHTML = `
+      <span id="loggedEmail" class="status" style="flex:1"></span>
+      <button class="btn secondary" type="button" id="btn-logout">로그아웃</button>`;
+    status.insertAdjacentElement('afterend', bar);
+  })();
 
-const REST_HEADERS = { apikey: SUPABASE_ANON, Authorization: `Bearer ${SUPABASE_ANON}` };
-function escapeHtml(s){return (s??'').replace(/[&<>"']/g,m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m]))}
-function fmtDate(iso){ try{const d=new Date(iso);return d.toLocaleString('ko-KR',{year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'})}catch{return iso||''} }
-function displayName(r){ return r?.nickname || (r?.author_email ? r.author_email.split('@')[0] : '익명'); }
-function applyImgClass(el){ if(!el) return; const set=()=>{ el.classList.remove('landscape','portrait'); (el.naturalWidth>el.naturalHeight?el.classList.add('landscape'):el.classList.add('portrait')); }; (el.complete&&el.naturalWidth)?set():el.addEventListener('load',set,{once:true}); }
+  function setTab(which){
+    $('#tab-login')?.classList.toggle('active', which==='login');
+    $('#tab-signup')?.classList.toggle('active', which==='signup');
+    $('#loginForm') && ($('#loginForm').hidden  = which!=='login');
+    $('#signupForm') && ($('#signupForm').hidden = which!=='signup');
+  }
+  $('#tab-login')?.addEventListener('click', ()=>setTab('login'));
+  $('#tab-signup')?.addEventListener('click', ()=>setTab('signup'));
 
-// ===== 라우팅 표시 =====
-function showList(){ if(listView) listView.hidden=false; if(readView) readView.hidden=true; if(writeForm) writeForm.hidden=true; }
-function showRead(){ if(listView) listView.hidden=true; if(readView) readView.hidden=false; if(writeForm) writeForm.hidden=true; }
-function showWrite(){if(listView) listView.hidden=true; if(readView) readView.hidden=true; if(writeForm) writeForm.hidden=false; }
+  async function refreshAuthUI(){
+    const { data:{ session } } = await sb.auth.getSession();
+    const authInfo   = $('#authInfo');
+    const needLogin  = $('#needLogin');
+    const authTabs   = $('#authTabs');
+    const fLogin     = $('#loginForm');
+    const fSignup    = $('#signupForm');
+    const loggedBar  = $('#loggedBar');
+    const loggedEmail= $('#loggedEmail');
 
-// ===== 인증: 타임아웃 가드(대기 방지) =====
-async function getSessionFast(ms=2500){
-  try{
-    const r = await Promise.race([
-      sb.auth.getSession(),
-      new Promise((_,rej)=>setTimeout(()=>rej(new Error('auth-timeout')), ms))
-    ]);
-    return r?.data?.session || null;
-  }catch{ return null; }
-}
-async function refreshAuthUI(){
-  const ses = await getSessionFast();
-  if(authInfo) authInfo.textContent = ses?.user ? `로그인: ${ses.user.email}` : '로그아웃 상태';
-  if(needLogin) needLogin.hidden = !!ses?.user;
-}
+    if(session?.user){
+      $('#authStatus') && ($('#authStatus').textContent = `로그인: ${session.user.email}`);
+      authInfo && (authInfo.textContent = `로그인: ${session.user.email}`);
+      needLogin && (needLogin.hidden = true);
 
-// ===== 목록: REST로 즉시 로드(대기 없음) =====
-async function loadList(){
-  if(!listBody) return;
-  listBody.innerHTML = `<tr><td colspan="4" class="muted">불러오는 중…</td></tr>`;
-  try{
-    const url = `${SUPABASE_URL}/rest/v1/reviews?select=id,title,content,nickname,author_email,created_at&order=created_at.desc&limit=100`;
-    const r = await fetch(url, { headers: REST_HEADERS });
-    if(!r.ok) throw new Error(`HTTP ${r.status}`);
-    const rows = await r.json();
-    if(!rows.length){
-      listBody.innerHTML = `<tr><td colspan="4" class="muted">등록된 후기가 없습니다.</td></tr>`;
-      return;
+      authTabs && authTabs.setAttribute('hidden','');
+      fLogin && fLogin.setAttribute('hidden','');
+      fSignup && fSignup.setAttribute('hidden','');
+
+      if (loggedBar){
+        loggedBar.hidden = false;
+        loggedEmail && (loggedEmail.textContent = session.user.email);
+      }
+    }else{
+      $('#authStatus') && ($('#authStatus').textContent = '로그아웃 상태');
+      authInfo && (authInfo.textContent = '로그아웃 상태');
+      needLogin && (needLogin.hidden = false);
+
+      authTabs && authTabs.removeAttribute('hidden');
+      fLogin && fLogin.removeAttribute('hidden');
+      fSignup && fSignup.setAttribute('hidden','');
+      $('#loggedBar') && ($('#loggedBar').hidden = true);
+      setTab('login');
     }
-    listBody.innerHTML = rows.map((row, i)=>`
-      <tr data-id="${row.id}" class="row-item" style="cursor:pointer">
-        <td class="cell-no">${i+1}</td>
-        <td class="cell-nick">${escapeHtml(displayName(row))}</td>
-        <td class="cell-body">${escapeHtml((row.title?`[${row.title}] `:'') + (row.content||''))}</td>
-        <td class="cell-time">${fmtDate(row.created_at)}</td>
-      </tr>
-    `).join('');
-    listBody.querySelectorAll('tr.row-item').forEach(tr=>{
-      tr.addEventListener('click',()=> location.href=`/reviews.html?id=${tr.dataset.id}`);
-    });
-  }catch(e){
-    listBody.innerHTML = `<tr><td colspan="4" class="muted">목록 로드 실패: ${escapeHtml(String(e.message||e))}</td></tr>`;
   }
-}
+  window.refreshAuthUI = refreshAuthUI; // 다른 코드가 호출해도 이 버전으로
 
-// ===== 읽기: REST 1건 =====
-async function loadOne(id){
-  if(!readView) return;
-  readView.innerHTML = `<p class="muted">불러오는 중…</p>`;
-  try{
-    const url = `${SUPABASE_URL}/rest/v1/reviews?select=title,content,created_at,nickname,author_email,image_url&id=eq.${encodeURIComponent(id)}&limit=1`;
-    const r = await fetch(url, { headers: REST_HEADERS });
-    if(!r.ok) throw new Error(`HTTP ${r.status}`);
-    const rows = await r.json();
-    const data = rows?.[0];
-    if(!data){ readView.innerHTML = `<p class="muted">데이터가 없습니다.</p>`; return; }
-    const img = data.image_url ? `<img id="readImg" class="image" src="${data.image_url}" alt="">` : '';
-    readView.innerHTML = `
-      <div class="top-actions">
-        <a class="btn secondary" href="/reviews.html">목록보기</a>
-        <button class="btn" type="button" id="btn-to-compose">글쓰기</button>
-      </div>
-      <h3 style="margin:0 0 6px">${escapeHtml(data.title || "(제목 없음)")}</h3>
-      <div class="muted" style="margin-bottom:10px">${escapeHtml(displayName(data))} · ${fmtDate(data.created_at)}</div>
-      <div style="white-space:pre-wrap;word-break:break-word">${escapeHtml(data.content || "")}</div>
-      ${img}
-    `;
-    applyImgClass(document.getElementById('readImg'));
-    document.getElementById('btn-to-compose')?.addEventListener('click', async ()=>{
-      const ses = await getSessionFast();
-      if(!ses){ alert('글쓰기를 하려면 로그인해주세요.'); location.href='/reviews.html'; return; }
-      location.href='/reviews.html?compose=1';
-    });
-  }catch(e){
-    readView.innerHTML = `<p class="muted">불러오기 실패: ${escapeHtml(String(e.message||e))}</p>`;
+  // 로그인/로그아웃
+  $('#btn-login')?.addEventListener('click', async (e)=>{
+    e.preventDefault();
+    const st = $('#loginStatus'); st && (st.textContent='로그인 중…');
+    const email = $('#login-email')?.value?.trim();
+    const pw    = $('#login-password')?.value;
+    const { error } = await sb.auth.signInWithPassword({ email, password: pw });
+    st && (st.textContent = error ? ('로그인 실패: '+error.message) : '로그인 성공');
+    refreshAuthUI();
+  });
+  $('#btn-logout')?.addEventListener('click', async (e)=>{
+    e.preventDefault();
+    await sb.auth.signOut();
+    refreshAuthUI();
+  });
+
+  // 세션 변동 반영 + 최초 1회
+  try { sb.auth.onAuthStateChange(()=> refreshAuthUI()); } catch {}
+  if (document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', refreshAuthUI);
+  } else {
+    refreshAuthUI();
   }
-}
-
-// ===== 쓰기: 미리보기 & 저장 =====
-fImage?.addEventListener('change', ()=>{
-  const f = fImage.files?.[0];
-  if(!f){ preview.hidden=true; return; }
-  preview.src = URL.createObjectURL(f); preview.hidden=false; applyImgClass(preview);
-});
-writeForm?.addEventListener('submit', async (e)=>{
-  e.preventDefault();
-  const ses = await getSessionFast();
-  if(!ses){ alert('로그인이 필요합니다.'); return; }
-  const title = fTitle.value.trim(), content = fContent.value.trim();
-  if(!content){ formStatus.textContent='내용을 입력하세요.'; return; }
-  btnSubmit.disabled=true; btnSubmit.textContent='저장 중…';
-  try{
-    let image_path=null, image_url=null;
-    const file0 = fImage.files?.[0]||null;
-    if(file0){
-      const ext=(file0.name.split('.').pop()||'jpg').toLowerCase();
-      const safe=["jpg","jpeg","png","webp","gif"].includes(ext)?ext:"jpg";
-      const key=`${ses.user.id}/${Date.now()}_${Math.random().toString(36).slice(2)}.${safe}`;
-      const up=await sb.storage.from('reviews').upload(key,file0,{upsert:false,cacheControl:'3600'});
-      if(up.error) throw new Error('이미지 업로드 실패: '+up.error.message);
-      image_path=key; image_url=sb.storage.from('reviews').getPublicUrl(key).data.publicUrl;
-    }
-    const nickname = (ses.user.user_metadata?.full_name) || (ses.user.email?.split('@')[0]) || '익명';
-    const ins=await sb.from('reviews').insert({
-      title, content, user_id:ses.user.id, author_email:ses.user.email, nickname, image_path, image_url
-    }).select('id').single();
-    if(ins.error) throw new Error(ins.error.message);
-    location.href='/reviews.html'; // 저장 후 목록으로
-  }catch(err){
-    formStatus.textContent=String(err.message||err);
-    btnSubmit.disabled=false; btnSubmit.textContent='저장';
-  }
-});
-
-// ===== “글쓰기” 버튼: 로그인 확인 후 이동 =====
-btnCompose?.addEventListener('click', async ()=>{
-  const ses = await getSessionFast();
-  if(!ses){ alert('글쓰기를 하려면 로그인해주세요.'); return; }
-  location.href='/reviews.html?compose=1';
-});
-
-// ===== 초기 진입 =====
-(async function init(){
-  await refreshAuthUI();       // UI 문구만 갱신(대기 제한)
-  const q = new URLSearchParams(location.search);
-  const id = q.get('id');
-  const compose = q.get('compose');
-
-  if(id){ showRead(); await loadOne(id); return; }
-  if(compose==='1'){
-    const ses = await getSessionFast();
-    if(!ses){ alert('로그인이 필요합니다.'); location.replace('/reviews.html'); return; }
-    showWrite(); return;
-  }
-  showList(); loadList();      // 목록은 즉시 REST로 로드(대기 없음)
-})();
 })();
 </script>
 
