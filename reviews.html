@@ -411,23 +411,7 @@ writeForm?.addEventListener('submit', async (e)=>{
   showList(); await loadList();
 })();
 </script>
-<script>
-/* LOGO HOTFIX – 기존 bumpLogo가 있더라도 덮어쓰기 */
-(function(){
-  function setLogo(){
-    const el = document.querySelector('.logo-img');
-    if(!el) return;
-    const v = Date.now().toString().slice(-6);
-    el.src = '/images/mm_logo_small.jpg?v='+v;  // 오직 small만
-    el.onerror = null; // 더 이상 mm_logo2.jpg로 폴백하지 않음
-  }
-  window.bumpLogo = setLogo; // 이전 정의(폴백 포함)를 덮어씀
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', setLogo);
-  } else {
-    setLogo();
-  }
-})();
+
 </script>
 <!-- READ VIEW HOTFIX: paste just before </body> -->
 <script>
