@@ -221,6 +221,12 @@ const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON, {
   auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
 });
 
+if (!window.supabase || !window.supabase.createClient) {
+  const msg = '오프라인이거나 SDK 로드 실패';
+  document.querySelector('#authStatus')?.append(' · ', msg);
+  document.querySelector('#authInfo')?.append(' · ', msg);
+}
+
 // ====== DOM refs ======
 const $ = s => document.querySelector(s);
 const authInfo  = $('#authInfo');
@@ -272,11 +278,8 @@ $('#tab-signup')?.addEventListener('click', ()=>setTab('signup'));
 
 // ====== 인증 UI 갱신(타임아웃 폴백 포함) ======
 async function refreshAuthUI(){
-  // 2초 안에 응답 없으면 폴백으로 '로그아웃 상태'
-  const res = await Promise.race([
-    sb.auth.getSession(),
-    new Promise(resolve=> setTimeout(()=>resolve({data:{session:null}}), 2000))
-  ]);
+  
+  const res = await safeGetSession(2000);
   const session = res?.data?.session ?? null;
 
   if(session?.user){
@@ -689,6 +692,18 @@ writeForm?.addEventListener('submit', async (e)=>{
 // ====== 진입 라우팅 ======
 async function init(){
   await refreshAuthUI();   // 먼저 인증 상태 반영
+  // 2.5초 후에도 여전히 '확인 중'이면 게스트 UI로 강제 전환
+  setTimeout(() => {
+    const waitingLeft = authStatus?.textContent?.includes('확인 중');
+    if (waitingLeft) {
+      authStatus && (authStatus.textContent = '로그아웃 상태');
+      authInfo   && (authInfo.textContent  = '로그아웃 상태');
+      authTabs   && authTabs.removeAttribute('hidden');
+      loginForm  && (loginForm.hidden = false);
+      signupForm && (signupForm.hidden = true);
+      try { setTab && setTab('login'); } catch {}
+    }
+  }, 2500);
   const q = new URLSearchParams(location.search);
   const id = q.get('id');
   const compose = q.get('compose');
@@ -706,6 +721,18 @@ async function init(){
 await refreshAuthUI();
 ensureAuthVisible(); 
 }
+
+async function safeGetSession(timeoutMs = 2000) {
+  try {
+    return await Promise.race([
+      sb.auth.getSession().catch(() => ({ data: { session: null } })),
+      new Promise(res => setTimeout(() => res({ data: { session: null } }), timeoutMs))
+    ]);
+  } catch {
+    return { data: { session: null } };
+  }
+}
+
 
 document.addEventListener('DOMContentLoaded', init);
 document.addEventListener('click', (e) => {
