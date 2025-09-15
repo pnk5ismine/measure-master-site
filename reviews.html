@@ -5,8 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Measure Master — 사용자 후기</title>
   <meta name="description" content="Measure Master 사용자 후기 작성/목록/읽기" />
-  <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-  <style>
+   <style>
     :root { --bg:#0b0d12; --border:#e5e7eb; --muted:#666; --text:#111; --pri:#111; }
     *{box-sizing:border-box}
     body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,'Noto Sans KR',sans-serif;background:#0b0d12;color:#e7edf5;min-height:100vh;display:flex;flex-direction:column}
@@ -69,8 +68,7 @@
 <body>
 <header>
   <div class="brand">
-<img src="/images/mm_logo_small.jpg?v=logo7" alt="Measure Master" class="logo-img"
-     onerror="this.onerror=null;this.src='/images/mm_logo2.jpg?v=logo7';">
+<img src="/images/mm_logo_small.jpg?v=logo10" alt="Measure Master" class="logo-img" />
 
     <strong>Measure Master</strong>
     <span style="margin-left:8px;opacity:.8">사용자 후기</span>
@@ -420,6 +418,24 @@ writeForm?.addEventListener('submit', async (e)=>{
   }
   if(id){ showRead(); await loadOne(id); return; }
   showList(); await loadList();
+})();
+</script>
+<script>
+/* LOGO HOTFIX – 기존 bumpLogo가 있더라도 덮어쓰기 */
+(function(){
+  function setLogo(){
+    const el = document.querySelector('.logo-img');
+    if(!el) return;
+    const v = Date.now().toString().slice(-6);
+    el.src = '/images/mm_logo_small.jpg?v='+v;  // 오직 small만
+    el.onerror = null; // 더 이상 mm_logo2.jpg로 폴백하지 않음
+  }
+  window.bumpLogo = setLogo; // 이전 정의(폴백 포함)를 덮어씀
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', setLogo);
+  } else {
+    setLogo();
+  }
 })();
 </script>
 
