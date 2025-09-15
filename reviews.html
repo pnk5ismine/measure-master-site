@@ -68,7 +68,7 @@
 <body>
 <header>
   <div class="brand">
-<img src="/images/mm_logo_small.png?v=logo11" alt="Measure Master" class="logo-img" />
+<img src="/images/mm_logo_small.png?v=logo12" alt="Measure Master" class="logo-img" />
 
     <strong>Measure Master</strong>
     <span style="margin-left:8px;opacity:.8">사용자 후기</span>
@@ -427,6 +427,67 @@ writeForm?.addEventListener('submit', async (e)=>{
   } else {
     setLogo();
   }
+})();
+</script>
+<!-- READ VIEW HOTFIX: paste just before </body> -->
+<script>
+(function(){
+  // 1) Supabase 클라이언트 확보
+  const sb = window.sb || (window.supabase && window.supabase.createClient?.(
+    "https://snxjcbaaysgfunpsohzg.supabase.co",
+    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNueGpjYmFheXNnZnVucHNvaHpnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY1OTk3MzQsImV4cCI6MjA3MjE3NTczNH0.T8b9PpabXkCvwW2W57Qbr-h--JLZB6errlyP5IwsYyk"
+  ));
+  if(!sb){ console.error("Supabase not ready"); return; }
+
+  // 2) 뷰 토글(중복 안전)
+  const listView = document.getElementById('listView');
+  const readView = document.getElementById('readView');
+  const writeForm= document.getElementById('writeForm');
+  const showList = ()=>{ if(listView) listView.hidden=false; if(readView) readView.hidden=true;  if(writeForm) writeForm.hidden=true;  };
+  const showRead = ()=>{ if(listView) listView.hidden=true;  if(readView) readView.hidden=false; if(writeForm) writeForm.hidden=true; };
+
+  // 3) 안전한 단건 로더(기존 loadOne과 무관하게 동작)
+  function esc(s){return (s??'').replace(/[&<>"']/g,m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m]))}
+  async function loadOneSafe(id){
+    if(!readView) return;
+    readView.innerHTML = '<p class="muted">불러오는 중…</p>';
+    try{
+      const { data, error } = await sb.from('reviews')
+        .select('title, content, created_at, nickname, author_email, image_url')
+        .eq('id', id).single();
+      if(error) throw error;
+
+      const name = data.nickname || (data.author_email ? data.author_email.split('@')[0] : '익명');
+      const img  = data.image_url ? `<img id="readImg" class="image" src="${data.image_url}" alt="">` : '';
+      readView.innerHTML = `
+        <div class="top-actions">
+          <a class="btn secondary" href="/reviews.html">목록보기</a>
+          <button class="btn" type="button" id="btn-to-compose">글쓰기</button>
+        </div>
+        <h3 style="margin:0 0 6px">${esc(data.title||'(제목 없음)')}</h3>
+        <div class="muted" style="margin-bottom:10px">${esc(name)} · ${new Date(data.created_at).toLocaleString('ko-KR')}</div>
+        <div style="white-space:pre-wrap;word-break:break-word">${esc(data.content||'')}</div>
+        ${img}
+      `;
+      const ri=document.getElementById('readImg');
+      if(ri){
+        const set=()=>{ri.classList.remove('landscape','portrait'); (ri.naturalWidth>ri.naturalHeight?ri.classList.add('landscape'):ri.classList.add('portrait'));};
+        ri.complete?set():ri.addEventListener('load',set,{once:true});
+      }
+      document.getElementById('btn-to-compose')?.addEventListener('click', async ()=>{
+        const { data:{ session } } = await sb.auth.getSession();
+        if(!session?.user){ alert('글쓰기를 하려면 회원가입/로그인이 필요합니다.'); document.getElementById('tab-login')?.click(); document.getElementById('leftAuth')?.scrollIntoView({behavior:'smooth'}); return; }
+        location.href='/reviews.html?compose=1';
+      });
+    }catch(err){
+      readView.innerHTML = `<p class="muted">불러오기 실패: ${esc(err.message||err)}</p>`;
+    }
+  }
+
+  // 4) 쿼리 라우팅(인증 대기 없이 바로 처리)
+  const q = new URLSearchParams(location.search);
+  const id = q.get('id');
+  if(id){ showRead(); loadOneSafe(id); }
 })();
 </script>
 
