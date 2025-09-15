@@ -1,0 +1,293 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Measure Master — 사용자 후기</title>
+  <meta name="description" content="Measure Master 사용자 후기 작성/목록/읽기" />
+   <style>
+    :root { --bg:#0b0d12; --border:#e5e7eb; --muted:#666; --text:#111; --pri:#111; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,'Noto Sans KR',sans-serif;background:#0b0d12;color:#e7edf5;min-height:100vh;display:flex;flex-direction:column}
+    header,main,footer{max-width:1100px;margin:0 auto;padding:16px}
+    header{display:flex;align-items:center;justify-content:space-between;gap:12px}
+    .brand{display:flex;align-items:center;gap:10px}
+    .logo-img{width:28px;height:28px;border-radius:6px;object-fit:contain;background:#0e1422}
+    nav a{margin-left:16px;color:#cfd6e4;text-decoration:none}
+    nav a:hover{text-decoration:underline}
+    footer{margin:30px auto 60px;text-align:center;color:#9aa4b2;font-size:14px}
+    main{flex:1}
+
+    /* 좌/우 레이아웃 */
+    .layout{display:grid;grid-template-columns:1fr;gap:18px;align-items:stretch;min-height:80vh}
+    @media (min-width:1024px){ .layout{grid-template-columns:1fr 3fr} }
+
+    /* 카드(화이트) */
+    .card{background:#fff;color:var(--text);border:1px solid var(--border);border-radius:16px;padding:18px;box-shadow:0 1px 2px rgba(0,0,0,.06);display:flex;flex-direction:column;min-height:80vh}
+    h1{margin:0 0 8px;font-size:20px}
+    .muted{color:var(--muted)}
+    .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+    .field{display:flex;flex-direction:column;gap:6px;margin:12px 0}
+    input[type="text"], input[type="email"], input[type="password"], textarea{
+      width:100%;padding:10px 12px;border-radius:12px;border:1px solid var(--border);background:#fff;color:#111
+    }
+    textarea{min-height:180px;resize:vertical}
+    input[type="file"]{display:block}
+    .btn{padding:10px 14px;border-radius:10px;border:1px solid var(--pri);background:var(--pri);color:#fff;cursor:pointer}
+    .btn.secondary{background:#f9fafb;color:#111;border:1px solid var(--border)}
+    .status{font-size:12px;color:var(--muted);margin-top:4px}
+
+    /* 좌측 배너(여백 채우기) */
+    #leftAuth .banner-flex{flex:1;border:1px dashed var(--border);border-radius:12px;background:#fff;margin-top:16px}
+
+    /* 목록 테이블 */
+    .table{width:100%;border-collapse:collapse}
+    .table th,.table td{border-bottom:1px solid #e5e7eb;padding:10px 8px;vertical-align:top}
+    .table th{font-weight:600;color:#222;text-align:left}
+    .table tr:hover{background:#fafafa}
+    .cell-no{width:56px;color:#666}
+    .cell-nick{width:160px}
+    .cell-time{width:180px;color:#666;text-align:right}
+    .cell-body{white-space:pre-wrap;word-break:break-word}
+
+    /* 목록 하단 마감선 + 우측 "글쓰기" 버튼 */
+    .list-footer{border-top:1px solid #e5e7eb;padding-top:10px;display:flex;justify-content:flex-end}
+
+    /* 읽기뷰 상단 액션바 */
+    .top-actions{border-bottom:1px solid #e5e7eb;padding-bottom:10px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;gap:8px;}
+
+    /* 폼 하단 액션바: 우측 정렬(저장만) */
+    .form-actions{border-top:1px solid #e5e7eb;margin-top:12px;padding-top:10px;display:flex;justify-content:flex-end;align-items:center;gap:8px}
+
+    /* 이미지 규칙: 가로 70% / 세로 30% */
+    .image,.thumb{display:block;height:auto;margin:10px auto}
+    .image.landscape,.thumb.landscape{width:70%;max-width:70%}
+    .image.portrait,.thumb.portrait{width:30%;max-width:30%}
+  </style>
+</head>
+<body>
+<header>
+  <div class="brand">
+<img src="/images/mm_logo_small.png?v=logo12" alt="Measure Master" class="logo-img" />
+
+    <strong>Measure Master</strong>
+    <span style="margin-left:8px;opacity:.8">사용자 후기</span>
+  </div>
+  <nav>
+    <a href="/">홈</a>
+    <a href="/howtouse.html">사용법</a>
+    <a href="/reviews.html">사용후기</a>
+  </nav>
+</header>
+
+<main>
+  <div class="layout">
+    <!-- 좌: 로그인/가입 -->
+    <section class="card" id="leftAuth">
+      <h2 class="section-title">로그인 · 회원가입</h2>
+      <div id="authStatus" class="status">로그인 상태 확인 중…</div>
+<div id="loggedBar" class="row" hidden>
+  <span id="loggedEmail" class="status" style="flex:1"></span>
+  <button class="btn secondary" type="button" id="btn-logout-main">로그아웃</button>
+</div>
+      <div id="authTabs" class="tabbar" hidden>
+        <button type="button" id="tab-login" class="active">로그인</button>
+        <button type="button" id="tab-signup">가입</button>
+      </div>
+
+      <!-- 로그인 -->
+      <form id="loginForm" hidden>
+        <div class="field">
+          <label for="login-email">이메일</label>
+          <input id="login-email" type="email" placeholder="you@example.com" required>
+        </div>
+        <div class="field">
+          <label for="login-password">비밀번호</label>
+          <input id="login-password" type="password" placeholder="8자 이상" required minlength="8">
+        </div>
+<div class="row">
+  <button class="btn" id="btn-login">로그인</button>
+</div>
+        <div id="loginStatus" class="status"></div>
+      </form>
+
+      <!-- 가입 -->
+      <form id="signupForm" hidden>
+        <div class="field">
+          <label for="signup-email">이메일</label>
+          <input id="signup-email" type="email" placeholder="you@example.com" required>
+        </div>
+        <div class="field">
+          <label for="signup-password">비밀번호</label>
+          <input id="signup-password" type="password" placeholder="8자 이상" required minlength="8">
+        </div>
+        <div class="field">
+          <label for="signup-password2">비밀번호 확인</label>
+          <input id="signup-password2" type="password" placeholder="다시 입력" required minlength="8">
+        </div>
+        <div class="row"><button class="btn" id="btn-signup">가입</button></div>
+        <div id="signupStatus" class="status"></div>
+      </form>
+
+      <div class="banner-flex"></div>
+    </section>
+
+    <!-- 우: 목록/읽기/쓰기 -->
+    <section class="card" id="rightCard">
+      <h1>사용자 후기</h1>
+      <p class="muted" id="authInfo">로그인 상태 확인 중…</p>
+
+      <!-- 📄 목록 -->
+      <div id="listView" hidden>
+        <table class="table">
+          <thead>
+            <tr>
+              <th class="cell-no">번호</th>
+              <th class="cell-nick">닉네임</th>
+              <th>내용</th>
+              <th class="cell-time">작성시각</th>
+            </tr>
+          </thead>
+          <tbody id="listBody"></tbody>
+        </table>
+        <div class="list-footer">
+          <button class="btn" id="btn-compose">글쓰기</button>
+        </div>
+      </div>
+
+      <!-- 📖 읽기 -->
+      <article id="readView" hidden></article>
+
+      <!-- ✍️ 쓰기 -->
+      <form id="writeForm" hidden>
+        <div class="field">
+          <label for="title">제목</label>
+          <input id="title" type="text" placeholder="제목을 입력하세요" required>
+        </div>
+        <div class="field">
+          <label for="content">내용</label>
+          <textarea id="content" placeholder="자유롭게 작성해 주세요" required></textarea>
+        </div>
+        <div class="field">
+          <label for="image">이미지(선택)</label>
+          <input id="image" type="file" accept="image/*">
+          <img id="preview" class="thumb" alt="" hidden>
+          <div class="status">큰 이미지는 업로드 전에 자동 축소(가로 최대 1600px).</div>
+        </div>
+        <div class="form-actions">
+          <span id="formStatus" class="status" style="margin-right:8px"></span>
+          <button class="btn" id="btn-submit">저장</button>
+        </div>
+      </form>
+
+      <!-- 비로그인 안내 -->
+      <div id="needLogin" class="muted" hidden>
+        글쓰기를 하려면 회원가입/로그인이 필요합니다.
+      </div>
+    </section>
+  </div>
+</main>
+
+<footer>
+  © <span id="year"></span> Measure Master. All rights reserved.
+</footer>
+
+<!-- Supabase SDK -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+/* ===== Left Auth Panel — canonical single source ===== */
+(() => {
+  const $ = s => document.querySelector(s);
+  const SUPABASE_URL  = "https://snxjcbaaysgfunpsohzg.supabase.co";
+  const SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNueGpjYmFheXNnZnVucHNvaHpnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY1OTk3MzQsImV4cCI6MjA3MjE3NTczNH0.T8b9PpabXkCvwW2W57Qbr-h--JLZB6errlyP5IwsYyk";
+  if (!window.sb && window.supabase) window.sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+
+  // 로그인 바(이메일 + 로그아웃) 없으면 생성
+  (function ensureLoggedBar(){
+    if ($('#loggedBar')) return;
+    const status = $('#authStatus');
+    if (!status) return;
+    const bar = document.createElement('div');
+    bar.id = 'loggedBar';
+    bar.className = 'row';
+    bar.hidden = true;
+    bar.innerHTML = `
+      <span id="loggedEmail" class="status" style="flex:1"></span>
+      <button class="btn secondary" type="button" id="btn-logout">로그아웃</button>`;
+    status.insertAdjacentElement('afterend', bar);
+  })();
+
+  function setTab(which){
+    $('#tab-login')?.classList.toggle('active', which==='login');
+    $('#tab-signup')?.classList.toggle('active', which==='signup');
+    $('#loginForm') && ($('#loginForm').hidden  = which!=='login');
+    $('#signupForm') && ($('#signupForm').hidden = which!=='signup');
+  }
+  $('#tab-login')?.addEventListener('click', ()=>setTab('login'));
+  $('#tab-signup')?.addEventListener('click', ()=>setTab('signup'));
+
+  async function refreshAuthUI(){
+    const { data:{ session } } = await sb.auth.getSession();
+    const authInfo   = $('#authInfo');
+    const needLogin  = $('#needLogin');
+    const authTabs   = $('#authTabs');
+    const fLogin     = $('#loginForm');
+    const fSignup    = $('#signupForm');
+    const loggedBar  = $('#loggedBar');
+    const loggedEmail= $('#loggedEmail');
+
+    if(session?.user){
+      $('#authStatus') && ($('#authStatus').textContent = `로그인: ${session.user.email}`);
+      authInfo && (authInfo.textContent = `로그인: ${session.user.email}`);
+      needLogin && (needLogin.hidden = true);
+
+      authTabs && authTabs.setAttribute('hidden','');
+      fLogin && fLogin.setAttribute('hidden','');
+      fSignup && fSignup.setAttribute('hidden','');
+
+      if (loggedBar){
+        loggedBar.hidden = false;
+        loggedEmail && (loggedEmail.textContent = session.user.email);
+      }
+    }else{
+      $('#authStatus') && ($('#authStatus').textContent = '로그아웃 상태');
+      authInfo && (authInfo.textContent = '로그아웃 상태');
+      needLogin && (needLogin.hidden = false);
+
+      authTabs && authTabs.removeAttribute('hidden');
+      fLogin && fLogin.removeAttribute('hidden');
+      fSignup && fSignup.setAttribute('hidden','');
+      $('#loggedBar') && ($('#loggedBar').hidden = true);
+      setTab('login');
+    }
+  }
+  window.refreshAuthUI = refreshAuthUI; // 다른 코드가 호출해도 이 버전으로
+
+  // 로그인/로그아웃
+  $('#btn-login')?.addEventListener('click', async (e)=>{
+    e.preventDefault();
+    const st = $('#loginStatus'); st && (st.textContent='로그인 중…');
+    const email = $('#login-email')?.value?.trim();
+    const pw    = $('#login-password')?.value;
+    const { error } = await sb.auth.signInWithPassword({ email, password: pw });
+    st && (st.textContent = error ? ('로그인 실패: '+error.message) : '로그인 성공');
+    refreshAuthUI();
+  });
+  $('#btn-logout')?.addEventListener('click', async (e)=>{
+    e.preventDefault();
+    await sb.auth.signOut();
+    refreshAuthUI();
+  });
+
+  // 세션 변동 반영 + 최초 1회
+  try { sb.auth.onAuthStateChange(()=> refreshAuthUI()); } catch {}
+  if (document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', refreshAuthUI);
+  } else {
+    refreshAuthUI();
+  }
+})();
+</script>
+
+</body>
+</html>
