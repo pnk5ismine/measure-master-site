@@ -396,15 +396,6 @@ writeForm?.addEventListener('submit', async (e)=>{
   }
 });
 
-// ====== 로고 캐시 파괴(즉시 갱신) ======
-(function bumpLogo(){
-  const lg = document.querySelector('.logo-img');
-  if(!lg) return;
-  const u = new URL(lg.src, location.origin);
-  u.searchParams.set('v', Date.now().toString().slice(-6));
-  lg.src = u.pathname + '?' + u.searchParams.toString();
-})();
-
 // ====== 초기 진입 ======
 (async function init(){
   await refreshAuthUI();
