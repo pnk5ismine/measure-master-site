@@ -165,7 +165,7 @@
         <div class="list-footer">
           <a class="btn" id="btn-compose" href="/reviews.html?compose=1">글쓰기</a>
         </div>
-        <p class="muted" style="margin-top:8px">글쓰기를 하려면 회원가입/로그인이 필요합니다.</p>
+        <p class="muted" id="listLoginHint" style="margin-top:8px">글쓰기를 하려면 회원가입/로그인이 필요합니다.</p>
       </div>
 
       <!-- 읽기 -->
@@ -217,7 +217,9 @@
 // ====== 기본 설정 ======
 const SUPABASE_URL  = "https://snxjcbaaysgfunpsohzg.supabase.co";
 const SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNueGpjYmFheXNnZnVucHNvaHpnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY1OTk3MzQsImV4cCI6MjA3MjE3NTczNH0.T8b9PpabXkCvwW2W57Qbr-h--JLZB6errlyP5IwsYyk";
-const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
+const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON, {
+  auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
+});
 
 // ====== DOM refs ======
 const $ = s => document.querySelector(s);
@@ -230,6 +232,13 @@ const loginForm    = $('#loginForm');
 const signupForm   = $('#signupForm');
 const loginStatus  = $('#loginStatus');
 const signupStatus = $('#signupStatus');
+// 로그인 폼 내부 요소 (로그인 상태에선 필드/로그인 버튼 숨기고, 로그아웃만 노출)
+const loginEmailField = $('#login-email')?.closest('.field');
+const loginPwField    = $('#login-password')?.closest('.field');
+const btnLogin        = $('#btn-login');
+const btnLogout       = $('#btn-logout');
+// 목록 하단 안내
+const listLoginHint   = $('#listLoginHint');
 
 const listView  = $('#listView');
 const readView  = $('#readView');
@@ -272,17 +281,35 @@ async function refreshAuthUI(){
   if(session?.user){
     authStatus && (authStatus.textContent = `로그인: ${session.user.email}`);
     authInfo   && (authInfo.textContent  = `로그인: ${session.user.email}`);
-    needLogin  && (needLogin.hidden = true);
-    authTabs   && authTabs.setAttribute('hidden','');
-    loginForm  && loginForm.setAttribute('hidden','');
-    signupForm && signupForm.setAttribute('hidden','');
+    needLogin    && (needLogin.hidden = true);
+    listLoginHint&& (listLoginHint.hidden = true);
+    // 탭은 숨김, 가입 폼 숨김
+    authTabs     && authTabs.setAttribute('hidden','');
+    signupForm   && signupForm.setAttribute('hidden','');
+    // 로그인 폼 컨테이너는 보여두고, 내부 입력/로그인 버튼만 감춤 → 로그아웃 버튼 노출
+    if (loginForm) {
+      loginForm.hidden = false;
+      loginEmailField && (loginEmailField.hidden = true);
+      loginPwField    && (loginPwField.hidden = true);
+      btnLogin        && (btnLogin.hidden = true);
+      btnLogout       && (btnLogout.hidden = false);
+    }
+
   }else{
     authStatus && (authStatus.textContent = '로그아웃 상태');
     authInfo   && (authInfo.textContent  = '로그아웃 상태');
-    needLogin  && (needLogin.hidden = false);
-    authTabs   && authTabs.removeAttribute('hidden');
-    loginForm  && loginForm.removeAttribute('hidden');
-    signupForm && signupForm.setAttribute('hidden','');
+    needLogin     && (needLogin.hidden = false);
+    listLoginHint && (listLoginHint.hidden = false);
+    // 로그인 UI 복원
+    authTabs      && authTabs.removeAttribute('hidden');
+    signupForm    && signupForm.setAttribute('hidden','');
+    if (loginForm) {
+      loginForm.hidden = false;
+      loginEmailField && (loginEmailField.hidden = false);
+      loginPwField    && (loginPwField.hidden = false);
+      btnLogin        && (btnLogin.hidden = false);
+      btnLogout       && (btnLogout.hidden = true);
+    }
     setTab('login');
     ensureAuthVisible();
   }
@@ -445,6 +472,8 @@ async function loadOne(id){
   document.getElementById('btn-delete')?.addEventListener('click', async ()=>{
     if(!confirm('정말 삭제할까요? 이 작업은 되돌릴 수 없습니다.')) return;
     try{
+      // (임시) 댓글 먼저 정리 → FK 제약/캐스케이드 미설정 환경에서도 삭제되도록
+      await sb.from('comments').delete().eq('review_id', id);
       const del = await sb.from('reviews').delete().eq('id', id);
       if(del.error) throw new Error(del.error.message);
       // 이미지 제거(있으면)
