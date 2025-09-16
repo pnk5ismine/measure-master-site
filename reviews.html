@@ -127,6 +127,15 @@
     /* 읽기 화면의 갤러리 이미지 폭은 셀 너비에 맞추되 중앙 정렬 */
     .gallery img{width:100%}
 
+    /* 썸네일 그리드(가운데 정렬, 모두 나열) */
+    .thumbs{display:flex;flex-wrap:wrap;justify-content:center;gap:12px}
+    .thumb-card{flex:0 1 20%;max-width:20%;display:flex;justify-content:center}
+    .thumb-img{width:100%;height:auto;display:block;border-radius:10px}
+    /* 모바일에서 너무 작지 않게 */
+    @media (max-width:768px){
+      .thumb-card{flex-basis:45%;max-width:45%}
+    }
+
 /* 반응바 */
 .reaction-bar{display:flex;gap:8px;align-items:center;margin:12px 0}
 .reaction-bar .btn-chip{padding:6px 10px;border:1px solid #e5e7eb;border-radius:999px;background:#f9fafb;color:#111;cursor:pointer}
@@ -521,10 +530,11 @@ async function renderEditImagesForEditMode(reviewId, fallbackUrl, fallbackPath){
     return;
   }
 
+  // 썸네일 카드 + 삭제 체크박스
   editImages.innerHTML = rows.map(r => `
-    <div class="imgSlot">
-      <img src="${r.url}" alt="" />
-      <label>
+    <div class="thumb-card">
+      <img class="thumb-img" src="${r.url}" alt="">
+      <label style="font-size:13px;color:#444;margin-top:6px">
         <input type="checkbox"
           data-del="img"
           data-imgid="${r.id ?? ''}"
@@ -535,6 +545,7 @@ async function renderEditImagesForEditMode(reviewId, fallbackUrl, fallbackPath){
     </div>
   `).join('');
 }
+
 
 
   // 세션 & 소유자 여부
@@ -607,7 +618,8 @@ async function renderEditImagesForEditMode(reviewId, fallbackUrl, fallbackPath){
         path: data.image_path || null
       };
     }
-   // 컨테이너 보이기 & 썸네일 렌더
+
+   // 편집 썸네일 표시
    const editBox = document.getElementById('editImages');
    if (editBox) editBox.hidden = false;
    renderEditImagesForEditMode(id, data.image_url, data.image_path);
@@ -807,12 +819,16 @@ fImage?.addEventListener('change', ()=>{
   if (preview){ preview.hidden = true; preview.removeAttribute('src'); }
   if (!previews) return;
   previews.innerHTML = '';
-  useFiles.forEach(f=>{
-    const url = URL.createObjectURL(f);
-    const img = document.createElement('img');
-    img.src = url;
-    previews.appendChild(img);
-  });
+   useFiles.forEach(f=>{
+     const url = URL.createObjectURL(f);
+     const wrap = document.createElement('div');
+     wrap.className = 'thumb-card';
+     const img = document.createElement('img');
+     img.className = 'thumb-img';
+     img.src = url;
+     wrap.appendChild(img);
+     previews.appendChild(wrap);
+ });
 });
 
 writeForm?.addEventListener('submit', async (e)=>{
@@ -1014,56 +1030,46 @@ async function renderGalleryLightbox(reviewId, fallbackUrl){
   const btnClose= lb?.querySelector('.lb-close');
   if(!box) return;
 
-  // 1) 이미지 목록 가져오기
+  // 1) 모든 이미지 URL 수집 (review_images → 없으면 legacy image_url 1장)
   let urls = [];
   try{
     const { data, error } = await sb
       .from('review_images')
-      .select('url, created_at')
+      .select('url')
       .eq('review_id', reviewId)
       .order('created_at', { ascending:true });
     if(!error && data?.length) urls = data.map(r=>r.url);
   }catch{}
   if(!urls.length && fallbackUrl) urls = [fallbackUrl];
 
-  // 2) 썸네일 렌더
-  box.innerHTML = '';
-  urls.forEach((u, i)=>{
-    const img = document.createElement('img');
-    img.src = u;
-    img.alt = '';
-    img.addEventListener('click', ()=> openAt(i));
-    box.appendChild(img);
-  });
+  // 2) 썸네일(모두 나열, 중앙 정렬). 썸네일은 `.thumb-img` 클래스를 사용!
+  box.innerHTML = urls.map((u,i)=>`
+    <div class="thumb-card">
+      <img class="thumb-img" src="${u}" alt="" data-idx="${i}">
+    </div>
+  `).join('');
 
-  // 3) 라이트박스 동작
+  // 3) 라이트박스(있을 때만)
+  if (!lb || !lbImg) return; // 라이트박스 안 쓰시면 이 라인만 남겨도 OK
+
   let cur = 0;
-  function openAt(i){
-    cur = i;
-    if(lb && lbImg){
-      lbImg.src = urls[cur];
-      lb.hidden = false;
-      document.body.style.overflow = 'hidden';
-    }
-  }
-  function close(){
-    if(lb){
-      lb.hidden = true;
-      document.body.style.overflow = '';
-    }
-  }
-  function prev(){ cur = (cur - 1 + urls.length) % urls.length; lbImg.src = urls[cur]; }
-  function next(){ cur = (cur + 1) % urls.length; lbImg.src = urls[cur]; }
+  function openAt(i){ cur=i; lbImg.src=urls[cur]; lb.hidden=false; document.body.style.overflow='hidden'; }
+  function close(){ lb.hidden=true; document.body.style.overflow=''; }
+  function prev(){ cur=(cur-1+urls.length)%urls.length; lbImg.src=urls[cur]; }
+  function next(){ cur=(cur+1)%urls.length; lbImg.src=urls[cur]; }
 
-  btnClose?.addEventListener('click', close);
+  box.querySelectorAll('img.thumb-img').forEach(img=>{
+    img.addEventListener('click', ()=> openAt(Number(img.dataset.idx)));
+  });
+  lb.querySelector('.lb-close')?.addEventListener('click', close);
   btnPrev?.addEventListener('click', prev);
   btnNext?.addEventListener('click', next);
-  lb?.addEventListener('click', (e)=>{ if(e.target === lb) close(); });
+  lb.addEventListener('click', (e)=>{ if(e.target===lb) close(); });
   document.addEventListener('keydown', (e)=>{
-    if(lb?.hidden) return;
-    if(e.key === 'Escape') close();
-    if(e.key === 'ArrowLeft') prev();
-    if(e.key === 'ArrowRight') next();
+    if(lb.hidden) return;
+    if(e.key==='Escape') close();
+    if(e.key==='ArrowLeft') prev();
+    if(e.key==='ArrowRight') next();
   });
 }
 
