@@ -80,10 +80,18 @@
 
     /* 읽기 상단 액션바 */
     .top-actions{border-bottom:1px solid #e5e7eb;padding-bottom:10px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;gap:8px}
+    /* 읽기 하단 공유 바 */
+    .bottom-actions{
+      border-top:1px solid #e5e7eb;
+      margin-top:16px; padding-top:10px;
+      display:flex; justify-content:flex-end; align-items:center; gap:8px;
+    }
+    .btn.icon{display:inline-flex;align-items:center;gap:6px}
 
 /* 공통 썸네일 그리드 (가운데 정렬) */
 /* 썸네일 그리드: 컨테이너만 중앙, 항목은 좌측부터 채움 */
 /* 썸네일 그리드: 컨테이너는 중앙 위치, 항목은 좌측부터 채움 */
+
 .thumbs{
   display:grid;
   gap:36px;
@@ -595,6 +603,14 @@ async function renderEditImagesForEditMode(reviewId, fallbackUrl, fallbackPath){
       </form>
       <div id="commentLoginHint" class="muted">댓글을 쓰려면 로그인하세요.</div>
     </div>
+
+    <!-- 하단 공유 -->
+    <div class="bottom-actions">
+      <button class="btn secondary icon" type="button" id="btnShare" title="링크 복사">
+        🔗 <span>공유</span>
+      </button>
+      <span id="shareTip" class="status"></span>
+    </div>
   `;
 
     // 상단 버튼
@@ -656,6 +672,33 @@ async function renderEditImagesForEditMode(reviewId, fallbackUrl, fallbackPath){
   await renderGalleryLightbox(id, data.image_url); // ← 읽기 썸네일/라이트박스
   // 조회수 +1
   try { await sb.rpc('inc_review_view', { _id: id }); } catch (e) { console.warn('view +1 실패', e); }
+
+
+  // 공유 버튼
+  const shareBtn = document.getElementById('btnShare');
+  const shareTip = document.getElementById('shareTip');
+  const shareUrl = `${location.origin}/reviews.html?id=${id}`;
+  shareBtn?.addEventListener('click', async () => {
+    try{
+      if (navigator.share) {
+        await navigator.share({ title: data.title || '사용자 후기', url: shareUrl });
+        shareTip.textContent = '공유 시작';
+      } else if (navigator.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(shareUrl);
+        shareTip.textContent = '링크를 복사했습니다.';
+      } else {
+        // 구형/비HTTPS 폴백
+        const ta = document.createElement('textarea');
+        ta.value = shareUrl; document.body.appendChild(ta);
+        ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
+        shareTip.textContent = '링크를 복사했습니다.';
+      }
+      setTimeout(()=>{ if(shareTip) shareTip.textContent=''; }, 2000);
+    }catch(e){
+      shareTip.textContent = '복사/공유 실패';
+      setTimeout(()=>{ if(shareTip) shareTip.textContent=''; }, 2000);
+    }
+  });
 }
 
 /* ========== 좋아요/싫어요 ========== */

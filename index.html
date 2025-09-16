@@ -44,10 +44,18 @@
     }
 
 /* 방문자수: 데스크톱에선 오른쪽 열(컬럼 2)로 고정 */
-.visit-counter {
+.visit-counter{
   text-align:center;
-  margin-top:8px;
+  margin-top:12px;
+  color:#e7edf5;                          /* 어두운 배경 대비 */
+  background:rgba(255,255,255,.06);
+  border:1px solid rgba(255,255,255,.12);
+  border-radius:10px;
+  padding:6px 10px;                        /* 살짝 패딩 */
+  width:fit-content;                       /* 내용폭만 */
+  margin-left:auto; margin-right:auto;     /* 가운데 배치 */
 }
+
 @media (min-width:1024px){
   .visit-counter { grid-column: 2 / 3; }
 }
@@ -373,6 +381,7 @@
       if (error) { el.textContent = '방문수 집계 실패'; return; }
       const n = Number(data || 0);
       el.textContent = `방문수 ${n.toLocaleString('ko-KR')}`;
+      el.style.color = '#e7edf5';  // 테마 클래스 미적용 상황 대비
     } catch {
       el.textContent = '방문수 집계 실패';
     }
