@@ -74,7 +74,14 @@
 
      /* 이미지 갤러리 & 반응형 배치 */
     .image,.thumb{display:block;height:auto}
-    .gallery{display:grid;gap:10px}
+    .gallery{display:grid;gap:10px;justify-items:center}
+    .gallery img{display:block;margin:0 auto;max-width:100%;border-radius:8px}
+    .edit-gallery .imgSlot{
+      width:100%; max-width:420px;
+      display:flex; flex-direction:column; align-items:center; gap:6px;
+      border:1px solid #e5e7eb; border-radius:10px; padding:8px; background:#fff;
+    }
+    .edit-gallery .imgSlot label{font-size:13px; color:#444}
     /* portrait: PC 3열, 태블릿 2열, 모바일 1열 */
     .gallery-portrait{grid-template-columns:1fr}
     @media (min-width:768px){ .gallery-portrait{grid-template-columns:repeat(2,1fr)} }
@@ -82,7 +89,8 @@
     /* landscape: PC 2열(=각 50%), 태블릿/모바일 1열 */
     .gallery-landscape{grid-template-columns:1fr}
     @media (min-width:1024px){ .gallery-landscape{grid-template-columns:repeat(2,1fr)} }
-    .gallery img{width:100%;border-radius:8px}
+    /* 읽기 화면의 갤러리 이미지 폭은 셀 너비에 맞추되 중앙 정렬 */
+    .gallery img{width:100%}
 
 /* 반응바 */
 .reaction-bar{display:flex;gap:8px;align-items:center;margin:12px 0}
@@ -206,7 +214,9 @@
         <div class="field">
           <label for="image">이미지(선택)</label>
           <input id="image" type="file" accept="image/*" multiple>
-          <!-- 여러 장 미리보기 -->
+          <!-- 편집 모드일 때 기존 이미지 나열(삭제 체크 가능) -->
+          <div id="editImages" class="gallery edit-gallery" hidden></div>
+          <!-- 새로 선택한 이미지 미리보기 -->
           <div id="previews" class="gallery"></div>
           <img id="preview" class="thumb" alt="" hidden> <!-- 기존 단일 프리뷰는 유지(호환) -->
           <div class="status">큰 이미지는 업로드 전 자동 축소(가로 최대 1600px)됩니다.</div>
@@ -275,6 +285,7 @@ const fContent = $('#content');
 const fImage   = $('#image');
 const preview  = $('#preview');
 const previews = $('#previews');
+const editImages = $('#editImages'); // 편집 모드에서 기존 이미지 나열
 
 // ====== 공용 유틸 ======
 function escapeHtml(s){return (s??'').replace(/[&<>"']/g,m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m]))}
@@ -451,6 +462,49 @@ async function loadOne(id){
     return;
   }
 
+async function renderEditImagesForEditMode(reviewId, fallbackUrl, fallbackPath){
+  if (!editImages) return;
+  editImages.hidden = false;
+  editImages.innerHTML = '<div class="muted">기존 이미지를 불러오는 중…</div>';
+
+  // review_images에서 불러오기
+  let rows = [];
+  try{
+    const { data, error } = await sb
+      .from('review_images')
+      .select('id, url, path, created_at')
+      .eq('review_id', reviewId)
+      .order('created_at', { ascending: true });
+    if (!error && data) rows = data;
+  }catch{}
+
+  // 구(단일) 이미지 컬럼 호환: review_images가 비어있고 fallback이 있으면 1개 항목으로 취급
+  if ((!rows || !rows.length) && fallbackUrl){
+    rows = [{ id: null, url: fallbackUrl, path: fallbackPath || null, _legacy: true }];
+  }
+
+  if (!rows.length){
+    editImages.innerHTML = `<div class="muted">기존 이미지가 없습니다.</div>`;
+    return;
+  }
+
+  // 썸네일 + 삭제 체크박스 렌더
+  editImages.innerHTML = rows.map(r => `
+    <div class="imgSlot">
+      <img src="${r.url}" alt="" />
+      <label>
+        <input type="checkbox"
+          data-del="img"
+          data-imgid="${r.id ?? ''}"
+          data-path="${r.path ?? ''}"
+          data-legacy="${r._legacy ? '1':'0'}"
+        /> 이 이미지를 삭제
+      </label>
+    </div>
+  `).join('');
+}
+
+
   // 세션 & 소유자 여부
   const { data: sess } = await sb.auth.getSession();
   const me = sess?.session?.user || null;
@@ -509,7 +563,15 @@ async function loadOne(id){
     // 프리필
     if (fTitle)   fTitle.value   = data.title   || '';
     if (fContent) fContent.value = data.content || '';
-    if (writeForm) writeForm.dataset.editing = id; // 편집 모드 플래그
+    if (writeForm) {
+      writeForm.dataset.editing = id;              // 편집 모드 플래그
+      writeForm._editingLegacy  = {                 // 구(단일) 이미지 호환
+        url: data.image_url || null,
+        path: data.image_path || null
+      };
+    }
+    // 기존 이미지 나열
+    renderEditImagesForEditMode(id, data.image_url, data.image_path);
   });
 
   document.getElementById('btn-delete')?.addEventListener('click', async ()=>{
@@ -717,9 +779,58 @@ writeForm?.addEventListener('submit', async (e)=>{
     const nickname = (session.user.user_metadata?.full_name) || (session.user.email?.split('@')[0]) || '익명';
     let image_path=null, image_url=null; // 호환용 첫 이미지
     if (editingId){
-      // 수정(제목/내용만 갱신)
+      // 1) 텍스트 업데이트
       const upd = await sb.from('reviews').update({ title, content }).eq('id', editingId);
       if(upd.error) throw new Error(upd.error.message);
+
+      // 2) 삭제 체크된 이미지 제거 (review_images & storage)
+      const dels = Array.from(document.querySelectorAll('input[data-del="img"]:checked'));
+      const pathsToRemove = [];
+      for (const el of dels){
+        const isLegacy = el.getAttribute('data-legacy') === '1';
+        const path = el.getAttribute('data-path') || '';
+        const imgId = el.getAttribute('data-imgid') || null;
+
+        // DB 행 삭제
+        if (!isLegacy && imgId){
+          const del = await sb.from('review_images').delete().eq('id', imgId);
+          if (del.error) console.warn('review_images 삭제 실패:', del.error.message);
+        }
+        // 구(단일) 이미지 컬럼 정리
+        if (isLegacy){
+          try {
+            await sb.from('reviews').update({ image_url: null, image_path: null }).eq('id', editingId);
+          } catch (e) { console.warn('legacy 컬럼 정리 실패', e); }
+        }
+        // 스토리지에서 삭제
+        if (path) pathsToRemove.push(path);
+      }
+      if (pathsToRemove.length){
+        try { await sb.storage.from('reviews').remove(pathsToRemove); }
+        catch (e) { console.warn('storage remove 실패', e); }
+      }
+
+      // 3) 새로 추가 업로드(있다면) → review_images에 insert
+      const files = Array.from(fImage.files || []);
+      const uploaded = [];
+      for (const file of files){
+        const ext=(file.name.split('.').pop()||'jpg').toLowerCase();
+        const safeExt=["jpg","jpeg","png","webp","gif"].includes(ext)?ext:"jpg";
+        const key=`${(session.user.id)}/${Date.now()}_${Math.random().toString(36).slice(2)}.${safeExt}`;
+        const up=await sb.storage.from("reviews").upload(key,file,{upsert:false,cacheControl:"3600"});
+        if(up.error) throw new Error("이미지 업로드 실패: "+up.error.message);
+        const url = sb.storage.from("reviews").getPublicUrl(key).data.publicUrl;
+        uploaded.push({ path:key, url });
+      }
+      if (uploaded.length){
+        try {
+          await sb.from('review_images').insert(
+            uploaded.map(u => ({ review_id: editingId, url: u.url, path: u.path }))
+          );
+        } catch (e) { console.warn('review_images insert 실패', e); }
+      }
+
+      // 완료: 편집 글 보기로 이동
       location.href = `/reviews.html?id=${editingId}`;
       return;
     }
