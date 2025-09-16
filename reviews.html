@@ -261,6 +261,7 @@
           <a class="btn secondary" href="/reviews.html">목록으로</a>
           <button class="btn" id="btn-submit">저장</button>
         </div>
+        <div id="editImages" class="thumbs edit-gallery" hidden></div>
       </form>
     </section>
   </div>
@@ -501,7 +502,6 @@ async function renderEditImagesForEditMode(reviewId, fallbackUrl, fallbackPath){
   editImages.hidden = false;
   editImages.innerHTML = '<div class="muted">기존 이미지를 불러오는 중…</div>';
 
-  // review_images에서 불러오기
   let rows = [];
   try{
     const { data, error } = await sb
@@ -512,7 +512,6 @@ async function renderEditImagesForEditMode(reviewId, fallbackUrl, fallbackPath){
     if (!error && data) rows = data;
   }catch{}
 
-  // 구(단일) 이미지 컬럼 호환: review_images가 비어있고 fallback이 있으면 1개 항목으로 취급
   if ((!rows || !rows.length) && fallbackUrl){
     rows = [{ id: null, url: fallbackUrl, path: fallbackPath || null, _legacy: true }];
   }
@@ -522,7 +521,6 @@ async function renderEditImagesForEditMode(reviewId, fallbackUrl, fallbackPath){
     return;
   }
 
-  // 썸네일 + 삭제 체크박스 렌더
   editImages.innerHTML = rows.map(r => `
     <div class="imgSlot">
       <img src="${r.url}" alt="" />
@@ -568,9 +566,8 @@ async function renderEditImagesForEditMode(reviewId, fallbackUrl, fallbackPath){
       <img id="lbImg" alt="">
       <button class="lb-next" aria-label="다음">›</button>
     </div>
-     <!-- 이미지 갤러리: 방향별 컨테이너 -->
-     <div class="gallery gallery-landscape" id="galLand"></div>
-     <div class="gallery gallery-portrait" id="galPort"></div>
+     
+     <div id="galleryThumbs" class="thumbs" style="margin-top:12px"></div>
      <div class="reaction-bar" id="reactBar"></div>
 
     <div class="comments" id="commentsBox">
@@ -584,9 +581,7 @@ async function renderEditImagesForEditMode(reviewId, fallbackUrl, fallbackPath){
     </div>
   `;
 
-  await renderGalleries(id, data.image_url);
-
-  // 상단 버튼
+    // 상단 버튼
   document.getElementById('btn-to-compose')?.addEventListener('click', async ()=>{
     const { data:{ session } } = await sb.auth.getSession();
     if(!session?.user){
@@ -612,8 +607,10 @@ async function renderEditImagesForEditMode(reviewId, fallbackUrl, fallbackPath){
         path: data.image_path || null
       };
     }
-    // 기존 이미지 나열
-    renderEditImagesForEditMode(id, data.image_url, data.image_path);
+   // 컨테이너 보이기 & 썸네일 렌더
+   const editBox = document.getElementById('editImages');
+   if (editBox) editBox.hidden = false;
+   renderEditImagesForEditMode(id, data.image_url, data.image_path);
   });
 
   document.getElementById('btn-delete')?.addEventListener('click', async ()=>{
