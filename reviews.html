@@ -143,14 +143,6 @@
     /* 읽기 화면의 갤러리 이미지 폭은 셀 너비에 맞추되 중앙 정렬 */
     .gallery img{width:100%}
 
-    /* 썸네일 그리드(가운데 정렬, 모두 나열) */
-    .thumbs{display:flex;flex-wrap:wrap;justify-content:center;gap:12px}
-    .thumb-card{flex:0 1 20%;max-width:20%;display:flex;justify-content:center}
-    .thumb-img{width:100%;height:auto;display:block;border-radius:10px}
-    /* 모바일에서 너무 작지 않게 */
-    @media (max-width:768px){
-      .thumb-card{flex-basis:45%;max-width:45%}
-    }
 
 /* 반응바 */
 .reaction-bar{display:flex;gap:8px;align-items:center;margin:12px 0}
@@ -273,10 +265,8 @@
         <div class="field">
           <label for="image">이미지(선택)</label>
           <input id="image" type="file" accept="image/*" multiple data-max="6">
-          <!-- 편집 모드일 때 기존 이미지 나열(삭제 체크 가능) -->
-        <div id="previews" class="thumbs"></div>
           <!-- 새로 선택한 이미지 미리보기 -->
-          <div id="previews" class="gallery"></div>
+          <div id="selectPreviews" class="thumbs"></div>
           <img id="preview" class="thumb" alt="" hidden> <!-- 기존 단일 프리뷰는 유지(호환) -->
        <div class="status">최대 6장까지 선택 가능 (가로 최대 1600px로 축소 예정)</div>
 
@@ -342,7 +332,7 @@ const fTitle   = $('#title');
 const fContent = $('#content');
 const fImage   = $('#image');
 const preview  = $('#preview');
-const previews = $('#previews');
++const selectPreviews = $('#selectPreviews');
 const editImages = $('#editImages'); // 편집 모드에서 기존 이미지 나열
 const MAX_FILES = Number($('#image')?.dataset?.max || 6);
 
@@ -521,47 +511,6 @@ async function loadOne(id){
     return;
   }
 
-async function renderEditImagesForEditMode(reviewId, fallbackUrl, fallbackPath){
-  if (!editImages) return;
-  editImages.hidden = false;
-  editImages.innerHTML = '<div class="muted">기존 이미지를 불러오는 중…</div>';
-
-  let rows = [];
-  try{
-    const { data, error } = await sb
-      .from('review_images')
-      .select('id, url, path, created_at')
-      .eq('review_id', reviewId)
-      .order('created_at', { ascending: true });
-    if (!error && data) rows = data;
-  }catch{}
-
-  if ((!rows || !rows.length) && fallbackUrl){
-    rows = [{ id: null, url: fallbackUrl, path: fallbackPath || null, _legacy: true }];
-  }
-
-  if (!rows.length){
-    editImages.innerHTML = `<div class="muted">기존 이미지가 없습니다.</div>`;
-    return;
-  }
-
-  // 썸네일 카드 + 삭제 체크박스
-  editImages.innerHTML = rows.map(r => `
-    <div class="thumb-card">
-      <img class="thumb-img" src="${r.url}" alt="">
-      <label style="font-size:13px;color:#444;margin-top:6px">
-        <input type="checkbox"
-          data-del="img"
-          data-imgid="${r.id ?? ''}"
-          data-path="${r.path ?? ''}"
-          data-legacy="${r._legacy ? '1':'0'}"
-        /> 삭제
-      </label>
-    </div>
-  `).join('');
-}
-
-
 
   // 세션 & 소유자 여부
   const { data: sess } = await sb.auth.getSession();
@@ -667,7 +616,6 @@ async function renderEditImagesForEditMode(reviewId, fallbackUrl, fallbackPath){
 
   // 반응 & 댓글 렌더
   await renderReactions(id);
-  await renderReactions(id);
   await renderComments(id);
   await renderGalleryLightbox(id, data.image_url); // ← 읽기 썸네일/라이트박스
   // 조회수 +1
@@ -699,7 +647,59 @@ async function renderEditImagesForEditMode(reviewId, fallbackUrl, fallbackPath){
       }catch(err){ reject(err); }
     });
   }
+
+  // ✅ 리스너 추가 (텍스트 URL만 복사) — 카톡 호환
+  copyBtn?.addEventListener('click', async ()=>{
+    try{
+      await copyPlainText(shareUrl);
+      if (shareTip) shareTip.textContent = '링크를 복사했습니다. (붙여넣기)';
+    }catch{
+      if (shareTip) shareTip.textContent = '복사 실패';
+    }
+    setTimeout(()=>{ if(shareTip) shareTip.textContent=''; }, 2000);
+  });
+} // ← loadOne 끝
+
+async function renderEditImagesForEditMode(reviewId, fallbackUrl, fallbackPath){
+  if (!editImages) return;
+  editImages.hidden = false;
+  editImages.innerHTML = '<div class="muted">기존 이미지를 불러오는 중…</div>';
+
+  let rows = [];
+  try{
+    const { data, error } = await sb
+      .from('review_images')
+      .select('id, url, path, created_at')
+      .eq('review_id', reviewId)
+      .order('created_at', { ascending: true });
+    if (!error && data) rows = data;
+  }catch{}
+
+  if ((!rows || !rows.length) && fallbackUrl){
+    rows = [{ id: null, url: fallbackUrl, path: fallbackPath || null, _legacy: true }];
+  }
+
+  if (!rows.length){
+    editImages.innerHTML = `<div class="muted">기존 이미지가 없습니다.</div>`;
+    return;
+  }
+
+  // 썸네일 카드 + 삭제 체크박스
+  editImages.innerHTML = rows.map(r => `
+    <div class="thumb-card">
+      <img class="thumb-img" src="${r.url}" alt="">
+      <label style="font-size:13px;color:#444;margin-top:6px">
+        <input type="checkbox"
+          data-del="img"
+          data-imgid="${r.id ?? ''}"
+          data-path="${r.path ?? ''}"
+          data-legacy="${r._legacy ? '1':'0'}"
+        /> 삭제
+      </label>
+    </div>
+  `).join('');
 }
+
 
 /* ========== 좋아요/싫어요 ========== */
 async function getMyReaction(reviewId){
@@ -865,8 +865,8 @@ fImage?.addEventListener('change', ()=>{
     formStatus.textContent = `이미지는 최대 ${MAX_FILES}장까지 가능합니다. (선택한 ${files.length}장 중 ${allowed}장만 반영)`;
   }
   if (preview){ preview.hidden = true; preview.removeAttribute('src'); }
-  if (!previews) return;
-  previews.innerHTML = '';
+  if (!selectPreviews) return;
+  selectPreviews.innerHTML = '';
    useFiles.forEach(f=>{
      const url = URL.createObjectURL(f);
      const wrap = document.createElement('div');
@@ -875,7 +875,7 @@ fImage?.addEventListener('change', ()=>{
      img.className = 'thumb-img';
      img.src = url;
      wrap.appendChild(img);
-     previews.appendChild(wrap);
+    selectPreviews.appendChild(wrap);
  });
 });
 
@@ -898,10 +898,6 @@ writeForm?.addEventListener('submit', async (e)=>{
       if(upd.error) throw new Error(upd.error.message);
 
       // 2) 삭제 체크된 이미지 제거 (review_images & storage)
-       if (pathsToRemove.length){
-         try { await sb.storage.from('reviews').remove(pathsToRemove); }
-         catch (e) { console.warn('storage remove 실패', e); }
-       }
       const dels = Array.from(document.querySelectorAll('input[data-del="img"]:checked'));
       const pathsToRemove = [];
       for (const el of dels){
