@@ -54,16 +54,31 @@
     .cell-no{width:56px;color:#666}
     .cell-nick{width:160px}
     .cell-time{width:180px;color:#666;text-align:right}
-    .cell-body{white-space:pre-wrap;word-break:break-word}
+     /* 본문 미리보기 3줄 고정 */
+    .cell-body{
+      word-break:break-word;
+      white-space:normal;              /* 줄바꿈 허용 */
+      display:-webkit-box;
+      -webkit-line-clamp:3;
+      -webkit-box-orient:vertical;
+      overflow:hidden;
+    }
     .list-footer{border-top:1px solid #e5e7eb;padding-top:10px;display:flex;justify-content:flex-end}
 
     /* 읽기 상단 액션바 */
     .top-actions{border-bottom:1px solid #e5e7eb;padding-bottom:10px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;gap:8px}
 
-    /* 이미지 규칙: 가로 70% / 세로 30% */
-    .image,.thumb{display:block;height:auto;margin:10px auto}
-    .image.landscape,.thumb.landscape{width:70%;max-width:70%}
-    .image.portrait,.thumb.portrait{width:30%;max-width:30%}
+     /* 이미지 갤러리 & 반응형 배치 */
+    .image,.thumb{display:block;height:auto}
+    .gallery{display:grid;gap:10px}
+    /* portrait: PC 3열, 태블릿 2열, 모바일 1열 */
+    .gallery-portrait{grid-template-columns:1fr}
+    @media (min-width:768px){ .gallery-portrait{grid-template-columns:repeat(2,1fr)} }
+    @media (min-width:1024px){ .gallery-portrait{grid-template-columns:repeat(3,1fr)} }
+    /* landscape: PC 2열(=각 50%), 태블릿/모바일 1열 */
+    .gallery-landscape{grid-template-columns:1fr}
+    @media (min-width:1024px){ .gallery-landscape{grid-template-columns:repeat(2,1fr)} }
+    .gallery img{width:100%;border-radius:8px}
 
 /* 반응바 */
 .reaction-bar{display:flex;gap:8px;align-items:center;margin:12px 0}
@@ -185,10 +200,13 @@
 
         <div class="field">
           <label for="image">이미지(선택)</label>
-          <input id="image" type="file" accept="image/*">
-          <img id="preview" class="thumb" alt="" hidden>
+          <input id="image" type="file" accept="image/*" multiple>
+          <!-- 여러 장 미리보기 -->
+          <div id="previews" class="gallery"></div>
+          <img id="preview" class="thumb" alt="" hidden> <!-- 기존 단일 프리뷰는 유지(호환) -->
           <div class="status">큰 이미지는 업로드 전 자동 축소(가로 최대 1600px)됩니다.</div>
         </div>
+
 
         <div class="row" style="border-top:1px solid #e5e7eb;margin-top:12px;padding-top:10px;justify-content:flex-end;gap:8px">
           <span id="formStatus" class="status" style="margin-right:auto"></span>
@@ -251,6 +269,7 @@ const fTitle   = $('#title');
 const fContent = $('#content');
 const fImage   = $('#image');
 const preview  = $('#preview');
+const previews = $('#previews');
 
 // ====== 공용 유틸 ======
 function escapeHtml(s){return (s??'').replace(/[&<>"']/g,m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m]))}
@@ -430,12 +449,11 @@ async function loadOne(id){
 
     <h3 style="margin:0 0 6px">${escapeHtml(data.title || "(제목 없음)")}</h3>
     <div class="muted" style="margin-bottom:10px">${escapeHtml(name)} · ${fmtDate(data.created_at)}</div>
-    <div style="white-space:pre-wrap;word-break:break-word">${escapeHtml(data.content || "")}</div>
-    ${imgHTML}
-
-    <div class="reaction-bar" id="reactBar">
-      <!-- 좋아요/싫어요 버튼이 여기 렌더링됩니다 -->
-    </div>
+     <div style="white-space:pre-wrap;word-break:break-word">${escapeHtml(data.content || "")}</div>
+     <!-- 이미지 갤러리: 방향별 컨테이너 -->
+     <div class="gallery gallery-landscape" id="galLand"></div>
+     <div class="gallery gallery-portrait" id="galPort"></div>
+     <div class="reaction-bar" id="reactBar"></div>
 
     <div class="comments" id="commentsBox">
       <h4 style="margin:16px 0 8px">댓글</h4>
@@ -448,7 +466,7 @@ async function loadOne(id){
     </div>
   `;
 
-  applyImgClass(document.getElementById('readImg'));
+  await renderGalleries(id, data.image_url);
 
   // 상단 버튼
   document.getElementById('btn-to-compose')?.addEventListener('click', async ()=>{
@@ -638,11 +656,18 @@ async function renderComments(reviewId){
 
 // ====== 글쓰기: 미리보기/저장 ======
 fImage?.addEventListener('change', ()=>{
-  const file0 = fImage.files?.[0];
-  if(!file0){ preview.hidden = true; return; }
-  preview.src = URL.createObjectURL(file0);
-  preview.hidden = false;
-  applyImgClass(preview);
+  const files = Array.from(fImage.files || []);
+  // 단일 프리뷰는 감춤
+  if (preview){ preview.hidden = true; preview.removeAttribute('src'); }
+  if (!previews) return;
+  previews.innerHTML = ''; // 초기화
+  files.forEach(f=>{
+    const url = URL.createObjectURL(f);
+    const img = document.createElement('img');
+    img.className = 'image';
+    img.src = url;
+    previews.appendChild(img);
+  });
 });
 
 writeForm?.addEventListener('submit', async (e)=>{
@@ -656,17 +681,20 @@ writeForm?.addEventListener('submit', async (e)=>{
   btnSubmit.disabled = true; btnSubmit.textContent = "저장 중…";
   try{
     const nickname = (session.user.user_metadata?.full_name) || (session.user.email?.split('@')[0]) || '익명';
-    let image_path=null, image_url=null;
-    const file0 = fImage.files?.[0] || null;
-    if(file0){
-      const ext=(file0.name.split('.').pop()||'jpg').toLowerCase();
+    let image_path=null, image_url=null; // 호환용 첫 이미지
+    const files = Array.from(fImage.files || []);
+    const uploaded = [];
+    for (const file of files){
+      const ext=(file.name.split('.').pop()||'jpg').toLowerCase();
       const safeExt=["jpg","jpeg","png","webp","gif"].includes(ext)?ext:"jpg";
       const key=`${session.user.id}/${Date.now()}_${Math.random().toString(36).slice(2)}.${safeExt}`;
-      const up=await sb.storage.from("reviews").upload(key,file0,{upsert:false,cacheControl:"3600"});
+      const up=await sb.storage.from("reviews").upload(key,file,{upsert:false,cacheControl:"3600"});
       if(up.error) throw new Error("이미지 업로드 실패: "+up.error.message);
-      image_path = key;
-      image_url  = sb.storage.from("reviews").getPublicUrl(key).data.publicUrl;
+      const url = sb.storage.from("reviews").getPublicUrl(key).data.publicUrl;
+      uploaded.push({ path:key, url });
     }
+    if (uploaded[0]) { image_path = uploaded[0].path; image_url = uploaded[0].url; }
+
     const ins = await sb.from("reviews").insert({
       title, content,
       user_id: session.user.id,
@@ -674,6 +702,15 @@ writeForm?.addEventListener('submit', async (e)=>{
       nickname, image_path, image_url
     }).select("id").single();
     if(ins.error) throw new Error(ins.error.message);
+
+    // 여러 장을 별도 테이블에 저장(있으면). 없으면 조용히 통과.
+    if (uploaded.length){
+      try {
+        await sb.from('review_images').insert(
+          uploaded.map(u => ({ review_id: ins.data.id, url: u.url, path: u.path }))
+        );
+      } catch (_) {}
+    }
     location.href = '/reviews.html';  // 저장 후 목록으로
   }catch(err){
     formStatus.textContent = String(err.message||err);
@@ -724,6 +761,41 @@ async function safeGetSession(timeoutMs = 2000) {
     return { data: { session: null } };
   }
 }
+
+async function renderGalleries(reviewId, fallbackUrl){
+  const land = document.getElementById('galLand');
+  const port = document.getElementById('galPort');
+  if(!land || !port) return;
+
+  // 1) review_images 테이블에서 불러오기
+  let urls = [];
+  try{
+    const { data: rows, error } = await sb
+      .from('review_images')
+      .select('url')
+      .eq('review_id', reviewId)
+      .order('created_at', { ascending:true });
+    if(!error && rows?.length) urls = rows.map(r=>r.url).filter(Boolean);
+  }catch{}
+
+  // 2) 없으면 단일 컬럼(fallback) 사용(호환)
+  if(!urls.length && fallbackUrl) urls = [fallbackUrl];
+
+  // 3) DOM 채우기 (방향에 따라 분류)
+  land.innerHTML = ''; port.innerHTML = '';
+  await Promise.all(urls.map(url => new Promise(resolve=>{
+    const img = new Image();
+    img.className = 'image';
+    img.src = url;
+    img.onload = () => {
+      if (img.naturalWidth > img.naturalHeight) land.appendChild(img);
+      else port.appendChild(img);
+      resolve();
+    };
+    img.onerror = resolve;
+  })));
+}
+
 
 
 document.addEventListener('DOMContentLoaded', init);
