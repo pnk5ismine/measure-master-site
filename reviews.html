@@ -222,9 +222,7 @@
 
       <div class="banner-flex"></div>
     </section>
-      <div id="visitCounter" class="muted" style="text-align:center;margin-top:8px"></div>
-
-    <!-- 우: 목록/읽기/쓰기 -->
+     <!-- 우: 목록/읽기/쓰기 -->
     <section class="card" id="rightCard">
       <h1>사용자 후기</h1>
       <p class="muted" id="authInfo">로그인 상태 확인 중…</p>
@@ -984,7 +982,6 @@ async function init(){
   // 기본: 목록
   showList();
   await loadList();
-  await bumpAndShowVisitCounter(); // ← 초기 페이지에서만 방문수 표시
   await refreshAuthUI();
   ensureAuthVisible(); 
 }

@@ -42,6 +42,16 @@
         align-items: stretch;
       }
     }
+
+/* 방문자수: 데스크톱에선 오른쪽 열(컬럼 2)로 고정 */
+.visit-counter {
+  text-align:center;
+  margin-top:8px;
+}
+@media (min-width:1024px){
+  .visit-counter { grid-column: 2 / 3; }
+}
+
     .card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:22px}
     .muted{color:var(--muted)}
     footer{margin:30px auto 60px;text-align:center;color:var(--muted);font-size:14px}
@@ -239,8 +249,9 @@
 
     const SUPABASE_URL  = "https://snxjcbaaysgfunpsohzg.supabase.co";
     const SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNueGpjYmFheXNnZnVucHNvaHpnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY1OTk3MzQsImV4cCI6MjA3MjE3NTczNH0.T8b9PpabXkCvwW2W57Qbr-h--JLZB6errlyP5IwsYyk";
-    const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON);
-
+    const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON, {
+    auth: { persistSession:true, autoRefreshToken:true, detectSessionInUrl:true }
+   });
     const $ = s => document.querySelector(s);
     const elTabs   = $("#auth-tabs");
     const elTabSignup = $("#tab-signup");
@@ -354,6 +365,20 @@
       console.warn("[MM] initLangAndLazy warning:", e);
     }
   }
+  async function bumpAndShowVisitCounterHome() {
+    const el = document.getElementById('visitCounterHome');
+    if (!el) return;
+    try {
+      const { data, error } = await sb.rpc('inc_page_visit', { _page: 'home_index' });
+      if (error) { el.textContent = '방문수 집계 실패'; return; }
+      const n = Number(data || 0);
+      el.textContent = `방문수 ${n.toLocaleString('ko-KR')}`;
+    } catch {
+      el.textContent = '방문수 집계 실패';
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', bumpAndShowVisitCounterHome);
 </script>
 <style id="__mobile_nav_only" nonce="mm">
 @media (max-width:640px){
