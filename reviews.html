@@ -77,7 +77,7 @@
 /* 썸네일 그리드: 컨테이너는 중앙 위치, 항목은 좌측부터 채움 */
 .thumbs{
   display:grid;
-  gap:12px;
+  gap:36px;
   max-width:1200px;
   margin:0 auto;  /* 컨테이너 자체 중앙 */
   grid-template-columns:repeat(2, minmax(0,1fr)); /* 폰 2열 */
@@ -85,7 +85,7 @@
 }
 @media (min-width:768px){  .thumbs{ grid-template-columns:repeat(3, minmax(0,1fr)); } }  /* 태블릿 3열 */
 @media (min-width:1024px){ .thumbs{ grid-template-columns:repeat(5, minmax(0,1fr)); } } /* PC 5열 ≈ 20% */
-.thumb-card{ width:100%; }
+.thumb-card{ width:100%; padding:8px; }
 .thumb-img{ width:100%; height:auto; display:block; border-radius:10px; margin:0; cursor:pointer; }
 
 /* 라이트박스 */
@@ -539,7 +539,7 @@ async function renderEditImagesForEditMode(reviewId, fallbackUrl, fallbackPath){
           data-imgid="${r.id ?? ''}"
           data-path="${r.path ?? ''}"
           data-legacy="${r._legacy ? '1':'0'}"
-        /> 이 이미지를 삭제
+        /> 삭제
       </label>
     </div>
   `).join('');
