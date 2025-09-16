@@ -847,6 +847,10 @@ writeForm?.addEventListener('submit', async (e)=>{
       if(upd.error) throw new Error(upd.error.message);
 
       // 2) 삭제 체크된 이미지 제거 (review_images & storage)
+       if (pathsToRemove.length){
+         try { await sb.storage.from('reviews').remove(pathsToRemove); }
+         catch (e) { console.warn('storage remove 실패', e); }
+       }
       const dels = Array.from(document.querySelectorAll('input[data-del="img"]:checked'));
       const pathsToRemove = [];
       for (const el of dels){
@@ -873,15 +877,11 @@ writeForm?.addEventListener('submit', async (e)=>{
         catch (e) { console.warn('storage remove 실패', e); }
       }
 
-      // 3) 새로 추가 업로드(있다면) → review_images에 insert (남은 슬롯만)
-      let remain = MAX_FILES;
-      // 현재 남은 슬롯 재계산: 기존 이미지 - 삭제 체크 수
-      if (editImages && !editImages.hidden){
-        const current = editImages.querySelectorAll('input[data-del="img"]').length
-                      - editImages.querySelectorAll('input[data-del="img"]:checked').length;
-        remain = Math.max(0, MAX_FILES - current);
-      }
+      // 3) (중요) 삭제 반영 후 남은 슬롯을 DB 기준으로 다시 계산
+      const currentCount = await getCurrentImageCount(editingId);
+      const remain = Math.max(0, MAX_FILES - currentCount);
       const files = Array.from(fImage.files || []).slice(0, remain);
+
       const uploaded = [];
       for (const file of files){
         const ext=(file.name.split('.').pop()||'jpg').toLowerCase();
@@ -892,19 +892,17 @@ writeForm?.addEventListener('submit', async (e)=>{
         const url = sb.storage.from("reviews").getPublicUrl(key).data.publicUrl;
         uploaded.push({ path:key, url });
       }
-      if (uploaded.length){
-        try {
-          await sb.from('review_images').insert(
-            uploaded.map(u => ({ review_id: editingId, url: u.url, path: u.path }))
-          );
-        } catch (e) { console.warn('review_images insert 실패', e); }
-      }
+        const add = await sb.from('review_images').insert(
+          uploaded.map(u => ({ review_id: editingId, url: u.url, path: u.path }))
+        );
+        if (add.error) throw new Error('이미지 메타 저장 실패: ' + add.error.message);
+
 
       // 완료: 편집 글 보기로 이동
       location.href = `/reviews.html?id=${editingId}`;
       return;
     }
-    const files = Array.from(fImage.files || []);
+    const files = Array.from(fImage.files || []).slice(0, MAX_FILES);
     const uploaded = [];
     for (const file of files){
       const ext=(file.name.split('.').pop()||'jpg').toLowerCase();
@@ -927,11 +925,10 @@ writeForm?.addEventListener('submit', async (e)=>{
 
     // 여러 장을 별도 테이블에 저장(있으면). 없으면 조용히 통과.
     if (uploaded.length){
-      try {
-        await sb.from('review_images').insert(
-          uploaded.map(u => ({ review_id: ins.data.id, url: u.url, path: u.path }))
-        );
-      } catch (_) {}
+      const add = await sb.from('review_images').insert(
+        uploaded.map(u => ({ review_id: ins.data.id, url: u.url, path: u.path }))
+      );
+      if (add.error) throw new Error('이미지 메타 저장 실패: ' + add.error.message);
     }
     location.href = '/reviews.html';  // 저장 후 목록으로
   }catch(err){
@@ -1057,6 +1054,27 @@ async function enterEditModeById(editId){
   const editBox = document.getElementById('editImages');
   if (editBox) editBox.hidden = false;
   await renderEditImagesForEditMode(data.id, data.image_url, data.image_path);
+}
+async function getCurrentImageCount(reviewId) {
+  // review_images에 몇 장 있는지
+  const { data: imgs, error } = await sb
+    .from('review_images')
+    .select('id')
+    .eq('review_id', reviewId);
+  const countDb = error ? 0 : (imgs?.length || 0);
+
+  // 레거시 1장(image_url)도 카운트
+  let legacy = 0;
+  try {
+    const { data: r } = await sb.from('reviews')
+      .select('image_url').eq('id', reviewId).single();
+    if (r?.image_url) legacy = 1;
+  } catch {}
+
+  // 화면에서 삭제 체크된 항목은 미리 제외
+  const toDel = document.querySelectorAll('input[data-del="img"]:checked').length;
+
+  return Math.max(0, countDb + legacy - toDel);
 }
 
 document.addEventListener('DOMContentLoaded', init);
