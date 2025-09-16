@@ -46,8 +46,17 @@
     .btn.secondary{background:#f9fafb;color:#111;border:1px solid var(--border)}
     .status{font-size:12px;color:var(--muted);margin-top:4px}
 
-    /* 좌측 배너(남는 공간 채움) */
-    #leftAuth .banner-flex{flex:1;border:1px dashed var(--border);border-radius:12px;background:#fff;margin-top:16px}
+    /* 왼쪽 카드만 늘어나지 않게 */
+    #leftAuth{ align-self:start; }
+    #leftAuth.card{ min-height:0; }          /* .card의 min-height:80vh 무력화 */
+
+    #leftAuth .banner-flex{
+      flex:0 0 auto;                         /* 높이 늘리지 않음 */
+      border:1px dashed var(--border);
+      border-radius:12px;
+      background:#fff;
+      margin-top:16px;
+    }
 
     /* 목록 테이블 */
     .table{width:100%;border-collapse:collapse}
@@ -213,6 +222,7 @@
 
       <div class="banner-flex"></div>
     </section>
+      <div id="visitCounter" class="muted" style="text-align:center;margin-top:8px"></div>
 
     <!-- 우: 목록/읽기/쓰기 -->
     <section class="card" id="rightCard">
@@ -974,8 +984,9 @@ async function init(){
   // 기본: 목록
   showList();
   await loadList();
-await refreshAuthUI();
-ensureAuthVisible(); 
+  await bumpAndShowVisitCounter(); // ← 초기 페이지에서만 방문수 표시
+  await refreshAuthUI();
+  ensureAuthVisible(); 
 }
 
 async function safeGetSession(timeoutMs = 2000) {
@@ -1076,6 +1087,21 @@ async function getCurrentImageCount(reviewId) {
 
   return Math.max(0, countDb + legacy - toDel);
 }
+
+async function bumpAndShowVisitCounter() {
+  const el = document.getElementById('visitCounter');
+  if (!el) return;
+  try {
+    // 페이지 키는 임의로 'reviews_index' 사용
+    const { data, error } = await sb.rpc('inc_page_visit', { _page: 'reviews_index' });
+    if (error) { el.textContent = '방문수 집계 실패'; return; }
+    const n = Number(data || 0);
+    el.textContent = `방문수 ${n.toLocaleString('ko-KR')}`;
+  } catch (e) {
+    el.textContent = '방문수 집계 실패';
+  }
+}
+
 
 document.addEventListener('DOMContentLoaded', init);
 document.addEventListener('click', (e) => {
