@@ -45,15 +45,13 @@
 
 /* 방문자수: 데스크톱에선 오른쪽 열(컬럼 2)로 고정 */
 .visit-counter{
-  text-align:center;
   margin-top:12px;
-  color:#e7edf5;                          /* 어두운 배경 대비 */
+  color:#e7edf5;                       /* 어두운 배경 대비 */
   background:rgba(255,255,255,.06);
   border:1px solid rgba(255,255,255,.12);
   border-radius:10px;
-  padding:6px 10px;                        /* 살짝 패딩 */
-  width:fit-content;                       /* 내용폭만 */
-  margin-left:auto; margin-right:auto;     /* 가운데 배치 */
+  padding:6px 10px;
+  text-align:center;
 }
 
 @media (min-width:1024px){
@@ -211,6 +209,7 @@
       <p class="muted" style="margin-top:10px">
         후기를 남기시려면 <a href="/reviews.html">사용후기 페이지</a>로 이동하세요.
       </p>
+      <div id="visitCounterHome" class="visit-counter">방문수 로딩중…</div>
     </section>
 
     <!-- 기능 요약 -->
@@ -275,6 +274,22 @@
     elTabSignup?.addEventListener("click", showSignup);
     elTabLogin?.addEventListener("click", showLogin);
     goLogin?.addEventListener("click", (e)=>{ e.preventDefault(); showLogin(); });
+
+   <script>
+   async function bumpAndShowVisitCounterHome() {
+     const el = document.getElementById('visitCounterHome');
+     if (!el) return;
+     try {
+       const { data, error } = await sb.rpc('inc_page_visit', { _page: 'home_index' });
+       if (error) throw error;
+       const n = Number(data || 0);
+       el.textContent = `방문수 ${n.toLocaleString('ko-KR')}`;
+     } catch (e) {
+       el.textContent = '방문수 집계 실패';
+     }
+   }
+   document.addEventListener('DOMContentLoaded', bumpAndShowVisitCounterHome);
+   </script>
 
     // 로그인 상태에선 탭/가입폼 숨기고, 로그인 폼만(버튼은 숨김, 로그아웃 보임)
     async function refreshAuthUI(){
