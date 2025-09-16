@@ -72,6 +72,41 @@
     /* 읽기 상단 액션바 */
     .top-actions{border-bottom:1px solid #e5e7eb;padding-bottom:10px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;gap:8px}
 
+/* 공통 썸네일 그리드 (가운데 정렬) */
+.thumbs{
+  display:grid;
+  gap:10px;
+  justify-items:center;
+  grid-template-columns:1fr;
+}
+@media (min-width:768px){ .thumbs{ grid-template-columns:repeat(2,1fr) } }
+@media (min-width:1024px){ .thumbs{ grid-template-columns:repeat(3,1fr) } }
+.thumbs img{
+  max-width:100%;
+  border-radius:10px;
+  display:block;
+  margin:0 auto;
+  cursor:pointer;
+}
+
+/* 라이트박스 */
+.lightbox{
+  position:fixed; inset:0; background:rgba(0,0,0,.75);
+  display:flex; align-items:center; justify-content:center; z-index:9999;
+}
+.lightbox[hidden]{ display:none; }
+.lightbox img{ max-width:90vw; max-height:85vh; border-radius:12px; }
+.lb-close,.lb-prev,.lb-next{
+  position:absolute; top:50%; transform:translateY(-50%);
+  background:#111; color:#fff; border:none; border-radius:999px;
+  width:42px; height:42px; cursor:pointer; font-size:24px; line-height:1;
+  display:flex; align-items:center; justify-content:center;
+  opacity:.9;
+}
+.lb-close{ top:8%; right:4%; transform:none; }
+.lb-prev{ left:3%; }
+.lb-next{ right:3%; }
+
      /* 이미지 갤러리 & 반응형 배치 */
     .image,.thumb{display:block;height:auto}
     .gallery{display:grid;gap:10px;justify-items:center}
@@ -213,15 +248,13 @@
 
         <div class="field">
           <label for="image">이미지(선택)</label>
-          <input id="image" type="file" accept="image/*" multiple>
+          <input id="image" type="file" accept="image/*" multiple data-max="6">
           <!-- 편집 모드일 때 기존 이미지 나열(삭제 체크 가능) -->
-          <div id="editImages" class="gallery edit-gallery" hidden></div>
+        <div id="previews" class="thumbs"></div>
           <!-- 새로 선택한 이미지 미리보기 -->
           <div id="previews" class="gallery"></div>
           <img id="preview" class="thumb" alt="" hidden> <!-- 기존 단일 프리뷰는 유지(호환) -->
-          <div class="status">큰 이미지는 업로드 전 자동 축소(가로 최대 1600px)됩니다.</div>
-        </div>
-
+       <div class="status">최대 6장까지 선택 가능 (가로 최대 1600px로 축소 예정)</div>
 
         <div class="row" style="border-top:1px solid #e5e7eb;margin-top:12px;padding-top:10px;justify-content:flex-end;gap:8px">
           <span id="formStatus" class="status" style="margin-right:auto"></span>
@@ -286,6 +319,7 @@ const fImage   = $('#image');
 const preview  = $('#preview');
 const previews = $('#previews');
 const editImages = $('#editImages'); // 편집 모드에서 기존 이미지 나열
+const MAX_FILES = Number($('#image')?.dataset?.max || 6);
 
 // ====== 공용 유틸 ======
 function escapeHtml(s){return (s??'').replace(/[&<>"']/g,m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m]))}
@@ -525,7 +559,15 @@ async function renderEditImagesForEditMode(reviewId, fallbackUrl, fallbackPath){
 
     <h3 style="margin:0 0 6px">${escapeHtml(data.title || "(제목 없음)")}</h3>
     <div class="muted" style="margin-bottom:10px">${escapeHtml(name)} · ${fmtDate(data.created_at)}</div>
-     <div style="white-space:pre-wrap;word-break:break-word">${escapeHtml(data.content || "")}</div>
+    <div style="white-space:pre-wrap;word-break:break-word">${escapeHtml(data.content || "")}</div>
+    <!-- 읽기: 썸네일 그리드 + 라이트박스 -->
+    <div id="galleryThumbs" class="thumbs" style="margin-top:12px"></div>
+    <div id="lb" class="lightbox" hidden>
+      <button class="lb-close" aria-label="닫기">×</button>
+      <button class="lb-prev" aria-label="이전">‹</button>
+      <img id="lbImg" alt="">
+      <button class="lb-next" aria-label="다음">›</button>
+    </div>
      <!-- 이미지 갤러리: 방향별 컨테이너 -->
      <div class="gallery gallery-landscape" id="galLand"></div>
      <div class="gallery gallery-portrait" id="galPort"></div>
@@ -595,7 +637,9 @@ async function renderEditImagesForEditMode(reviewId, fallbackUrl, fallbackPath){
 
   // 반응 & 댓글 렌더
   await renderReactions(id);
+  await renderReactions(id);
   await renderComments(id);
+  await renderGalleryLightbox(id, data.image_url); // ← 읽기 썸네일/라이트박스
   // 조회수 +1
   try { await sb.rpc('inc_review_view', { _id: id }); } catch (e) { console.warn('view +1 실패', e); }
 }
@@ -752,14 +796,23 @@ async function renderComments(reviewId){
 // ====== 글쓰기: 미리보기/저장 ======
 fImage?.addEventListener('change', ()=>{
   const files = Array.from(fImage.files || []);
-  // 단일 프리뷰는 감춤
+  // 현재 편집 모드에서 남은 슬롯 계산 (기존 이미지 수 - 삭제 체크 수)
+  let existing = 0;
+  if (editImages && !editImages.hidden){
+    existing = editImages.querySelectorAll('input[data-del="img"]').length
+             - editImages.querySelectorAll('input[data-del="img"]:checked').length;
+  }
+  const allowed = Math.max(0, MAX_FILES - existing);
+  const useFiles = files.slice(0, allowed);
+  if (files.length > allowed && formStatus){
+    formStatus.textContent = `이미지는 최대 ${MAX_FILES}장까지 가능합니다. (선택한 ${files.length}장 중 ${allowed}장만 반영)`;
+  }
   if (preview){ preview.hidden = true; preview.removeAttribute('src'); }
   if (!previews) return;
-  previews.innerHTML = ''; // 초기화
-  files.forEach(f=>{
+  previews.innerHTML = '';
+  useFiles.forEach(f=>{
     const url = URL.createObjectURL(f);
     const img = document.createElement('img');
-    img.className = 'image';
     img.src = url;
     previews.appendChild(img);
   });
@@ -810,8 +863,15 @@ writeForm?.addEventListener('submit', async (e)=>{
         catch (e) { console.warn('storage remove 실패', e); }
       }
 
-      // 3) 새로 추가 업로드(있다면) → review_images에 insert
-      const files = Array.from(fImage.files || []);
+      // 3) 새로 추가 업로드(있다면) → review_images에 insert (남은 슬롯만)
+      let remain = MAX_FILES;
+      // 현재 남은 슬롯 재계산: 기존 이미지 - 삭제 체크 수
+      if (editImages && !editImages.hidden){
+        const current = editImages.querySelectorAll('input[data-del="img"]').length
+                      - editImages.querySelectorAll('input[data-del="img"]:checked').length;
+        remain = Math.max(0, MAX_FILES - current);
+      }
+      const files = Array.from(fImage.files || []).slice(0, remain);
       const uploaded = [];
       for (const file of files){
         const ext=(file.name.split('.').pop()||'jpg').toLowerCase();
@@ -947,6 +1007,69 @@ async function renderGalleries(reviewId, fallbackUrl){
     img.onerror = resolve;
   })));
 }
+
+async function renderGalleryLightbox(reviewId, fallbackUrl){
+  const box = document.getElementById('galleryThumbs');
+  const lb  = document.getElementById('lb');
+  const lbImg = document.getElementById('lbImg');
+  const btnPrev = lb?.querySelector('.lb-prev');
+  const btnNext = lb?.querySelector('.lb-next');
+  const btnClose= lb?.querySelector('.lb-close');
+  if(!box) return;
+
+  // 1) 이미지 목록 가져오기
+  let urls = [];
+  try{
+    const { data, error } = await sb
+      .from('review_images')
+      .select('url, created_at')
+      .eq('review_id', reviewId)
+      .order('created_at', { ascending:true });
+    if(!error && data?.length) urls = data.map(r=>r.url);
+  }catch{}
+  if(!urls.length && fallbackUrl) urls = [fallbackUrl];
+
+  // 2) 썸네일 렌더
+  box.innerHTML = '';
+  urls.forEach((u, i)=>{
+    const img = document.createElement('img');
+    img.src = u;
+    img.alt = '';
+    img.addEventListener('click', ()=> openAt(i));
+    box.appendChild(img);
+  });
+
+  // 3) 라이트박스 동작
+  let cur = 0;
+  function openAt(i){
+    cur = i;
+    if(lb && lbImg){
+      lbImg.src = urls[cur];
+      lb.hidden = false;
+      document.body.style.overflow = 'hidden';
+    }
+  }
+  function close(){
+    if(lb){
+      lb.hidden = true;
+      document.body.style.overflow = '';
+    }
+  }
+  function prev(){ cur = (cur - 1 + urls.length) % urls.length; lbImg.src = urls[cur]; }
+  function next(){ cur = (cur + 1) % urls.length; lbImg.src = urls[cur]; }
+
+  btnClose?.addEventListener('click', close);
+  btnPrev?.addEventListener('click', prev);
+  btnNext?.addEventListener('click', next);
+  lb?.addEventListener('click', (e)=>{ if(e.target === lb) close(); });
+  document.addEventListener('keydown', (e)=>{
+    if(lb?.hidden) return;
+    if(e.key === 'Escape') close();
+    if(e.key === 'ArrowLeft') prev();
+    if(e.key === 'ArrowRight') next();
+  });
+}
+
 
 
 
