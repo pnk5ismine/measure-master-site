@@ -74,21 +74,19 @@
 
 /* 공통 썸네일 그리드 (가운데 정렬) */
 /* 썸네일 그리드: 컨테이너만 중앙, 항목은 좌측부터 채움 */
+/* 썸네일 그리드: 컨테이너는 중앙 위치, 항목은 좌측부터 채움 */
 .thumbs{
   display:grid;
   gap:12px;
-  max-width:1200px;   /* 그리드 박스 폭 제한 */
-  margin:0 auto;      /* 그리드 박스 자체는 중앙 위치 */
-  grid-template-columns:repeat(2, minmax(0, 1fr)); /* 폰: 2열 */
-  justify-content:start; /* 각 행은 왼쪽부터 채움 */
+  max-width:1200px;
+  margin:0 auto;  /* 컨테이너 자체 중앙 */
+  grid-template-columns:repeat(2, minmax(0,1fr)); /* 폰 2열 */
+  justify-content:start; /* 각 행 왼쪽부터 채움 */
 }
-@media (min-width:768px){  .thumbs{ grid-template-columns:repeat(3, minmax(0, 1fr)); } }  /* 태블릿: 3열 */
-@media (min-width:1024px){ .thumbs{ grid-template-columns:repeat(5, minmax(0, 1fr)); } }  /* PC: 5열 ≈ 각 20% */
-
-.thumb-card{ width:100%; }                       /* 그리드 셀 전체 사용 */
+@media (min-width:768px){  .thumbs{ grid-template-columns:repeat(3, minmax(0,1fr)); } }  /* 태블릿 3열 */
+@media (min-width:1024px){ .thumbs{ grid-template-columns:repeat(5, minmax(0,1fr)); } } /* PC 5열 ≈ 20% */
+.thumb-card{ width:100%; }
 .thumb-img{ width:100%; height:auto; display:block; border-radius:10px; margin:0; cursor:pointer; }
-
-/* (중요) 기존 .image 규칙은 썸네일과 분리되므로 그대로 두셔도 됩니다 */
 
 /* 라이트박스 */
 .lightbox{
@@ -555,7 +553,6 @@ async function renderEditImagesForEditMode(reviewId, fallbackUrl, fallbackPath){
   const isOwner = !!(me && data.user_id && me.id === data.user_id);
 
   const name = displayName(data);
-  //const imgHTML = data.image_url ? `<img id="readImg" class="image" src="${data.image_url}" alt="">` : "";
 
   readView.innerHTML = `
     <div class="top-actions">
@@ -961,6 +958,7 @@ async function init(){
   const q = new URLSearchParams(location.search);
   const id = q.get('id');
   const compose = q.get('compose');
+  const edit   = q.get('edit');
 
   if(compose === '1'){
     const { data:{ session } } = await sb.auth.getSession();
@@ -968,6 +966,13 @@ async function init(){
     showWrite(); return;
   }
   if(id){ showRead(); await loadOne(id); return; }
+
+  if (edit){
+    const { data:{ session } } = await sb.auth.getSession();
+    if(!session?.user){ history.replaceState(null,'','/reviews.html'); showList(); await loadList(); return; }
+    await enterEditModeById(edit);
+    return;
+ }
 
   // 기본: 목록
   showList();
@@ -991,12 +996,8 @@ async function renderGalleryLightbox(reviewId, fallbackUrl){
   const box = document.getElementById('galleryThumbs');
   const lb  = document.getElementById('lb');
   const lbImg = document.getElementById('lbImg');
-  const btnPrev = lb?.querySelector('.lb-prev');
-  const btnNext = lb?.querySelector('.lb-next');
-  const btnClose= lb?.querySelector('.lb-close');
   if(!box) return;
 
-  // 1) 모든 이미지 URL 수집 (review_images → 없으면 legacy image_url 1장)
   let urls = [];
   try{
     const { data, error } = await sb
@@ -1005,31 +1006,28 @@ async function renderGalleryLightbox(reviewId, fallbackUrl){
       .eq('review_id', reviewId)
       .order('created_at', { ascending:true });
     if(!error && data?.length) urls = data.map(r=>r.url);
-  }catch{}
+  }catch(e){ console.warn('review_images select error', e); }
   if(!urls.length && fallbackUrl) urls = [fallbackUrl];
 
-  // 2) 썸네일(모두 나열, 중앙 정렬). 썸네일은 `.thumb-img` 클래스를 사용!
+  // ✅ 썸네일(여러 장 모두) 렌더 — 썸네일 전용 클래스만 사용
   box.innerHTML = urls.map((u,i)=>`
-    <div class="thumb-card">
-      <img class="thumb-img" src="${u}" alt="" data-idx="${i}">
-    </div>
+    <div class="thumb-card"><img class="thumb-img" src="${u}" alt="" data-idx="${i}"></div>
   `).join('');
 
-  // 3) 라이트박스(있을 때만)
-  if (!lb || !lbImg) return; // 라이트박스 안 쓰시면 이 라인만 남겨도 OK
-
+  // (라이트박스가 있다면 동작 연결)
+  const lbOk = lb && lbImg;
+  if(!lbOk) return;
   let cur = 0;
-  function openAt(i){ cur=i; lbImg.src=urls[cur]; lb.hidden=false; document.body.style.overflow='hidden'; }
-  function close(){ lb.hidden=true; document.body.style.overflow=''; }
-  function prev(){ cur=(cur-1+urls.length)%urls.length; lbImg.src=urls[cur]; }
-  function next(){ cur=(cur+1)%urls.length; lbImg.src=urls[cur]; }
-
+  const openAt = (i)=>{ cur=i; lbImg.src=urls[cur]; lb.hidden=false; document.body.style.overflow='hidden'; };
+  const close  = ()=>{ lb.hidden=true; document.body.style.overflow=''; };
+  const prev   = ()=>{ cur=(cur-1+urls.length)%urls.length; lbImg.src=urls[cur]; };
+  const next   = ()=>{ cur=(cur+1)%urls.length; lbImg.src=urls[cur]; };
   box.querySelectorAll('img.thumb-img').forEach(img=>{
     img.addEventListener('click', ()=> openAt(Number(img.dataset.idx)));
   });
   lb.querySelector('.lb-close')?.addEventListener('click', close);
-  btnPrev?.addEventListener('click', prev);
-  btnNext?.addEventListener('click', next);
+  lb.querySelector('.lb-prev')?.addEventListener('click', prev);
+  lb.querySelector('.lb-next')?.addEventListener('click', next);
   lb.addEventListener('click', (e)=>{ if(e.target===lb) close(); });
   document.addEventListener('keydown', (e)=>{
     if(lb.hidden) return;
@@ -1039,8 +1037,27 @@ async function renderGalleryLightbox(reviewId, fallbackUrl){
   });
 }
 
+async function enterEditModeById(editId){
+  // 후기 로드
+  const { data, error } = await sb
+    .from('reviews')
+    .select('id, title, content, image_url, image_path')
+    .eq('id', editId).single();
+  if (error){ alert('글 불러오기 실패: ' + error.message); return; }
 
-
+  // 편집 폼 전환 + 프리필 + 플래그
+  showWrite && showWrite();
+  if (fTitle)   fTitle.value   = data.title   || '';
+  if (fContent) fContent.value = data.content || '';
+  if (writeForm){
+    writeForm.dataset.editing = data.id;               // ✅ 편집 모드 플래그
+    writeForm._editingLegacy  = { url: data.image_url, path: data.image_path };
+  }
+  // 기존 이미지 썸네일 표시
+  const editBox = document.getElementById('editImages');
+  if (editBox) editBox.hidden = false;
+  await renderEditImagesForEditMode(data.id, data.image_url, data.image_path);
+}
 
 document.addEventListener('DOMContentLoaded', init);
 document.addEventListener('click', (e) => {
