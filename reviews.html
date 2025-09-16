@@ -30,7 +30,10 @@
 
     /* 카드 */
     .card{background:#fff;color:var(--text);border:1px solid var(--border);border-radius:16px;padding:18px;box-shadow:0 1px 2px rgba(0,0,0,.06);display:flex;flex-direction:column;min-height:80vh}
-    h1{margin:0 0 8px;font-size:20px}
+    h1{margin:0 0 8px;font-size:18px}
+    h2, .section-title{font-size:16px}
+    body, .table td, .table th, .comment-body, .cell-body{font-size:14px}
+
     .muted{color:var(--muted)}
     .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
     .field{display:flex;flex-direction:column;gap:6px;margin:12px 0}
@@ -63,6 +66,7 @@
       -webkit-box-orient:vertical;
       overflow:hidden;
     }
+    .cell-stats{width:100px;text-align:center;color:#555}
     .list-footer{border-top:1px solid #e5e7eb;padding-top:10px;display:flex;justify-content:flex-end}
 
     /* 읽기 상단 액션바 */
@@ -172,6 +176,7 @@
             <th class="cell-no">번호</th>
             <th class="cell-nick">닉네임</th>
             <th>내용</th>
+            <th class="cell-stats">조회</th>
             <th class="cell-time">작성시각</th>
           </tr>
           </thead>
@@ -392,7 +397,7 @@ function showWrite(){listView.hidden=true;  readView.hidden=true;  writeForm.hid
 // ====== 목록 로드 (로그인 여부와 무관하게 항상 보이도록) ======
 async function loadList(){
   const { data, error } = await sb.from('reviews')
-    .select('id, title, content, nickname, author_email, created_at')
+    .select('id, title, content, nickname, author_email, created_at, view_count')
     .order('created_at', { ascending:false })
     .limit(100);
   if(error){
@@ -403,14 +408,30 @@ async function loadList(){
     listBody.innerHTML = `<tr><td colspan="4" class="muted">등록된 후기가 없습니다.</td></tr>`;
     return;
   }
-  listBody.innerHTML = data.map((row, idx)=>`
+  // 댓글수/조회수 합치기
+  const ids = data.map(r => r.id);
+  let countMap = new Map();
+  if (ids.length){
+    const { data: counts } = await sb.from('review_counts')
+      .select('review_id, view_count, comment_count')
+      .in('review_id', ids);
+    counts?.forEach(r => countMap.set(r.review_id, {
+      v: Number(r.view_count||0),
+      c: Number(r.comment_count||0)
+    }));
+  }
+
+  listBody.innerHTML = data.map((row, idx)=>{
+    const stat = countMap.get(row.id) || { v: Number(row.view_count||0), c: 0 };
+    return `
     <tr data-id="${row.id}" class="row-item" style="cursor:pointer">
       <td class="cell-no">${idx+1}</td>
       <td class="cell-nick">${escapeHtml(displayName(row))}</td>
       <td class="cell-body">${escapeHtml((row.title?`[${row.title}] `:'') + (row.content||''))}</td>
+      <td class="cell-stats">${stat.v} (${stat.c})</td>
       <td class="cell-time">${fmtDate(row.created_at)}</td>
     </tr>
-  `).join('');
+  `}).join('');
   listBody.querySelectorAll('tr.row-item').forEach(tr=>{
     tr.addEventListener('click',()=> location.href=`/reviews.html?id=${tr.dataset.id}`);
   });
@@ -443,7 +464,8 @@ async function loadOne(id){
       <a class="btn secondary" href="/reviews.html">목록보기</a>
       <div style="display:flex; gap:8px; align-items:center">
         <button class="btn" type="button" id="btn-to-compose">글쓰기</button>
-        ${isOwner ? `<button class="btn secondary" type="button" id="btn-delete">삭제</button>` : ``}
+      ${isOwner ? `<button class="btn secondary" type="button" id="btn-edit">수정</button>` : ``}
+      ${isOwner ? `<button class="btn secondary" type="button" id="btn-delete">삭제</button>` : ``}
       </div>
     </div>
 
@@ -480,6 +502,15 @@ async function loadOne(id){
     history.replaceState(null,'','/reviews.html?compose=1');
     showWrite && showWrite();
   });
+  // 수정: 제목/내용만 편집 (이미지는 유지)
+  document.getElementById('btn-edit')?.addEventListener('click', ()=>{
+    history.replaceState(null,'', `/reviews.html?edit=${id}`);
+    showWrite && showWrite();
+    // 프리필
+    if (fTitle)   fTitle.value   = data.title   || '';
+    if (fContent) fContent.value = data.content || '';
+    if (writeForm) writeForm.dataset.editing = id; // 편집 모드 플래그
+  });
 
   document.getElementById('btn-delete')?.addEventListener('click', async ()=>{
     if(!confirm('정말 삭제할까요? 이 작업은 되돌릴 수 없습니다.')) return;
@@ -503,6 +534,8 @@ async function loadOne(id){
   // 반응 & 댓글 렌더
   await renderReactions(id);
   await renderComments(id);
+  // 조회수 +1
+  try { await sb.rpc('inc_review_view', { _id: id }); } catch (e) { console.warn('view +1 실패', e); }
 }
 
 /* ========== 좋아요/싫어요 ========== */
@@ -677,11 +710,19 @@ writeForm?.addEventListener('submit', async (e)=>{
   const title = fTitle.value.trim();
   const content = fContent.value.trim();
   if(!content){ formStatus.textContent = "내용을 입력하세요."; return; }
+  const editingId = writeForm?.dataset?.editing;
 
   btnSubmit.disabled = true; btnSubmit.textContent = "저장 중…";
   try{
     const nickname = (session.user.user_metadata?.full_name) || (session.user.email?.split('@')[0]) || '익명';
     let image_path=null, image_url=null; // 호환용 첫 이미지
+    if (editingId){
+      // 수정(제목/내용만 갱신)
+      const upd = await sb.from('reviews').update({ title, content }).eq('id', editingId);
+      if(upd.error) throw new Error(upd.error.message);
+      location.href = `/reviews.html?id=${editingId}`;
+      return;
+    }
     const files = Array.from(fImage.files || []);
     const uploaded = [];
     for (const file of files){
