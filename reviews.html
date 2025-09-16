@@ -26,16 +26,19 @@
 
     /* 레이아웃 */
    + .layout{display:grid;grid-template-columns:1fr;gap:18px;align-items:start}
-     @media (min-width:1024px){
-       .layout{ grid-template-columns:1fr 3fr; align-items:start }
+   @media (min-width:1024px){
+     .layout{
+       display:grid !important;
+       grid-template-columns: minmax(300px,1fr) 3fr !important;
+       align-items:start !important;
+       column-gap:18px;
+     }
+     #leftAuth{ grid-column:1; align-self:start; }
+     #leftAuth.card{ min-height:0; }
+     #rightCard{ grid-column:2; align-self:stretch; }
+    }
    /* 카드 */
     .card{background:#fff;color:var(--text);border:1px solid var(--border);border-radius:16px;padding:18px;box-shadow:0 1px 2px rgba(0,0,0,.06);display:flex;flex-direction:column}
-    /* 오른쪽 카드는 콘텐츠에 맞춰 높이 */
-      #rightCard{ grid-column:2; align-self:stretch; }
- 
-    /* 왼쪽 카드는 늘어나지 않게 */
-       #leftAuth{ grid-column:1; align-self:start; }
-       #leftAuth.card{ min-height:0; }
  
     h1{margin:0 0 8px;font-size:18px}
     h2, .section-title{font-size:16px}
@@ -45,9 +48,8 @@
     .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
     .field{display:flex;flex-direction:column;gap:6px;margin:12px 0}
     input[type="text"], input[type="email"], input[type="password"], textarea{
-      width:100%;padding:10px 12px;border-radius:12px;border:1px solid var(--border);background:#fff;color:#111
-    }
-    textarea{min-height:180px;resize:vertical}
+      width:100%;padding:10px 12px;border-radius:12px;border:1px solid var(--border);background:#fff;color:#111}
+      textarea{min-height:180px;resize:vertical}
     input[type="file"]{display:block}
     .btn{padding:10px 14px;border-radius:10px;border:1px solid var(--pri);background:var(--pri);color:#fff;cursor:pointer}
     .btn.secondary{background:#f9fafb;color:#111;border:1px solid var(--border)}
