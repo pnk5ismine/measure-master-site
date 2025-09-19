@@ -138,6 +138,32 @@
     .comment-form textarea{flex:1;min-height:60px}
     #leftAuth{align-self:start; height:auto}
     #leftAuth.card{min-height:auto}
+
+   /* ========== [OVERRIDE] 읽기 썸네일 그리드 ========== */
+   /* 기본: 모바일 1열 */
+   .thumbs{display:grid; gap:14px; grid-template-columns:1fr; justify-content:center}
+   .thumb-card{width:100%; max-width:480px; margin:0 auto}
+   .thumb-img{width:100%; height:auto; display:block; border-radius:10px}
+
+   /* 데스크톱: 3열 */
+   @media (min-width:1024px){
+     .thumbs{ grid-template-columns: repeat(3, minmax(0,1fr)); }
+   }
+
+   /* ========== [MOBILE LIST] 2줄 카드형 ========== */
+    .m-only{display:none}
+
+    @media (max-width:700px){
+      .table thead{display:none}
+      .table tr{display:block; border-bottom:1px solid #e5e7eb; padding:8px 0}
+      .table td{display:block; border:none; padding:4px 8px}
+      .cell-no,.cell-nick,.cell-stats,.cell-time{display:none}           /* 데스크톱용 열 숨김 */
+      .cell-body{display:block; -webkit-line-clamp:1}                    /* 1줄만 노출 */
+      .cell-body .m-line1{display:block; font-weight:600; margin-bottom:4px}
+      .cell-body .m-line1 .nick{margin-right:6px; color:#333}
+      .cell-body .m-line2{display:flex; justify-content:space-between; color:#666; font-size:12px}
+      .m-only{display:inline}                                            /* 모바일 전용 표시 */
+    }
   </style>
 </head>
 <body>
@@ -452,18 +478,25 @@ async function loadList(){
       c: Number(r.comment_count||0)
     }));
   }
-  listBody.innerHTML = data.map((row, idx)=>{
-    const stat = countMap.get(row.id) || { v: Number(row.view_count||0), c: 0 };
-    return `
-      <tr data-id="${row.id}" class="row-item" style="cursor:pointer">
-        <td class="cell-no">${idx+1}</td>
-        <td class="cell-nick">${escapeHtml(displayName(row))}</td>
-        <td class="cell-body">${escapeHtml((row.title?`[${row.title}] `:'') + (row.content||''))}</td>
-        <td class="cell-stats">${stat.v} (${stat.c})</td>
-        <td class="cell-time">${fmtDate(row.created_at)}</td>
-      </tr>
-    `;
-  }).join('');
+ listBody.innerHTML = data.map((row, idx)=>{
+   const stat = countMap.get(row.id) || { v: Number(row.view_count||0), c: 0 };
+   const nick = escapeHtml(displayName(row));
+   const body = escapeHtml((row.title?`[${row.title}] `:'') + (row.content||''));  // PC: 2줄 클램프, 모바일: 1줄
+   const when = fmtDate(row.created_at);
+   return `
+     <tr data-id="${row.id}" class="row-item" style="cursor:pointer">
+       <td class="cell-no">${idx+1}</td>
+       <td class="cell-nick">${nick}</td>
+       <td class="cell-body">
+         <div class="m-line1"><span class="nick m-only">${nick}</span>${body}</div>
+         <div class="m-line2 m-only"><span>조회 ${stat.v} (${stat.c})</span><span>${when}</span></div>
+       </td>
+       <td class="cell-stats">${stat.v} (${stat.c})</td>
+       <td class="cell-time">${when}</td>
+     </tr>
+   `;
+ }).join('');
+
   listBody.querySelectorAll('tr.row-item').forEach(tr=>{
     tr.addEventListener('click',()=> location.href=`/reviews.html?id=${tr.dataset.id}`);
   });
