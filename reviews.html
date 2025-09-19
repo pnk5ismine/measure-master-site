@@ -807,13 +807,27 @@ async function renderGalleryLightbox(reviewId, fallbackUrl){
 
   let urls = [];
   try{
-    const { data, error } = await sb
+    let res = await sb
       .from('review_images')
-      .select('url')
+      .select('id,url')
       .eq('review_id', reviewId)
       .order('created_at', { ascending:true });
-    if(!error && data?.length) urls = data.map(r=>r.url);
-  }catch(e){ console.warn('review_images select error', e); }
+    if (res.error) throw res.error;
+    if (res.data?.length) urls = res.data.map(r=>r.url);
+  }catch(e){
+    // created_at이 없을 때 대비: id 기준으로 재시도
+    try{
+      const res2 = await sb
+        .from('review_images')
+        .select('id,url')
+        .eq('review_id', reviewId)
+        .order('id', { ascending:true });
+      if (!res2.error && res2.data?.length) urls = res2.data.map(r=>r.url);
+    }catch(e2){
+      console.warn('review_images select fallback error', e2);
+    }
+  }
+
   if(!urls.length && fallbackUrl) urls = [fallbackUrl];
 
   box.innerHTML = urls.map((u,i)=>`
@@ -850,14 +864,23 @@ async function renderEditImagesForEditMode(reviewId, fallbackUrl, fallbackPath){
 
   let rows = [];
   try{
-    const { data, error } = await sb
+    let res = await sb
       .from('review_images')
-      .select('id, url, path, created_at')
+      .select('id,url,path,created_at')
       .eq('review_id', reviewId)
-      .order('created_at', { ascending: true });
-    if (!error && data) rows = data;
-  }catch{}
-
+      .order('created_at', { ascending:true });
+    if (!res.error && res.data) rows = res.data;
+  }catch{
+    // created_at 미존재 대비: id 기준으로 재시도
+    try{
+      const res2 = await sb
+        .from('review_images')
+        .select('id,url,path')
+        .eq('review_id', reviewId)
+        .order('id', { ascending:true });
+      if (!res2.error && res2.data) rows = res2.data;
+    }catch(e2){ console.warn('review_images fallback error', e2); }
+  }
   if ((!rows || !rows.length) && fallbackUrl){
     rows = [{ id: null, url: fallbackUrl, path: fallbackPath || null, _legacy: true }];
   }
