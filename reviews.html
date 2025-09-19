@@ -829,6 +829,7 @@ async function renderGalleryLightbox(reviewId, fallbackUrl){
   }
 
   if(!urls.length && fallbackUrl) urls = [fallbackUrl];
+ if (!urls.length) console.warn('[review_images] 0장 반환 (RLS/타입/값 불일치 가능)');
 
   box.innerHTML = urls.map((u,i)=>`
     <div class="thumb-card"><img class="thumb-img" src="${u}" alt="" data-idx="${i}"></div>
