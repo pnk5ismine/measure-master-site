@@ -338,6 +338,7 @@ const preview  = $('#preview');
 const selectPreviews = $('#selectPreviews');
 const editImages = $('#editImages');
 const MAX_FILES = Number($('#image')?.dataset?.max || 6);
+ let chosenFiles = [];
 
 /* ========= 유틸 ========= */
 function escapeHtml(s){return (s??'').replace(/[&<>"']/g,m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m]))}
@@ -483,6 +484,7 @@ async function loadList(){
    const nick = escapeHtml(displayName(row));
    const body = escapeHtml((row.title?`[${row.title}] `:'') + (row.content||''));  // PC: 2줄 클램프, 모바일: 1줄
    const when = fmtDate(row.created_at);
+
    return `
      <tr data-id="${row.id}" class="row-item" style="cursor:pointer">
        <td class="cell-no">${idx+1}</td>
@@ -946,32 +948,53 @@ async function getCurrentImageCount(reviewId) {
 }
 
 /* ========= 파일 선택(새 썸네일 미리보기) ========= */
-fImage?.addEventListener('change', ()=>{
-  const files = Array.from(fImage.files || []);
-  let existing = 0;
-  if (editImages && !editImages.hidden){
-    existing = editImages.querySelectorAll('input[data-del="img"]').length
-             - editImages.querySelectorAll('input[data-del="img"]:checked').length;
-  }
-  const allowed = Math.max(0, MAX_FILES - existing);
-  const useFiles = files.slice(0, allowed);
-  if (files.length > allowed && formStatus){
-    formStatus.textContent = `이미지는 최대 ${MAX_FILES}장까지 가능합니다. (선택한 ${files.length}장 중 ${allowed}장만 반영)`;
-  }
-  if (preview){ preview.hidden = true; preview.removeAttribute('src'); }
-  if (!selectPreviews) return;
-  selectPreviews.innerHTML = '';
-  useFiles.forEach(f=>{
-    const url = URL.createObjectURL(f);
-    const wrap = document.createElement('div');
-    wrap.className = 'thumb-card';
-    const img = document.createElement('img');
-    img.className = 'thumb-img';
-    img.src = url;
-    wrap.appendChild(img);
-    selectPreviews.appendChild(wrap);
-  });
-});
+ fImage?.addEventListener('change', ()=>{
+   // 현재 편집 모드에서 남은 슬롯 계산
+   let existing = 0;
+   if (editImages && !editImages.hidden){
+     existing = editImages.querySelectorAll('input[data-del="img"]').length
+              - editImages.querySelectorAll('input[data-del="img"]:checked').length;
+   }
+   const slot = Math.max(0, MAX_FILES - existing);
+
+   // 새로 고른 파일들
+   const newly = Array.from(fImage.files || []);
+
+   // 누적(chosenFiles) + 신규(newly) → 중복 제거(name+size+lastModified)
+   const key = f => `${f.name}__${f.size}__${f.lastModified}`;
+   const map = new Map();
+   [...chosenFiles, ...newly].forEach(f => { if (!map.has(key(f))) map.set(key(f), f); });
+   let next = Array.from(map.values());
+
+   // 슬롯 초과면 앞에서부터 MAX 유지
+   if (next.length > slot){
+     if (formStatus) formStatus.textContent =
+       `이미지는 최대 ${MAX_FILES}장까지 가능합니다. (현재 ${next.length}→${slot}장으로 제한)`;
+     next = next.slice(0, slot);
+   }else{
+     if (formStatus) formStatus.textContent = '';
+   }
+
+   chosenFiles = next;
+
+   // 미리보기 렌더
+   if (preview){ preview.hidden = true; preview.removeAttribute('src'); }
+   if (!selectPreviews) return;
+   selectPreviews.innerHTML = '';
+   chosenFiles.forEach(f=>{
+     const url = URL.createObjectURL(f);
+     const wrap = document.createElement('div');
+     wrap.className = 'thumb-card';
+     const img = document.createElement('img');
+     img.className = 'thumb-img';
+     img.src = url;
+     wrap.appendChild(img);
+     selectPreviews.appendChild(wrap);
+   });
+
+   // 같은 파일을 다시 선택 가능하도록 초기화
+   try{ fImage.value = ''; }catch{}
+ });
 
 /* ========= 저장(신규/편집) ========= */
 writeForm?.addEventListener('submit', async (e)=>{
@@ -1019,7 +1042,7 @@ writeForm?.addEventListener('submit', async (e)=>{
       // 3) 남은 슬롯 계산 → 업로드
       const currentCount = await getCurrentImageCount(editingId);
       const remain = Math.max(0, MAX_FILES - currentCount);
-      const files = Array.from(fImage.files || []).slice(0, remain);
+      const files = (chosenFiles.length ? chosenFiles : Array.from(fImage.files || [])).slice(0, remain);
 
       const uploaded = [];
       for (const file of files){
@@ -1042,7 +1065,7 @@ writeForm?.addEventListener('submit', async (e)=>{
     }
 
     // 신규 글
-    const files = Array.from(fImage.files || []).slice(0, MAX_FILES);
+    const files = (chosenFiles.length ? chosenFiles : Array.from(fImage.files || [])).slice(0, MAX_FILES);
     const uploaded = [];
     for (const file of files){
       const ext=(file.name.split('.').pop()||'jpg').toLowerCase();
