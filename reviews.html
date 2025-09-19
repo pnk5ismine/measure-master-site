@@ -153,17 +153,31 @@
    /* ========== [MOBILE LIST] 2줄 카드형 ========== */
     .m-only{display:none}
 
-    @media (max-width:700px){
-      .table thead{display:none}
-      .table tr{display:block; border-bottom:1px solid #e5e7eb; padding:8px 0}
-      .table td{display:block; border:none; padding:4px 8px}
-      .cell-no,.cell-nick,.cell-stats,.cell-time{display:none}           /* 데스크톱용 열 숨김 */
-      .cell-body{display:block; -webkit-line-clamp:1}                    /* 1줄만 노출 */
-      .cell-body .m-line1{display:block; font-weight:600; margin-bottom:4px}
-      .cell-body .m-line1 .nick{margin-right:6px; color:#333}
-      .cell-body .m-line2{display:flex; justify-content:space-between; color:#666; font-size:12px}
-      .m-only{display:inline}                                            /* 모바일 전용 표시 */
-    }
+ @media (max-width:700px){
+   .table thead{display:none}
+   .table tr{display:block; border-bottom:1px solid #e5e7eb; padding:8px 0}
+   .table td{display:block; border:none; padding:4px 8px}
+   .cell-no,.cell-nick,.cell-stats,.cell-time{display:none}
+   .cell-body{display:block}
+   .cell-body .m-line1{
+     display:-webkit-box;
+     -webkit-line-clamp:1;              /* 1줄만 노출 */
+     -webkit-box-orient:vertical;
+     overflow:hidden;
+     white-space:normal;
+     font-weight:600;
+     margin-bottom:4px;
+   }
+   .cell-body .m-line1 .nick{margin-right:6px; color:#333}
+   .cell-body .m-line2{
+     display:flex;
+     justify-content:flex-end;          /* 둘 다 오른쪽 정렬 */
+     gap:10px;
+     color:#666;
+     font-size:12px;
+   }
+   .m-only{display:inline}
+ }
   </style>
 </head>
 <body>
