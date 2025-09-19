@@ -153,15 +153,18 @@
    /* ========== [MOBILE LIST] 2줄 카드형 ========== */
     .m-only{display:none}
 
- @media (max-width:700px){
+   @media (max-width:700px){
    .table thead{display:none}
    .table tr{display:block; border-bottom:1px solid #e5e7eb; padding:8px 0}
    .table td{display:block; border:none; padding:4px 8px}
-   .cell-no,.cell-nick,.cell-stats,.cell-time{display:none}
+   .table td.cell-no,
+   .table td.cell-nick,
+   .table td.cell-stats,
+   .table td.cell-time{display:none !important}
    .cell-body{display:block}
    .cell-body .m-line1{
      display:-webkit-box;
-     -webkit-line-clamp:1;              /* 1줄만 노출 */
+     -webkit-line-clamp:2;              /* 1~2줄 요약 */
      -webkit-box-orient:vertical;
      overflow:hidden;
      white-space:normal;
@@ -171,10 +174,10 @@
    .cell-body .m-line1 .nick{margin-right:6px; color:#333}
    .cell-body .m-line2{
      display:flex;
-     justify-content:flex-end;          /* 둘 다 오른쪽 정렬 */
+     justify-content:flex-end;          /* 조회·시각 오른쪽 정렬 */
      gap:10px;
      color:#666;
-     font-size:12px;
+     font-size:12px;                    /* 작은 글씨 */
    }
    .m-only{display:inline}
  }
