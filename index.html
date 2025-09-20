@@ -105,6 +105,41 @@
     .featurelist{display:grid;grid-template-columns:1fr;gap:12px}
     @media(min-width:700px){.featurelist{grid-template-columns:1fr 1fr}}
     .feature{border:1px dashed var(--border);border-radius:14px;padding:14px;background:#0f1320}
+@media (max-width: 700px){
+  header{
+    display:grid !important;
+    grid-template-columns: 1fr auto;
+    grid-template-areas:
+      "brand lang"
+      "nav   nav";
+    align-items:center;
+    gap:8px;
+  }
+  .brand{ grid-area: brand; }
+  .lang{  grid-area: lang; display:flex; justify-content:flex-end; }
+  header nav{
+    grid-area: nav;
+    width:100%;
+    display:flex;
+    flex-wrap:wrap;          /* 길면 다음 줄로 자동 줄바꿈 */
+    gap:8px;
+  }
+  header nav a{
+    margin:0;                /* 데스크톱용 여백 제거 */
+    padding:8px 10px;
+    border:1px solid var(--border, #1e2230);
+    border-radius:999px;
+    background:#0f1320;
+    color:#e7edf5;
+    font-size:13px;          /* 기본 모바일 메뉴 글자 */
+    line-height:1.1;
+    white-space:nowrap;      /* 단어 중간 줄바꿈 방지 */
+  }
+  header nav a.nav-privacy{
+    font-size:12px;          /* 개인정보처리방침만 살짝 더 작게 */
+    letter-spacing:-0.2px;
+  }
+}
   </style>
 </head>
 <body>
@@ -129,7 +164,7 @@
     <a href="#auth">로그인</a>
     <a href="/howtouse.html">사용법</a>
     <a href="/reviews.html">사용후기</a>
-    <a href="/privacy.html">개인정보처리방침</a>
+    <a href="/privacy.html" class="nav-privacy">개인정보처리방침</a>
   </nav>
   <div class="lang">
     <button type="button" data-lang-btn="ko">🇰🇷 한국어</button>
