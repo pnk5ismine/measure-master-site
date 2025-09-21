@@ -1,0 +1,5 @@
+# 프로젝트 루트(gradlew가 있는 폴더)로 이동
+Set-Location "D:\Android_Home\AndroidStudioProjects\Compose_Study1\MMProject"
+
+# AAB 생성 (모듈명이 app이라면 :app:, 모듈명이 MMProject라면 :MMProject: 로)
+.\gradlew.bat clean :MMProject:bundleRelease --no-daemon --stacktrace

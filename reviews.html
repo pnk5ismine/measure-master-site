@@ -281,7 +281,9 @@
           <label for="title">제목</label>
           <input id="title" type="text" placeholder="제목을 입력하세요" required>
         </div>
-
+        <div class="field" id="noticeBox" hidden>
+          <label><input id="isNotice" type="checkbox"> 공지로 고정</label>
+        </div>
         <div class="field">
           <label for="content">내용</label>
           <textarea id="content" placeholder="자유롭게 작성해 주세요" required></textarea>
@@ -356,6 +358,13 @@ const selectPreviews = $('#selectPreviews');
 const editImages = $('#editImages');
 const MAX_FILES = Number($('#image')?.dataset?.max || 6);
  let chosenFiles = [];
+
+// 관리자 이메일 목록(본인 메일로 바꿔 주세요)
+const ADMIN_EMAILS = ['pnk506@gmail.com'];
+function isAdmin(session){
+  const email = session?.user?.email || '';
+  return ADMIN_EMAILS.includes(email);
+}
 
 /* ========= 유틸 ========= */
 function escapeHtml(s){return (s??'').replace(/[&<>"']/g,m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m]))}
@@ -473,9 +482,10 @@ function showWrite(){listView.hidden=true;  readView.hidden=true;  writeForm.hid
 /* ========= 목록 ========= */
 async function loadList(){
   const { data, error } = await sb.from('reviews')
-    .select('id, title, content, nickname, author_email, created_at, view_count')
+    .select('id, title, content, nickname, author_email, created_at, view_count, is_notice')
+    .order('is_notice', { ascending:false })
     .order('created_at', { ascending:false })
-    .limit(100);
+     .limit(100);
   if(error){
     listBody.innerHTML = `<tr><td colspan="5" class="muted">목록 로드 실패: ${escapeHtml(error.message)}</td></tr>`;
     return;
@@ -499,7 +509,9 @@ async function loadList(){
  listBody.innerHTML = data.map((row, idx)=>{
    const stat = countMap.get(row.id) || { v: Number(row.view_count||0), c: 0 };
    const nick = escapeHtml(displayName(row));
-   const body = escapeHtml((row.title?`[${row.title}] `:'') + (row.content||''));  // PC: 2줄 클램프, 모바일: 1줄
+   const titlePrefix = row.is_notice ? '[알림] ' : '';
+   const titlePart   = row.title ? `[${row.title}] ` : '';
+   const body = escapeHtml(`${titlePrefix}${titlePart}${row.content||''}`);  // PC: 2줄 클램프, 모바일: 1줄
    const when = fmtDate(row.created_at);
 
    return `
@@ -525,7 +537,7 @@ async function loadList(){
 async function loadOne(id){
   const { data, error } = await sb
     .from("reviews")
-    .select("id, user_id, title, content, created_at, nickname, author_email, image_url, image_path")
+   <h3 style="margin:0 0 6px">${escapeHtml((data.is_notice ? "[일림] " : "") + (data.title || "(제목 없음)"))}</h3>
     .eq("id", id)
     .single();
 
@@ -609,6 +621,12 @@ async function loadOne(id){
         url: data.image_url || null,
         path: data.image_path || null
       };
+    }
+    // 관리자라면 공지 체크박스 보이기 + 기존 상태 반영
+    if (isAdmin(sess?.session)) {
+      document.getElementById('noticeBox')?.removeAttribute('hidden');
+      const cb = document.getElementById('isNotice');
+      if (cb) cb.checked = !!data.is_notice;
     }
     const editBox = document.getElementById('editImages');
     if (editBox) editBox.hidden = false;
@@ -929,7 +947,7 @@ async function renderEditImagesForEditMode(reviewId, fallbackUrl, fallbackPath){
 async function enterEditModeById(editId){
   const { data, error } = await sb
     .from('reviews')
-    .select('id, title, content, image_url, image_path')
+    .select('id, title, content, image_url, image_path, is_notice')
     .eq('id', editId).single();
   if (error){ alert('글 불러오기 실패: ' + error.message); return; }
 
@@ -1030,7 +1048,8 @@ writeForm?.addEventListener('submit', async (e)=>{
 
     if (editingId){
       // 1) 텍스트 업데이트
-      const upd = await sb.from('reviews').update({ title, content }).eq('id', editingId);
+      const noticeFlag = isAdmin(session) ? !!document.getElementById('isNotice')?.checked : false;
+      const upd = await sb.from('reviews').update({ title, content, is_notice: noticeFlag }).eq('id', editingId);
       if(upd.error) throw new Error(upd.error.message);
 
       // 2) 삭제 체크된 이미지 제거
@@ -1095,8 +1114,13 @@ writeForm?.addEventListener('submit', async (e)=>{
     }
     if (uploaded[0]) { image_path = uploaded[0].path; image_url = uploaded[0].url; }
 
-    const ins = await sb.from("reviews").insert({
-      title, content,
+     const noticeFlag = isAdmin(session) ? !!document.getElementById('isNotice')?.checked : false;
+     const ins = await sb.from("reviews").insert({
+       title, content, is_notice: noticeFlag,
+       user_id: session.user.id,
+       author_email: session.user.email,
+       nickname, image_path, image_url
+     }).select("id").single();
       user_id: session.user.id,
       author_email: session.user.email,
       nickname, image_path, image_url
@@ -1141,15 +1165,23 @@ async function init(){
   if(compose === '1'){
     const { data:{ session } } = await sb.auth.getSession();
     if(!session?.user){ history.replaceState(null,'','/reviews.html'); showList(); await loadList(); return; }
-    showWrite(); return;
+    showWrite();
+    if (isAdmin(session)) document.getElementById('noticeBox')?.removeAttribute('hidden');
+    return; 
+    if(id){ showRead(); await loadOne(id); return;  }
   }
-  if(id){ showRead(); await loadOne(id); return; }
 
   if (edit){
     const { data:{ session } } = await sb.auth.getSession();
     if(!session?.user){ history.replaceState(null,'','/reviews.html'); showList(); await loadList(); return; }
     await enterEditModeById(edit);
     return;
+    const { data: sess2 } = await sb.auth.getSession();
+    if (isAdmin(sess2?.session)) {
+     document.getElementById('noticeBox')?.removeAttribute('hidden');
+     const cb2 = document.getElementById('isNotice');
+     if (cb2) cb2.checked = !!data.is_notice;
+   }
   }
 
   // 기본: 목록
