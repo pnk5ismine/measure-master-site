@@ -1160,25 +1160,42 @@ async function init(){
     }
   }, 2500);
 
-  const q = new URLSearchParams(location.search);
-  const id = q.get('id');
-  const compose = q.get('compose');
-  const edit   = q.get('edit');
-
-  if(compose === '1'){
-    const { data:{ session } } = await sb.auth.getSession();
-    if(!session?.user){ history.replaceState(null,'','/reviews.html'); showList(); await loadList(); return; }
-    showWrite();
-    if (isAdmin(session)) document.getElementById('noticeBox')?.removeAttribute('hidden');
-    return; 
-  }
-
-  if (edit){
-    const { data:{ session } } = await sb.auth.getSession();
-    if(!session?.user){ history.replaceState(null,'','/reviews.html'); showList(); await loadList(); return; }
-    await enterEditModeById(edit);
-    return;
-  }
+    const q = new URLSearchParams(location.search);
+    const id = q.get('id');
+    const compose = q.get('compose');
+    const edit   = q.get('edit');
+  
+    if (compose === '1') {
+      const res = await safeGetSession(2000);
+      const session = res?.data?.session;
+      if (!session?.user) {
+        history.replaceState(null, '', '/reviews.html');
+        showList();
+        await loadList();
+        setTab('login');
+        document.getElementById('leftAuth')?.scrollIntoView({ behavior:'smooth', block:'start' });
+        return;
+      }
+      showWrite();
+      if (isAdmin(session)) document.getElementById('noticeBox')?.removeAttribute('hidden');
+      return;
+    }
+  
+    if (edit) {
+      const res = await safeGetSession(2000);
+      const session = res?.data?.session;
+      if (!session?.user) {
+        history.replaceState(null, '', '/reviews.html');
+        showList();
+        await loadList();
+        setTab('login');
+        document.getElementById('leftAuth')?.scrollIntoView({ behavior:'smooth', block:'start' });
+        return;
+      }
+      await enterEditModeById(edit);
+      if (isAdmin(session)) document.getElementById('noticeBox')?.removeAttribute('hidden');
+      return;
+    }
 
   // 기본: 목록
   showList();
