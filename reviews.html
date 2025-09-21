@@ -1178,7 +1178,6 @@ async function init(){
     if(!session?.user){ history.replaceState(null,'','/reviews.html'); showList(); await loadList(); return; }
     await enterEditModeById(edit);
     return;
-   }
   }
 
   // 기본: 목록
