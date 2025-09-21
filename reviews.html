@@ -537,7 +537,7 @@ async function loadList(){
 async function loadOne(id){
   const { data, error } = await sb
     .from("reviews")
-   <h3 style="margin:0 0 6px">${escapeHtml((data.is_notice ? "[일림] " : "") + (data.title || "(제목 없음)"))}</h3>
+    .select("id, user_id, title, content, created_at, nickname, author_email, image_url, image_path, is_notice")
     .eq("id", id)
     .single();
 
@@ -561,7 +561,7 @@ async function loadOne(id){
       </div>
     </div>
 
-    <h3 style="margin:0 0 6px">${escapeHtml(data.title || "(제목 없음)")}</h3>
+    <h3 style="margin:0 0 6px">${escapeHtml((data.is_notice ? "[일림] " : "") + (data.title || "(제목 없음)"))}</h3>
     <div class="muted" style="margin-bottom:10px">${escapeHtml(name)} · ${fmtDate(data.created_at)}</div>
     <div style="white-space:pre-wrap;word-break:break-word">${escapeHtml(data.content || "")}</div>
 
@@ -961,6 +961,13 @@ async function enterEditModeById(editId){
   const editBox = document.getElementById('editImages');
   if (editBox) editBox.hidden = false;
   await renderEditImagesForEditMode(data.id, data.image_url, data.image_path);
+
+  const { data: sess2 } = await sb.auth.getSession();
+  if (isAdmin(sess2?.session)) {
+    document.getElementById('noticeBox')?.removeAttribute('hidden');
+    const cb2 = document.getElementById('isNotice');
+    if (cb2) cb2.checked = !!data.is_notice;
+  }
 }
 
 /* ========= 현재 이미지 수(편집시 슬롯 계산) ========= */
@@ -1121,10 +1128,6 @@ writeForm?.addEventListener('submit', async (e)=>{
        author_email: session.user.email,
        nickname, image_path, image_url
      }).select("id").single();
-      user_id: session.user.id,
-      author_email: session.user.email,
-      nickname, image_path, image_url
-    }).select("id").single();
     if(ins.error) throw new Error(ins.error.message);
 
     if (uploaded.length){
@@ -1168,7 +1171,6 @@ async function init(){
     showWrite();
     if (isAdmin(session)) document.getElementById('noticeBox')?.removeAttribute('hidden');
     return; 
-    if(id){ showRead(); await loadOne(id); return;  }
   }
 
   if (edit){
@@ -1176,11 +1178,6 @@ async function init(){
     if(!session?.user){ history.replaceState(null,'','/reviews.html'); showList(); await loadList(); return; }
     await enterEditModeById(edit);
     return;
-    const { data: sess2 } = await sb.auth.getSession();
-    if (isAdmin(sess2?.session)) {
-     document.getElementById('noticeBox')?.removeAttribute('hidden');
-     const cb2 = document.getElementById('isNotice');
-     if (cb2) cb2.checked = !!data.is_notice;
    }
   }
 
