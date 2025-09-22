@@ -520,28 +520,28 @@ async function loadList(){
       c: Number(r.comment_count||0)
     }));
   }
- listBody.innerHTML = data.map((row, idx)=>{
-   const stat = countMap.get(row.id) || { v: Number(row.view_count||0), c: 0 };
-   const nick = escapeHtml(displayName(row));
-   const titleHtml   = row.title ? `[${escapeHtml(row.title)}] ` : '';
-   const bodyHtml =
-     `${row.is_notice ? '<span class="notice-tag">[알림]</span> ' : ''}`
-     `${titleHtml}${escapeHtml(row.content||'')}`;
-   const when = fmtDate(row.created_at);
-
-   return `
-   <tr data-id="${row.id}" class="row-item ${row.is_notice?'notice':''}" style="cursor:pointer">
-       <td class="cell-no">${idx+1}</td>
-       <td class="cell-nick">${nick}</td>
-       <td class="cell-body">
-    <div class="m-line1"><span class="nick m-only">${nick}</span>${bodyHtml}</div>
-         <div class="m-line2 m-only"><span>조회 ${stat.v} (${stat.c})</span><span>${when}</span></div>
-       </td>
-       <td class="cell-stats">${stat.v} (${stat.c})</td>
-       <td class="cell-time">${when}</td>
-     </tr>
-   `;
- }).join('');
+    listBody.innerHTML = data.map((row, idx) => {
+      const stat = countMap.get(row.id) || { v: Number(row.view_count||0), c: 0 };
+      const nick = escapeHtml(displayName(row));
+      const titleHtml = row.title ? `[${escapeHtml(row.title)}] ` : '';
+      const bodyHtml =
+        (row.is_notice ? '<span class="notice-tag">[알림]</span> ' : '')
+        + titleHtml + escapeHtml(row.content||'');
+      const when = fmtDate(row.created_at);
+      const trCls = row.is_notice ? 'row-item notice' : 'row-item';
+      return `
+        <tr data-id="${row.id}" class="${trCls}" style="cursor:pointer">
+          <td class="cell-no">${idx+1}</td>
+          <td class="cell-nick">${nick}</td>
+          <td class="cell-body">
+            <div class="m-line1"><span class="nick m-only">${nick}</span>${bodyHtml}</div>
+            <div class="m-line2 m-only"><span>조회 ${stat.v} (${stat.c})</span><span>${when}</span></div>
+          </td>
+          <td class="cell-stats">${stat.v} (${stat.c})</td>
+          <td class="cell-time">${when}</td>
+        </tr>
+      `;
+    }).join('');
 
   listBody.querySelectorAll('tr.row-item').forEach(tr=>{
     tr.addEventListener('click',()=> location.href=`/reviews.html?id=${tr.dataset.id}`);
@@ -772,7 +772,7 @@ async function renderReactions(reviewId){
 }
 
 /* ========= 댓글 ========= */
-async function renderComments(reviewId){
+async function renderComments(reviewId, ownerUserId){
   const list = document.getElementById('commentList');
   const form = document.getElementById('commentForm');
   const hint = document.getElementById('commentLoginHint');
@@ -780,7 +780,7 @@ async function renderComments(reviewId){
 
   const { data, error } = await sb
     .from('comments')
-    .select('id, user_id, nickname, author_email, content, created_at')
+    .select('id, user_id, nickname, author_email, content, created_at, is_secret')
     .eq('review_id', reviewId)
     .order('created_at', { ascending: true });
 
@@ -794,13 +794,18 @@ async function renderComments(reviewId){
     list.innerHTML = data.map(c=>{
       const name = c.nickname || (c.author_email ? c.author_email.split('@')[0] : '익명');
       const canDel = myId && c.user_id && (myId === c.user_id);
+      const canSee = !c.is_secret
+                  || (myId && c.user_id && myId === c.user_id)
+                  || isAdmin(session)
+                  || (ownerUserId && myId === ownerUserId);
+      const contentHtml = canSee ? escapeHtml(c.content||'') : '비밀 댓글입니다.';
       return `
         <div class="comment-item" data-id="${c.id}">
           <div class="comment-head">
             <span>${escapeHtml(name)} · ${fmtDate(c.created_at)}</span>
             ${canDel ? `<button class="btn secondary btn-sm" data-del="${c.id}">삭제</button>` : ``}
           </div>
-          <div class="comment-body">${escapeHtml(c.content||'')}</div>
+          <div class="comment-body">${contentHtml}</div>
         </div>
       `;
     }).join('');
@@ -835,12 +840,14 @@ async function renderComments(reviewId){
       const nick = session.user.user_metadata?.full_name
                 || (session.user.email ? session.user.email.split('@')[0] : '익명');
 
+      const secret = !!document.getElementById('commentSecret')?.checked;
       const ins = await sb.from('comments').insert({
         review_id: reviewId,
         user_id: session.user.id,
         author_email: session.user.email,
         nickname: nick,
-        content: text
+        content: text,
+        is_secret: secret
       });
       if(ins.error) return alert('등록 실패: '+ins.error.message);
 
