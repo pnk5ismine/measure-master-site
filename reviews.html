@@ -152,6 +152,10 @@
 
    /* ========== [MOBILE LIST] 2줄 카드형 ========== */
     .m-only{display:none}
+   /* [알림] 행 파란색 */
+   .table tr.notice td { color:#2563eb; }
+   .table tr.notice .cell-body { color:#2563eb; }
+   .notice-tag{ color:#2563eb; font-weight:700; }
 
    @media (max-width:700px){
    .table thead{display:none}
@@ -171,14 +175,15 @@
      font-weight:600;
      margin-bottom:4px;
    }
-   .cell-body .m-line1 .nick{margin-right:6px; color:#333}
-   .cell-body .m-line2{
-     display:flex;
-     justify-content:flex-end;          /* 조회·시각 오른쪽 정렬 */
-     gap:10px;
-     color:#666;
-     font-size:12px;                    /* 작은 글씨 */
-   }
+    .cell-body .m-line2{ display:none; }  /* 3번째 라인 숨김 */
+    .cell-body .m-line1{
+      display:-webkit-box;
+      -webkit-line-clamp:2;     /* 2줄까지만 */
+      -webkit-box-orient:vertical;
+      overflow:hidden;
+      white-space:normal;
+    }
+
    .m-only{display:inline}
  }
   </style>
@@ -459,7 +464,7 @@ $('#btn-login')?.addEventListener('click', async (e)=>{
   e.preventDefault();
   loginStatus && (loginStatus.textContent = '로그인 중…');
   const email = $('#login-email')?.value.trim();
-  const pw    = $('#login-password')?.value;
+  const pw    = ($('#login-password')?.value ?? '').trim();
   const { error } = await sb.auth.signInWithPassword({ email, password: pw });
   loginStatus && (loginStatus.textContent = error ? ('로그인 실패: '+error.message) : '로그인 성공');
   await refreshAuthUI();
@@ -518,17 +523,18 @@ async function loadList(){
  listBody.innerHTML = data.map((row, idx)=>{
    const stat = countMap.get(row.id) || { v: Number(row.view_count||0), c: 0 };
    const nick = escapeHtml(displayName(row));
-   const titlePrefix = row.is_notice ? '[알림] ' : '';
-   const titlePart   = row.title ? `[${row.title}] ` : '';
-   const body = escapeHtml(`${titlePrefix}${titlePart}${row.content||''}`);  // PC: 2줄 클램프, 모바일: 1줄
+   const titleHtml   = row.title ? `[${escapeHtml(row.title)}] ` : '';
+   const bodyHtml =
+     `${row.is_notice ? '<span class="notice-tag">[알림]</span> ' : ''}`
+     `${titleHtml}${escapeHtml(row.content||'')}`;
    const when = fmtDate(row.created_at);
 
    return `
-     <tr data-id="${row.id}" class="row-item" style="cursor:pointer">
+   <tr data-id="${row.id}" class="row-item ${row.is_notice?'notice':''}" style="cursor:pointer">
        <td class="cell-no">${idx+1}</td>
        <td class="cell-nick">${nick}</td>
        <td class="cell-body">
-         <div class="m-line1"><span class="nick m-only">${nick}</span>${body}</div>
+    <div class="m-line1"><span class="nick m-only">${nick}</span>${bodyHtml}</div>
          <div class="m-line2 m-only"><span>조회 ${stat.v} (${stat.c})</span><span>${when}</span></div>
        </td>
        <td class="cell-stats">${stat.v} (${stat.c})</td>
