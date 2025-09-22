@@ -370,6 +370,15 @@ function isAdmin(session){
 function escapeHtml(s){return (s??'').replace(/[&<>"']/g,m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m]))}
 function fmtDate(iso){try{const d=new Date(iso);return d.toLocaleString('ko-KR',{year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'})}catch{return iso||''}}
 function displayName(row){return row?.nickname || (row?.author_email?row.author_email.split('@')[0]:'익명')}
+  async function waitForSession(maxMs=5000, step=250){
+    const t0 = Date.now();
+    while (Date.now() - t0 < maxMs){
+      const { data:{ session } } = await sb.auth.getSession();
+      if (session?.user) return session;
+      await new Promise(r=>setTimeout(r, step));
+    }
+    return null;
+  }
 
 /* ========= 탭 전환 ========= */
 function setTab(which){
@@ -1164,10 +1173,14 @@ async function init(){
     const id = q.get('id');
     const compose = q.get('compose');
     const edit   = q.get('edit');
+    if (id) {
+      showRead();
+      await loadOne(id);
+      return;
+    }
   
     if (compose === '1') {
-      const res = await safeGetSession(2000);
-      const session = res?.data?.session;
+      const session = await waitForSession(5000);
       if (!session?.user) {
         history.replaceState(null, '', '/reviews.html');
         showList();
@@ -1182,7 +1195,6 @@ async function init(){
     }
   
     if (edit) {
-      const res = await safeGetSession(2000);
       const session = res?.data?.session;
       if (!session?.user) {
         history.replaceState(null, '', '/reviews.html');
@@ -1208,6 +1220,19 @@ document.addEventListener('DOMContentLoaded', ()=>{
   document.getElementById('year').textContent = new Date().getFullYear();
   init();
 });
+  document.getElementById('btn-compose')?.addEventListener('click', async (e)=>{
+    e.preventDefault();
+    const session = await waitForSession(5000);
+    if (!session?.user){
+      setTab('login');
+      document.getElementById('leftAuth')?.scrollIntoView({behavior:'smooth', block:'start'});
+      return;
+    }
+    history.pushState(null,'','/reviews.html?compose=1');
+    showWrite();
+    if (isAdmin(session)) document.getElementById('noticeBox')?.removeAttribute('hidden');
+  });
+
 </script>
 </body>
 </html>
