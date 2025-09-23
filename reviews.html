@@ -820,6 +820,7 @@ async function renderComments(reviewId, ownerUserId){
     list.innerHTML = data.map(c=>{
       const name = c.nickname || (c.author_email ? c.author_email.split('@')[0] : '익명');
       const canDel = myId && c.user_id && (myId === c.user_id);
+      const canEdit = canDel; // 작성자만 수정 허용(관리자까지 열고 싶으면 || isAdmin(session) 추가)
       const canSee = !c.is_secret
                   || (myId && c.user_id && myId === c.user_id)
                   || isAdmin(session)
@@ -829,9 +830,10 @@ async function renderComments(reviewId, ownerUserId){
         <div class="comment-item" data-id="${c.id}">
           <div class="comment-head">
             <span>${escapeHtml(name)} · ${fmtDate(c.created_at)}</span>
+            ${canEdit ? `<button class="btn secondary btn-sm" data-edit="${c.id}">수정</button>` : ``}
             ${canDel ? `<button class="btn secondary btn-sm" data-del="${c.id}">삭제</button>` : ``}
           </div>
-          <div class="comment-body">${contentHtml}</div>
+          <div class="comment-body" data-raw="${encodeURIComponent(c.content||'')}">${contentHtml}</div>
         </div>
       `;
     }).join('');
@@ -842,9 +844,58 @@ async function renderComments(reviewId, ownerUserId){
         if(!confirm('댓글을 삭제할까요?')) return;
         const del = await sb.from('comments').delete().eq('id', id);
         if(del.error) return alert('삭제 실패: '+del.error.message);
-        await renderComments(reviewId);
+        await renderComments(reviewId, ownerUserId);
       });
     });
+  // 수정
+   list.querySelectorAll('[data-edit]').forEach(btn=>{
+     btn.addEventListener('click', async (e)=>{
+       e.preventDefault();
+       const id   = btn.getAttribute('data-edit');
+       const item = btn.closest('.comment-item');
+       const body = item.querySelector('.comment-body');
+       if (!body) return;
+       if (item._editing) return;  // 중복 방지
+       item._editing = true;
+
+       const original = decodeURIComponent(body.dataset.raw || '');
+       body.innerHTML = '';
+
+       const ta = document.createElement('textarea');
+       ta.style.width = '100%';
+       ta.style.minHeight = '70px';
+       ta.value = original;
+       body.appendChild(ta);
+
+       const actions = document.createElement('div');
+       actions.style.marginTop = '6px';
+       const save = document.createElement('button');
+       save.className = 'btn';
+       save.textContent = '저장';
+       const cancel = document.createElement('button');
+       cancel.className = 'btn secondary';
+       cancel.style.marginLeft = '6px';
+       cancel.textContent = '취소';
+       actions.appendChild(save);
+       actions.appendChild(cancel);
+       body.appendChild(actions);
+
+       save.addEventListener('click', async ()=>{
+         const newText = ta.value.trim();
+         if (!newText){ alert('내용을 입력하세요.'); return; }
+         const { data:{ session } } = await sb.auth.getSession();
+         if (!session?.user){ alert('로그인이 필요합니다.'); return; }
+
+         const up = await sb.from('comments').update({ content: newText }).eq('id', id);
+         if (up.error){ alert('수정 실패: ' + up.error.message); return; }
+         await renderComments(reviewId, ownerUserId);
+       });
+
+       cancel.addEventListener('click', ()=>{
+         renderComments(reviewId, ownerUserId);
+       });
+     });
+   });
   }
 
   const { data:{ session } } = await sb.auth.getSession();
@@ -880,7 +931,7 @@ async function renderComments(reviewId, ownerUserId){
       if(ins.error) return alert('등록 실패: '+ins.error.message);
 
       ta.value = '';
-      await renderComments(reviewId);
+      await renderComments(reviewId, ownerUserId);
     });
   }
 }
