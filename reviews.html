@@ -390,6 +390,28 @@ function displayName(row){
     }
     return null;
   }
+async function fetchCommentsSafe(reviewId){
+  // 1차: is_secret 포함 조회
+  let res = await sb
+    .from('comments')
+    .select('id, user_id, nickname, author_email, content, created_at, is_secret')
+    .eq('review_id', reviewId)
+    .order('created_at', { ascending:true });
+
+  // 컬럼 없음 → 2차: is_secret 빼고 재시도(+false로 채움)
+  if (res.error && /is_secret|schema cache/i.test(res.error.message||'')) {
+    let res2 = await sb
+      .from('comments')
+      .select('id, user_id, nickname, author_email, content, created_at')
+      .eq('review_id', reviewId)
+      .order('created_at', { ascending:true });
+    if (!res2.error && Array.isArray(res2.data)) {
+      res2.data = res2.data.map(c => ({ ...c, is_secret:false }));
+    }
+    return res2;
+  }
+  return res;
+}
 
 /* ========= 탭 전환 ========= */
 function setTab(which){
@@ -602,10 +624,13 @@ async function loadOne(id){
     <div class="comments" id="commentsBox">
       <h4 style="margin:16px 0 8px">댓글</h4>
       <div id="commentList"></div>
-      <form id="commentForm" class="comment-form" hidden>
-        <textarea id="commentText" placeholder="댓글을 입력해 주세요"></textarea>
-        <button class="btn" id="btnComment">등록</button>
-      </form>
+   <form id="commentForm" class="comment-form" hidden>
+     <textarea id="commentText" placeholder="댓글을 입력해 주세요"></textarea>
+     <label style="display:flex;align-items:center;gap:6px;white-space:nowrap">
+       <input type="checkbox" id="commentSecret"> 비밀글
+     </label>
+     <button class="btn" id="btnComment">등록</button>
+   </form>
       <div id="commentLoginHint" class="muted">댓글을 쓰려면 로그인하세요.</div>
     </div>
 
@@ -675,7 +700,7 @@ async function loadOne(id){
 
   // 반응/댓글/이미지
   await renderReactions(id);
-  await renderComments(id);
+  await renderComments(id, data.user_id);
   await renderGalleryLightbox(id, data.image_url);
 
   // 조회수 +1
@@ -784,12 +809,7 @@ async function renderComments(reviewId, ownerUserId){
   const hint = document.getElementById('commentLoginHint');
   if(!list) return;
 
-  const { data, error } = await sb
-    .from('comments')
-    .select('id, user_id, nickname, author_email, content, created_at, is_secret')
-    .eq('review_id', reviewId)
-    .order('created_at', { ascending: true });
-
+ const { data, error } = await fetchCommentsSafe(reviewId);
   if(error){
     list.innerHTML = `<div class="muted">댓글 로드 실패: ${escapeHtml(error.message)}</div>`;
   }else if(!data?.length){
@@ -849,7 +869,7 @@ async function renderComments(reviewId, ownerUserId){
            || (session.user.email ? session.user.email.split('@')[0] : '익명'));
 
       const secret = !!document.getElementById('commentSecret')?.checked;
-      const ins = await sb.from('comments').insert({
+      const ins = await insertCommentSafe({
         review_id: reviewId,
         user_id: session.user.id,
         author_email: session.user.email,
@@ -863,6 +883,14 @@ async function renderComments(reviewId, ownerUserId){
       await renderComments(reviewId);
     });
   }
+}
+async function insertCommentSafe(row){
+  let res = await sb.from('comments').insert(row);
+  if (res.error && /is_secret|schema cache/i.test(res.error.message||'')) {
+    const { is_secret, ...row2 } = row;
+    res = await sb.from('comments').insert(row2);
+  }
+  return res;
 }
 
 /* ========= 갤러리(읽기) ========= */
@@ -1217,7 +1245,7 @@ async function init(){
     }
   
     if (edit) {
-      const session = res?.data?.session;
+      const session = await waitForSession(5000);
       if (!session?.user) {
         history.replaceState(null, '', '/reviews.html');
         showList();
