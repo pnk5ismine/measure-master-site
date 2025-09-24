@@ -168,160 +168,228 @@
 </footer>
 
 <script>
-/* howtouse: PC/MO 분리 + 실시간 미리보기/간이 에디터 v=mo01 */
-(function(){
-  const GRID_ID       = "howtoGrid";
-  const TOTAL_PAGES   = 23;
-  const IMG_DIRS      = ["/images/howtouse", "/image/howtouse"];
-  const IMG_PREFIX    = "howtouse";
-  const IMG_EXTS      = ["jpg","png","jpeg","webp"];
-  const OVERLAYS_JSON_PC = "/assets/data/howtouse_overlays_pc.json?v=pc28";
-  const OVERLAYS_JSON_MO = "/assets/data/howtouse_overlays_mo.json?v=mo01";
-  const STRINGS_JSON  = "/assets/data/strings_ko_pc.json?v=pc28";
-  const BASE_H        = 600;
+/* howtouse 렌더러: 스코프 오류(map 미정의) 해결 + PC/MO 오버레이 자동/강제 선택 + 미리보기 폭조절(옵션)
+   사용법:
+   - 기본: PC 오버레이 자동 사용(폭은 페이지 CSS에 따름)
+   - 모바일 강제:  ?ovr=mo
+   - PC 강제:      ?ovr=pc
+   - 미리보기 툴바: ?preview=1  (폭 슬라이더로 레이아웃 확인)
+*/
+(function () {
+  /* ====== 설정 ====== */
+  const GRID_ID      = "howtoGrid";
+  const TOTAL_PAGES  = 23;                    // 이미지 장 수
+  const IMG_DIRS     = ["/images/howtouse", "/image/howtouse"]; // 폴더 보조 경로(과거 호환)
+  const IMG_PREFIX   = "howtouse";
+  const IMG_EXTS     = ["jpg", "png", "jpeg", "webp"];
+  const STRINGS_JSON = "/assets/data/strings_ko_pc.json?v=pc28";
+  const BASE_H       = 600; // 오버레이 상대배치 기준 높이
 
-  const IS_MOBILE_VIEW = matchMedia('(max-width:640px)').matches;
-  const OVERLAYS_JSON  = IS_MOBILE_VIEW
-    ? "/assets/data/howtouse_overlays_mo.json?v=mo1"
-    : "/assets/data/howtouse_overlays_pc.json?v=pc28";
+  // 쿼리로 오버레이 파일 선택 (없으면 화면폭 기준 자동)
+  function pickOverlayJson() {
+    const qs = new URLSearchParams(location.search);
+    const force = (qs.get("ovr") || qs.get("mode") || "").toLowerCase();
+    const base = "/assets/data";
+    if (force === "mo") return `${base}/howtouse_overlays_mo.json?v=mo1`;
+    if (force === "pc") return `${base}/howtouse_overlays_pc.json?v=pc28}`;
+    const isMo = window.matchMedia("(max-width: 640px)").matches;
+    return isMo
+      ? `${base}/howtouse_overlays_mo.json?v=mo1`
+      : `${base}/howtouse_overlays_pc.json?v=pc28`;
+  }
+  const OVERLAYS_JSON = pickOverlayJson();
 
-  // 상태
-  const state = {
-    mode: window.matchMedia("(max-width:640px)").matches ? "mo" : "pc",
-    overlays: null,    // {pages:[ [...], ... ]}
-    strings: null,     // 공용
-    page: 1,           // 현재 포커스 페이지(에디터용)
-    // page->labels 빠른 접근 (원본 객체 참조 유지)
-    pageMap: {},       // { "01": [labelObj, ...], ... }
-  };
+  /* ====== 상태(전역) ====== */
+  // ⛔ map is not defined 오류 원인 → 스코프 밖에서 접근.
+  // ✅ 파일 스코프 전역으로 선언해 모든 함수에서 접근 가능하게 함.
+  let overlayMap = {};
 
-  // DOM
-  const $ = s => document.querySelector(s);
-  const gridEl      = () => document.getElementById(GRID_ID) || document.querySelector(".howtouse-grid");
-  const toolbar     = { modeSel: $('#modeSel'), pageSel: $('#pageSel'),
-                        btnPreview: $('#btnPreview'), btnEditor: $('#btnEditor'),
-                        editorPanel: $('#editorPanel') };
+  /* ====== 유틸 ====== */
+  function grid() {
+    return (
+      document.getElementById(GRID_ID) ||
+      document.querySelector(".howtouse-grid") ||
+      document.querySelector(".howto-grid")
+    );
+  }
 
-  function createImage(num){
+  // 이미지 후보들을 순차 로딩(확장자/경로 폴백)
+  function createImage(num) {
     const img = new Image();
     img.alt = `사용법 ${num}`;
+    img.decoding = "async";
     img.loading = "eager";
     const cands = [];
-    for(const d of IMG_DIRS) for(const e of IMG_EXTS) cands.push(`${d}/${IMG_PREFIX}${num}.${e}`);
-    let i=0;
-    img.onerror = ()=>{ if(++i<cands.length) img.src=cands[i]; else img.onerror=null; };
+    for (const d of IMG_DIRS) {
+      for (const e of IMG_EXTS) {
+        cands.push(`${d}/${IMG_PREFIX}${num}.${e}`);
+      }
+    }
+    let i = 0;
+    img.onerror = () => {
+      i++;
+      if (i < cands.length) img.src = cands[i];
+      else img.onerror = null;
+    };
     img.src = cands[i];
     return img;
   }
 
-  function parseColorHex(hex){
-    if(!hex) return null;
-    let s=String(hex).trim();
-    if(s.startsWith("0x")) s=s.slice(2);
-    if(s.startsWith("#")) s=s.slice(1);
-    if(s.length===8){ const a=parseInt(s.slice(0,2),16)/255, r=parseInt(s.slice(2,4),16), g=parseInt(s.slice(4,6),16), b=parseInt(s.slice(6,8),16); return `rgba(${r},${g},${b},${a})`; }
-    if(s.length===6){ const r=parseInt(s.slice(0,2),16), g=parseInt(s.slice(2,4),16), b=parseInt(s.slice(4,6),16); return `rgb(${r},${g},${b})`; }
+  function parseColorHex(hex) {
+    if (!hex) return null;
+    let s = String(hex).trim();
+    if (s.startsWith("0x")) s = s.slice(2);
+    if (s.startsWith("#")) s = s.slice(1);
+    if (s.length === 8) {
+      const a = parseInt(s.slice(0, 2), 16) / 255;
+      const r = parseInt(s.slice(2, 4), 16);
+      const g = parseInt(s.slice(4, 6), 16);
+      const b = parseInt(s.slice(6, 8), 16);
+      return `rgba(${r},${g},${b},${a})`;
+    }
+    if (s.length === 6) {
+      const r = parseInt(s.slice(0, 2), 16);
+      const g = parseInt(s.slice(2, 4), 16);
+      const b = parseInt(s.slice(4, 6), 16);
+      return `rgb(${r},${g},${b})`;
+    }
     return null;
   }
-  function anchorClass(align="TopStart"){
-    const a=String(align).toLowerCase();
-    if(a.includes("center")) return "anchor-topcenter";
-    if(a.includes("end"))    return "anchor-topend";
+
+  function anchorClass(align = "TopStart") {
+    const a = String(align).toLowerCase();
+    if (a.includes("center")) return "anchor-topcenter";
+    if (a.includes("end")) return "anchor-topend";
     return "anchor-topstart";
   }
 
-  function layoutLabels(card, labels, STR){
+  // 카드 위에 라벨을 그려주는 함수(오버레이 JSON 호환)
+  function layoutLabels(card, labels, STR) {
     let ol = card.querySelector(".overlay");
-    if(!ol){ ol=document.createElement("div"); ol.className="overlay"; card.appendChild(ol); }
+    if (!ol) {
+      ol = document.createElement("div");
+      ol.className = "overlay";
+      card.appendChild(ol);
+    }
     ol.innerHTML = "";
 
     const rect = card.getBoundingClientRect();
-    const W = rect.width, H = rect.height;
-    const scale = H/BASE_H;
+    const W = rect.width;
+    const H = rect.height;
+    const scale = H / BASE_H;
 
-    (labels||[]).forEach(cfg=>{
+    (labels || []).forEach((cfg) => {
       const el = document.createElement("div");
       el.className = "olabel " + anchorClass(cfg.align);
-      // ✅ 에디터 연결 정보
-      el.__cfgRef = cfg;                                // 객체 참조
-      el.dataset.key   = cfg.key || "";                 // 키
-      el.dataset.page  = card.querySelector(".overlay")?.dataset.page || "";
-      el.dataset.index = String((ol.childElementCount || 0));  // 대략적 순번
-
       const text = (STR && STR[cfg.key]) || cfg.key || "";
       el.textContent = text;
 
-      if(cfg.bold) el.style.fontWeight = "700";
-      if(cfg.sizeSp) el.style.fontSize = cfg.sizeSp + "px";
-      if(cfg.lineHeightSp) el.style.lineHeight = cfg.lineHeightSp + "px";
-      if(cfg.textAlign) el.style.textAlign = ({Center:"center", End:"right", Start:"left"}[cfg.textAlign]||"left");
-      const col = parseColorHex(cfg.colorHex); if(col) el.style.color = col;
-      if(cfg.maxWidthPercent) el.style.maxWidth = (cfg.maxWidthPercent*W) + "px";
+      if (cfg.bold) el.style.fontWeight = "700";
+      if (cfg.sizeSp) el.style.fontSize = cfg.sizeSp + "px";
+      if (cfg.lineHeightSp) el.style.lineHeight = cfg.lineHeightSp + "px";
+      if (cfg.textAlign)
+        el.style.textAlign =
+          { Center: "center", End: "right", Start: "left" }[cfg.textAlign] ||
+          "left";
+      const col = parseColorHex(cfg.colorHex);
+      if (col) el.style.color = col;
+      if (cfg.maxWidthPercent)
+        el.style.maxWidth = cfg.maxWidthPercent * W + "px";
 
-      if(typeof cfg.xPercent==="number" && typeof cfg.yPercent==="number"){
-        el.style.left = (cfg.xPercent*100) + "%";
-        el.style.top  = (cfg.yPercent*100) + "%";
-      }else{
-        const a = String(cfg.align||"").toLowerCase();
-        const base = a.includes("center") ? W/2 : a.includes("end") ? W : 0;
-        el.style.left = (base + (cfg.dx||0)*scale) + "px";
-        el.style.top  = ((cfg.dy||0)*scale) + "px";
+      if (
+        typeof cfg.xPercent === "number" &&
+        typeof cfg.yPercent === "number"
+      ) {
+        el.style.left = cfg.xPercent * 100 + "%";
+        el.style.top = cfg.yPercent * 100 + "%";
+      } else {
+        const a = String(cfg.align || "").toLowerCase();
+        const baseX = a.includes("center") ? W / 2 : a.includes("end") ? W : 0;
+        const dx = (cfg.dx || 0) * scale;
+        const dy = (cfg.dy || 0) * scale;
+        el.style.left = baseX + dx + "px";
+        el.style.top = dy + "px";
       }
       ol.appendChild(el);
     });
   }
 
-  // pages -> {"01":[...], ...} (원본 객체 참조 유지 → 에디터에서 값 수정 즉시 반영)
-  function buildPageMap(pages){
-    const map = {}; let premCandidate = null;
-    (pages||[]).forEach(group=>{
-      const any = group.find(it=>it && typeof it.key === 'string');
-      const key = any ? any.key : '';
+  // 오버레이 페이지 매핑:
+  // 1) 키가 htuNN_* 이면 NN 매핑
+  // 2) 키에 2자리 숫자 있으면 그 숫자를 페이지로
+  // 3) prem1_* 그룹은 23으로 매핑(없을 때만)
+  function buildMap(pages) {
+    const mapObj = {};
+    let premCandidate = null;
+
+    (pages || []).forEach((group) => {
+      const any = group.find((it) => it && typeof it.key === "string");
+      const key = any ? any.key : "";
 
       let m = key.match(/htu(\d{2})_/i);
-      if (m){ map[m[1]] = group; return; }
-
-      const anyWithDigits = group.find(it=>/\d{2}/.test(it.key||''));
-      if (anyWithDigits){
-        const m2 = (anyWithDigits.key||'').match(/(\d{2})/);
-        if (m2){ map[m2[1]] = group; return; }
+      if (m) {
+        mapObj[m[1]] = group;
+        return;
       }
-      if (!premCandidate && group.some(it=>/^prem1_/i.test(it.key||''))) premCandidate = group;
+
+      const anyWithDigits = group.find((it) => /\d{2}/.test(it.key || ""));
+      if (anyWithDigits) {
+        const m2 = (anyWithDigits.key || "").match(/(\d{2})/);
+        if (m2) {
+          mapObj[m2[1]] = group;
+          return;
+        }
+      }
+
+      if (!premCandidate && group.some((it) => /^prem1_/i.test(it.key || ""))) {
+        premCandidate = group;
+      }
     });
-    if (!map["23"] && premCandidate) map["23"] = premCandidate;
-    return map;
+
+    if (!mapObj["23"] && premCandidate) mapObj["23"] = premCandidate;
+    return mapObj;
   }
 
-  window.__howtouse_state = { map, overlays, strings };
-
-  async function loadJson(url){
-    const r = await fetch(url, {cache:"no-store"});
-    if(!r.ok) throw new Error(`HTTP ${r.status} @ ${url}`);
-    return r.json();
+  async function loadJson(url) {
+    try {
+      const r = await fetch(url, { cache: "no-store" });
+      if (!r.ok) throw new Error(`HTTP ${r.status}`);
+      return await r.json();
+    } catch (e) {
+      console.warn("[howtouse] JSON load 실패:", url, e.message);
+      return null;
+    }
   }
 
-  async function loadData(){
-    // 모드별 오버레이 고르기
-    const overlayUrl = state.mode === 'mo' ? OVERLAYS_JSON_MO : OVERLAYS_JSON_PC;
-    const [ov, str] = await Promise.all([
-      loadJson(overlayUrl),
-      state.strings ? Promise.resolve(state.strings) : loadJson(STRINGS_JSON)
-    ]);
-    state.overlays = ov || { pages: [] };
-    state.strings  = str || {};
-    state.pageMap  = buildPageMap(state.overlays.pages || []);
-  }
-
-  function renderGrid(){
-    const container = gridEl();
-    if(!container){ console.error("[howtouse] grid container not found"); return; }
+  /* ====== 메인 렌더 ====== */
+  async function init() {
+    const container = grid();
+    if (!container) {
+      console.error("[howtouse] grid container not found");
+      return;
+    }
     container.innerHTML = "";
 
-    for(let i=1;i<=TOTAL_PAGES;i++){
-      const num = String(i).padStart(2,"0");
+    let overlays = null,
+      strings = null;
+    [overlays, strings] = await Promise.all([
+      loadJson(OVERLAYS_JSON),
+      loadJson(STRINGS_JSON),
+    ]);
+    overlayMap =
+      overlays && Array.isArray(overlays.pages)
+        ? buildMap(overlays.pages)
+        : {};
+    console.log("[howtouse] overlayMap keys:", Object.keys(overlayMap));
+
+    for (let i = 1; i <= TOTAL_PAGES; i++) {
+      const num = String(i).padStart(2, "0");
+
+      // 카드
       const a = document.createElement("a");
       a.className = "howtouse-item";
-      a.target = "_blank"; a.rel="noopener";
+      a.target = "_blank";
+      a.rel = "noopener";
       a.href = `${IMG_DIRS[0]}/${IMG_PREFIX}${num}.jpg`;
 
       const img = createImage(num);
@@ -329,171 +397,67 @@
 
       const ol = document.createElement("div");
       ol.className = "overlay";
-      ol.dataset.page = num;           // ✅ 에디터가 페이지 번호를 알아야 함
       a.appendChild(ol);
 
       container.appendChild(a);
 
-      const labels = state.pageMap[num];
-      if(labels){
-        const render = ()=> layoutLabels(a, labels, state.strings);
+      // 오버레이
+      const labels = overlayMap[num];
+      if (labels) {
+        const STR = strings || {};
+        const render = () => layoutLabels(a, labels, STR);
         img.addEventListener("load", render);
         render();
-        new ResizeObserver(render).observe(a);
+        if ("ResizeObserver" in window) {
+          new ResizeObserver(render).observe(a);
+        } else {
+          window.addEventListener("resize", render);
+        }
       }
     }
+
+    injectPreviewToolbar(container); // 옵션: ?preview=1
   }
 
-  // ============ 미리보기/에디터 ============
-  function togglePreview(){
-    const on = !document.body.classList.contains('debug');
-    document.body.classList.toggle('debug', on);
-    toolbar.btnPreview.textContent = on ? '미리보기 끄기' : '미리보기 켜기';
-  }
+  /* ====== 미리보기 툴바(옵션: ?preview=1) ====== */
+  function injectPreviewToolbar(container) {
+    const qs = new URLSearchParams(location.search);
+    const pv = (qs.get("preview") || qs.get("pv") || "").toLowerCase();
+    const enabled = pv === "1" || pv === "on" || pv === "true";
+    if (!enabled) return;
 
-  function openEditor(){
-    renderEditor();
-    toolbar.editorPanel.style.display = 'block';
-    toolbar.btnEditor.textContent = '에디터 닫기';
-  }
-  function closeEditor(){
-    toolbar.editorPanel.style.display = 'none';
-    toolbar.btnEditor.textContent = '에디터 열기';
-  }
-  function toggleEditor(){
-    const opened = toolbar.editorPanel.style.display === 'block';
-    opened ? closeEditor() : openEditor();
-  }
-
-  function getPageLabels(p){
-    const num = String(p).padStart(2,'0');
-    return state.pageMap[num] || [];
-  }
-
-  function renderEditor(){
-    const panel = toolbar.editorPanel;
-    const labels = getPageLabels(state.page);
-    const numStr = String(state.page).padStart(2,'0');
-
-    const rowsHtml = labels.map((lb, idx)=>`
-      <tr data-idx="${idx}">
-        <td style="width:120px"><code>${lb.key||''}</code></td>
-        <td><input type="number" step="0.0001" min="0" max="1" value="${(lb.xPercent??'')}" data-field="xPercent" placeholder="xPercent (0~1)"></td>
-        <td><input type="number" step="0.0001" min="0" max="1" value="${(lb.yPercent??'')}" data-field="yPercent" placeholder="yPercent (0~1)"></td>
-        <td>
-          <select data-field="align">
-            ${['TopStart','TopCenter','TopEnd'].map(v=>`<option value="${v}" ${lb.align===v?'selected':''}>${v}</option>`).join('')}
-          </select>
-        </td>
-        <td><input type="number" step="1" value="${(lb.sizeSp??'')}" data-field="sizeSp" placeholder="sizeSp(px)"></td>
-        <td><input type="number" step="1" value="${(lb.lineHeightSp??'')}" data-field="lineHeightSp" placeholder="lineHeightSp(px)"></td>
-        <td><input type="number" step="0.001" min="0" max="1" value="${(lb.maxWidthPercent??'')}" data-field="maxWidthPercent" placeholder="maxWidth(0~1)"></td>
-        <td><input type="text" value="${lb.colorHex??''}" data-field="colorHex" placeholder="#RRGGBB 또는 0xAARRGGBB"></td>
-        <td style="text-align:center"><input type="checkbox" ${lb.bold?'checked':''} data-field="bold"></td>
-      </tr>
-    `).join('');
-
-    panel.innerHTML = `
-      <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:6px">
-        <strong>에디터 · 페이지 ${numStr} (${labels.length}개 라벨)</strong>
-        <div class="row-actions">
-          <button type="button" class="mini" id="btnExport">JSON 내보내기</button>
-          <button type="button" class="mini" id="btnReRender">미리보기 갱신</button>
-        </div>
-      </div>
-      <table>
-        <thead>
-          <tr>
-            <th>key</th><th>x%</th><th>y%</th><th>align</th><th>size</th><th>line</th><th>maxW%</th><th>color</th><th>bold</th>
-          </tr>
-        </thead>
-        <tbody>${rowsHtml || `<tr><td colspan="9" class="muted">이 페이지에 라벨이 없습니다.</td></tr>`}</tbody>
-      </table>
-      <textarea id="exportArea" hidden readonly></textarea>
+    const bar = document.createElement("div");
+    bar.style.cssText =
+      "position:sticky;top:8px;z-index:10;margin:8px 0 12px;padding:8px;border:1px solid #1e2230;border-radius:10px;background:#0f1320;color:#cfd6e4;display:flex;flex-wrap:wrap;align-items:center;gap:10px";
+    bar.innerHTML = `
+      <strong style="font-size:12px">미리보기</strong>
+      <label style="display:inline-flex;align-items:center;gap:6px">
+        폭 <input id="pv-width" type="range" min="280" max="1100" step="10" value="${Math.min(container.clientWidth || 720, 1100)}">
+      </label>
+      <span id="pv-width-val" style="font-size:12px"></span>
     `;
+    container.parentNode.insertBefore(bar, container);
 
-    // 입력 변경 → 즉시 state 업데이트 & 해당 카드만 리렌더
-    panel.querySelectorAll('tbody tr').forEach(tr=>{
-      tr.querySelectorAll('input,select').forEach(inp=>{
-        inp.addEventListener('input', ()=>{
-          const idx = Number(tr.dataset.idx);
-          const field = inp.dataset.field;
-          const label = labels[idx];
-          if (!label) return;
+    const rng = bar.querySelector("#pv-width");
+    const out = bar.querySelector("#pv-width-val");
 
-          if (inp.type === 'checkbox'){
-            label[field] = inp.checked;
-          } else if (inp.type === 'number'){
-            const v = inp.value === '' ? null : Number(inp.value);
-            label[field] = (Number.isFinite(v) ? v : null);
-          } else {
-            label[field] = inp.value;
-          }
-          // 현재 페이지의 카드만 갱신
-          rerenderCard(state.page);
-        });
-      });
-    });
-
-    panel.querySelector('#btnReRender')?.addEventListener('click', ()=>{
-      rerenderCard(state.page);
-    });
-
-    panel.querySelector('#btnExport')?.addEventListener('click', ()=>{
-      const ta = panel.querySelector('#exportArea');
-      const out = JSON.stringify(state.overlays, null, 2);
-      ta.value = out;
-      ta.hidden = false;
-      ta.select(); document.execCommand('copy');
-      ta.blur();
-      alert("현재 모드("+state.mode+") 오버레이 전체 JSON을 복사했습니다.\n서버의 "+(state.mode==='mo'?'howtouse_overlays_mo.json':'howtouse_overlays_pc.json')+"에 반영하세요.");
-    });
+    const apply = () => {
+      const px = Number(rng.value || 720);
+      out.textContent = px + "px";
+      container.style.maxWidth = px + "px";
+      container.style.marginLeft = "auto";
+      container.style.marginRight = "auto";
+      window.dispatchEvent(new Event("resize")); // 오버레이 재배치
+    };
+    rng.addEventListener("input", apply);
+    apply();
   }
 
-  // 특정 페이지 카드만 리렌더
-  function rerenderCard(page){
-    const container = gridEl(); if(!container) return;
-    const idx = page - 1; if (idx < 0) return;
-    const card = container.children[idx]; if (!card) return;
-
-    const labels = getPageLabels(page);
-    layoutLabels(card, labels, state.strings);
-  }
-
-  // ============ 초기화/이벤트 ============
-  async function boot(){
-    // 컨트롤 초기값
-    if (toolbar.modeSel) toolbar.modeSel.value = state.mode;
-    if (toolbar.pageSel) toolbar.pageSel.value = state.page;
-
-    await loadData();
-    renderGrid();
-
-    toolbar.modeSel?.addEventListener('change', async ()=>{
-      state.mode = toolbar.modeSel.value;
-      await loadData();
-      renderGrid();
-      if (toolbar.editorPanel.style.display === 'block') renderEditor();
-    });
-
-    toolbar.pageSel?.addEventListener('input', ()=>{
-      const v = Math.min(TOTAL_PAGES, Math.max(1, Number(toolbar.pageSel.value||1)));
-      state.page = v;
-      if (toolbar.editorPanel.style.display === 'block') renderEditor();
-      // 카드 포커스 스크롤
-      const container = gridEl(); const idx = v-1; const card = container?.children[idx];
-      card?.scrollIntoView({behavior:'smooth', block:'center'});
-    });
-
-    toolbar.btnPreview?.addEventListener('click', togglePreview);
-    toolbar.btnEditor?.addEventListener('click', toggleEditor);
-  }
-
-  // 최소 오버레이 CSS(없으면만 주입, 기존과 동일)
-  (function injectCSS(){
+  /* ====== 최소 오버레이 CSS 주입(없을 때만) ====== */
+  (function injectCSS() {
     if (document.getElementById("__howtouse_min_css")) return;
     const s = document.createElement("style");
-    s.id="__howtouse_min_css";
+    s.id = "__howtouse_min_css";
     s.textContent = `
       .overlay{position:absolute;inset:0;pointer-events:none}
       .olabel{position:absolute;color:#000;font-weight:400}
@@ -504,359 +468,11 @@
     document.head.appendChild(s);
   })();
 
-  window.addEventListener("load", boot);
+  // 시작
+  window.addEventListener("load", init);
 })();
 </script>
 
-<script>
-/* =========================
-   HOWTO 미리보기·에디터 (drag handles)
-   - ?editor=1 으로 자동 시작
-   - 이동: 파란 원 핸들 드래그
-   - 폭조절: 초록 사각 핸들 드래그 → maxWidthPercent 기록
-   - 방향키: 좌/우/상/하 (Shift 키와 함께 누르면 5배)
-   - Export: 현재 상태 JSON 다운로드(pc/mo 선택)
-   ========================= */
-(function(){
-  const qs = new URLSearchParams(location.search);
-  const START_ON = qs.get('editor') === '1';
-
-  // 툴바 만들기
-  function makeBar(){
-    if (document.getElementById('howtoEditorBar')) return;
-    const bar = document.createElement('div');
-    bar.id = 'howtoEditorBar';
-    bar.innerHTML = `
-      <button id="htToggle">미리보기 ON</button>
-      <label style="display:inline-flex;align-items:center;gap:6px">
-        대상:
-        <select id="htTarget">
-          <option value="pc">PC JSON</option>
-          <option value="mo">MO JSON</option>
-        </select>
-      </label>
-      <button id="htExport">Export JSON</button>
-      <label class="ht-import">Import JSON
-        <input id="htImport" type="file" accept="application/json" hidden>
-      </label>
-      <span id="htHint" style="opacity:.8">파란 원: 이동 · 초록 사각: 폭</span>
-    `;
-    document.body.appendChild(bar);
-
-    document.getElementById('htToggle').addEventListener('click', toggleEditing);
-    document.getElementById('htExport').addEventListener('click', doExport);
-    document.getElementById('htImport').addEventListener('change', doImport);
-  }
-
-  let editing = false;
-  let current = null; // { el, cfg, overlay }
-
-  function overlays(){
-    return Array.from(document.querySelectorAll('.howtouse-item .overlay'));
-  }
-
-  function setEditing(on){
-    editing = on;
-    overlays().forEach(ol=>{
-      ol.classList.toggle('editing', on);
-    });
-    if (on) decorateAll();
-  }
-
-  function toggleEditing(){
-    setEditing(!editing);
-    document.getElementById('htToggle').textContent = editing ? '미리보기 OFF' : '미리보기 ON';
-  }
-
-  // 레이블에 핸들(이동/리사이즈) 붙이기
-  function decorate(el){
-    if (!editing) return;
-    if (el.classList.contains('ht-decorated')) return;
-    el.classList.add('ht-decorated');
-    el.style.position = 'absolute'; // 안전
-    el.style.userSelect = 'none';
-
-    // 이동 핸들
-    const hMove = document.createElement('span');
-    hMove.className = 'ht-handle ht-handle-move';
-    el.appendChild(hMove);
-
-    // 리사이즈 핸들
-    const hSize = document.createElement('span');
-    hSize.className = 'ht-handle ht-handle-resize';
-    el.appendChild(hSize);
-
-    hMove.addEventListener('mousedown', startDragMove);
-    hMove.addEventListener('touchstart', startDragMove, {passive:false});
-    hSize.addEventListener('mousedown', startResize);
-    hSize.addEventListener('touchstart', startResize, {passive:false});
-
-    // 선택 포커스
-    el.addEventListener('mousedown', ()=>{ current = bind(el); highlight(el); });
-    el.addEventListener('touchstart', ()=>{ current = bind(el); highlight(el); }, {passive:true});
-  }
-
-  function decorateAll(){
-    overlays().forEach(ol=>{
-      // 편집 중엔 포인터 가능
-      ol.style.pointerEvents = 'auto';
-      Array.from(ol.children).forEach(child=>{
-        if (child.classList.contains('olabel')) decorate(child);
-      });
-    });
-  }
-
-  // DOM ↔ cfg 연결 확보
-  function bind(el){
-    const cfg = el.__cfgRef || null;
-    const overlay = el.closest('.overlay');
-    return { el, cfg, overlay };
-  }
-
-  function highlight(el){
-    document.querySelectorAll('.olabel').forEach(x=>x.classList.toggle('ht-active', x===el));
-  }
-
-  // 유틸: 포인터 좌표
-  function pt(e){
-    if (e.touches && e.touches[0]) return { x:e.touches[0].clientX, y:e.touches[0].clientY };
-    return { x:e.clientX, y:e.clientY };
-  }
-
-  // ===== 이동 =====
-  function startDragMove(e){
-    e.preventDefault();
-    e.stopPropagation();
-    const el = this.parentElement;
-    current = bind(el); highlight(el);
-    if (!current.cfg) return;
-
-    const start = pt(e);
-    const rect  = current.overlay.getBoundingClientRect();
-    const baseL = parseFloat(el.style.left || '0');
-    const baseT = parseFloat(el.style.top  || '0');
-
-    function onMove(ev){
-      const p = pt(ev);
-      let nx = baseL + (p.x - start.x);
-      let ny = baseT + (p.y - start.y);
-      nx = Math.max(0, Math.min(nx, rect.width));
-      ny = Math.max(0, Math.min(ny, rect.height));
-      el.style.left = nx + 'px';
-      el.style.top  = ny + 'px';
-      // cfg에 퍼센트로 기록
-      current.cfg.xPercent = nx / rect.width;
-      current.cfg.yPercent = ny / rect.height;
-    }
-    function onUp(){
-      window.removeEventListener('mousemove', onMove);
-      window.removeEventListener('mouseup', onUp);
-      window.removeEventListener('touchmove', onMove);
-      window.removeEventListener('touchend', onUp);
-    }
-    window.addEventListener('mousemove', onMove);
-    window.addEventListener('mouseup', onUp, {once:true});
-    window.addEventListener('touchmove', onMove);
-    window.addEventListener('touchend', onUp, {once:true});
-  }
-
-  // ===== 폭 조절(maxWidthPercent) =====
-  function startResize(e){
-    e.preventDefault();
-    e.stopPropagation();
-    const el = this.parentElement;
-    current = bind(el); highlight(el);
-    if (!current.cfg) return;
-
-    const start = pt(e);
-    const rect  = current.overlay.getBoundingClientRect();
-    const startW = el.getBoundingClientRect().width;
-    const startMax = (current.cfg.maxWidthPercent || (startW/rect.width));
-
-    function onMove(ev){
-      const p = pt(ev);
-      const dx = p.x - start.x;
-      let w = startW + dx;
-      w = Math.max(20, Math.min(w, rect.width)); // 최소/최대 폭 제한
-      el.style.maxWidth = w + 'px';
-      current.cfg.maxWidthPercent = w / rect.width;
-    }
-    function onUp(){
-      window.removeEventListener('mousemove', onMove);
-      window.removeEventListener('mouseup', onUp);
-      window.removeEventListener('touchmove', onMove);
-      window.removeEventListener('touchend', onUp);
-    }
-    window.addEventListener('mousemove', onMove);
-    window.addEventListener('mouseup', onUp, {once:true});
-    window.addEventListener('touchmove', onMove);
-    window.addEventListener('touchend', onUp, {once:true});
-  }
-
-  // 방향키 미세 이동 (선택된 레이블만)
-  window.addEventListener('keydown', (e)=>{
-    if (!editing || !current?.el || !current?.cfg) return;
-    const rect = current.overlay.getBoundingClientRect();
-    const step = e.shiftKey ? 0.05 : 0.01; // 5% / 1%
-    let xp = current.cfg.xPercent ?? (parseFloat(current.el.style.left)/rect.width);
-    let yp = current.cfg.yPercent ?? (parseFloat(current.el.style.top)/rect.height);
-    let changed = false;
-
-    if (e.key === 'ArrowLeft')  { xp -= step; changed = true; }
-    if (e.key === 'ArrowRight') { xp += step; changed = true; }
-    if (e.key === 'ArrowUp')    { yp -= step; changed = true; }
-    if (e.key === 'ArrowDown')  { yp += step; changed = true; }
-
-    if (changed){
-      xp = Math.max(0, Math.min(1, xp));
-      yp = Math.max(0, Math.min(1, yp));
-      current.cfg.xPercent = xp;
-      current.cfg.yPercent = yp;
-      current.el.style.left = (xp*rect.width) + 'px';
-      current.el.style.top  = (yp*rect.height) + 'px';
-      e.preventDefault();
-    }
-  });
-
-  // Export / Import
-  function snapshotPages(){
-    // 가능한 한 원본 구조를 따라 {pages:[ [...page1 labels], [...page2], ... ]}
-    // window.__howtouse_state.map 이 있으면 그걸, 없으면 DOM에서 재구성
-    const pages = [];
-    // 우선 페이지 번호 수집(작은→큰)
-    const nums = Array.from(document.querySelectorAll('.overlay'))
-      .map(ol => ol.dataset.page).filter(Boolean)
-      .filter((v,i,arr)=>arr.indexOf(v)===i).sort((a,b)=>(+a)-(+b));
-
-    nums.forEach(num=>{
-      let labels = [];
-      // map 이용 가능하면 깊은 복사
-      if (window.__howtouse_state?.map?.[num]) {
-        labels = window.__howtouse_state.map[num].map(x=>({ ...x }));
-      } else {
-        // DOM에서 최소필수만 복원
-        const ol = document.querySelector(`.overlay[data-page="${num}"]`);
-        if (ol){
-          labels = Array.from(ol.querySelectorAll('.olabel')).map(el=>{
-            const rect = ol.getBoundingClientRect();
-            const left = parseFloat(el.style.left||'0');
-            const top  = parseFloat(el.style.top ||'0');
-            return {
-              key: el.dataset.key || '',
-              xPercent: left/rect.width,
-              yPercent: top/rect.height,
-              maxWidthPercent: (parseFloat((getComputedStyle(el).maxWidth||'0'))/rect.width) || undefined,
-              align: 'TopStart'
-            }
-          });
-        }
-      }
-      pages.push(labels);
-    });
-    return { pages };
-  }
-
-  function download(filename, text){
-    const blob = new Blob([text], {type:'application/json'});
-    const a = document.createElement('a');
-    a.href = URL.createObjectURL(blob);
-    a.download = filename;
-    a.click();
-    setTimeout(()=>URL.revokeObjectURL(a.href), 1000);
-  }
-
-  function doExport(){
-    const target = (document.getElementById('htTarget').value || 'pc');
-    const json = snapshotPages();
-    download(`howtouse_overlays_${target}.json`, JSON.stringify(json, null, 2));
-  }
-
-  async function doImport(ev){
-    const f = ev.target.files?.[0]; if (!f) return;
-    try{
-      const txt = await f.text();
-      const obj = JSON.parse(txt);
-      if (!obj?.pages) throw new Error('잘못된 JSON 형식');
-      // 상태에 반영
-      if (!window.__howtouse_state) window.__howtouse_state = {};
-      // buildMap 없이도 페이지 순서대로 매핑
-      const map = {};
-      obj.pages.forEach((arr, i)=>{
-        const num = String(i+1).padStart(2,'0');
-        map[num] = arr;
-      });
-      window.__howtouse_state.map = map;
-      // 화면에 즉시 반영: 기존 overlay 비우고 다시 그리기
-      overlays().forEach(ol=>{
-        const num = ol.dataset.page;
-        const labels = map[num] || [];
-        ol.innerHTML = '';
-        applyLabels(ol, labels);
-      });
-      if (editing) decorateAll();
-      alert('임포트 적용 완료 (미리보기 기준). 서버 파일을 교체해야 영구 반영됩니다.');
-    }catch(err){
-      alert('임포트 실패: ' + (err.message||err));
-    }finally{
-      ev.target.value = '';
-    }
-  }
-
-  // 최소 렌더러(레이아웃) 복제: xPercent/yPercent, maxWidthPercent 중심
-  function applyLabels(overlay, labels){
-    const card = overlay.closest('.howtouse-item');
-    const rect = overlay.getBoundingClientRect();
-    const W = rect.width;
-
-    labels.forEach(cfg=>{
-      const el = document.createElement('div');
-      el.className = 'olabel anchor-topstart';
-      el.textContent = (window.__howtouse_state?.strings?.[cfg.key]) || cfg.key || '';
-
-      if (cfg.bold) el.style.fontWeight = "700";
-      if (cfg.sizeSp) el.style.fontSize = cfg.sizeSp + "px";
-      if (cfg.lineHeightSp) el.style.lineHeight = cfg.lineHeightSp + "px";
-      if (cfg.textAlign) el.style.textAlign = ({Center:"center", End:"right", Start:"left"}[cfg.textAlign]||"left");
-      if (cfg.colorHex){
-        let s=String(cfg.colorHex).trim();
-        if(s.startsWith("0x")) s=s.slice(2);
-        if(s.startsWith("#")) s=s.slice(1);
-        if(s.length===8){ const a=parseInt(s.slice(0,2),16)/255, r=parseInt(s.slice(2,4),16), g=parseInt(s.slice(4,6),16), b=parseInt(s.slice(6,8),16); el.style.color=`rgba(${r},${g},${b},${a})`; }
-        if(s.length===6){ const r=parseInt(s.slice(0,2),16), g=parseInt(s.slice(2,4),16), b=parseInt(s.slice(4,6),16); el.style.color=`rgb(${r},${g},${b})`; }
-      }
-      if (cfg.maxWidthPercent) el.style.maxWidth = (cfg.maxWidthPercent*W) + 'px';
-
-      // 위치
-      const xp = (typeof cfg.xPercent === 'number') ? cfg.xPercent : 0;
-      const yp = (typeof cfg.yPercent === 'number') ? cfg.yPercent : 0;
-      el.style.left = (xp*W) + 'px';
-      el.style.top  = (yp*overlay.getBoundingClientRect().height) + 'px';
-
-      // 에디터 연결 정보
-      el.__cfgRef = cfg;
-      el.dataset.key   = cfg.key || '';
-      el.dataset.page  = overlay.dataset.page || '';
-      el.dataset.index = String(overlay.childElementCount || 0);
-
-      overlay.appendChild(el);
-    });
-  }
-
-  // 레이아웃이 다시 그려져도 핸들이 살아있게 Mutation 감시
-  const mo = new MutationObserver(() => { if (editing) decorateAll(); });
-  mo.observe(document.body, { subtree:true, childList:true });
-
- // 공개 페이지엔 전혀 주입하지 않음
- if (!START_ON) return;
-
- window.addEventListener('load', async ()=>{
-   await waitForGridReady();      // 아래 B의 함수
-   makeBar();
-   setEditing(true);
-   document.getElementById('htToggle').textContent = '미리보기 OFF';
- });
-})();
-</script>
 
 <style>
 /* ====== 에디터용 스타일 ====== */
