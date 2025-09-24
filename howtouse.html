@@ -122,8 +122,14 @@
   #howtoGrid .howtouse-item img{ height:auto !important; object-fit:contain !important; }
 }
 </style>
-
-
+<style id="__howto_hide_public">
+  /* 공개 페이지에선 미리보기/툴바류 전부 숨김 */
+  .howto-toolbar,
+  #howtoToolbar,
+  .howtouse-toolbar,
+  .preview-controls,
+  .preview-toolbar { display:none !important; }
+</style>
 </head>
 <body>
 <header>
@@ -197,12 +203,16 @@
       ? `${base}/howtouse_overlays_mo.json?v=mo1`
       : `${base}/howtouse_overlays_pc.json?v=pc28`;
   }
-  const OVERLAYS_JSON = pickOverlayJson();
+  const OVERLAYS_JSON = (new URLSearchParams(location.search).get("ovr") === "mo")
+  ? "/assets/data/howtouse_overlays_mo.json?v=mo1"
+  : "/assets/data/howtouse_overlays_pc.json?v=pc28";
+
 
   /* ====== 상태(전역) ====== */
   // ⛔ map is not defined 오류 원인 → 스코프 밖에서 접근.
   // ✅ 파일 스코프 전역으로 선언해 모든 함수에서 접근 가능하게 함.
   let overlayMap = {};
+  let labelsMap = {}; // ← 전역에 선언 (map 스코프 오류 방지)
 
   /* ====== 유틸 ====== */
   function grid() {
@@ -363,6 +373,13 @@
 
   /* ====== 메인 렌더 ====== */
   async function init() {
+    const qs = new URLSearchParams(location.search);
+    const w = parseInt(qs.get("w"), 10);
+    if (w && w >= 280 && w <= 1400) {
+     const el = document.getElementById("howtoGrid") || document.querySelector(".howtouse-grid");
+     if (el) { el.style.maxWidth = w + "px"; el.style.margin = "0 auto"; }
+    }
+
     const container = grid();
     if (!container) {
       console.error("[howtouse] grid container not found");
@@ -472,8 +489,6 @@
   window.addEventListener("load", init);
 })();
 </script>
-
-
 <style>
 /* ====== 에디터용 스타일 ====== */
 #howtoEditorBar{
@@ -499,6 +514,16 @@
 .olabel .ht-handle-move{ top:-8px; left:-8px; background:#2563eb; border-radius:999px; cursor:grab; }
 .olabel .ht-handle-resize{ right:-8px; bottom:-8px; background:#10b981; border-radius:2px; cursor:se-resize; }
 </style>
+<script>
+  // URL에 ?dev=1 이 붙은 경우에만 툴바를 보이도록 허용
+  (function () {
+    const dev = new URLSearchParams(location.search).get('dev') === '1';
+    if (dev) {
+      const hider = document.getElementById('__howto_hide_public');
+      if (hider) hider.remove(); // 숨김 스타일 제거 → 툴바 표시
+    }
+  })();
+</script>
 
 </body>
 </html>
