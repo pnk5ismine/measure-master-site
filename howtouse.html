@@ -846,14 +846,15 @@
   const mo = new MutationObserver(() => { if (editing) decorateAll(); });
   mo.observe(document.body, { subtree:true, childList:true });
 
-  // 초기화
-  window.addEventListener('load', ()=>{
-    makeBar();
-    if (START_ON){
-      setEditing(true);
-      document.getElementById('htToggle').textContent = '미리보기 OFF';
-    }
-  });
+ // 공개 페이지엔 전혀 주입하지 않음
+ if (!START_ON) return;
+
+ window.addEventListener('load', async ()=>{
+   await waitForGridReady();      // 아래 B의 함수
+   makeBar();
+   setEditing(true);
+   document.getElementById('htToggle').textContent = '미리보기 OFF';
+ });
 })();
 </script>
 
