@@ -5,7 +5,9 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Measure Master — 사진 보정 · 길이/면적 계산</title>
   <meta name="description" content="A4 같이 각 길이를 아는 기준 직사각형으로 투시 보정 후 길이/면적을 계산하는 Measure Master 앱" />
-
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
   <!-- 파비콘 -->
   <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
 
@@ -147,6 +149,7 @@
   #leftAuth{ order:2; }   /* 로그인/가입 패널은 맨 아래 */
 }
   </style>
+
 </head>
 <body>
 <header>
@@ -323,6 +326,14 @@
       el.textContent = '방문수 집계 실패';
     }
   }
+
+(function(){
+  var u = new URL(location.href);
+  if(!u.searchParams.has('__v')){
+    u.searchParams.set('__v', String(Date.now()).slice(0,10));
+    location.replace(u.toString());  // 한 번만 새로고침
+  }
+})();
 
   // --- 인증 UI ---
   async function refreshAuthUI(){

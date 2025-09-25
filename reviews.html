@@ -5,7 +5,10 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Measure Master — 사용자 후기</title>
   <meta name="description" content="Measure Master 사용자 후기" />
-  <!-- 로고/파비콘 -->
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0"> 
+<!-- 로고/파비콘 -->
   <link rel="icon" type="image/png" href="/images/mm_logo_small.png?v=rev-clean1" />
   <link rel="shortcut icon" type="image/png" href="/images/mm_logo_small.png?v=rev-clean1" />
   <!-- 데이터 URI 파비콘 -->
@@ -381,6 +384,15 @@ const MAX_FILES = Number($('#image')?.dataset?.max || 6);
 
 // 관리자 이메일 목록(본인 메일로 바꿔 주세요)
 const ADMIN_EMAILS = ['pnk506@gmail.com'];
+
+(function(){
+  var u = new URL(location.href);
+  if(!u.searchParams.has('__v')){
+    u.searchParams.set('__v', String(Date.now()).slice(0,10));
+    location.replace(u.toString());  // 한 번만 새로고침
+  }
+})();
+
 function isAdmin(session){
   const email = session?.user?.email || '';
   return ADMIN_EMAILS.includes(email);
