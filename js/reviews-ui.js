@@ -4,9 +4,9 @@ var MMReviews = (function(){
   function $(s){ return document.querySelector(s); }
   var elAuthInfo   = null;
   var elAuthStatus = null;
-  var elListView   = null;
-  var elReadView   = null;
-  var elWriteForm  = null;
+  const elViewList  = document.getElementById('listView');
+  const elReadView  = document.getElementById('readView');
+  const elWriteForm = document.getElementById('writeForm');
   var elListBody   = null;
   var elBtnCompose = null;
   var elBtnSubmit  = null;
@@ -23,10 +23,10 @@ var MMReviews = (function(){
     catch(_){ return false; }
   }
 
-  function showList(){ if (elListView) elListView.hidden=false; if(elReadView) elReadView.hidden=true; if(elWriteForm) elWriteForm.hidden=true; }
-  function showRead(){ if (elListView) elListView.hidden=true; if(elReadView) elReadView.hidden=false; if(elWriteForm) elWriteForm.hidden=true; }
-  function showWrite(){if (elListView) elListView.hidden=true; if(elReadView) elReadView.hidden=true; if(elWriteForm) elWriteForm.hidden=false; }
-
+// ------ 뷰 전환 ------
+function showList(){ if(elViewList) elViewList.hidden=false; if(elReadView) elReadView.hidden=true; if(elWriteForm) elWriteForm.hidden=true; }
+function showRead(){ if(elViewList) elViewList.hidden=true;  if(elReadView) elReadView.hidden=false; if(elWriteForm) elWriteForm.hidden=true; }
+function showWrite(){if(elViewList) elViewList.hidden=true;  if(elReadView) elReadView.hidden=true;  if(elWriteForm) elWriteForm.hidden=false; }
   function escapeHtml(s){
     if (s===null || s===undefined) return "";
     return String(s).replace(/[&<>"']/g, function(m){
@@ -110,17 +110,17 @@ var MMReviews = (function(){
             var bodyHtml = (row.is_notice ? '<span class="notice-tag">[알림]</span> ' : '') + titleHtml + escapeHtml(row.content||"");
             var when = fmtDate(row.created_at);
             var trCls = row.is_notice ? "row-item notice" : "row-item";
-            html += ''
-              + '<tr data-id="'+row.id+'" class="'+trCls+'" style="cursor:pointer">'
-              +   '<td class="cell-no">'+(j+1)+'</td>'
-              +   '<td class="cell-nick">'+nick+'</td>'
-              +   '<td class="cell-body">'
-              +     '<div class="m-line1"><span class="nick m-only">'+nick+'</span>'+bodyHtml+'</div>'
-              +     '<div class="m-line2 m-only"><span>조회 '+stat.v+' ('+stat.c+')</span><span>'+when+'</span></div>'
-              +   '</td>'
-              +   '<td class="cell-stats">'+stat.v+' ('+stat.c+')</td>'
-              +   '<td class="cell-time">'+when+'</td>'
-              + '</tr>';
+            html = ''
+               '<tr data-id="'+row.id+'" class="'+trCls+'" style="cursor:pointer">'
+                 '<td class="cell-no">'+(j+1)+'</td>'
+                 '<td class="cell-nick">'+nick+'</td>'
+                 '<td class="cell-body">'
+                   '<div class="m-line1"><span class="nick m-only">'+nick+'</span>'+bodyHtml+'</div>'
+                   '<div class="m-line2 m-only"><span>조회 '+stat.v+' ('+stat.c+')</span><span>'+when+'</span></div>'
+                 '</td>'
+                 '<td class="cell-stats">'+stat.v+' ('+stat.c+')</td>'
+                 '<td class="cell-time">'+when+'</td>'
+               '</tr>';
           }
           elListBody.innerHTML = html;
 
@@ -295,9 +295,6 @@ var MMReviews = (function(){
     // DOM 캐시
     elAuthInfo   = $("#authInfo");
     elAuthStatus = $("#authStatus");
-    elListView   = $("#listView");
-    elReadView   = $("#readView");
-    elWriteForm  = $("#writeForm");
     elListBody   = $("#listBody");
     elBtnCompose = $("#btn-compose");
     elBtnSubmit  = $("#btn-submit");
@@ -365,7 +362,7 @@ var MMReviews = (function(){
   // 디버그 헬퍼
   function _debug(){
     console.log("[MMReviews] elements",
-      !!elListView, !!elReadView, !!elWriteForm, !!elListBody);
+      !!elViewList, !!elReadView, !!elWriteForm, !!elListBody);
     if (window.mmAuth) window.mmAuth._debugPing();
   }
 
