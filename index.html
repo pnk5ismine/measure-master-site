@@ -139,7 +139,12 @@
     font-size:12px;          /* 개인정보처리방침만 살짝 더 작게 */
     letter-spacing:-0.2px;
   }
-  #leftAuth{ order : 999;}
+  .layout{
+    display:flex;
+    flex-direction:column;
+  }
+  #rightCard{ order:1; }  /* 본문(메인) 먼저 */
+  #leftAuth{ order:2; }   /* 로그인/가입 패널은 맨 아래 */
 }
   </style>
 </head>

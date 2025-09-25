@@ -1327,18 +1327,22 @@ async function init(){
     return;
   }
 
-  // 2) 글쓰기(라우팅으로 들어온 경우)
-  if (compose === '1'){
-    const session = await waitForSession(3000);
-    if (!session?.user){
-      // 비로그인 → 목록을 먼저 보여주고, 모바일에서만 로그인/가입 박스 노출
-      showAuthForMobile();
-      return;
-    }
-    showWrite();
-    if (isAdmin(session)) document.getElementById('noticeBox')?.removeAttribute('hidden');
+// 2) 글쓰기(라우팅으로 들어온 경우)
+if (compose === '1'){
+  const session = await waitForSession(3000);
+  if (!session?.user){
+    // ✅ 비로그인: 목록을 먼저 보여주고, 모바일에서만 로그인/가입 박스 노출
+    showList();
+    await loadList();
+    showAuthForMobile();
+    // 필요하면 주소를 깔끔히: history.replaceState(null,'','/reviews.html');
     return;
   }
+  showWrite();
+  if (isAdmin(session)) document.getElementById('noticeBox')?.removeAttribute('hidden');
+  return;
+}
+
 
   // 3) 편집
   if (edit){
