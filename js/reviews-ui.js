@@ -1,70 +1,48 @@
-/*! reviews-ui.js : 후기 페이지 전용 UI (목록/읽기/쓰기/댓글/반응/업로드) */
-(function(){
-  'use strict';
-
-  // ----- 공유 클라이언트/헬퍼 -----
-  const sb = window.mmAuth.getClient();
-  const $  = s => document.querySelector(s);
-  const _get = v => (typeof v === 'function' ? v() : v); // 변수/함수 겸용 안전 접근
-
-  // ----- DOM refs -----
-  const authInfo     = $('#authInfo');
-  const authStatus   = $('#authStatus');
-  const authTabs     = $('#authTabs');
-  const loginForm    = $('#loginForm');
-  const signupForm   = $('#signupForm');
-  const loginStatus  = $('#loginStatus');
-  const signupStatus = $('#signupStatus');
-
-  const loginEmailField = $('#login-email')?.closest('.field');
-  const loginPwField    = $('#login-password')?.closest('.field');
-  const btnLogin        = $('#btn-login');
-  const btnLogout       = $('#btn-logout');
-  const listLoginHint   = $('#listLoginHint');
-
-  const listView   = $('#listView');
-  const readView   = $('#readView');
-  const writeForm  = $('#writeForm');
-  const listBody   = $('#listBody');
-  const btnCompose = $('#btn-compose');
-  const btnSubmit  = $('#btn-submit');
-  const formStatus = $('#formStatus');
-
-  const fTitle   = $('#title');
-  const fContent = $('#content');
-  const fImage   = $('#image');
-  const preview  = $('#preview');
-  const selectPreviews = $('#selectPreviews');
-  const editImages = $('#editImages');
-
-  const MAX_FILES = Number($('#image')?.dataset?.max || 6);
-  let   chosenFiles = [];
-
-  // ----- 모바일 auth 패널 노출 제어 -----
-  const MOBILE_MAX = 700;
-  const isMobile = () => window.matchMedia(`(max-width:${MOBILE_MAX}px)`).matches;
-  function showAuthForMobile(){
-    if (!isMobile()) return;
-    document.body.classList.add('show-auth');
-    try { setTab && setTab('login'); } catch {}
-    document.getElementById('leftAuth')?.scrollIntoView({ behavior:'smooth', block:'start' });
+// /js/reviews-ui.js
+;(() => {
+  if (!window.mmAuth) {
+    console.error('[reviews-ui] mmAuth 가 먼저 로드되어야 합니다.');
+    return;
   }
-  function hideAuthForMobile(){
-    if (!isMobile()) return;
-    document.body.classList.remove('show-auth');
-  }
+  const sb = window.mmAuth.sb;
 
-  // ----- 탭 전환 -----
-  function setTab(which){
-    $('#tab-login')?.classList.toggle('active', which==='login');
-    $('#tab-signup')?.classList.toggle('active', which==='signup');
-    if(loginForm)  loginForm.hidden  = (which!=='login');
-    if(signupForm) signupForm.hidden = (which!=='signup');
-  }
-  $('#tab-login')?.addEventListener('click', ()=>setTab('login'));
-  $('#tab-signup')?.addEventListener('click', ()=>setTab('signup'));
+  // ------- DOM refs -------
+  const $ = sel => document.querySelector(sel);
+  const els = {
+    authInfo:   $('#authInfo'),
+    authStatus: $('#authStatus'),
+    authTabs:   $('#authTabs'),
+    loginForm:  $('#loginForm'),
+    signupForm: $('#signupForm'),
+    loginStatus:  $('#loginStatus'),
+    signupStatus: $('#signupStatus'),
 
-  // ----- 유틸 -----
+    btnLogin:  $('#btn-login'),
+    btnLogout: $('#btn-logout'),
+
+    listView:  $('#listView'),
+    readView:  $('#readView'),
+    writeForm: $('#writeForm'),
+    listBody:  $('#listBody'),
+    btnCompose: $('#btn-compose'),
+    btnSubmit:  $('#btn-submit'),
+    formStatus: $('#formStatus'),
+
+    fTitle:   $('#title'),
+    fContent: $('#content'),
+    fImage:   $('#image'),
+    preview:  $('#preview'),
+    selectPreviews: $('#selectPreviews'),
+    editImages: $('#editImages'),
+
+    noticeBox:  $('#noticeBox'),
+    isNotice:   $('#isNotice')
+  };
+
+  const MAX_FILES = Number(els.fImage?.dataset?.max || 6);
+  let chosenFiles = [];
+
+  // ------- 유틸 -------
   function escapeHtml(s){return (s??'').replace(/[&<>"']/g,m=>({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;' }[m]))}
   function fmtDate(iso){try{const d=new Date(iso);return d.toLocaleString('ko-KR',{year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'})}catch{return iso||''}}
   function displayName(row){
@@ -72,177 +50,79 @@
     return row?.nickname || (row?.author_email ? row.author_email.split('@')[0] : '익명');
   }
 
-  // =========================
-  // 인증 UI 갱신
-  // =========================
-  async function refreshAuthUI(){
-    const res = await window.mmAuth.safeGetSession(2000);
-    const session = res?.data?.session ?? null;
-
-    if(session?.user){
-      authStatus && (authStatus.textContent = `로그인: ${session.user.email}`);
-      authInfo   && (authInfo.textContent  = `로그인: ${session.user.email}`);
-      listLoginHint && (listLoginHint.hidden = true);
-      authTabs && authTabs.setAttribute('hidden','');
-      signupForm && signupForm.setAttribute('hidden','');
-
-      if (loginForm) {
-        loginForm.hidden = false;
-        loginEmailField && (loginEmailField.hidden = true);
-        loginPwField    && (loginPwField.hidden = true);
-        btnLogin        && (btnLogin.hidden = true);
-        btnLogout       && (btnLogout.hidden = false);
-      }
-    }else{
-      authStatus && (authStatus.textContent = '로그아웃 상태');
-      authInfo   && (authInfo.textContent  = '로그아웃 상태');
-      listLoginHint && (listLoginHint.hidden = false);
-      authTabs && authTabs.removeAttribute('hidden');
-      signupForm && signupForm.setAttribute('hidden','');
-      if (loginForm) loginForm.hidden = false;
-      loginEmailField && (loginEmailField.hidden = false);
-      loginPwField    && (loginPwField.hidden = false);
-      btnLogin        && (btnLogin.hidden = false);
-      btnLogout       && (btnLogout.hidden = true);
-      setTab('login');
-      ensureAuthVisible();
-    }
+  // 모바일 로그인 패널 토글(리뷰 페이지 전용)
+  const isMobile = () => window.matchMedia('(max-width:700px)').matches;
+  function showAuthForMobile(){
+    if (!isMobile()) return;
+    document.body.classList.add('show-auth');
+    document.getElementById('leftAuth')?.scrollIntoView({ behavior:'smooth', block:'start' });
   }
-  function ensureAuthVisible(){
-    const loginForm = document.getElementById('loginForm');
-    const authTabs  = document.getElementById('authTabs');
-    const signupForm= document.getElementById('signupForm');
-    if (!loginForm || !authTabs) return;
-    const cs = getComputedStyle(loginForm);
-    const needsShow = loginForm.hidden || cs.display === 'none' || cs.visibility === 'hidden';
-    if (needsShow) {
-      authTabs.hidden = false;
-      loginForm.hidden = false;
-      loginForm.style.display = '';
-      loginForm.style.visibility = '';
-      if (signupForm) { signupForm.hidden = true; }
-      if (typeof setTab === 'function') setTab('login');
-    }
+  function hideAuthForMobile(){
+    if (!isMobile()) return;
+    document.body.classList.remove('show-auth');
   }
 
-  // 실사용 로그인/로그아웃/가입
-  $('#btn-login')?.addEventListener('click', async (e)=>{
-    e.preventDefault();
-    if (loginStatus) loginStatus.textContent = '로그인 중…';
-    const email = $('#login-email')?.value.trim();
-    const pw    = ($('#login-password')?.value ?? '').trim();
-    const { error } = await window.mmAuth.signIn(email, pw);
-    if (loginStatus) loginStatus.textContent = error ? ('로그인 실패: '+error.message) : '로그인 성공';
-    await refreshAuthUI();
-  });
-  $('#btn-logout')?.addEventListener('click', async (e)=>{
-    e.preventDefault();
-    await window.mmAuth.signOut();
-    await refreshAuthUI();
-  });
-  $('#btn-signup')?.addEventListener('click', async (e)=>{
-    e.preventDefault();
-    if (signupStatus) signupStatus.textContent = '가입 중…';
-    const email = $('#signup-email')?.value.trim();
-    const pw1   = $('#signup-password')?.value;
-    const pw2   = $('#signup-password2')?.value;
-    if(pw1 !== pw2){ signupStatus.textContent='비밀번호 확인이 일치하지 않습니다.'; return; }
-    if((pw1||'').length < 8){ signupStatus.textContent='비밀번호는 8자 이상'; return; }
-    const { data, error } = await window.mmAuth.signUp(email, pw1);
-    if(error){ signupStatus.textContent = '가입 실패: ' + error.message; return; }
-    signupStatus.textContent = data.session ? '가입+로그인 완료' : '가입 완료';
-    await refreshAuthUI();
-  });
+  // ------- 인증 UI 갱신 -------
+  async function refreshAuthUI(session) {
+    // session 인자가 없으면 최신 세션 조회
+    if (!session) session = await window.mmAuth.getSession();
+    const loggedIn = !!session?.user;
 
-  // 모든 페이지 공통 상태 변경에 반응
-  window.mmAuth.onAuthChange(async (session)=>{
-    // 로그인 완료되면 모바일에선 auth 박스 숨김 + compose=1이면 글쓰기로
-    if (session?.user && document.body.classList.contains('show-auth')){
+    if (els.authStatus) els.authStatus.textContent = loggedIn ? `로그인: ${session.user.email}` : '로그아웃 상태';
+    if (els.authInfo)   els.authInfo.textContent   = loggedIn ? `로그인: ${session.user.email}` : '로그아웃 상태';
+
+    // 로그인 폼/버튼 토글
+    if (els.loginForm) els.loginForm.hidden = false;
+    const emailField = $('#login-email')?.closest('.field');
+    const pwField    = $('#login-password')?.closest('.field');
+
+    if (loggedIn) {
+      els.authTabs?.setAttribute('hidden','');
+      els.signupForm?.setAttribute('hidden','');
+
+      if (emailField) emailField.hidden = true;
+      if (pwField)    pwField.hidden = true;
+      if (els.btnLogin)  els.btnLogin.hidden = true;
+      if (els.btnLogout) els.btnLogout.hidden = false;
+
       hideAuthForMobile();
-      const q = new URLSearchParams(location.search);
-      if (q.get('compose') === '1'){
-        showWrite();
-        if (window.mmAuth.isAdmin(session)) document.getElementById('noticeBox')?.removeAttribute('hidden');
-      }
+    } else {
+      els.authTabs?.removeAttribute('hidden');
+      els.signupForm?.setAttribute('hidden','');
+
+      if (emailField) emailField.hidden = false;
+      if (pwField)    pwField.hidden = false;
+      if (els.btnLogin)  els.btnLogin.hidden = false;
+      if (els.btnLogout) els.btnLogout.hidden = true;
+
+      if (isMobile()) document.body.classList.remove('show-auth'); // 기본은 숨김
     }
-    if (session?.user) hideAuthForMobile();
-    await refreshAuthUI();
-  });
-
-  // =========================
-  // 뷰 전환
-  // =========================
-  function setSection(elLike, visible){
-    const el = _get(elLike);
-    if(!el) return;
-    el.hidden = !visible;
-    el.setAttribute('aria-hidden', visible ? 'false' : 'true');
-    el.style.display = visible ? '' : 'none';
-  }
-  function resetWriteDraft(){
-    try{
-      const wf = _get(writeForm);
-      if (wf && wf.dataset) delete wf.dataset.editing;
-      const t  = _get(fTitle);
-      const c  = _get(fContent);
-      const sp = _get(selectPreviews);
-      const ei = _get(editImages);
-      const fi = _get(fImage);
-      const fs = _get(formStatus);
-      if (t)  t.value = '';
-      if (c)  c.value = '';
-      if (sp) sp.innerHTML = '';
-      if (ei){ ei.hidden = true; ei.innerHTML = ''; }
-      if (fi) fi.value = '';
-      if (fs) fs.textContent = '';
-      chosenFiles = [];
-    }catch{}
-  }
-  function showList(opts={}){
-    setSection(listView,  true);
-    setSection(readView,  false);
-    setSection(writeForm, false);
-    resetWriteDraft();
-    if (opts.updateUrl !== false) history.replaceState(null,'','/reviews.html');
-    (document.getElementById('btn-compose') || _get(listView) || document.body)
-      .scrollIntoView({ behavior:'smooth', block:'start' });
-  }
-  function showRead(opts={}){
-    setSection(listView,  false);
-    setSection(readView,  true);
-    setSection(writeForm, false);
-    if (opts.scroll !== false) (_get(readView) || document.body).scrollIntoView({ behavior:'smooth', block:'start' });
-  }
-  function showWrite(opts={}){
-    setSection(listView,  false);
-    setSection(readView,  false);
-    setSection(writeForm, true);
-    const wf = _get(writeForm);
-    if (opts.clear !== false && !(wf && wf.dataset && wf.dataset.editing)) resetWriteDraft();
-    try{ hideAuthForMobile?.(); }catch{}
-    if (opts.updateUrl) history.replaceState(null,'','/reviews.html?compose=1');
-    ( _get(fTitle) || wf || document.body ).scrollIntoView({ behavior:'smooth', block:'start' });
   }
 
-  // =========================
-  // 목록
-  // =========================
+  // ------- 뷰 전환 -------
+  function showList(){ if(els.listView) els.listView.hidden=false; if(els.readView) els.readView.hidden=true; if(els.writeForm) els.writeForm.hidden=true; }
+  function showRead(){ if(els.listView) els.listView.hidden=true;  if(els.readView) els.readView.hidden=false; if(els.writeForm) els.writeForm.hidden=true; }
+  function showWrite(){if(els.listView) els.listView.hidden=true;  if(els.readView) els.readView.hidden=true;  if(els.writeForm) els.writeForm.hidden=false; }
+
+  // ------- 목록 로드 -------
   async function loadList(){
+    if (!els.listBody) return;
     const { data, error } = await sb.from('reviews')
       .select('id, title, content, nickname, author_email, created_at, view_count, is_notice')
       .order('is_notice', { ascending:false })
       .order('created_at', { ascending:false })
       .limit(100);
+
     if(error){
-      listBody.innerHTML = `<tr><td colspan="5" class="muted">목록 로드 실패: ${escapeHtml(error.message)}</td></tr>`;
+      els.listBody.innerHTML = `<tr><td colspan="5" class="muted">목록 로드 실패: ${escapeHtml(error.message)}</td></tr>`;
       return;
     }
     if(!data?.length){
-      listBody.innerHTML = `<tr><td colspan="5" class="muted">등록된 후기가 없습니다.</td></tr>`;
+      els.listBody.innerHTML = `<tr><td colspan="5" class="muted">등록된 후기가 없습니다.</td></tr>`;
       return;
     }
 
-    // 조회/댓글 카운트(뷰가 있으면 사용)
+    // review_counts 뷰(있으면 사용)
     const ids = data.map(r => r.id);
     let countMap = new Map();
     if (ids.length){
@@ -255,7 +135,7 @@
       }));
     }
 
-    listBody.innerHTML = data.map((row, idx) => {
+    els.listBody.innerHTML = data.map((row, idx) => {
       const stat = countMap.get(row.id) || { v: Number(row.view_count||0), c: 0 };
       const nick = escapeHtml(displayName(row));
       const titleHtml = row.title ? `[${escapeHtml(row.title)}] ` : '';
@@ -278,30 +158,31 @@
       `;
     }).join('');
 
-    listBody.querySelectorAll('tr.row-item').forEach(tr=>{
+    els.listBody.querySelectorAll('tr.row-item').forEach(tr=>{
       tr.addEventListener('click',()=> location.href=`/reviews.html?id=${tr.dataset.id}`);
     });
   }
 
-  // =========================
-  // 읽기(상세)
-  // =========================
+  // ------- 읽기(단건) -------
   async function loadOne(id){
     const { data, error } = await sb
       .from("reviews")
       .select("id, user_id, title, content, created_at, nickname, author_email, image_url, image_path, is_notice")
-      .eq("id", id).single();
+      .eq("id", id)
+      .single();
+
     if(error){
-      readView.innerHTML = `<p class="muted">불러오기 실패: ${escapeHtml(error.message)}</p>`;
+      els.readView.innerHTML = `<p class="muted">불러오기 실패: ${escapeHtml(error.message)}</p>`;
       return;
     }
 
-    const session = await window.mmAuth.getSession();
-    const me = session?.user || null;
+    // 세션이 늦게 올 수도 있으니 잠깐 대기
+    const sess = await window.mmAuth.waitForSession(1200);
+    const me = sess?.user || null;
     const isOwner = !!(me && data.user_id && me.id === data.user_id);
     const name = displayName(data);
 
-    readView.innerHTML = `
+    els.readView.innerHTML = `
       <div class="top-actions">
         <a class="btn secondary" href="/reviews.html">목록보기</a>
         <div style="display:flex; gap:8px; align-items:center">
@@ -350,28 +231,27 @@
       </div>
     `;
 
-    // 상단 버튼
+    // 버튼 바인드
     document.getElementById('btn-to-compose')?.addEventListener('click', async ()=>{
-      const s = await window.mmAuth.waitForSession(3000);
-      if(!s?.user){ showAuthForMobile(); return; }
+      const s = await window.mmAuth.getSession();
+      if (!s?.user){ showAuthForMobile(); return; }
       history.replaceState(null,'','/reviews.html?compose=1');
       showWrite();
-      if (window.mmAuth.isAdmin(s)) document.getElementById('noticeBox')?.removeAttribute('hidden');
+      if (window.mmAuth.isAdminSession(s)) els.noticeBox?.removeAttribute('hidden');
     });
 
     document.getElementById('btn-edit')?.addEventListener('click', ()=>{
       history.replaceState(null,'', `/reviews.html?edit=${id}`);
       showWrite();
-      if (fTitle)   fTitle.value   = data.title   || '';
-      if (fContent) fContent.value = data.content || '';
-      if (writeForm) {
-        writeForm.dataset.editing = id;
-        writeForm._editingLegacy  = { url: data.image_url || null, path: data.image_path || null };
+      if (els.fTitle)   els.fTitle.value   = data.title   || '';
+      if (els.fContent) els.fContent.value = data.content || '';
+      if (els.writeForm) {
+        els.writeForm.dataset.editing = id;
+        els.writeForm._editingLegacy  = { url: data.image_url || null, path: data.image_path || null };
       }
-      // 관리자라면 공지 체크 박스
-      if (window.mmAuth.isAdmin(session)) {
-        document.getElementById('noticeBox')?.removeAttribute('hidden');
-        const cb = document.getElementById('isNotice'); if (cb) cb.checked = !!data.is_notice;
+      if (window.mmAuth.isAdminSession(sess)) {
+        els.noticeBox?.removeAttribute('hidden');
+        if (els.isNotice) els.isNotice.checked = !!data.is_notice;
       }
       const editBox = document.getElementById('editImages');
       if (editBox) editBox.hidden = false;
@@ -396,52 +276,38 @@
       }
     });
 
-    // 반응/댓글/이미지
+    // 반응/댓글/이미지/뷰카운트
     await renderReactions(id);
     await renderComments(id, data.user_id);
     await renderGalleryLightbox(id, data.image_url);
-
-    // 조회수 +1 (있으면)
     try { await sb.rpc('inc_review_view', { _id: id }); } catch (e) { console.warn('view +1 실패', e); }
 
-    // 공유: 텍스트 링크 복사
+    // 공유
     const copyBtn  = document.getElementById('btnCopyLink');
     const shareTip = document.getElementById('shareTip');
     const shareUrl = `${location.origin}/reviews.html?id=${id}`;
-    function copyPlainText(text) {
-      if (navigator.clipboard && window.isSecureContext) return navigator.clipboard.writeText(text);
-      return new Promise((resolve, reject) => {
-        try{
-          const ta = document.createElement('textarea');
-          ta.value = text; ta.setAttribute('readonly', '');
-          ta.style.position = 'fixed'; ta.style.left = '-9999px';
-          document.body.appendChild(ta); ta.select();
-          const ok = document.execCommand('copy');
-          document.body.removeChild(ta);
-          ok ? resolve() : reject(new Error('execCommand copy 실패'));
-        }catch(err){ reject(err); }
-      });
-    }
     copyBtn?.addEventListener('click', async ()=>{
-      try{ await copyPlainText(shareUrl); if (shareTip) shareTip.textContent = '링크를 복사했습니다. (붙여넣기)'; }
-      catch{ if (shareTip) shareTip.textContent = '복사 실패'; }
+      try{
+        await (navigator.clipboard?.writeText(shareUrl) ?? (async()=>{
+          const ta=document.createElement('textarea'); ta.value=shareUrl; ta.style.position='fixed'; ta.style.left='-9999px';
+          document.body.appendChild(ta); ta.select(); document.execCommand('copy'); document.body.removeChild(ta);
+        })());
+        if (shareTip) shareTip.textContent = '링크를 복사했습니다. (붙여넣기)';
+      }catch{
+        if (shareTip) shareTip.textContent = '복사 실패';
+      }
       setTimeout(()=>{ if(shareTip) shareTip.textContent=''; }, 2000);
     });
   }
 
-  // =========================
-  // 좋아요/싫어요
-  // =========================
+  // ------- 반응(좋아요/싫어요) -------
   async function getMyReaction(reviewId){
-    const session = await window.mmAuth.getSession();
-    const uid = session?.user?.id;
+    const s = await window.mmAuth.getSession();
+    const uid = s?.user?.id;
     if(!uid) return null;
     const { data, error } = await sb
       .from('reactions')
-      .select('kind')
-      .eq('review_id', reviewId)
-      .eq('user_id', uid)
-      .limit(1);
+      .select('kind').eq('review_id', reviewId).eq('user_id', uid).limit(1);
     if(error) return null;
     return (data && data[0]) ? data[0].kind : null;
   }
@@ -454,13 +320,15 @@
     return count || 0;
   }
   async function toggleReaction(reviewId, kind){
-    const session = await window.mmAuth.getSession();
-    if(!session?.user){ alert('로그인이 필요합니다.'); return; }
-    const uid = session.user.id;
+    const s = await window.mmAuth.getSession();
+    if(!s?.user){ alert('로그인이 필요합니다.'); return; }
+    const uid = s.user.id;
+
     const { data: curRows } = await sb
       .from('reactions')
       .select('id, kind')
       .eq('review_id', reviewId).eq('user_id', uid).limit(1);
+
     const cur = curRows?.[0] || null;
 
     if(cur && cur.kind === kind){
@@ -488,15 +356,14 @@
     document.getElementById('btnDislike')?.addEventListener('click', ()=> toggleReaction(reviewId, 'dislike'));
   }
 
-  // =========================
-  // 댓글
-  // =========================
+  // ------- 댓글 -------
   async function fetchCommentsSafe(reviewId){
     let res = await sb
       .from('comments')
       .select('id, user_id, nickname, author_email, content, created_at, is_secret')
       .eq('review_id', reviewId)
       .order('created_at', { ascending:true });
+
     if (res.error && /is_secret|schema cache/i.test(res.error.message||'')) {
       let res2 = await sb
         .from('comments')
@@ -530,15 +397,15 @@
     }else if(!data?.length){
       list.innerHTML = `<div class="muted">아직 댓글이 없습니다.</div>`;
     }else{
-      const session = await window.mmAuth.getSession();
-      const myId = session?.user?.id || null;
+      const s = await window.mmAuth.getSession();
+      const myId = s?.user?.id || null;
       list.innerHTML = data.map(c=>{
         const name = c.nickname || (c.author_email ? c.author_email.split('@')[0] : '익명');
         const canDel = myId && c.user_id && (myId === c.user_id);
         const canEdit = canDel;
         const canSee = !c.is_secret
                     || (myId && c.user_id && myId === c.user_id)
-                    || window.mmAuth.isAdmin(session)
+                    || window.mmAuth.isAdminSession(s)
                     || (ownerUserId && myId === ownerUserId);
         const contentHtml = canSee ? escapeHtml(c.content||'') : '비밀 댓글입니다.';
         return `
@@ -570,7 +437,8 @@
           const id   = btn.getAttribute('data-edit');
           const item = btn.closest('.comment-item');
           const body = item.querySelector('.comment-body');
-          if (!body || item._editing) return;
+          if (!body) return;
+          if (item._editing) return;
           item._editing = true;
 
           const original = decodeURIComponent(body.dataset.raw || '');
@@ -588,25 +456,28 @@
           save.className = 'btn'; save.textContent = '저장';
           const cancel = document.createElement('button');
           cancel.className = 'btn secondary'; cancel.style.marginLeft = '6px'; cancel.textContent = '취소';
-          actions.appendChild(save); actions.appendChild(cancel); body.appendChild(actions);
+          actions.appendChild(save); actions.appendChild(cancel);
+          body.appendChild(actions);
 
           save.addEventListener('click', async ()=>{
             const newText = ta.value.trim();
             if (!newText){ alert('내용을 입력하세요.'); return; }
-            const session = await window.mmAuth.getSession();
-            if (!session?.user){ alert('로그인이 필요합니다.'); return; }
+            const s = await window.mmAuth.getSession();
+            if (!s?.user){ alert('로그인이 필요합니다.'); return; }
             const up = await sb.from('comments').update({ content: newText }).eq('id', id);
             if (up.error){ alert('수정 실패: ' + up.error.message); return; }
             await renderComments(reviewId, ownerUserId);
           });
 
-          cancel.addEventListener('click', ()=>{ renderComments(reviewId, ownerUserId); });
+          cancel.addEventListener('click', ()=>{
+            renderComments(reviewId, ownerUserId);
+          });
         });
       });
     }
 
-    const session = await window.mmAuth.getSession();
-    const loggedIn = !!session?.user;
+    const s = await window.mmAuth.getSession();
+    const loggedIn = !!s?.user;
     if(form) form.hidden = !loggedIn;
     if(hint) hint.hidden = loggedIn;
 
@@ -618,19 +489,18 @@
         const text = (ta?.value||'').trim();
         if(!text) return;
 
-        const session = await window.mmAuth.getSession();
-        if(!session?.user){ alert('로그인이 필요합니다.'); return; }
+        const s = await window.mmAuth.getSession();
+        if(!s?.user){ alert('로그인이 필요합니다.'); return; }
 
-        const nick = window.mmAuth.isAdmin(session)
+        const nick = window.mmAuth.isAdminSession(s)
           ? '관리자'
-          : (session.user.user_metadata?.full_name
-             || (session.user.email ? session.user.email.split('@')[0] : '익명'));
+          : (s.user.user_metadata?.full_name || (s.user.email ? s.user.email.split('@')[0] : '익명'));
 
         const secret = !!document.getElementById('commentSecret')?.checked;
         const ins = await insertCommentSafe({
           review_id: reviewId,
-          user_id: session.user.id,
-          author_email: session.user.email,
+          user_id: s.user.id,
+          author_email: s.user.email,
           nickname: nick,
           content: text,
           is_secret: secret
@@ -643,9 +513,7 @@
     }
   }
 
-  // =========================
-  // 갤러리(읽기)
-  // =========================
+  // ------- 갤러리 -------
   async function renderGalleryLightbox(reviewId, fallbackUrl){
     const box = document.getElementById('galleryThumbs');
     const lb  = document.getElementById('lb');
@@ -659,8 +527,7 @@
         .select('id,url')
         .eq('review_id', reviewId)
         .order('created_at', { ascending:true });
-      if (res.error) throw res.error;
-      if (res.data?.length) urls = res.data.map(r=>r.url);
+      if (!res.error && res.data?.length) urls = res.data.map(r=>r.url);
     }catch{
       try{
         const res2 = await sb
@@ -669,18 +536,17 @@
           .eq('review_id', reviewId)
           .order('id', { ascending:true });
         if (!res2.error && res2.data?.length) urls = res2.data.map(r=>r.url);
-      }catch(e2){ console.warn('review_images fallback error', e2); }
+      }catch(e2){
+        console.warn('review_images fallback error', e2);
+      }
     }
-
     if(!urls.length && fallbackUrl) urls = [fallbackUrl];
-    if (!urls.length) console.warn('[review_images] 0장 반환');
 
     box.innerHTML = urls.map((u,i)=>`
       <div class="thumb-card"><img class="thumb-img" src="${u}" alt="" data-idx="${i}"></div>
     `).join('');
 
-    const lbOk = lb && lbImg;
-    if(!lbOk) return;
+    if(!(lb && lbImg)) return;
     let cur = 0;
     const openAt = (i)=>{ cur=i; lbImg.src=urls[cur]; lb.hidden=false; document.body.style.overflow='hidden'; };
     const close  = ()=>{ lb.hidden=true; document.body.style.overflow=''; };
@@ -701,10 +567,9 @@
     });
   }
 
-  // =========================
-  // 편집 모드: 기존 이미지 썸네일/삭제
-  // =========================
+  // ------- 편집 이미지(기존) -------
   async function renderEditImagesForEditMode(reviewId, fallbackUrl, fallbackPath){
+    const editImages = els.editImages;
     if (!editImages) return;
     editImages.hidden = false;
     editImages.innerHTML = '<div class="muted">기존 이미지를 불러오는 중…</div>';
@@ -751,76 +616,44 @@
     `).join('');
   }
 
-  async function enterEditModeById(editId){
-    const { data, error } = await sb
-      .from('reviews')
-      .select('id, title, content, image_url, image_path, is_notice')
-      .eq('id', editId).single();
-    if (error){ alert('글 불러오기 실패: ' + error.message); return; }
-
-    showWrite();
-    if (fTitle)   fTitle.value   = data.title   || '';
-    if (fContent) fContent.value = data.content || '';
-    if (writeForm){
-      writeForm.dataset.editing = data.id;
-      writeForm._editingLegacy  = { url: data.image_url, path: data.image_path };
-    }
-    const editBox = document.getElementById('editImages');
-    if (editBox) editBox.hidden = false;
-    await renderEditImagesForEditMode(data.id, data.image_url, data.image_path);
-
-    const session = await window.mmAuth.getSession();
-    if (window.mmAuth.isAdmin(session)) {
-      document.getElementById('noticeBox')?.removeAttribute('hidden');
-      const cb2 = document.getElementById('isNotice');
-      if (cb2) cb2.checked = !!data.is_notice;
-    }
-  }
-
   async function getCurrentImageCount(reviewId) {
     const { data: imgs, error } = await sb
-      .from('review_images')
-      .select('id')
-      .eq('review_id', reviewId);
+      .from('review_images').select('id').eq('review_id', reviewId);
     const countDb = error ? 0 : (imgs?.length || 0);
-
     let legacy = 0;
     try {
-      const { data: r } = await sb.from('reviews')
-        .select('image_url').eq('id', reviewId).single();
+      const { data: r } = await sb.from('reviews').select('image_url').eq('id', reviewId).single();
       if (r?.image_url) legacy = 1;
     } catch {}
-
     const toDel = document.querySelectorAll('input[data-del="img"]:checked').length;
     return Math.max(0, countDb + legacy - toDel);
   }
 
   // 새 이미지 선택 미리보기
-  fImage?.addEventListener('change', ()=>{
+  els.fImage?.addEventListener('change', ()=>{
     let existing = 0;
-    if (editImages && !editImages.hidden){
-      existing = editImages.querySelectorAll('input[data-del="img"]').length
-               - editImages.querySelectorAll('input[data-del="img"]:checked').length;
+    if (els.editImages && !els.editImages.hidden){
+      existing = els.editImages.querySelectorAll('input[data-del="img"]').length
+              - els.editImages.querySelectorAll('input[data-del="img"]:checked').length;
     }
     const slot = Math.max(0, MAX_FILES - existing);
-    const newly = Array.from(fImage.files || []);
+    const newly = Array.from(els.fImage.files || []);
+
     const key = f => `${f.name}__${f.size}__${f.lastModified}`;
     const map = new Map();
     [...chosenFiles, ...newly].forEach(f => { if (!map.has(key(f))) map.set(key(f), f); });
     let next = Array.from(map.values());
-
     if (next.length > slot){
-      if (formStatus) formStatus.textContent =
-        `이미지는 최대 ${MAX_FILES}장까지 가능합니다. (현재 ${next.length}→${slot}장으로 제한)`;
+      if (els.formStatus) els.formStatus.textContent = `이미지는 최대 ${MAX_FILES}장까지 가능합니다. (현재 ${next.length}→${slot}장으로 제한)`;
       next = next.slice(0, slot);
-    }else{
-      if (formStatus) formStatus.textContent = '';
+    } else {
+      if (els.formStatus) els.formStatus.textContent = '';
     }
     chosenFiles = next;
 
-    if (preview){ preview.hidden = true; preview.removeAttribute('src'); }
-    if (!selectPreviews) return;
-    selectPreviews.innerHTML = '';
+    if (els.preview){ els.preview.hidden = true; els.preview.removeAttribute('src'); }
+    if (!els.selectPreviews) return;
+    els.selectPreviews.innerHTML = '';
     chosenFiles.forEach(f=>{
       const url = URL.createObjectURL(f);
       const wrap = document.createElement('div');
@@ -829,32 +662,31 @@
       img.className = 'thumb-img';
       img.src = url;
       wrap.appendChild(img);
-      selectPreviews.appendChild(wrap);
+      els.selectPreviews.appendChild(wrap);
     });
-    try{ fImage.value = ''; }catch{}
+    try{ els.fImage.value = ''; }catch{}
   });
 
   // 저장(신규/편집)
-  writeForm?.addEventListener('submit', async (e)=>{
+  els.writeForm?.addEventListener('submit', async (e)=>{
     e.preventDefault();
-    const session = await window.mmAuth.getSession();
-    if(!session?.user){ alert('로그인이 필요합니다.'); return; }
+    const s = await window.mmAuth.getSession();
+    if(!s?.user){ alert('로그인이 필요합니다.'); return; }
+    const title = els.fTitle.value.trim();
+    const content = els.fContent.value.trim();
+    if(!content){ els.formStatus.textContent = "내용을 입력하세요."; return; }
+    const editingId = els.writeForm?.dataset?.editing;
 
-    const title = fTitle.value.trim();
-    const content = fContent.value.trim();
-    if(!content){ formStatus.textContent = "내용을 입력하세요."; return; }
-    const editingId = writeForm?.dataset?.editing;
-
-    btnSubmit.disabled = true; btnSubmit.textContent = "저장 중…";
+    els.btnSubmit.disabled = true; els.btnSubmit.textContent = "저장 중…";
     try{
-      const nickname = window.mmAuth.isAdmin(session)
+      const nickname = window.mmAuth.isAdminSession(s)
         ? '관리자'
-        : ((session.user.user_metadata?.full_name) || (session.user.email?.split('@')[0]) || '익명');
+        : ((s.user.user_metadata?.full_name) || (s.user.email?.split('@')[0]) || '익명');
 
       let image_path=null, image_url=null;
 
       if (editingId){
-        const noticeFlag = window.mmAuth.isAdmin(session) ? !!document.getElementById('isNotice')?.checked : false;
+        const noticeFlag = window.mmAuth.isAdminSession(s) ? !!els.isNotice?.checked : false;
         const upd = await sb.from('reviews').update({ title, content, is_notice: noticeFlag }).eq('id', editingId);
         if(upd.error) throw new Error(upd.error.message);
 
@@ -882,13 +714,13 @@
 
         const currentCount = await getCurrentImageCount(editingId);
         const remain = Math.max(0, MAX_FILES - currentCount);
-        const files = (chosenFiles.length ? chosenFiles : Array.from(fImage.files || [])).slice(0, remain);
+        const files = (chosenFiles.length ? chosenFiles : Array.from(els.fImage.files || [])).slice(0, remain);
 
         const uploaded = [];
         for (const file of files){
           const ext=(file.name.split('.').pop()||'jpg').toLowerCase();
           const safeExt=["jpg","jpeg","png","webp","gif"].includes(ext)?ext:"jpg";
-          const key=`${(session.user.id)}/${Date.now()}_${Math.random().toString(36).slice(2)}.${safeExt}`;
+          const key=`${(s.user.id)}/${Date.now()}_${Math.random().toString(36).slice(2)}.${safeExt}`;
           const up=await sb.storage.from("reviews").upload(key,file,{upsert:false,cacheControl:"3600"});
           if(up.error) throw new Error("이미지 업로드 실패: "+up.error.message);
           const url = sb.storage.from("reviews").getPublicUrl(key).data.publicUrl;
@@ -904,13 +736,13 @@
         return;
       }
 
-      // 신규 글
-      const files = (chosenFiles.length ? chosenFiles : Array.from(fImage.files || [])).slice(0, MAX_FILES);
+      // 신규
+      const files = (chosenFiles.length ? chosenFiles : Array.from(els.fImage.files || [])).slice(0, MAX_FILES);
       const uploaded = [];
       for (const file of files){
         const ext=(file.name.split('.').pop()||'jpg').toLowerCase();
         const safeExt=["jpg","jpeg","png","webp","gif"].includes(ext)?ext:"jpg";
-        const key=`${session.user.id}/${Date.now()}_${Math.random().toString(36).slice(2)}.${safeExt}`;
+        const key=`${s.user.id}/${Date.now()}_${Math.random().toString(36).slice(2)}.${safeExt}`;
         const up=await sb.storage.from("reviews").upload(key,file,{upsert:false,cacheControl:"3600"});
         if(up.error) throw new Error("이미지 업로드 실패: "+up.error.message);
         const url = sb.storage.from("reviews").getPublicUrl(key).data.publicUrl;
@@ -918,11 +750,11 @@
       }
       if (uploaded[0]) { image_path = uploaded[0].path; image_url = uploaded[0].url; }
 
-      const noticeFlag = window.mmAuth.isAdmin(session) ? !!document.getElementById('isNotice')?.checked : false;
+      const noticeFlag = window.mmAuth.isAdminSession(s) ? !!els.isNotice?.checked : false;
       const ins = await sb.from("reviews").insert({
         title, content, is_notice: noticeFlag,
-        user_id: session.user.id,
-        author_email: session.user.email,
+        user_id: s.user.id,
+        author_email: s.user.email,
         nickname, image_path, image_url
       }).select("id").single();
       if(ins.error) throw new Error(ins.error.message);
@@ -935,31 +767,22 @@
       }
       location.href = '/reviews.html';
     }catch(err){
-      formStatus.textContent = String(err.message||err);
-      btnSubmit.disabled = false; btnSubmit.textContent = "저장";
+      els.formStatus.textContent = String(err.message||err);
+      els.btnSubmit.disabled = false; els.btnSubmit.textContent = "저장";
     }
   });
 
-  // =========================
-  // 라우팅 & 부트스트랩
-  // =========================
+  // ------- 라우팅 -------
   async function init(){
-    await refreshAuthUI();
+    // 상단 연도
+    const yearEl = document.getElementById('year');
+    if (yearEl) yearEl.textContent = new Date().getFullYear();
 
-    // 2.5초 후에도 '확인 중'이면 게스트 표시(모바일에서도 auth 박스는 기본 숨김)
-    setTimeout(() => {
-      const waitingLeft = authStatus?.textContent?.includes('확인 중');
-      if (waitingLeft) {
-        authStatus && (authStatus.textContent = '로그아웃 상태');
-        authInfo   && (authInfo.textContent  = '로그아웃 상태');
-        authTabs   && authTabs.removeAttribute('hidden');
-        loginForm  && (loginForm.hidden = false);
-        signupForm && (signupForm.hidden = true);
-        try { setTab && setTab('login'); } catch {}
-      }
-    }, 2500);
+    // 인증 UI를 즉시 반영 + 변경시 반영
+    window.mmAuth.onChange(refreshAuthUI);
 
-    hideAuthForMobile(); // 모바일 기본 숨김
+    // 모바일 기본: 로그인 패널 숨김(PC 영향 없음)
+    hideAuthForMobile();
 
     const q = new URLSearchParams(location.search);
     const id = q.get('id');
@@ -973,56 +796,36 @@
     }
 
     if (compose === '1'){
-      const session = await window.mmAuth.waitForSession(3000);
+      const session = await window.mmAuth.waitForSession(2000);
       if (!session?.user){
         showList();
         await loadList();
-        showAuthForMobile();
+        showAuthForMobile();   // 비로그인 시 로그인판 열기(모바일 전용)
         return;
       }
       showWrite();
-      if (window.mmAuth.isAdmin(session)) document.getElementById('noticeBox')?.removeAttribute('hidden');
+      if (window.mmAuth.isAdminSession(session)) els.noticeBox?.removeAttribute('hidden');
       return;
     }
 
     if (edit){
-      const session = await window.mmAuth.waitForSession(3000);
+      const session = await window.mmAuth.waitForSession(2000);
       if (!session?.user){
         showList();
         await loadList();
         showAuthForMobile();
         return;
       }
-      await enterEditModeById(edit);
-      if (window.mmAuth.isAdmin(session)) document.getElementById('noticeBox')?.removeAttribute('hidden');
+      await loadOne(edit); // 내용 읽은 뒤 편집 진입이 자연스럽지만, 여기선 목록부터 보여주고 편집 루트는 읽기뷰에서 진입하도록 일관 유지
+      history.replaceState(null,'', `/reviews.html?id=${edit}`);
       return;
     }
 
     // 기본: 목록
-    try{
-      showList();
-    }catch(e){
-      console.error('[showList error]', e);
-      const v = _get(listView);
-      if (v){ v.hidden = false; v.style.display = ''; }
-    }
+    showList();
     await loadList();
   }
 
-  document.addEventListener('DOMContentLoaded', ()=>{
-    const y = document.getElementById('year');
-    if (y) y.textContent = new Date().getFullYear();
-    init();
-  });
-
-  // 글쓰기 버튼
-  document.getElementById('btn-compose')?.addEventListener('click', async (e)=>{
-    e.preventDefault();
-    const session = await window.mmAuth.waitForSession(3000);
-    if (!session?.user){ showAuthForMobile(); return; }
-    history.pushState(null,'','/reviews.html?compose=1');
-    showWrite();
-    if (window.mmAuth.isAdmin(session)) document.getElementById('noticeBox')?.removeAttribute('hidden');
-  });
-
+  // 공개 init
+  window.MMReviews = { init };
 })();
