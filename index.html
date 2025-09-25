@@ -287,13 +287,10 @@
 
 <!-- Supabase -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/js/mm-auth.js"></script>
 <script>
-  // --- Supabase 클라이언트 ---
-  const SUPABASE_URL  = "https://snxjcbaaysgfunpsohzg.supabase.co";
-  const SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNueGpjYmFheXNnZnVucHNvaHpnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY1OTk3MzQsImV4cCI6MjA3MjE3NTczNH0.T8b9PpabXkCvwW2W57Qbr-h--JLZB6errlyP5IwsYyk";
-  const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON, {
-    auth: { persistSession:true, autoRefreshToken:true, detectSessionInUrl:true }
-  });
+// --- Supabase 클라이언트 (공용 모듈 사용) ---
+  const sb = window.mmAuth.sb;
 
   // --- DOM refs & 탭 전환 ---
   const $ = s => document.querySelector(s);
@@ -327,18 +324,10 @@
     }
   }
 
-(function(){
-  var u = new URL(location.href);
-  if(!u.searchParams.has('__v')){
-    u.searchParams.set('__v', String(Date.now()).slice(0,10));
-    location.replace(u.toString());  // 한 번만 새로고침
-  }
-})();
-
   // --- 인증 UI ---
   async function refreshAuthUI(){
     try{
-      const { data:{ session } } = await sb.auth.getSession();
+      const session = await window.mmAuth.getSession();
       if(session?.user){
         if(elTabs)   elTabs.hidden = true;
         if(elSignup) elSignup.hidden = true;
@@ -371,7 +360,7 @@
     const pw1   = e.target.password.value;
     const pw2   = e.target.password2.value;
     if(pw1 !== pw2){ alert("비밀번호 확인이 일치하지 않습니다."); return; }
-    const { error } = await sb.auth.signUp({ email, password: pw1 });
+    const { error } = await window.mmAuth.signUp(email, pw1);
     alert(error ? `가입 실패: ${error.message}` : "가입 완료(이메일 인증을 설정했다면 메일을 확인하세요)");
     refreshAuthUI();
   });
@@ -386,11 +375,11 @@
   });
 
   elLogout?.addEventListener("click", async()=>{
-    await sb.auth.signOut();
+    await window.mmAuth.signOut();
     refreshAuthUI();
   });
 
-  sb.auth.onAuthStateChange(()=>{ refreshAuthUI(); });
+  window.mmAuth.onChange(refreshAuthUI);
 
   // --- 언어 토글 + 지연로딩 ---
   function initLangAndLazy(){
