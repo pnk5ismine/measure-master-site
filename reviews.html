@@ -427,6 +427,20 @@ async function fetchCommentsSafe(reviewId){
   }
   return res;
 }
+/* ===== 모바일 로그인/가입 표시 토글 ===== */
+const isMobile = () => window.matchMedia('(max-width:700px)').matches;
+
+function showAuthForMobile(){
+  if (!isMobile()) return;
+  document.body.classList.add('show-auth');
+  try { setTab && setTab('login'); } catch {}
+  document.getElementById('leftAuth')?.scrollIntoView({ behavior:'smooth', block:'start' });
+}
+
+function hideAuthForMobile(){
+  if (!isMobile()) return;
+  document.body.classList.remove('show-auth');
+}
 
 /* ========= 탭 전환 ========= */
 function setTab(which){
@@ -529,6 +543,19 @@ $('#btn-signup')?.addEventListener('click', async (e)=>{
   if(error){ signupStatus.textContent = '가입 실패: ' + error.message; return; }
   signupStatus.textContent = data.session ? '가입+로그인 완료' : '가입 완료';
   await refreshAuthUI();
+});
+
+sb.auth.onAuthStateChange(async ()=>{
+  // 로그인 완료되면 모바일에서 auth 박스 숨기고 compose=1이면 글쓰기로
+  const { data:{ session } } = await sb.auth.getSession();
+  if (session?.user && document.body.classList.contains('show-auth')){
+    hideAuthForMobile();
+    const q = new URLSearchParams(location.search);
+    if (q.get('compose') === '1'){
+      showWrite();
+      if (isAdmin(session)) document.getElementById('noticeBox')?.removeAttribute('hidden');
+    }
+  }
 });
 
 /* ========= 뷰 전환 ========= */
@@ -662,9 +689,7 @@ async function loadOne(id){
   document.getElementById('btn-to-compose')?.addEventListener('click', async ()=>{
     const { data:{ session } } = await sb.auth.getSession();
     if(!session?.user){
-      alert('글쓰기를 하려면 회원가입/로그인이 필요합니다.');
-      setTab && setTab('login');
-      document.getElementById('leftAuth')?.scrollIntoView({behavior:'smooth', block:'start'});
+      showAuthForMobile();
       return;
     }
     history.replaceState(null,'','/reviews.html?compose=1');
@@ -1297,18 +1322,18 @@ async function init(){
   
     if (compose === '1') {
       const session = await waitForSession(5000);
-      if (!session?.user) {
-        history.replaceState(null, '', '/reviews.html');
+      if (!session?.user){
+        // 목록을 먼저 보여주고, 모바일에선 로그인 박스를 맨 위로 노출
         showList();
         await loadList();
-        setTab('login');
-        document.getElementById('leftAuth')?.scrollIntoView({ behavior:'smooth', block:'start' });
+        showAuthForMobile();
         return;
       }
       showWrite();
       if (isAdmin(session)) document.getElementById('noticeBox')?.removeAttribute('hidden');
       return;
     }
+
   
     if (edit) {
       const session = await waitForSession(5000);
@@ -1336,18 +1361,20 @@ document.addEventListener('DOMContentLoaded', ()=>{
   document.getElementById('year').textContent = new Date().getFullYear();
   init();
 });
-  document.getElementById('btn-compose')?.addEventListener('click', async (e)=>{
-    e.preventDefault();
-    const session = await waitForSession(5000);
-    if (!session?.user){
-      setTab('login');
-      document.getElementById('leftAuth')?.scrollIntoView({behavior:'smooth', block:'start'});
-      return;
-    }
-    history.pushState(null,'','/reviews.html?compose=1');
-    showWrite();
-    if (isAdmin(session)) document.getElementById('noticeBox')?.removeAttribute('hidden');
-  });
+
+document.getElementById('btn-compose')?.addEventListener('click', async (e)=>{
+  e.preventDefault();
+  const session = await waitForSession(5000);
+  if (!session?.user){
+    // 모바일: 평소 숨김 → 글쓰기 누르면 맨 위에 로그인/가입 노출
+    showAuthForMobile();
+    return;
+  }
+  history.pushState(null,'','/reviews.html?compose=1');
+  showWrite();
+  if (isAdmin(session)) document.getElementById('noticeBox')?.removeAttribute('hidden');
+});
+
 
 </script>
 </body>
