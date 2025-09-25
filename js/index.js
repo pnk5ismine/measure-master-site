@@ -54,11 +54,11 @@
       el.textContent = `방문수 ${n.toLocaleString('ko-KR')}`;
     } catch (e) {
       console.warn('[visitCounter] RPC 실패:', e?.message||e);
-      el.textContent = '방문수 집계 실패';
+      el.textContent = '방문수 준비중';
     }
     // 3초 후에도 로딩이면 실패로 표시
     setTimeout(() => {
-      if (/로딩중/.test(el.textContent)) el.textContent = '방문수 집계 실패';
+      if (/로딩중/.test(el.textContent)) el.textContent = '방문수 준비중';
     }, 3000);
   }
 
