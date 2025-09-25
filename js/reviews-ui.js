@@ -780,6 +780,15 @@
 
     // 인증 UI를 즉시 반영 + 변경시 반영
     window.mmAuth.onChange(refreshAuthUI);
+    // --- Fallback: 2.5초가 지나도 '확인 중'이면 로그아웃 UI로 정리 + 목록 재시도 ---
+    setTimeout(async () => {
+      const waiting = els.authStatus?.textContent?.includes('확인 중') || els.authInfo?.textContent?.includes('확인 중');
+      if (waiting) {
+        await refreshAuthUI(null);                 // 강제로 '로그아웃 상태' 표기 전환
+        const hasRows = (els.listBody?.children?.length || 0) > 0;
+        if (!hasRows) { showList(); await loadList(); } // 목록이 비었으면 한 번 더 로드
+      }
+    }, 2500);
 
     // 모바일 기본: 로그인 패널 숨김(PC 영향 없음)
     hideAuthForMobile();
