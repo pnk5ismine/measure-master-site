@@ -427,19 +427,20 @@ async function fetchCommentsSafe(reviewId){
   }
   return res;
 }
-/* ===== 모바일 로그인/가입 표시 토글 ===== */
-const isMobile = () => window.matchMedia('(max-width:700px)').matches;
+/* ===== 모바일에서만 로그인/가입 박스 표시 토글 ===== */
+const MOBILE_MAX = 700;
+const isMobile = () => window.matchMedia(`(max-width:${MOBILE_MAX}px)`).matches;
 
 function showAuthForMobile(){
-  if (!isMobile()) return;
-  document.body.classList.add('show-auth');
+  if (!isMobile()) return;                 // PC는 변경 없음
+  document.body.classList.add('show-auth'); // CSS로 #leftAuth 노출
   try { setTab && setTab('login'); } catch {}
   document.getElementById('leftAuth')?.scrollIntoView({ behavior:'smooth', block:'start' });
 }
 
 function hideAuthForMobile(){
   if (!isMobile()) return;
-  document.body.classList.remove('show-auth');
+  document.body.classList.remove('show-auth'); // #leftAuth 숨김
 }
 
 /* ========= 탭 전환 ========= */
@@ -556,6 +557,7 @@ sb.auth.onAuthStateChange(async ()=>{
       if (isAdmin(session)) document.getElementById('noticeBox')?.removeAttribute('hidden');
     }
   }
+  if (session?.user) hideAuthForMobile();
 });
 
 /* ========= 뷰 전환 ========= */
@@ -1297,7 +1299,7 @@ writeForm?.addEventListener('submit', async (e)=>{
 async function init(){
   await refreshAuthUI();
 
-  // 2.5초 후에도 '확인 중'이면 게스트 UI로 전환
+  // 2.5초 후에도 '확인 중'이면 텍스트만 게스트로 전환(모바일에서도 auth 박스는 숨겨둠)
   setTimeout(() => {
     const waitingLeft = authStatus?.textContent?.includes('확인 중');
     if (waitingLeft) {
@@ -1310,52 +1312,53 @@ async function init(){
     }
   }, 2500);
 
-    const q = new URLSearchParams(location.search);
-    const id = q.get('id');
-    const compose = q.get('compose');
-    const edit   = q.get('edit');
-    if (id) {
-      showRead();
-      await loadOne(id);
-      return;
-    }
-  
-    if (compose === '1') {
-      const session = await waitForSession(5000);
-      if (!session?.user){
-        // 목록을 먼저 보여주고, 모바일에선 로그인 박스를 맨 위로 노출
-        showList();
-        await loadList();
-        showAuthForMobile();
-        return;
-      }
-      showWrite();
-      if (isAdmin(session)) document.getElementById('noticeBox')?.removeAttribute('hidden');
-      return;
-    }
+  // 모바일에선 기본적으로 로그인/가입 박스 숨김(PC 영향 없음)
+  hideAuthForMobile();
 
-  
-    if (edit) {
-      const session = await waitForSession(5000);
-      if (!session?.user) {
-        history.replaceState(null, '', '/reviews.html');
-        showList();
-        await loadList();
-        setTab('login');
-        document.getElementById('leftAuth')?.scrollIntoView({ behavior:'smooth', block:'start' });
-        return;
-      }
-      await enterEditModeById(edit);
-      if (isAdmin(session)) document.getElementById('noticeBox')?.removeAttribute('hidden');
+  const q = new URLSearchParams(location.search);
+  const id = q.get('id');
+  const compose = q.get('compose');
+  const edit   = q.get('edit');
+
+  // 1) 읽기
+  if (id){
+    showRead();
+    await loadOne(id);
+    return;
+  }
+
+  // 2) 글쓰기(라우팅으로 들어온 경우)
+  if (compose === '1'){
+    const session = await waitForSession(3000);
+    if (!session?.user){
+      // 비로그인 → 목록을 먼저 보여주고, 모바일에서만 로그인/가입 박스 노출
+      showAuthForMobile();
       return;
     }
+    showWrite();
+    if (isAdmin(session)) document.getElementById('noticeBox')?.removeAttribute('hidden');
+    return;
+  }
 
-  // 기본: 목록
+  // 3) 편집
+  if (edit){
+    const session = await waitForSession(3000);
+    if (!session?.user){
+      showList();
+      await loadList();
+      showAuthForMobile();
+      return;
+    }
+    await enterEditModeById(edit);
+    if (isAdmin(session)) document.getElementById('noticeBox')?.removeAttribute('hidden');
+    return;
+  }
+
+  // 4) 기본: 목록 먼저
   showList();
   await loadList();
-  await refreshAuthUI();
-  ensureAuthVisible();
 }
+
 
 document.addEventListener('DOMContentLoaded', ()=>{
   document.getElementById('year').textContent = new Date().getFullYear();
@@ -1364,9 +1367,9 @@ document.addEventListener('DOMContentLoaded', ()=>{
 
 document.getElementById('btn-compose')?.addEventListener('click', async (e)=>{
   e.preventDefault();
-  const session = await waitForSession(5000);
+  const session = await waitForSession(3000);
   if (!session?.user){
-    // 모바일: 평소 숨김 → 글쓰기 누르면 맨 위에 로그인/가입 노출
+    // 목록 화면에서 글쓰기 클릭 → 모바일에서만 로그인/가입 박스 노출
     showAuthForMobile();
     return;
   }
