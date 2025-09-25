@@ -13,7 +13,7 @@
 <link rel="alternate icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='28' fill='%230e1422'/%3E%3Ctext x='32' y='39' font-size='28' text-anchor='middle' fill='%235eead4'%3EM%3C/text%3E%3C/svg%3E"/>
   
 <!-- 로고/히어로 이미지 프리로드(깜빡임 감소) -->
-  <link rel="preload" as="image" href="/images/mm_logo_small.png />
+  <link rel="preload" as="image" href="/images/mm_logo_small.png" />
   <link rel="preload" as="image" href="/images/mm_photo1.jpg" />
   <link rel="preload" as="image" href="/images/mm_photo2.jpg" />
   <link rel="preload" as="image" href="/images/mm_photo3.jpg" />
@@ -147,7 +147,11 @@
     flex-direction:column;
   }
   .left-col { order:1; }   /* 본문 먼저 */
-  .right-col { order:2; }  /* 인증 카드(우측 칼럼) 아래 */
+  .left-col .hero-photos{ order:1; }  /* ✅ 이미지 가장 위 */
+  .left-col .hero-dark  { order:2; }
+  .left-col .hero-text  { order:3; }
+  .span-2   { order:2; }   /* ✅ “왜 Measure Master인가요?” 4개 홍보문 */
+  .right-col { order:3; }  /* 인증 카드(우측 칼럼) 아래 */
 }
   </style>
 
