@@ -158,6 +158,8 @@
    .notice-tag{ color:#2563eb; font-weight:700; }
 
 @media (max-width:700px){
+  body:not(.show-auth) #leftAuth{ display:none !important; }
+  body.show-auth #leftAuth{ display:block !important; }
   .table thead{display:none}
   .table tr{display:block; border-bottom:1px solid #e5e7eb; padding:8px 0}
   .table td{display:block; border:none; padding:4px 8px}
