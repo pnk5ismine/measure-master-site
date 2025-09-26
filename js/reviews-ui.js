@@ -146,136 +146,140 @@ var MMReviews = (function(){
        }
 
   // ---------- 단건 읽기 ----------
-  function loadOne(id){
-    if (!elReadView) return Promise.resolve();
+function loadOne(id){
+  if (!elReadView) return Promise.resolve();
 
-    var sb = window.mmAuth && window.mmAuth.sb;
-    if (!sb){
-      elReadView.innerHTML = '<p class="muted">불러오기 실패: Supabase 클라이언트 준비 전</p>';
-      return Promise.resolve();
-    }
+  var sb = window.mmAuth && window.mmAuth.sb;
+  if (!sb){
+    elReadView.innerHTML = '<p class="muted">불러오기 실패: Supabase 클라이언트 준비 전</p>';
+    return Promise.resolve();
+  }
 
-    return sb.from('reviews')
-      .select('id, user_id, title, content, created_at, nickname, author_email, image_url, image_path, is_notice')
-      .eq('id', id).single()
-      .then(function(r){
-        if (r.error){
-          elReadView.innerHTML = '<p class="muted">불러오기 실패: '+escapeHtml(r.error.message)+'</p>';
-          return;
+  return sb.from('reviews')
+    .select('id, user_id, title, content, created_at, nickname, author_email, image_url, image_path, is_notice')
+    .eq('id', id).single()
+    .then(function(r){
+      if (r.error){
+        elReadView.innerHTML = '<p class="muted">불러오기 실패: '+escapeHtml(r.error.message)+'</p>';
+        return;
+      }
+      var data = r.data;
+
+      return window.mmAuth.getSession().then(function(sess){
+        var me = sess && sess.user ? sess.user : null;
+        var isOwner = !!(me && data.user_id && me.id === data.user_id);
+        var name = displayName(data);
+        var title = (data.is_notice ? "[알림] " : "") + (data.title || "(제목 없음)");
+
+        var html = '';
+        html += '<div class="top-actions">';
+        html += '  <a class="btn secondary" href="/reviews.html">목록보기</a>';
+        html += '  <div style="display:flex; gap:8px; align-items:center">';
+        html += '    <button class="btn" type="button" id="btn-to-compose">글쓰기</button>';
+        if (isOwner){
+          html += '    <button class="btn secondary" type="button" id="btn-edit">수정</button>';
+          html += '    <button class="btn secondary" type="button" id="btn-delete">삭제</button>';
         }
-        var data = r.data;
+        html += '  </div>';
+        html += '</div>';
 
-        return window.mmAuth.getSession().then(function(sess){
-          var me = sess && sess.user ? sess.user : null;
-          var isOwner = !!(me && data.user_id && me.id === data.user_id);
-          var name = displayName(data);
-          var title = (data.is_notice ? '[일림] ' : '') + (data.title || '(제목 없음)');
+        html += '<h3 style="margin:0 0 6px">'+escapeHtml(title)+'</h3>';
+        html += '<div class="muted" style="margin-bottom:10px">'+escapeHtml(name)+' · '+fmtDate(data.created_at)+'</div>';
+        html += '<div style="white-space:pre-wrap;word-break:break-word">'+escapeHtml(data.content || "")+'</div>';
 
-          var parts = [
-            '<div class="top-actions">',
-              '<a class="btn secondary" href="/reviews.html">목록보기</a>',
-              '<div style="display:flex; gap:8px; align-items:center">',
-                '<button class="btn" type="button" id="btn-to-compose">글쓰기</button>',
-                (isOwner ? '<button class="btn secondary" type="button" id="btn-edit">수정</button>' : ''),
-                (isOwner ? '<button class="btn secondary" type="button" id="btn-delete">삭제</button>' : ''),
-              '</div>',
-            '</div>',
+        html += '<div id="lb" class="lightbox" hidden>';
+        html += '  <button class="lb-close" aria-label="닫기">×</button>';
+        html += '  <button class="lb-prev" aria-label="이전">‹</button>';
+        html += '  <img id="lbImg" alt="">';
+        html += '  <button class="lb-next" aria-label="다음">›</button>';
+        html += '</div>';
 
-            '<h3 style="margin:0 0 6px">'+escapeHtml(title)+'</h3>',
-            '<div class="muted" style="margin-bottom:10px">'+escapeHtml(name)+' · '+fmtDate(data.created_at)+'</div>',
-            '<div style="white-space:pre-wrap;word-break:break-word">'+escapeHtml(data.content || '')+'</div>',
+        html += '<div id="galleryThumbs" class="thumbs" style="margin-top:12px"></div>';
+        html += '<div class="reaction-bar" id="reactBar"></div>';
 
-            // 라이트박스 + 갤러리 컨테이너(필요 시 확장)
-            '<div id="lb" class="lightbox" hidden>',
-              '<button class="lb-close" aria-label="닫기">×</button>',
-              '<button class="lb-prev" aria-label="이전">‹</button>',
-              '<img id="lbImg" alt="">',
-              '<button class="lb-next" aria-label="다음">›</button>',
-            '</div>',
-            '<div id="galleryThumbs" class="thumbs" style="margin-top:12px"></div>',
+        html += '<div class="comments" id="commentsBox">';
+        html += '  <h4 style="margin:16px 0 8px">댓글</h4>';
+        html += '  <div id="commentList"></div>';
+        html += '  <form id="commentForm" class="comment-form" hidden>';
+        html += '    <textarea id="commentText" placeholder="댓글을 입력해 주세요"></textarea>';
+        html += '    <label style="display:flex;align-items:center;gap:6px;white-space:nowrap">';
+        html += '      <input type="checkbox" id="commentSecret"> 비밀글';
+        html += '    </label>';
+        html += '    <button class="btn" id="btnComment">등록</button>';
+        html += '  </form>';
+        html += '  <div id="commentLoginHint" class="muted">댓글을 쓰려면 로그인하세요.</div>';
+        html += '</div>';
 
-            // 하단 공유
-            '<div class="bottom-actions">',
-              '<button class="btn secondary icon" type="button" id="btnCopyLink" title="링크 복사">🔗 <span>공유</span></button>',
-              '<span id="shareTip" class="status"></span>',
-            '</div>'
-          ];
+        html += '<div class="bottom-actions">';
+        html += '  <button class="btn secondary icon" type="button" id="btnCopyLink" title="링크 복사">🔗 <span>공유</span></button>';
+        html += '  <span id="shareTip" class="status"></span>';
+        html += '</div>';
 
-          elReadView.innerHTML = parts.join('');
+        elReadView.innerHTML = html;
 
-          // 글쓰기 버튼
-          var btnToCompose = $('#btn-to-compose');
-          if (btnToCompose){
-            btnToCompose.addEventListener('click', function(){
-              window.mmAuth.getSession().then(function(s){
-                if (!s || !s.user){
-                showAuthPanel();
-                (document.getElementById('leftAuth') || document.body)
-                  .scrollIntoView({ behavior:'smooth', block:'start' });
-               }else{
-                 history.replaceState(null, "", "/reviews.html?compose=1");
-                 showWrite();
-               }
-              });
+        // 글쓰기 이동
+        var btnToCompose = document.getElementById('btn-to-compose');
+        if (btnToCompose){
+          btnToCompose.addEventListener('click', function(){
+            window.mmAuth.getSession().then(function(s){
+              if (!s || !s.user){ alert('로그인이 필요합니다.'); return; }
+              history.replaceState(null, '', '/reviews.html?compose=1');
+              showWrite();
             });
-          }
+          });
+        }
 
-         // 조회수 +1 (있으면: 안전 호출)
-        try {
-          var p = (sb && typeof sb.rpc === 'function')
-            ? sb.rpc('inc_review_view', { _id: id })
-            : null;
-
-          if (p && typeof p.then === 'function') {
-            p.then(function(){ /* ok */ })["catch"](function(e){
+        // 조회수 +1 (안전 호출: Promise일 때만 then/catch)
+        try{
+          var p = (sb && typeof sb.rpc === 'function') ? sb.rpc('inc_review_view', { _id: id }) : null;
+          if (p && typeof p.then === 'function'){
+            p.then(function(){})["catch"](function(e){
               console.warn('[reviews] view +1 실패:', e && e.message);
             });
           }
-        } catch(e) {
+        }catch(e){
           console.warn('[reviews] view +1 예외:', e && e.message);
         }
 
-          // 공유
-          var copyBtn  = $('#btnCopyLink');
-          var shareTip = $('#shareTip');
-          var shareUrl = location.origin + '/reviews.html?id=' + id;
-
-          function copyPlainText(text){
-            if (navigator.clipboard && window.isSecureContext){
-              return navigator.clipboard.writeText(text);
-            }
-            return new Promise(function(resolve, reject){
-              try{
-                var ta = document.createElement('textarea');
-                ta.value = text;
-                ta.setAttribute('readonly', '');
-                ta.style.position = 'fixed';
-                ta.style.left = '-9999px';
-                document.body.appendChild(ta);
-                ta.select();
-                var ok = document.execCommand('copy');
-                document.body.removeChild(ta);
-                if (ok) resolve(); else reject(new Error('execCommand copy 실패'));
-              }catch(err){ reject(err); }
-            });
+        // 공유
+        var copyBtn  = document.getElementById('btnCopyLink');
+        var shareTip = document.getElementById('shareTip');
+        var shareUrl = location.origin + '/reviews.html?id=' + id;
+        function copyPlainText(text){
+          if (navigator.clipboard && window.isSecureContext){
+            return navigator.clipboard.writeText(text);
           }
-
-          if (copyBtn){
-            copyBtn.addEventListener('click', function(){
-              copyPlainText(shareUrl).then(function(){
-                if (shareTip) shareTip.textContent = '링크를 복사했습니다. (붙여넣기)';
-                setTimeout(function(){ if (shareTip) shareTip.textContent=''; }, 2000);
-              })['catch'](function(){
-                if (shareTip) shareTip.textContent = '복사 실패';
-                setTimeout(function(){ if (shareTip) shareTip.textContent=''; }, 2000);
-              });
+          return new Promise(function(resolve, reject){
+            try{
+              var ta = document.createElement('textarea');
+              ta.value = text;
+              ta.setAttribute('readonly','');
+              ta.style.position='fixed';
+              ta.style.left='-9999px';
+              document.body.appendChild(ta);
+              ta.select();
+              var ok = document.execCommand('copy');
+              document.body.removeChild(ta);
+              ok ? resolve() : reject(new Error('execCommand copy 실패'));
+            }catch(err){ reject(err); }
+          });
+        }
+        if (copyBtn){
+          copyBtn.addEventListener('click', function(){
+            copyPlainText(shareUrl).then(function(){
+              if (shareTip) shareTip.textContent = '링크를 복사했습니다. (붙여넣기)';
+              setTimeout(function(){ if (shareTip) shareTip.textContent=''; }, 2000);
+            })["catch"](function(){
+              if (shareTip) shareTip.textContent = '복사 실패';
+              setTimeout(function(){ if (shareTip) shareTip.textContent=''; }, 2000);
             });
-          }
-        });
-      })['catch'](function(err){
-        elReadView.innerHTML = '<p class="muted">불러오기 실패: '+escapeHtml(err && err.message)+'</p>';
+          });
+        }
       });
-  }
+    })["catch"](function(err){
+      elReadView.innerHTML = '<p class="muted">불러오기 실패: '+escapeHtml(err && err.message)+'</p>';
+    });
+}
 
   // ---------- 초기화 & 라우팅 ----------
   function init(){
@@ -376,6 +380,5 @@ var MMReviews = (function(){
       !!elListView, !!elReadView, !!elWriteForm, !!elListBody);
     if (window.mmAuth) window.mmAuth._debugPing();
   }
-
   return { init: init, _debug: _debug };
 })();
