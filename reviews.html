@@ -198,6 +198,28 @@
     display:flex;
     flex-direction:column;
   }
+  /* ▼ 모바일: 2줄 카드형—둘째 줄 오른쪽 정렬 + 작은 글씨 */
+  .m-only{ display:initial !important; }         /* 모바일에서 .m-only 보이게 */
+  .cell-body .m-line1 .nick{ margin-right:6px; } /* 닉네임과 본문 사이 여백 */
+  .cell-body .m-line1{
+    display:-webkit-box;
+    -webkit-line-clamp:2;              /* 1~2줄 요약 */
+    -webkit-box-orient:vertical;
+    overflow:hidden;
+    white-space:normal;
+    font-weight:600;
+    margin-bottom:4px;
+  }
+
+  .cell-body .m-line2{
+    display:flex;
+    justify-content:flex-end;
+    gap:10px;
+    font-size:12px;
+    color:#666;
+  }
+  .cell-body .m-line2 span{ white-space:nowrap; } /* 조회, 시각 붙어서 줄바꿈 방지 */
+
   .left-col{ order:1; }  /* 본문(메인) 먼저 */
   #auth{ order:2; }      /* 인증 카드 맨 아래 */
 }
