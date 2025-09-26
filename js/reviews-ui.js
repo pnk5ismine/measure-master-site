@@ -225,6 +225,8 @@ var MMReviews = (function(){
 
             elReadView.innerHTML = html;
 
+            renderGallery(id, data.image_url);
+
             // 글쓰기 버튼
             var btnToCompose = document.getElementById('btn-to-compose');
             if (btnToCompose){
@@ -288,6 +290,87 @@ var MMReviews = (function(){
         elReadView.innerHTML = '<p class="muted">불러오기 실패: '+escapeHtml(err && err.message)+'</p>';
       });
   }
+  // -------- 갤러리(읽기) --------
+  function renderGallery(reviewId, fallbackUrl){
+    var box   = document.getElementById('galleryThumbs');
+    var lb    = document.getElementById('lb');
+    var lbImg = document.getElementById('lbImg');
+    if (!box) return;
+
+    var sb = window.mmAuth && window.mmAuth.sb;
+    if (!sb){ box.innerHTML=''; return; }
+
+    function render(urls){
+      if (!urls || !urls.length){ box.innerHTML=''; return; }
+      var html = '';
+      for (var i=0;i<urls.length;i++){
+        html += '<div class="thumb-card"><img class="thumb-img" src="'+urls[i]+'" alt="" data-idx="'+i+'"></div>';
+      }
+      box.innerHTML = html;
+
+      if (!lb || !lbImg) return;
+      var cur = 0;
+      function openAt(i){ cur=i; lbImg.src=urls[cur]; lb.hidden=false; document.body.style.overflow='hidden'; }
+      function close(){ lb.hidden=true; document.body.style.overflow=''; }
+      function prev(){ cur=(cur-1+urls.length)%urls.length; lbImg.src=urls[cur]; }
+      function next(){ cur=(cur+1)%urls.length; lbImg.src=urls[cur]; }
+
+      var imgs = box.querySelectorAll('img.thumb-img');
+      for (var k=0;k<imgs.length;k++){
+        (function(img){
+          img.addEventListener('click', function(){
+            var idx = parseInt(img.getAttribute('data-idx'),10) || 0;
+            openAt(idx);
+          });
+        })(imgs[k]);
+      }
+
+      var btnClose = lb.querySelector('.lb-close');
+      var btnPrev  = lb.querySelector('.lb-prev');
+      var btnNext  = lb.querySelector('.lb-next');
+      if (btnClose) btnClose.addEventListener('click', close);
+      if (btnPrev)  btnPrev.addEventListener('click', prev);
+      if (btnNext)  btnNext.addEventListener('click', next);
+      lb.addEventListener('click', function(e){ if (e.target===lb) close(); });
+      document.addEventListener('keydown', function(e){
+        if (lb.hidden) return;
+        if (e.key==='Escape') close();
+        if (e.key==='ArrowLeft') prev();
+        if (e.key==='ArrowRight') next();
+      });
+    }
+
+    // 1차: review_images에서 불러오기
+    sb.from('review_images')
+      .select('id,url')
+      .eq('review_id', reviewId)
+      .order('created_at', { ascending:true })
+      .then(function(res){
+        if (res.error){
+          // created_at 없는 경우 대비: id 기준 재시도
+          return sb.from('review_images')
+                   .select('id,url')
+                   .eq('review_id', reviewId)
+                   .order('id', { ascending:true });
+        }
+        return res;
+      })
+      .then(function(res2){
+        var urls = [];
+        if (!res2.error && res2.data && res2.data.length){
+          for (var i=0;i<res2.data.length;i++){
+            var u = res2.data[i] && res2.data[i].url;
+            if (u) urls.push(u);
+          }
+        }
+        if (!urls.length && fallbackUrl) urls = [fallbackUrl];
+        render(urls);
+      })
+      .catch(function(){
+        if (fallbackUrl) render([fallbackUrl]); else render([]);
+      });
+  }
+
 
   // -------- 부트스트랩 & 라우팅 --------
   function init(){
