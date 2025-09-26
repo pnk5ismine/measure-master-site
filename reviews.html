@@ -74,7 +74,7 @@
     .table th{font-weight:600;color:#222;text-align:left}
     .table tr:hover{background:#fafafa}
     .cell-no{width:56px;color:#666}
-    .cell-nick{width:120px}
+    .cell-nick{width:96px}
     .cell-stats{width:100px;text-align:center;color:#555}
     .cell-time{width:170px;color:#666;text-align:right}
     .cell-body{
@@ -219,6 +219,22 @@
     color:#666;
   }
   .cell-body .m-line2 span{ white-space:nowrap; } /* 조회, 시각 붙어서 줄바꿈 방지 */
+  /* ==== MOBILE TABLE OVERRIDES (force hide header & right cols) ==== */
+  .table thead,
+  .table th{ display:none !important; }
+
+  .table, .table tbody, .table tr, .table td{
+    display:block !important;
+    width:100% !important;
+  }
+  .table tr{ border-bottom:1px solid #e5e7eb; padding:8px 0; }
+  .table td{ border:none; padding:4px 8px; }
+
+  /* 번호, 닉네임, 조회, 시각 열을 모바일에서 숨김 */
+  .table td.cell-no,
+  .table td.cell-nick,
+  .table td.cell-stats,
+  .table td.cell-time{ display:none !important; }
 
   .left-col{ order:1; }  /* 본문(메인) 먼저 */
   #auth{ order:2; }      /* 인증 카드 맨 아래 */
