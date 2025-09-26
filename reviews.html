@@ -198,7 +198,11 @@
     display:flex;
     flex-direction:column;
   }
-  /* ▼ 모바일: 2줄 카드형—둘째 줄 오른쪽 정렬 + 작은 글씨 */
+  /* 모바일: 인증 패널 기본 숨김, 필요 시(body.show-auth)만 노출 */
+  #leftAuth { display:none !important; }
+  body.show-auth #leftAuth { display:block !important; }
+ 
+ /* ▼ 모바일: 2줄 카드형—둘째 줄 오른쪽 정렬 + 작은 글씨 */
   .m-only{ display:initial !important; }         /* 모바일에서 .m-only 보이게 */
   .cell-body .m-line1 .nick{ margin-right:6px; } /* 닉네임과 본문 사이 여백 */
   .cell-body .m-line1{
@@ -396,7 +400,7 @@
 <!-- Supabase -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="/js/mm-auth.js?v=rev3"></script>
-<script src="/js/reviews-ui.js?v=rev3"></script>
+<script src="/js/reviews-ui.js?v=rev4"></script>
 <script>
    document.addEventListener('DOMContentLoaded', ()=> { MMReviews.init(); });
 </script>

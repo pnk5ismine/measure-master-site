@@ -26,6 +26,9 @@ var MMReviews = (function(){
     try { return window.matchMedia('(max-width:'+MOBILE_MAX+'px)').matches; }
     catch(_) { return false; }
   }
+  // 모바일 인증 박스 토글(PC에는 영향 없음: CSS가 모바일에서만 숨김 처리)
+ function showAuthPanel(){ document.body.classList.add('show-auth'); }
+ function hideAuthPanel(){ document.body.classList.remove('show-auth'); }
 
   // ---------- 유틸 ----------
   function escapeHtml(s){
@@ -234,11 +237,13 @@ var MMReviews = (function(){
             btnToCompose.addEventListener('click', function(){
               window.mmAuth.getSession().then(function(s){
                 if (!s || !s.user){
-                  alert('로그인이 필요합니다.');
-                  return;
-                }
-                history.replaceState(null, '', '/reviews.html?compose=1');
-                showWrite();
+                showAuthPanel();
+                (document.getElementById('leftAuth') || document.body)
+                  .scrollIntoView({ behavior:'smooth', block:'start' });
+               }else{
+                 history.replaceState(null, "", "/reviews.html?compose=1");
+                 showWrite();
+               }
               });
             });
           }
@@ -304,6 +309,24 @@ var MMReviews = (function(){
 
     elListBody   = $('#listBody');
     elBtnCompose = $('#btn-compose');
+    if (elBtnCompose){
+      elBtnCompose.addEventListener('click', function(e){
+        e.preventDefault();
+        window.mmAuth.getSession().then(function(s){
+          if (!s || !s.user){
+            // 모바일: 인증 박스 노출(PC는 원래 보이니 그대로)
+            showAuthPanel();
+            // 최상단으로 부드럽게 스크롤
+            (document.getElementById('leftAuth') || document.body)
+              .scrollIntoView({ behavior:'smooth', block:'start' });
+          }else{
+            history.pushState(null,'','/reviews.html?compose=1');
+            showWrite();
+          }
+        });
+      });
+    }
+
     elBtnSubmit  = $('#btn-submit');
     elFormStatus = $('#formStatus');
 
@@ -318,6 +341,7 @@ var MMReviews = (function(){
 
     // 인증 모듈 준비 후 시작
     window.mmAuth.whenReady(function(){
+      hideAuthPanel();
       refreshAuthUI();
 
       // 라우팅
