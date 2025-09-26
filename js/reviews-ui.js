@@ -210,7 +210,13 @@ var MMReviews = (function(){
             html += '<div class="muted" style="margin-bottom:10px">'+escapeHtml(name)+' · '+fmtDate(data.created_at)+'</div>';
             html += '<div style="white-space:pre-wrap;word-break:break-word">'+escapeHtml(data.content || "")+'</div>';
 
-            // (갤러리/댓글/리액션 생략)
+            html += '<div id="lb" class="lightbox" hidden>'
+                  +   '<button class="lb-close" aria-label="닫기">×</button>'
+                  +   '<button class="lb-prev" aria-label="이전">‹</button>'
+                  +   '<img id="lbImg" alt="">'
+                  +   '<button class="lb-next" aria-label="다음">›</button>'
+                  + '</div>';
+            html += '<div id="galleryThumbs" class="thumbs" style="margin-top:12px"></div>';
 
             html += '<div class="bottom-actions">';
             html += '  <button class="btn secondary icon" type="button" id="btnCopyLink" title="링크 복사">🔗 <span>공유</span></button>';
