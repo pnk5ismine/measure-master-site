@@ -220,12 +220,20 @@ var MMReviews = (function(){
             });
           }
 
-          // 조회수 +1
-          if (sb.rpc){
-            sb.rpc('inc_review_view', { _id: id })['catch'](function(e){
+         // 조회수 +1 (있으면: 안전 호출)
+        try {
+          var p = (sb && typeof sb.rpc === 'function')
+            ? sb.rpc('inc_review_view', { _id: id })
+            : null;
+
+          if (p && typeof p.then === 'function') {
+            p.then(function(){ /* ok */ })["catch"](function(e){
               console.warn('[reviews] view +1 실패:', e && e.message);
             });
           }
+        } catch(e) {
+          console.warn('[reviews] view +1 예외:', e && e.message);
+        }
 
           // 공유
           var copyBtn  = $('#btnCopyLink');
