@@ -108,70 +108,42 @@ var MMReviews = (function(){
         var ids = [];
         for (var i=0;i<data.length;i++){ ids.push(data[i].id); }
 
-        function renderWithCounts(map){
-          var rows = [];
-          for (var j=0;j<data.length;j++){
-            var row   = data[j];
-            var stat  = map[row.id] || { v: Number(row.view_count||0), c: 0 };
-            var nick  = escapeHtml(displayName(row));
-            var title = row.title ? '['+escapeHtml(row.title)+'] ' : '';
-            var body  = (row.is_notice ? '<span class="notice-tag">[알림]</span> ' : '') + title + escapeHtml(row.content||'');
-            var when  = fmtDate(row.created_at);
-            var trCls = row.is_notice ? 'row-item notice' : 'row-item';
+       function renderWithCounts(map){
+         var html = "";
+         for (var j=0;j<data.length;j++){
+           var row = data[j];
+           var stat = map[row.id] || { v: Number(row.view_count||0), c: 0 };
+           var nick = escapeHtml(displayName(row));
+           var titleHtml = row.title ? "["+escapeHtml(row.title)+"] " : "";
+           var bodyHtml = (row.is_notice ? '<span class="notice-tag">[알림]</span> ' : '') + titleHtml + escapeHtml(row.content||"");
+           var when = fmtDate(row.created_at);
+           var trCls = row.is_notice ? "row-item notice" : "row-item";
+           html +=
+             '<tr data-id="'+row.id+'" class="'+trCls+'" style="cursor:pointer">'
+               + '<td class="cell-no">'+(j+1)+'</td>'
+               + '<td class="cell-nick">'+nick+'</td>'
+               + '<td class="cell-body">'
+                 + '<div class="m-line1"><span class="nick m-only">'+nick+'</span>'+bodyHtml+'</div>'
+                 + '<div class="m-line2 m-only"><span>조회 '+stat.v+' ('+stat.c+')</span><span>'+when+'</span></div>'
+               + '</td>'
+               + '<td class="cell-stats">'+stat.v+' ('+stat.c+')</td>'
+               + '<td class="cell-time">'+when+'</td>'
+             + '</tr>';
+         }
+         elListBody.innerHTML = html;
 
-            rows.push(
-              '<tr data-id="'+row.id+'" class="'+trCls+'" style="cursor:pointer">'
-                + '<td class="cell-no">'+(j+1)+'</td>'
-                + '<td class="cell-nick">'+nick+'</td>'
-                + '<td class="cell-body">'
-                  + '<div class="m-line1"><span class="nick m-only">'+nick+'</span>'+body+'</div>'
-                  + '<div class="m-line2 m-only"><span>조회 '+stat.v+' ('+stat.c+')</span><span>'+when+'</span></div>'
-                + '</td>'
-                + '<td class="cell-stats">'+stat.v+' ('+stat.c+')</td>'
-                + '<td class="cell-time">'+when+'</td>'
-              + '</tr>'
-            );
-          }
-          elListBody.innerHTML = rows.join('');
-
-          var trs = elListBody.querySelectorAll('tr.row-item');
-          for (var k=0;k<trs.length;k++){
-            (function(tr){
-              tr.addEventListener('click', function(){
-                var id = tr.getAttribute('data-id');
-                // 읽기 라우팅
-                history.pushState(null, '', '/reviews.html?id='+id);
-                showRead();
-                loadOne(id);
-              });
-            })(trs[k]);
-          }
-        }
-
-        if (!ids.length){ renderWithCounts({}); return; }
-
-        sb.from('review_counts')
-          .select('review_id, view_count, comment_count')
-          .in('review_id', ids)
-          .then(function(r2){
-            var map = {};
-            if (!r2.error && r2.data){
-              for (var i=0;i<r2.data.length;i++){
-                var rr = r2.data[i];
-                map[rr.review_id] = {
-                  v: Number(rr.view_count||0),
-                  c: Number(rr.comment_count||0)
-                };
-              }
-            }
-            renderWithCounts(map);
-          })['catch'](function(){
-            renderWithCounts({});
-          });
-      })['catch'](function(err){
-        elListBody.innerHTML = '<tr><td colspan="5" class="muted">목록 로드 실패: '+escapeHtml(err && err.message)+'</td></tr>';
-      });
-  }
+         // 행 클릭은 '한 번만' 붙는 위임 방식
+         if (!elListBody._boundClick) {
+           elListBody.addEventListener('click', function(ev){
+             var tr = ev.target.closest('tr.row-item');
+             if (!tr || !elListBody.contains(tr)) return;
+             var id = tr.getAttribute('data-id');
+             if (!id) return;
+             window.location.href = '/reviews.html?id=' + encodeURIComponent(id);
+           });
+           elListBody._boundClick = true;
+         }
+       }
 
   // ---------- 단건 읽기 ----------
   function loadOne(id){
