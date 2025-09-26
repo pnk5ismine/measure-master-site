@@ -36,6 +36,8 @@ var MMReviews = (function(){
   // -------- DOM refs (init에서 채움) --------
   var elAuthInfo   = null;
   var elAuthStatus = null;
+  var fTitle = null, fContent = null;   // 제목/본문 입력
+  var elBtnSubmit = null, elFormStatus = null; // 저장 버튼/상태 텍스트
   var elListView   = null;
   var elReadView   = null;
   var elWriteForm  = null;
@@ -227,6 +229,30 @@ var MMReviews = (function(){
 
             renderGallery(id, data.image_url);
 
+            // [EDIT] 수정 버튼 → 편집 모드로
+            var btnEdit = document.getElementById('btn-edit');
+            if (btnEdit){
+              btnEdit.addEventListener('click', function(){
+                window.mmAuth.getSession().then(function(sess){
+                  var u = sess && sess.user;
+                  var admin = u && window.mmAuth.isAdmin(u.email);
+                  if (!u){ alert('로그인이 필요합니다.'); return; }
+                  if (!admin && u.id !== data.user_id){ alert('본인 글만 수정할 수 있습니다.'); return; }
+
+                  // 작성 폼으로 전환 + 값 프리필
+                  showWrite();
+                  if (fTitle)   fTitle.value   = data.title   || '';
+                  if (fContent) fContent.value = data.content || '';
+                  if (elWriteForm) elWriteForm.dataset.editing = data.id;
+
+                  // 기존 이미지 간단 프리뷰(있으면)
+                  var editBox = document.getElementById('editImages');
+                  if (editBox){ editBox.hidden = false; }
+                  renderEditImagesForEditMode(data.id, data.image_url);
+                });
+              });
+            }
+
             // 글쓰기 버튼
             var btnToCompose = document.getElementById('btn-to-compose');
             if (btnToCompose){
@@ -382,6 +408,37 @@ var MMReviews = (function(){
     elWriteForm  = $("#writeForm");
     elListBody   = $("#listBody");
     elBtnCompose = $("#btn-compose");
+    fTitle       = $("#title");
+    fContent     = $("#content");
+    elBtnSubmit  = $("#btn-submit");
+    elFormStatus = $("#formStatus");
+
+    // [EDIT SAVE] 저장(편집 전용)
+    if (elWriteForm && !elWriteForm._bindSubmit){
+      elWriteForm._bindSubmit = true;
+      elWriteForm.addEventListener('submit', function(e){
+        e.preventDefault();
+        var sb = window.mmAuth && window.mmAuth.sb;
+        if (!sb){ alert('클라이언트 준비 전'); return; }
+        var title   = fTitle ? fTitle.value.trim() : '';
+        var content = fContent ? fContent.value.trim() : '';
+        var editingId = elWriteForm && elWriteForm.dataset ? elWriteForm.dataset.editing : '';
+        if (!editingId){ alert('편집 중인 글이 없습니다.'); return; }
+        if (!content){ if (elFormStatus) elFormStatus.textContent = '내용을 입력하세요.'; return; }
+        if (elBtnSubmit){ elBtnSubmit.disabled = true; elBtnSubmit.textContent = '저장 중…'; }
+
+        sb.from('reviews').update({ title:title, content:content }).eq('id', editingId)
+          .then(function(r){
+            if (r.error){ throw r.error; }
+            location.href = '/reviews.html?id=' + editingId;
+          })
+          .catch(function(err){
+            if (elFormStatus) elFormStatus.textContent = '저장 실패: ' + (err && err.message);
+            if (elBtnSubmit){ elBtnSubmit.disabled = false; elBtnSubmit.textContent = '저장'; }
+          });
+      });
+    }
+
 
     // 2) auth 모듈 준비 후 진행
     if (window.mmAuth && typeof window.mmAuth.whenReady === 'function'){
