@@ -241,6 +241,7 @@ var MMReviews = (function(){
 
                   // 작성 폼으로 전환 + 값 프리필
                   showWrite();
+
                   if (fTitle)   fTitle.value   = data.title   || '';
                   if (fContent) fContent.value = data.content || '';
                   if (elWriteForm) elWriteForm.dataset.editing = data.id;
@@ -249,7 +250,11 @@ var MMReviews = (function(){
                   var editBox = document.getElementById('editImages');
                   if (editBox){ editBox.hidden = false; }
                   renderEditImagesForEditMode(data.id, data.image_url);
-                });
+                  if (elEditImages){
+ 	       elEditImages.hidden = false;
+  	       renderEditImagesForEditMode(id, data.image_url, data.image_path);
+   	    }
+	   });
               });
             }
 
@@ -399,6 +404,57 @@ var MMReviews = (function(){
 
 
   // -------- 부트스트랩 & 라우팅 --------
+// ---- 편집 모드: 기존 이미지 썸네일 표시 ----
+function renderEditImagesForEditMode(reviewId, fallbackUrl, fallbackPath){
+  if (!elEditImages) return;
+  elEditImages.hidden = false;
+  elEditImages.innerHTML = '<div class="muted">기존 이미지를 불러오는 중…</div>';
+
+  var sb = window.mmAuth && window.mmAuth.sb;
+  if (!sb){
+    elEditImages.innerHTML = '<div class="muted">클라이언트 준비 전</div>';
+    return;
+  }
+
+  sb.from('review_images')
+    .select('id,url,path,created_at')
+    .eq('review_id', reviewId)
+    .order('created_at', { ascending:true })
+    .then(function(res){
+      var rows = [];
+      if (!res.error && res.data && res.data.length){
+        rows = res.data;
+      }
+      if (!rows.length && fallbackUrl){
+        rows = [{ id:null, url:fallbackUrl, path:(fallbackPath||null), _legacy:true }];
+      }
+      if (!rows.length){
+        elEditImages.innerHTML = '<div class="muted">기존 이미지가 없습니다.</div>';
+        return;
+      }
+
+      var html = '';
+      for (var i=0;i<rows.length;i++){
+        var r = rows[i];
+        html += ''
+          + '<div class="thumb-card">'
+          + '  <img class="thumb-img" src="'+r.url+'" alt="">'
+          + '  <label style="font-size:13px;color:#444;margin-top:6px; display:block; text-align:center">'
+          + '    <input type="checkbox"'
+          + '           data-del="img"'
+          + '           data-imgid="'+(r.id||'')+'"'
+          + '           data-path="'+(r.path||'')+'"'
+          + '           data-legacy="'+(r._legacy ? '1':'0')+'"> 삭제'
+          + '  </label>'
+          + '</div>';
+      }
+      elEditImages.innerHTML = html;
+    })
+    .catch(function(){
+      elEditImages.innerHTML = '<div class="muted">이미지 로드 실패</div>';
+    });
+}
+
   function init(){
     // 1) DOM 캐시
     elAuthInfo   = $("#authInfo");
@@ -410,6 +466,7 @@ var MMReviews = (function(){
     elBtnCompose = $("#btn-compose");
     fTitle       = $("#title");
     fContent     = $("#content");
+    elEditImages     = $("#editImages");
     elBtnSubmit  = $("#btn-submit");
     elFormStatus = $("#formStatus");
 
