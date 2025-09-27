@@ -1,187 +1,237 @@
 // /js/reviews-ui.js
-// 일관 네이밍: elListView / elReadView / elWriteForm (reviews.html과 동일)
-// 기능: 목록 로드, 행 클릭 → 읽기, 읽기 화면 렌더, 인증 상태 텍스트만 갱신
-// 주의: 편집/삭제/댓글/리액션은 임시 비활성 (필요 시 이후 단계에서 추가)
-
 var MMReviews = (function(){
-  // -------- 공통 유틸 --------
+  // ---------- DOM refs ----------
   function $(s){ return document.querySelector(s); }
-  function escapeHtml(s){
-    if (s===null || s===undefined) return "";
-    return String(s).replace(/[&<>"']/g, function(m){
-      if (m==="&") return "&amp;";
-      if (m==="<") return "&lt;";
-      if (m===">") return "&gt;";
-      if (m==='"') return "&quot;";
-      return "&#39;";
-    });
-  }
-  function fmtDate(iso){
-    try{
-      var d = new Date(iso);
-      return d.toLocaleString("ko-KR",{year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'});
-    }catch(_){ return iso || ""; }
-  }
-  function displayName(row){
-    var email = row && row.author_email ? row.author_email : "";
-    try{
-      if (window.mmAuth && typeof window.mmAuth.isAdmin === 'function' && window.mmAuth.isAdmin(email)) return "관리자";
-    }catch(_){}
-    if (row && row.nickname) return row.nickname;
-    if (email){ var p = email.split("@"); return p[0] || "익명"; }
-    return "익명";
-  }
-  function safeText(el, text){ if (el) el.textContent = text; }
 
-  // -------- DOM refs (init에서 채움) --------
   var elAuthInfo   = null;
   var elAuthStatus = null;
-  var fTitle = null, fContent = null;   // 제목/본문 입력
-  var elBtnSubmit = null, elFormStatus = null; // 저장 버튼/상태 텍스트
   var elListView   = null;
   var elReadView   = null;
   var elWriteForm  = null;
   var elListBody   = null;
   var elBtnCompose = null;
+  var elBtnSubmit  = null;
+  var elFormStatus = null;
 
-  // -------- 뷰 전환 --------
-  function showList(){
-    if (elListView)  elListView.hidden = false;
-    if (elReadView)  elReadView.hidden = true;
-    if (elWriteForm) elWriteForm.hidden = true;
+  var fTitle = null, fContent = null, fImage = null;
+  var elSelectPreviews = null, elEditImages = null;
+
+  var MAX_FILES = 6;
+  var chosenFiles = []; // 새로 선택한 파일 누적(미리보기용)
+  var MOBILE_MAX = 700;
+
+  function isMobile(){
+    try { return window.matchMedia("(max-width:"+MOBILE_MAX+"px)").matches; }
+    catch(_){ return false; }
   }
-  function showRead(){
-    if (elListView)  elListView.hidden = true;
-    if (elReadView)  elReadView.hidden = false;
-    if (elWriteForm) elWriteForm.hidden = true;
+  function safeText(el, s){ if(el) el.textContent = s; }
+  function escapeHtml(s){
+    if (s===null || s===undefined) return "";
+    return String(s).replace(/[&<>"']/g, function(m){
+      if(m==="&")return"&amp;"; if(m==="<")return"&lt;"; if(m===">")return"&gt;"; if(m==='"')return"&quot;"; return"&#39;";
+    });
   }
-  function showWrite(){
-    if (elListView)  elListView.hidden = true;
-    if (elReadView)  elReadView.hidden = true;
-    if (elWriteForm) elWriteForm.hidden = false;
+  function fmtDate(iso){
+    try{ var d=new Date(iso);
+      return d.toLocaleString("ko-KR",{year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'});
+    }catch(_){ return iso||""; }
+  }
+  function displayName(row){
+    var email = row && row.author_email ? row.author_email : "";
+    if (window.mmAuth && window.mmAuth.isAdmin(email)) return "관리자";
+    if (row && row.nickname) return row.nickname;
+    if (email){ var p=email.split("@"); return p[0]||"익명"; }
+    return "익명";
   }
 
-  // -------- 인증 텍스트 갱신 --------
+  // ---------- 인증 UI(좌측 패널) ----------
   function refreshAuthUI(){
-    return (window.mmAuth && window.mmAuth.getSession ? window.mmAuth.getSession() : Promise.resolve(null))
-      .then(function(session){
-        if (session && session.user){
-          safeText(elAuthStatus, "로그인: " + (session.user.email||""));
-          safeText(elAuthInfo,   "로그인: " + (session.user.email||""));
-        } else {
-          safeText(elAuthStatus, "로그아웃 상태");
-          safeText(elAuthInfo,   "로그아웃 상태");
-        }
-      })
-      .catch(function(){
-        safeText(elAuthStatus, "로그아웃 상태");
-        safeText(elAuthInfo,   "로그아웃 상태");
-      });
+    return window.mmAuth.getSession().then(function(session){
+      var logged = !!(session && session.user);
+      safeText(elAuthStatus, logged ? ("로그인: "+(session.user.email||"")) : "로그아웃 상태");
+      safeText(elAuthInfo,   logged ? ("로그인: "+(session.user.email||"")) : "로그아웃 상태");
+
+      // 좌측 로그인 패널의 버튼/필드 토글
+      var authTabs   = $("#authTabs");
+      var loginForm  = $("#loginForm");
+      var signupForm = $("#signupForm");
+      var btnLogin   = $("#btn-login");
+      var btnLogout  = $("#btn-logout");
+      var loginEmailField = $("#login-email") ? $("#login-email").closest(".field") : null;
+      var loginPwField    = $("#login-password") ? $("#login-password").closest(".field") : null;
+
+      if (logged){
+        if (authTabs) authTabs.setAttribute("hidden","");
+        if (signupForm) signupForm.setAttribute("hidden","");
+        if (loginForm)  loginForm.hidden = false;
+        if (loginEmailField) loginEmailField.hidden = true;
+        if (loginPwField)    loginPwField.hidden = true;
+        if (btnLogin)  btnLogin.hidden  = true;
+        if (btnLogout) btnLogout.hidden = false;
+      }else{
+        if (authTabs) authTabs.removeAttribute("hidden");
+        if (signupForm) signupForm.setAttribute("hidden","");
+        if (loginForm)  loginForm.hidden = false;
+        if (loginEmailField) loginEmailField.hidden = false;
+        if (loginPwField)    loginPwField.hidden = false;
+        if (btnLogin)  btnLogin.hidden  = false;
+        if (btnLogout) btnLogout.hidden = true;
+      }
+    })["catch"](function(){
+      safeText(elAuthStatus,"로그아웃 상태");
+      safeText(elAuthInfo,"로그아웃 상태");
+    });
   }
 
-  // -------- 목록 --------
+  // ---------- 목록 ----------
+  function attachRowClicks(){
+    if (!elListBody) return;
+    var trs = elListBody.querySelectorAll("tr.row-item");
+    for (var k=0;k<trs.length;k++){
+      (function(tr){
+        tr.addEventListener("click", function(){
+          var id = tr.getAttribute("data-id");
+          location.href = "/reviews.html?id=" + id;
+        });
+      })(trs[k]);
+    }
+  }
+
   function loadList(){
     if (!elListBody) return Promise.resolve();
     var sb = window.mmAuth && window.mmAuth.sb;
     if (!sb){
-      elListBody.innerHTML = '<tr><td colspan="5" class="muted">로딩 실패: Supabase 클라이언트 준비 전</td></tr>';
+      elListBody.innerHTML = '<tr><td colspan="5" class="muted">로딩 실패: Supabase 준비 전</td></tr>';
       return Promise.resolve();
     }
-
-    return sb.from('reviews')
-      .select('id, title, content, nickname, author_email, created_at, view_count, is_notice')
-      .order('is_notice', { ascending:false })
-      .order('created_at', { ascending:false })
+    return sb.from("reviews")
+      .select("id, title, content, nickname, author_email, created_at, view_count, is_notice")
+      .order("is_notice",{ascending:false})
+      .order("created_at",{ascending:false})
       .limit(100)
       .then(function(res){
         if (res.error){
           elListBody.innerHTML = '<tr><td colspan="5" class="muted">목록 로드 실패: '+escapeHtml(res.error.message)+'</td></tr>';
           return;
         }
-        var data = res.data || [];
+        var data = res.data||[];
         if (!data.length){
           elListBody.innerHTML = '<tr><td colspan="5" class="muted">등록된 후기가 없습니다.</td></tr>';
           return;
         }
 
-        // counts 조회 (없어도 진행)
-        var ids = [];
-        for (var i=0;i<data.length;i++) ids.push(data[i].id);
+        var ids = []; for (var i=0;i<data.length;i++) ids.push(data[i].id);
 
-        function renderWithCounts(countMap){
+        function renderWithCounts(map){
           var html = "";
           for (var j=0;j<data.length;j++){
             var row = data[j];
-            var stat = countMap[row.id] || { v: Number(row.view_count||0), c: 0 };
+            var stat = map[row.id] || { v: Number(row.view_count||0), c: 0 };
             var nick = escapeHtml(displayName(row));
             var titleHtml = row.title ? "["+escapeHtml(row.title)+"] " : "";
-            var bodyHtml = (row.is_notice ? '<span class="notice-tag">[알림]</span> ' : '') + titleHtml + escapeHtml(row.content||"");
+            var bodyHtml  = (row.is_notice ? '<span class="notice-tag">[알림]</span> ' : '') + titleHtml + escapeHtml(row.content||"");
             var when = fmtDate(row.created_at);
             var trCls = row.is_notice ? "row-item notice" : "row-item";
 
-            html += '<tr data-id="'+row.id+'" class="'+trCls+'" style="cursor:pointer">';
-            html +=   '<td class="cell-no">'+(j+1)+'</td>';
-            html +=   '<td class="cell-nick">'+nick+'</td>';
-            html +=   '<td class="cell-body">';
-            // 1줄 요약(닉네임 + 본문) — 모바일에서도 보이며, 닉네임은 .m-only 로 표시
-            html +=     '<div class="m-line1"><span class="nick m-only">'+nick+'</span>'+bodyHtml+'</div>';
-            // 2줄 요약(조회/시각) — 모바일에서만 보임 (CSS에서 .m-line2를 PC에선 display:none)
-            html +=     '<div class="m-line2 m-only"><span>조회 '+stat.v+' ('+stat.c+')</span><span>'+when+'</span></div>';
-            html +=   '</td>';
-            html +=   '<td class="cell-stats">'+stat.v+' ('+stat.c+')</td>';
-            html +=   '<td class="cell-time">'+when+'</td>';
-            html += '</tr>';
+            html += ''
+              + '<tr data-id="'+row.id+'" class="'+trCls+'" style="cursor:pointer">'
+              +   '<td class="cell-no">'+(j+1)+'</td>'
+              +   '<td class="cell-nick">'+nick+'</td>'
+              +   '<td class="cell-body">'
+              +     '<div class="m-line1"><span class="nick m-only">'+nick+'</span>'+bodyHtml+'</div>'
+              +     '<div class="m-line2 m-only"><span>조회 '+stat.v+' ('+stat.c+')</span><span>'+when+'</span></div>'
+              +   '</td>'
+              +   '<td class="cell-stats">'+stat.v+' ('+stat.c+')</td>'
+              +   '<td class="cell-time">'+when+'</td>'
+              + '</tr>';
           }
           elListBody.innerHTML = html;
-
-          var trs = elListBody.querySelectorAll("tr.row-item");
-          for (var k=0;k<trs.length;k++){
-            (function(tr){
-              tr.addEventListener("click", function(){
-                var id = tr.getAttribute("data-id");
-                // 같은 페이지 내 라우팅
-                history.pushState(null, "", "/reviews.html?id=" + id);
-                showRead();
-                loadOne(id);
-              });
-            })(trs[k]);
-          }
+          attachRowClicks();
         }
 
         if (!ids.length){ renderWithCounts({}); return; }
 
-        sb.from('review_counts')
-          .select('review_id, view_count, comment_count')
-          .in('review_id', ids)
+        sb.from("review_counts")
+          .select("review_id, view_count, comment_count")
+          .in("review_id", ids)
           .then(function(r2){
             var map = {};
             if (!r2.error && r2.data){
               for (var i=0;i<r2.data.length;i++){
                 var rr = r2.data[i];
-                map[rr.review_id] = { v: Number(rr.view_count||0), c: Number(rr.comment_count||0) };
+                map[rr.review_id] = { v:Number(rr.view_count||0), c:Number(rr.comment_count||0) };
               }
             }
             renderWithCounts(map);
-          })
-          .catch(function(){ renderWithCounts({}); });
-      })
-      .catch(function(err){
+          })["catch"](function(){ renderWithCounts({}); });
+      })["catch"](function(err){
         elListBody.innerHTML = '<tr><td colspan="5" class="muted">목록 로드 실패: '+escapeHtml(err && err.message)+'</td></tr>';
       });
   }
 
-  // -------- 단건 읽기 --------
+  // ---------- 갤러리(읽기) ----------
+  function renderGallery(reviewId, fallbackUrl){
+    var sb = window.mmAuth && window.mmAuth.sb;
+    var box = $("#galleryThumbs");
+    var lb  = $("#lb");
+    var lbImg = $("#lbImg");
+    if (!box || !sb) return;
+
+    sb.from("review_images").select("id,url").eq("review_id", reviewId).order("created_at",{ascending:true})
+      .then(function(r){
+        var urls = [];
+        if (!r.error && r.data && r.data.length){
+          for (var i=0;i<r.data.length;i++) urls.push(r.data[i].url);
+        }
+        if (!urls.length && fallbackUrl) urls = [fallbackUrl];
+
+        if (!urls.length){ box.innerHTML = ""; return; }
+
+        var html = "";
+        for (var i=0;i<urls.length;i++){
+          html += '<div class="thumb-card"><img class="thumb-img" src="'+urls[i]+'" data-idx="'+i+'" alt=""></div>';
+        }
+        box.innerHTML = html;
+
+        if (!lb || !lbImg) return;
+        var cur = 0;
+        function openAt(i){ cur=i; lbImg.src=urls[cur]; lb.hidden=false; document.body.style.overflow="hidden"; }
+        function close(){ lb.hidden=true; document.body.style.overflow=""; }
+        function prev(){ cur=(cur-1+urls.length)%urls.length; lbImg.src=urls[cur]; }
+        function next(){ cur=(cur+1)%urls.length; lbImg.src=urls[cur]; }
+
+        var imgs = box.querySelectorAll("img.thumb-img");
+        for (var k=0;k<imgs.length;k++){
+          (function(img){
+            img.addEventListener("click", function(){ openAt(Number(img.getAttribute("data-idx"))); });
+          })(imgs[k]);
+        }
+        var x = lb.querySelector(".lb-close"), p = lb.querySelector(".lb-prev"), n = lb.querySelector(".lb-next");
+        if (x) x.addEventListener("click", close);
+        if (p) p.addEventListener("click", prev);
+        if (n) n.addEventListener("click", next);
+        lb.addEventListener("click", function(e){ if(e.target===lb) close(); });
+        document.addEventListener("keydown", function(e){
+          if (lb.hidden) return;
+          if (e.key==="Escape") close();
+          if (e.key==="ArrowLeft") prev();
+          if (e.key==="ArrowRight") next();
+        });
+      });
+  }
+
+  // ---------- 읽기 ----------
   function loadOne(id){
     if (!elReadView) return Promise.resolve();
     var sb = window.mmAuth && window.mmAuth.sb;
     if (!sb){
-      elReadView.innerHTML = '<p class="muted">불러오기 실패: Supabase 클라이언트 준비 전</p>';
+      elReadView.innerHTML = '<p class="muted">불러오기 실패: Supabase 준비 전</p>';
       return Promise.resolve();
     }
 
-    return sb.from('reviews')
-      .select('id, user_id, title, content, created_at, nickname, author_email, image_url, image_path, is_notice')
-      .eq('id', id).single()
+    return sb.from("reviews")
+      .select("id, user_id, title, content, created_at, nickname, author_email, image_url, image_path, is_notice")
+      .eq("id", id).single()
       .then(function(r){
         if (r.error){
           elReadView.innerHTML = '<p class="muted">불러오기 실패: '+escapeHtml(r.error.message)+'</p>';
@@ -189,274 +239,436 @@ var MMReviews = (function(){
         }
         var data = r.data;
 
-        return (window.mmAuth.getSession ? window.mmAuth.getSession() : Promise.resolve(null))
-          .then(function(sess){
-            var me = sess && sess.user ? sess.user : null;
-            var isOwner = !!(me && data.user_id && me.id === data.user_id);
-            var name = displayName(data);
-            var title = (data.is_notice ? "[알림] " : "") + (data.title || "(제목 없음)");
+        return window.mmAuth.getSession().then(function(sess){
+          var me = sess && sess.user ? sess.user : null;
+          var isOwner = !!(me && data.user_id && me.id === data.user_id);
+          var name = displayName(data);
+          var title = (data.is_notice ? "[일림] " : "") + (data.title || "(제목 없음)");
 
-            var html = "";
-            html += '<div class="top-actions">';
-            html += '  <a class="btn secondary" href="/reviews.html">목록보기</a>';
-            html += '  <div style="display:flex; gap:8px; align-items:center">';
-            html += '    <button class="btn" type="button" id="btn-to-compose">글쓰기</button>';
-            if (isOwner){
-              html += '    <button class="btn secondary" type="button" id="btn-edit">수정</button>';
-              html += '    <button class="btn secondary" type="button" id="btn-delete">삭제</button>';
-            }
-            html += '  </div>';
-            html += '</div>';
+          // 버튼 묶음 구성(문자열 안전)
+          var actionsRight = '<button class="btn" type="button" id="btn-to-compose">글쓰기</button>';
+          if (isOwner){
+            actionsRight += '<button class="btn secondary" type="button" id="btn-edit">수정</button>';
+            actionsRight += '<button class="btn secondary" type="button" id="btn-delete">삭제</button>';
+          }
 
-            html += '<h3 style="margin:0 0 6px">'+escapeHtml(title)+'</h3>';
-            html += '<div class="muted" style="margin-bottom:10px">'+escapeHtml(name)+' · '+fmtDate(data.created_at)+'</div>';
-            html += '<div style="white-space:pre-wrap;word-break:break-word">'+escapeHtml(data.content || "")+'</div>';
+          var html = ''
+            + '<div class="top-actions">'
+            +   '<a class="btn secondary" href="/reviews.html">목록보기</a>'
+            +   '<div style="display:flex; gap:8px; align-items:center">'+actionsRight+'</div>'
+            + '</div>'
+            + '<h3 style="margin:0 0 6px">'+escapeHtml(title)+'</h3>'
+            + '<div class="muted" style="margin-bottom:10px">'+escapeHtml(name)+' · '+fmtDate(data.created_at)+'</div>'
+            + '<div style="white-space:pre-wrap;word-break:break-word">'+escapeHtml(data.content||"")+'</div>'
+            + '<div id="lb" class="lightbox" hidden>'
+            +   '<button class="lb-close" aria-label="닫기">×</button>'
+            +   '<button class="lb-prev" aria-label="이전">‹</button>'
+            +   '<img id="lbImg" alt="">'
+            +   '<button class="lb-next" aria-label="다음">›</button>'
+            + '</div>'
+            + '<div id="galleryThumbs" class="thumbs" style="margin-top:12px"></div>'
+            + '<div class="reaction-bar" id="reactBar"></div>'
+            + '<div class="comments" id="commentsBox">'
+            +   '<h4 style="margin:16px 0 8px">댓글</h4>'
+            +   '<div id="commentList"></div>'
+            +   '<form id="commentForm" class="comment-form" hidden>'
+            +     '<textarea id="commentText" placeholder="댓글을 입력해 주세요"></textarea>'
+            +     '<label style="display:flex;align-items:center;gap:6px;white-space:nowrap">'
+            +       '<input type="checkbox" id="commentSecret"> 비밀글'
+            +     '</label>'
+            +     '<button class="btn" id="btnComment">등록</button>'
+            +   '</form>'
+            +   '<div id="commentLoginHint" class="muted">댓글을 쓰려면 로그인하세요.</div>'
+            + '</div>'
+            + '<div class="bottom-actions">'
+            +   '<button class="btn secondary icon" type="button" id="btnCopyLink" title="링크 복사">🔗 <span>공유</span></button>'
+            +   '<span id="shareTip" class="status"></span>'
+            + '</div>';
 
-            html += '<div id="lb" class="lightbox" hidden>'
-                  +   '<button class="lb-close" aria-label="닫기">×</button>'
-                  +   '<button class="lb-prev" aria-label="이전">‹</button>'
-                  +   '<img id="lbImg" alt="">'
-                  +   '<button class="lb-next" aria-label="다음">›</button>'
-                  + '</div>';
-            html += '<div id="galleryThumbs" class="thumbs" style="margin-top:12px"></div>';
+          elReadView.innerHTML = html;
 
-            html += '<div class="bottom-actions">';
-            html += '  <button class="btn secondary icon" type="button" id="btnCopyLink" title="링크 복사">🔗 <span>공유</span></button>';
-            html += '  <span id="shareTip" class="status"></span>';
-            html += '</div>';
-
-            elReadView.innerHTML = html;
-
-            renderGallery(id, data.image_url);
-
-            // [EDIT] 수정 버튼 → 편집 모드로
-            var btnEdit = document.getElementById('btn-edit');
-            if (btnEdit){
-              btnEdit.addEventListener('click', function(){
-                window.mmAuth.getSession().then(function(sess){
-                  var u = sess && sess.user;
-                  var admin = u && window.mmAuth.isAdmin(u.email);
-                  if (!u){ alert('로그인이 필요합니다.'); return; }
-                  if (!admin && u.id !== data.user_id){ alert('본인 글만 수정할 수 있습니다.'); return; }
-
-                  // 작성 폼으로 전환 + 값 프리필
-                  showWrite();
-
-                  if (fTitle)   fTitle.value   = data.title   || '';
-                  if (fContent) fContent.value = data.content || '';
-                  if (elWriteForm) elWriteForm.dataset.editing = data.id;
-
-                  // 기존 이미지 간단 프리뷰(있으면)
-                  var editBox = document.getElementById('editImages');
-                  if (editBox){ editBox.hidden = false; }
-                  renderEditImagesForEditMode(data.id, data.image_url);
-                  if (elEditImages){
- 	       elEditImages.hidden = false;
-  	       renderEditImagesForEditMode(id, data.image_url, data.image_path);
-   	    }
-	   });
+          // 글쓰기 이동
+          var btnToCompose = $("#btn-to-compose");
+          if (btnToCompose){
+            btnToCompose.addEventListener("click", function(){
+              window.mmAuth.getSession().then(function(s){
+                if (!s || !s.user){
+                  alert("로그인이 필요합니다.");
+                  return;
+                }
+                history.replaceState(null,"","/reviews.html?compose=1");
+                showWrite();
               });
-            }
+            });
+          }
 
-            // 글쓰기 버튼
-            var btnToCompose = document.getElementById('btn-to-compose');
-            if (btnToCompose){
-              btnToCompose.addEventListener('click', function(){
-                (window.mmAuth.getSession ? window.mmAuth.getSession() : Promise.resolve(null))
-                  .then(function(s){
-                    if (!s || !s.user){ alert('로그인이 필요합니다.'); return; }
-                    history.replaceState(null, '', '/reviews.html?compose=1');
-                    showWrite();
+          // 수정(저자만)
+          var btnEdit = $("#btn-edit");
+          if (btnEdit){
+            btnEdit.addEventListener("click", function(){
+              showWrite();
+              if (fTitle)   fTitle.value   = data.title   || "";
+              if (fContent) fContent.value = data.content || "";
+              if (elWriteForm) elWriteForm.setAttribute("data-editing", data.id);
+
+              var sess2 = sess; // 위에서 구해둠
+              // 관리자 공지 체크박스
+              var noticeBox = $("#noticeBox");
+              var cb = $("#isNotice");
+              if (noticeBox){
+                if (window.mmAuth.isAdmin(sess2 && sess2.user ? sess2.user.email : "")){
+                  noticeBox.removeAttribute("hidden");
+                  if (cb) cb.checked = !!data.is_notice;
+                }else{
+                  noticeBox.setAttribute("hidden","");
+                  if (cb) cb.checked = false;
+                }
+              }
+              // 기존 이미지 썸네일
+              if (elEditImages){
+                elEditImages.hidden = false;
+                renderEditImagesForEditMode(data.id, data.image_url, data.image_path);
+              }
+            });
+          }
+
+          // 삭제(저자만)
+          var btnDelete = $("#btn-delete");
+          if (btnDelete){
+            btnDelete.addEventListener("click", function(){
+              if (!confirm("정말 삭제할까요? 이 작업은 되돌릴 수 없습니다.")) return;
+              // 댓글 먼저 삭제(제약 없는 환경 대비)
+              sb.from("comments").delete().eq("review_id", id).then(function(){
+                // 레거시 단일 이미지 스토리지 정리
+                var toRemove = [];
+                if (data.image_path) toRemove.push(data.image_path);
+                // 메타/스토리지(여러 장)
+                sb.from("review_images").select("path").eq("review_id", id).then(function(rm){
+                  if (!rm.error && rm.data){
+                    for (var i=0;i<rm.data.length;i++){
+                      if (rm.data[i].path) toRemove.push(rm.data[i].path);
+                    }
+                  }
+                  // 글 삭제
+                  sb.from("reviews").delete().eq("id", id).then(function(del){
+                    if (toRemove.length){
+                      sb.storage.from("reviews").remove(toRemove).then(function(){ location.href="/reviews.html"; })["catch"](function(){ location.href="/reviews.html"; });
+                    }else{
+                      location.href="/reviews.html";
+                    }
                   });
-              });
-            }
-
-            // 조회수 +1 (Promise일 때만 then 핸들링)
-            try{
-              var p = (sb && typeof sb.rpc === 'function') ? sb.rpc('inc_review_view', { _id: id }) : null;
-              if (p && typeof p.then === 'function'){
-                p.then(function(){}, function(e){ console.warn('[reviews] view +1 실패:', e && e.message); });
-              }
-            }catch(e){
-              console.warn('[reviews] view +1 예외:', e && e.message);
-            }
-
-            // 공유
-            var copyBtn  = document.getElementById('btnCopyLink');
-            var shareTip = document.getElementById('shareTip');
-            var shareUrl = location.origin + '/reviews.html?id=' + id;
-            function copyPlainText(text){
-              if (navigator.clipboard && window.isSecureContext){
-                return navigator.clipboard.writeText(text);
-              }
-              return new Promise(function(resolve, reject){
-                try{
-                  var ta = document.createElement('textarea');
-                  ta.value = text;
-                  ta.setAttribute('readonly','');
-                  ta.style.position='fixed';
-                  ta.style.left='-9999px';
-                  document.body.appendChild(ta);
-                  ta.select();
-                  var ok = document.execCommand('copy');
-                  document.body.removeChild(ta);
-                  ok ? resolve() : reject(new Error('execCommand copy 실패'));
-                }catch(err){ reject(err); }
-              });
-            }
-            if (copyBtn){
-              copyBtn.addEventListener('click', function(){
-                copyPlainText(shareUrl).then(function(){
-                  if (shareTip) shareTip.textContent = '링크를 복사했습니다. (붙여넣기)';
-                  setTimeout(function(){ if (shareTip) shareTip.textContent=''; }, 2000);
-                }, function(){
-                  if (shareTip) shareTip.textContent = '복사 실패';
-                  setTimeout(function(){ if (shareTip) shareTip.textContent=''; }, 2000);
                 });
               });
+            });
+          }
+
+          // 갤러리
+          renderGallery(id, data.image_url);
+
+          // 조회수 +1 (RPC 실패해도 조용히 무시)
+          try{
+            sb.rpc("inc_review_view", { _id:id })["catch"](function(){});
+          }catch(_){}
+
+          // 공유
+          var copyBtn  = $("#btnCopyLink");
+          var shareTip = $("#shareTip");
+          var shareUrl = location.origin + "/reviews.html?id=" + id;
+          function copyPlainText(text){
+            if (navigator.clipboard && window.isSecureContext){
+              return navigator.clipboard.writeText(text);
             }
-          });
-      })
-      .catch(function(err){
+            return new Promise(function(resolve, reject){
+              try{
+                var ta=document.createElement("textarea");
+                ta.value=text; ta.setAttribute("readonly",""); ta.style.position="fixed"; ta.style.left="-9999px";
+                document.body.appendChild(ta); ta.select();
+                var ok=document.execCommand("copy");
+                document.body.removeChild(ta);
+                if (ok) resolve(); else reject(new Error("execCommand copy 실패"));
+              }catch(err){ reject(err); }
+            });
+          }
+          if (copyBtn){
+            copyBtn.addEventListener("click", function(){
+              copyPlainText(shareUrl).then(function(){
+                if (shareTip) shareTip.textContent="링크를 복사했습니다. (붙여넣기)";
+                setTimeout(function(){ if(shareTip) shareTip.textContent=""; },2000);
+              })["catch"](function(){
+                if (shareTip) shareTip.textContent="복사 실패";
+                setTimeout(function(){ if(shareTip) shareTip.textContent=""; },2000);
+              });
+            });
+          }
+        });
+      })["catch"](function(err){
         elReadView.innerHTML = '<p class="muted">불러오기 실패: '+escapeHtml(err && err.message)+'</p>';
       });
   }
-  // -------- 갤러리(읽기) --------
-  function renderGallery(reviewId, fallbackUrl){
-    var box   = document.getElementById('galleryThumbs');
-    var lb    = document.getElementById('lb');
-    var lbImg = document.getElementById('lbImg');
-    if (!box) return;
 
+  // ---------- 편집 모드: 기존 이미지 썸네일 + 삭제 체크 ----------
+  function renderEditImagesForEditMode(reviewId, fallbackUrl, fallbackPath){
+    if (!elEditImages) return;
     var sb = window.mmAuth && window.mmAuth.sb;
-    if (!sb){ box.innerHTML=''; return; }
-
-    function render(urls){
-      if (!urls || !urls.length){ box.innerHTML=''; return; }
-      var html = '';
-      for (var i=0;i<urls.length;i++){
-        html += '<div class="thumb-card"><img class="thumb-img" src="'+urls[i]+'" alt="" data-idx="'+i+'"></div>';
-      }
-      box.innerHTML = html;
-
-      if (!lb || !lbImg) return;
-      var cur = 0;
-      function openAt(i){ cur=i; lbImg.src=urls[cur]; lb.hidden=false; document.body.style.overflow='hidden'; }
-      function close(){ lb.hidden=true; document.body.style.overflow=''; }
-      function prev(){ cur=(cur-1+urls.length)%urls.length; lbImg.src=urls[cur]; }
-      function next(){ cur=(cur+1)%urls.length; lbImg.src=urls[cur]; }
-
-      var imgs = box.querySelectorAll('img.thumb-img');
-      for (var k=0;k<imgs.length;k++){
-        (function(img){
-          img.addEventListener('click', function(){
-            var idx = parseInt(img.getAttribute('data-idx'),10) || 0;
-            openAt(idx);
-          });
-        })(imgs[k]);
-      }
-
-      var btnClose = lb.querySelector('.lb-close');
-      var btnPrev  = lb.querySelector('.lb-prev');
-      var btnNext  = lb.querySelector('.lb-next');
-      if (btnClose) btnClose.addEventListener('click', close);
-      if (btnPrev)  btnPrev.addEventListener('click', prev);
-      if (btnNext)  btnNext.addEventListener('click', next);
-      lb.addEventListener('click', function(e){ if (e.target===lb) close(); });
-      document.addEventListener('keydown', function(e){
-        if (lb.hidden) return;
-        if (e.key==='Escape') close();
-        if (e.key==='ArrowLeft') prev();
-        if (e.key==='ArrowRight') next();
-      });
+    elEditImages.hidden = false;
+    elEditImages.innerHTML = '<div class="muted">기존 이미지를 불러오는 중…</div>';
+    if (!sb){
+      elEditImages.innerHTML = '<div class="muted">클라이언트 준비 전</div>';
+      return;
     }
-
-    // 1차: review_images에서 불러오기
-    sb.from('review_images')
-      .select('id,url')
-      .eq('review_id', reviewId)
-      .order('created_at', { ascending:true })
+    sb.from("review_images")
+      .select("id,url,path,created_at")
+      .eq("review_id", reviewId)
+      .order("created_at",{ascending:true})
       .then(function(res){
-        if (res.error){
-          // created_at 없는 경우 대비: id 기준 재시도
-          return sb.from('review_images')
-                   .select('id,url')
-                   .eq('review_id', reviewId)
-                   .order('id', { ascending:true });
+        var rows = [];
+        if (!res.error && res.data && res.data.length) rows = res.data;
+        if (!rows.length && fallbackUrl){
+          rows = [{ id:null, url:fallbackUrl, path:(fallbackPath||null), _legacy:true }];
         }
-        return res;
-      })
-      .then(function(res2){
-        var urls = [];
-        if (!res2.error && res2.data && res2.data.length){
-          for (var i=0;i<res2.data.length;i++){
-            var u = res2.data[i] && res2.data[i].url;
-            if (u) urls.push(u);
-          }
+        if (!rows.length){
+          elEditImages.innerHTML = '<div class="muted">기존 이미지가 없습니다.</div>';
+          return;
         }
-        if (!urls.length && fallbackUrl) urls = [fallbackUrl];
-        render(urls);
-      })
-      .catch(function(){
-        if (fallbackUrl) render([fallbackUrl]); else render([]);
+        var html = "";
+        for (var i=0;i<rows.length;i++){
+          var r = rows[i];
+          html += ''
+            + '<div class="thumb-card">'
+            +   '<img class="thumb-img" src="'+r.url+'" alt="">'
+            +   '<label style="font-size:13px;color:#444;margin-top:6px; display:block; text-align:center">'
+            +     '<input type="checkbox"'
+            +       ' data-del="img"'
+            +       ' data-imgid="'+(r.id||'')+'"'
+            +       ' data-path="'+(r.path||'')+'"'
+            +       ' data-legacy="'+(r._legacy ? '1':'0')+'"> 삭제'
+            +   '</label>'
+            + '</div>';
+        }
+        elEditImages.innerHTML = html;
+      })["catch"](function(){
+        elEditImages.innerHTML = '<div class="muted">이미지 로드 실패</div>';
       });
   }
 
+  // ---------- 파일 선택 미리보기 ----------
+  function onFileChange(){
+    if (!fImage || !elSelectPreviews) return;
+    var files = fImage.files ? Array.prototype.slice.call(fImage.files) : [];
+    // 누적 중복 제거(name+size+lastModified)
+    function key(f){ return (f.name||"")+"__"+(f.size||0)+"__"+(f.lastModified||0); }
+    var map = {};
+    // 기존 누적 + 신규
+    for (var i=0;i<chosenFiles.length;i++){ map[key(chosenFiles[i])] = chosenFiles[i]; }
+    for (var j=0;j<files.length;j++){ map[key(files[j])] = files[j]; }
+    chosenFiles = []; for (var k in map){ if (map.hasOwnProperty(k)) chosenFiles.push(map[k]); }
 
-  // -------- 부트스트랩 & 라우팅 --------
-// ---- 편집 모드: 기존 이미지 썸네일 표시 ----
-function renderEditImagesForEditMode(reviewId, fallbackUrl, fallbackPath){
-  if (!elEditImages) return;
-  elEditImages.hidden = false;
-  elEditImages.innerHTML = '<div class="muted">기존 이미지를 불러오는 중…</div>';
+    // 슬롯 제한 계산: 편집 모드면 기존 - 삭제체크 수 고려
+    var slot = MAX_FILES;
+    if (elWriteForm && elWriteForm.getAttribute("data-editing")){
+      var totalThumbs = elEditImages ? elEditImages.querySelectorAll('input[data-del="img"]').length : 0;
+      var delChecked  = elEditImages ? elEditImages.querySelectorAll('input[data-del="img"]:checked').length : 0;
+      var existing = Math.max(0, totalThumbs - delChecked);
+      slot = Math.max(0, MAX_FILES - existing);
+    }
+    if (chosenFiles.length > slot) chosenFiles = chosenFiles.slice(0, slot);
 
-  var sb = window.mmAuth && window.mmAuth.sb;
-  if (!sb){
-    elEditImages.innerHTML = '<div class="muted">클라이언트 준비 전</div>';
-    return;
+    // 미리보기 렌더
+    elSelectPreviews.innerHTML = "";
+    for (var x=0;x<chosenFiles.length;x++){
+      (function(f){
+        var url = URL.createObjectURL(f);
+        var wrap = document.createElement("div"); wrap.className = "thumb-card";
+        var img  = document.createElement("img"); img.className = "thumb-img"; img.src = url;
+        wrap.appendChild(img);
+        elSelectPreviews.appendChild(wrap);
+      })(chosenFiles[x]);
+    }
+    try{ fImage.value = ""; }catch(_){}
   }
 
-  sb.from('review_images')
-    .select('id,url,path,created_at')
-    .eq('review_id', reviewId)
-    .order('created_at', { ascending:true })
-    .then(function(res){
-      var rows = [];
-      if (!res.error && res.data && res.data.length){
-        rows = res.data;
+  // ---------- 저장(신규/수정) ----------
+  function saveWriteForm(e){
+    e.preventDefault();
+    var sb = window.mmAuth && window.mmAuth.sb;
+    if (!sb){ alert("Supabase 준비 전"); return; }
+
+    window.mmAuth.getSession().then(function(sess){
+      if (!sess || !sess.user){ alert("로그인이 필요합니다."); return; }
+      var user = sess.user;
+
+      if (!fContent || !fContent.value.trim()){
+        if (elFormStatus) elFormStatus.textContent = "내용을 입력하세요.";
+        return;
       }
-      if (!rows.length && fallbackUrl){
-        rows = [{ id:null, url:fallbackUrl, path:(fallbackPath||null), _legacy:true }];
+      if (elBtnSubmit){ elBtnSubmit.disabled = true; elBtnSubmit.textContent = "저장 중…"; }
+
+      var editingId = elWriteForm ? elWriteForm.getAttribute("data-editing") : null;
+      var title = fTitle && fTitle.value ? fTitle.value.trim() : "";
+      var content = fContent.value.trim();
+      var nickname = (window.mmAuth.isAdmin(user.email) ? "관리자"
+        : (user.user_metadata && user.user_metadata.full_name) ? user.user_metadata.full_name
+        : (user.email ? user.email.split("@")[0] : "익명"));
+
+      // 업로드 함수
+      function uploadFilesLimit(remain, cb){
+        var files = chosenFiles.slice(0, remain);
+        var uploaded = [];
+        if (!files.length){ cb(null, uploaded); return; }
+
+        (function up(i){
+          if (i>=files.length){ cb(null, uploaded); return; }
+          var file = files[i];
+          var ext = (file.name.split(".").pop()||"jpg").toLowerCase();
+          var ok = ("jpg jpeg png webp gif").indexOf(ext) >= 0 ? ext : "jpg";
+          var key = user.id + "/" + Date.now() + "_" + Math.random().toString(36).slice(2) + "." + ok;
+          sb.storage.from("reviews").upload(key, file, { upsert:false, cacheControl:"3600" })
+            .then(function(up){
+              if (up.error){ cb(up.error); return; }
+              var pub = sb.storage.from("reviews").getPublicUrl(key);
+              var url = pub && pub.data ? pub.data.publicUrl : "";
+              uploaded.push({ path:key, url:url });
+              up(i+1);
+            })["catch"](function(err){ cb(err); });
+        })(0);
       }
-      if (!rows.length){
-        elEditImages.innerHTML = '<div class="muted">기존 이미지가 없습니다.</div>';
+
+      // 공지 플래그
+      var noticeFlag = false;
+      var cbNotice = $("#isNotice");
+      if (cbNotice && window.mmAuth.isAdmin(user.email)) noticeFlag = !!cbNotice.checked;
+
+      if (editingId){
+        // -------- 수정 흐름 --------
+        // 1) 텍스트 업데이트
+        sb.from("reviews").update({ title:title, content:content, is_notice:noticeFlag }).eq("id", editingId)
+          .then(function(upd){
+            if (upd.error){ throw upd.error; }
+
+            // 2) 삭제 체크
+            var dels = elEditImages ? elEditImages.querySelectorAll('input[data-del="img"]:checked') : [];
+            var pathsToRemove = [];
+            function deleteNextDel(idx, done){
+              if (!dels || idx>=dels.length){ done(); return; }
+              var el = dels[idx];
+              var isLegacy = (el.getAttribute("data-legacy")==="1");
+              var path     = el.getAttribute("data-path") || "";
+              var imgId    = el.getAttribute("data-imgid") || null;
+
+              function next(){ deleteNextDel(idx+1, done); }
+
+              if (!isLegacy && imgId){
+                // review_images 행 삭제
+                sb.from("review_images").delete().eq("id", imgId).then(function(){ if(path) pathsToRemove.push(path); next(); })["catch"](function(){ if(path) pathsToRemove.push(path); next(); });
+              }else if (isLegacy){
+                // reviews 레거시 컬럼 제거
+                sb.from("reviews").update({ image_url:null, image_path:null }).eq("id", editingId)
+                  .then(function(){ if(path) pathsToRemove.push(path); next(); })["catch"](function(){ if(path) pathsToRemove.push(path); next(); });
+              }else{
+                if (path) pathsToRemove.push(path);
+                next();
+              }
+            }
+
+            deleteNextDel(0, function(){
+              // 스토리지 제거
+              function removeStorage(pList, cb2){
+                if (!pList.length){ cb2(); return; }
+                sb.storage.from("reviews").remove(pList).then(function(){ cb2(); })["catch"](function(){ cb2(); });
+              }
+
+              // 3) 남은 슬롯 계산 → 업로드 → 메타 insert
+              var totalThumbs = elEditImages ? elEditImages.querySelectorAll('input[data-del="img"]').length : 0;
+              var delChecked  = elEditImages ? elEditImages.querySelectorAll('input[data-del="img"]:checked').length : 0;
+              var existing = Math.max(0, totalThumbs - delChecked);
+              var remain = Math.max(0, MAX_FILES - existing);
+
+              uploadFilesLimit(remain, function(errUp, uploaded){
+                if (errUp){
+                  removeStorage(pathsToRemove, function(){ afterAll(errUp); });
+                  return;
+                }
+                function insertMeta(list, cb3){
+                  if (!list.length){ cb3(); return; }
+                  var rows = [];
+                  for (var i=0;i<list.length;i++){
+                    rows.push({ review_id:editingId, url:list[i].url, path:list[i].path });
+                  }
+                  sb.from("review_images").insert(rows).then(function(ins){
+                    cb3(ins.error || null);
+                  })["catch"](function(e){ cb3(e); });
+                }
+                insertMeta(uploaded, function(errMeta){
+                  removeStorage(pathsToRemove, function(){
+                    afterAll(errMeta || null);
+                  });
+                });
+              });
+            });
+
+            function afterAll(err){
+              if (err){
+                if (elFormStatus) elFormStatus.textContent = "저장 일부 실패: " + (err.message||err);
+                if (elBtnSubmit){ elBtnSubmit.disabled=false; elBtnSubmit.textContent="저장"; }
+                return;
+              }
+              location.href = "/reviews.html?id=" + editingId;
+            }
+          })["catch"](function(e){
+            if (elFormStatus) elFormStatus.textContent = "수정 실패: " + (e.message||e);
+            if (elBtnSubmit){ elBtnSubmit.disabled=false; elBtnSubmit.textContent="저장"; }
+          });
+
         return;
       }
 
-      var html = '';
-      for (var i=0;i<rows.length;i++){
-        var r = rows[i];
-        html += ''
-          + '<div class="thumb-card">'
-          + '  <img class="thumb-img" src="'+r.url+'" alt="">'
-          + '  <label style="font-size:13px;color:#444;margin-top:6px; display:block; text-align:center">'
-          + '    <input type="checkbox"'
-          + '           data-del="img"'
-          + '           data-imgid="'+(r.id||'')+'"'
-          + '           data-path="'+(r.path||'')+'"'
-          + '           data-legacy="'+(r._legacy ? '1':'0')+'"> 삭제'
-          + '  </label>'
-          + '</div>';
-      }
-      elEditImages.innerHTML = html;
-    })
-    .catch(function(){
-      elEditImages.innerHTML = '<div class="muted">이미지 로드 실패</div>';
-    });
-}
+      // -------- 신규 작성 --------
+      uploadFilesLimit(MAX_FILES, function(errUp, uploaded){
+        if (errUp){
+          if (elFormStatus) elFormStatus.textContent = "이미지 업로드 실패: " + (errUp.message||errUp);
+          if (elBtnSubmit){ elBtnSubmit.disabled=false; elBtnSubmit.textContent="저장"; }
+          return;
+        }
+        var image_path = null, image_url = null;
+        if (uploaded[0]){ image_path = uploaded[0].path; image_url = uploaded[0].url; }
 
+        sb.from("reviews").insert({
+          title:title, content:content, is_notice:noticeFlag,
+          user_id:user.id, author_email:user.email, nickname:nickname,
+          image_path:image_path, image_url:image_url
+        }).select("id").single()
+        .then(function(ins){
+          if (ins.error){ throw ins.error; }
+          var newId = ins.data.id;
+          if (!uploaded.length){ location.href="/reviews.html"; return; }
+          var rows = [];
+          for (var i=0;i<uploaded.length;i++){
+            rows.push({ review_id:newId, url:uploaded[i].url, path:uploaded[i].path });
+          }
+          sb.from("review_images").insert(rows).then(function(add){
+            if (add.error){
+              if (elFormStatus) elFormStatus.textContent = "메타 저장 실패: " + add.error.message;
+              if (elBtnSubmit){ elBtnSubmit.disabled=false; elBtnSubmit.textContent="저장"; }
+              return;
+            }
+            location.href="/reviews.html";
+          });
+        })["catch"](function(e){
+          if (elFormStatus) elFormStatus.textContent = "저장 실패: " + (e.message||e);
+          if (elBtnSubmit){ elBtnSubmit.disabled=false; elBtnSubmit.textContent="저장"; }
+        });
+      });
+    });
+  }
+
+  // ---------- 뷰 전환 ----------
+  function showList(){ if(elListView) elListView.hidden=false; if(elReadView) elReadView.hidden=true; if(elWriteForm) elWriteForm.hidden=true; }
+  function showRead(){ if(elListView) elListView.hidden=true;  if(elReadView) elReadView.hidden=false; if(elWriteForm) elWriteForm.hidden=true; }
+  function showWrite(){if(elListView) elListView.hidden=true;  if(elReadView) elReadView.hidden=true;  if(elWriteForm) elWriteForm.hidden=false; }
+
+  // ---------- 부트스트랩 & 라우팅 ----------
   function init(){
-    // 1) DOM 캐시
+    // DOM 캐시
     elAuthInfo   = $("#authInfo");
     elAuthStatus = $("#authStatus");
     elListView   = $("#listView");
@@ -464,101 +676,67 @@ function renderEditImagesForEditMode(reviewId, fallbackUrl, fallbackPath){
     elWriteForm  = $("#writeForm");
     elListBody   = $("#listBody");
     elBtnCompose = $("#btn-compose");
-    fTitle       = $("#title");
-    fContent     = $("#content");
-    elEditImages     = $("#editImages");
     elBtnSubmit  = $("#btn-submit");
     elFormStatus = $("#formStatus");
 
-    // [EDIT SAVE] 저장(편집 전용)
-    if (elWriteForm && !elWriteForm._bindSubmit){
-      elWriteForm._bindSubmit = true;
-      elWriteForm.addEventListener('submit', function(e){
-        e.preventDefault();
-        var sb = window.mmAuth && window.mmAuth.sb;
-        if (!sb){ alert('클라이언트 준비 전'); return; }
-        var title   = fTitle ? fTitle.value.trim() : '';
-        var content = fContent ? fContent.value.trim() : '';
-        var editingId = elWriteForm && elWriteForm.dataset ? elWriteForm.dataset.editing : '';
-        if (!editingId){ alert('편집 중인 글이 없습니다.'); return; }
-        if (!content){ if (elFormStatus) elFormStatus.textContent = '내용을 입력하세요.'; return; }
-        if (elBtnSubmit){ elBtnSubmit.disabled = true; elBtnSubmit.textContent = '저장 중…'; }
-
-        sb.from('reviews').update({ title:title, content:content }).eq('id', editingId)
-          .then(function(r){
-            if (r.error){ throw r.error; }
-            location.href = '/reviews.html?id=' + editingId;
-          })
-          .catch(function(err){
-            if (elFormStatus) elFormStatus.textContent = '저장 실패: ' + (err && err.message);
-            if (elBtnSubmit){ elBtnSubmit.disabled = false; elBtnSubmit.textContent = '저장'; }
-          });
-      });
+    fTitle = $("#title");
+    fContent = $("#content");
+    fImage = $("#image");
+    elSelectPreviews = $("#selectPreviews");
+    elEditImages = $("#editImages");
+    if (fImage && fImage.getAttribute("data-max")){
+      var n = parseInt(fImage.getAttribute("data-max"),10);
+      if (!isNaN(n)) MAX_FILES = n;
     }
 
+    if (fImage){ fImage.addEventListener("change", onFileChange); }
+    if (elWriteForm){ elWriteForm.addEventListener("submit", saveWriteForm); }
 
-    // 2) auth 모듈 준비 후 진행
-    if (window.mmAuth && typeof window.mmAuth.whenReady === 'function'){
+    // 인증 핸들
+    if (window.mmAuth){
       window.mmAuth.whenReady(function(){
         refreshAuthUI();
 
+        // 라우팅
         var q = new URLSearchParams(location.search);
         var id = q.get("id");
         var compose = q.get("compose");
         var edit = q.get("edit");
 
-        if (id){
-          showRead();
-          loadOne(id);
-          return;
-        }
-        if (compose === "1"){
-          // 비로그인도 목록 먼저
+        if (id){ showRead(); loadOne(id); return; }
+
+        if (compose==="1"){
           showList();
           loadList().then(function(){
-            (window.mmAuth.getSession ? window.mmAuth.getSession() : Promise.resolve(null))
-              .then(function(s){
-                if (!s || !s.user){ /* 로그인 유도 메시지 정도 */ }
-                else { showWrite(); }
-              });
+            window.mmAuth.getSession().then(function(s){
+              if (s && s.user){ showWrite(); }
+            });
           });
           return;
         }
+
         if (edit){
-          // 로그인 필요. 비로그인이면 목록 먼저
-          showList();
-          loadList();
-          console.log("[reviews] edit 모드는 로그인 후 구현 예정");
+          // 간소화: 목록 먼저 → 로그인 시 edit 로직 추가 구현 가능
+          showList(); loadList();
           return;
         }
 
-        // 기본: 목록
-        showList();
-        loadList();
+        showList(); loadList();
       });
-
-      if (typeof window.mmAuth.onChange === 'function'){
-        window.mmAuth.onChange(function(){ refreshAuthUI(); });
-      }
-    } else {
-      // mmAuth가 없으면 목록만 시도
-      showList();
-      loadList();
+      window.mmAuth.onChange(function(){ refreshAuthUI(); });
+    }else{
+      // 비상: 인증모듈이 없다면 목록만
+      showList(); loadList();
     }
 
-    // footer 연도
     var y = $("#year");
     if (y) y.textContent = (new Date()).getFullYear();
   }
 
-  // 디버그
   function _debug(){
-    console.log("[MMReviews] elements",
-      !!elListView, !!elReadView, !!elWriteForm, !!elListBody);
-    if (window.mmAuth && typeof window.mmAuth._debugPing === 'function'){
-      window.mmAuth._debugPing();
-    }
+    console.log("[MMReviews] el", !!elListView, !!elReadView, !!elWriteForm, !!elListBody);
+    if (window.mmAuth && window.mmAuth._debugPing) window.mmAuth._debugPing();
   }
 
-  return { init: init, _debug: _debug };
-})(); // IIFE 종료 (파일 반드시 이 줄로 끝나야 함)
+  return { init:init, _debug:_debug };
+})();
