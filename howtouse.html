@@ -150,7 +150,7 @@
 <main>
   <section class="card howtouse">
     <h1>사용법</h1>
-    <p class="muted">총 23장 · 이미지를 탭하면 원본이 새 탭에서 열립니다.</p>
+    <p class="muted">총 24장 · 이미지를 탭하면 원본이 새 탭에서 열립니다.</p>
     <div class="howto-toolbar">
       <label>모드
         <select id="modeSel">
@@ -159,7 +159,7 @@
        </select>
      </label>
      <label>페이지
-       <input id="pageSel" type="number" min="1" max="23" value="1">
+       <input id="pageSel" type="number" min="1" max="24" value="1">
      </label>
      <button id="btnPreview" class="mini" type="button">미리보기 켜기</button>
      <button id="btnEditor" class="mini" type="button">에디터 열기</button>
@@ -174,28 +174,41 @@
 </footer>
 
 <script>
-/* howtouse 렌더러: 스코프 오류(map 미정의) 해결 + PC/MO 오버레이 자동/강제 선택 + 미리보기 폭조절(옵션)
-   사용법:
-   - 기본: PC 오버레이 자동 사용(폭은 페이지 CSS에 따름)
-   - 모바일 강제:  ?ovr=mo
-   - PC 강제:      ?ovr=pc
-   - 미리보기 툴바: ?preview=1  (폭 슬라이더로 레이아웃 확인)
-*/
+/* howtouse 렌더러(24장/커스텀 순서/키 기반 맵핑/문구 폴백 완비) */
 (function () {
   /* ====== 설정 ====== */
-  const GRID_ID      = "howtoGrid";
-  const TOTAL_PAGES  = 23;                    // 이미지 장 수
-  const IMG_DIRS     = ["/images/howtouse", "/image/howtouse"]; // 폴더 보조 경로(과거 호환)
-  const IMG_PREFIX   = "howtouse";
-  const IMG_EXTS     = ["jpg", "png", "jpeg", "webp"];
-  const STRINGS_JSON = "/assets/data/strings_ko_pc.json?v=pc28";
-  const BASE_H       = 600; // 오버레이 상대배치 기준 높이
+  const GRID_ID = "howtoGrid";
 
-  // 쿼리로 오버레이 파일 선택 (없으면 화면폭 기준 자동)
+  // 🔹 실제 렌더 순서: 01~19 → 23 → 20~22 → premier.jpg
+  //    - num: 숫자 페이지(파일명 howtouseNN)
+  //    - file: 비숫자 파일명 (확장자 없이, 예: "premier")
+  //    - key:  오버레이/문구 그룹 키(htuXX 또는 prem1)
+  const RENDER_PAGES = [
+    // 01..19
+    ...Array.from({length:19}, (_,i) => {
+      const n = i+1; const nn = String(n).padStart(2,'0');
+      return { id: nn, num: n, file: `howtouse${nn}`, key: `htu${nn}` };
+    }),
+    // 23
+    { id: '23', num: 23, file: 'howtouse23', key: 'htu23' },
+    // 20..22
+    ...[20,21,22].map(n => {
+      const nn = String(n).padStart(2,'0');
+      return { id: nn, num: n, file: `howtouse${nn}`, key: `htu${nn}` };
+    }),
+    // premier.jpg (비숫자)
+    { id: 'prem', file: 'premier', key: 'prem1' }
+  ];
+  const TOTAL_PAGES = RENDER_PAGES.length;
+
+  const IMG_DIRS  = ["/images/howtouse", "/image/howtouse"]; // 폴더 폴백
+  const IMG_EXTS  = ["jpg","png","jpeg","webp"];
+
+  // 오버레이 JSON (PC/MO 자동 + 강제 ?ovr=pc|mo 지원)
   function pickOverlayJson() {
     const qs = new URLSearchParams(location.search);
     const force = (qs.get("ovr") || qs.get("mode") || "").toLowerCase();
-    const base = "/assets/data";
+    const base  = "/assets/data";
     if (force === "mo") return `${base}/howtouse_overlays_mo.json?v=mo1`;
     if (force === "pc") return `${base}/howtouse_overlays_pc.json?v=pc28`;
     const isMo = window.matchMedia("(max-width: 640px)").matches;
@@ -203,16 +216,19 @@
       ? `${base}/howtouse_overlays_mo.json?v=mo1`
       : `${base}/howtouse_overlays_pc.json?v=pc28`;
   }
-  const OVERLAYS_JSON = (new URLSearchParams(location.search).get("ovr") === "mo")
-  ? "/assets/data/howtouse_overlays_mo.json?v=mo1"
-  : "/assets/data/howtouse_overlays_pc.json?v=pc28";
+  const OVERLAYS_JSON = pickOverlayJson();
 
+  // 문자열 JSON: 여러 경로 폴백(어느 걸 만들어두셨든 1개만 있어도 OK)
+  const STRINGS_JSON_CANDIDATES = [
+    "/assets/data/strings_ko_pc.json?v=pc28",
+    "/assets/data/strings_ko.json?v=pc28",
+    "/assets/data/strings_ko_pc.json",
+    "/assets/data/strings_ko.json"
+  ];
 
-  /* ====== 상태(전역) ====== */
-  // ⛔ map is not defined 오류 원인 → 스코프 밖에서 접근.
-  // ✅ 파일 스코프 전역으로 선언해 모든 함수에서 접근 가능하게 함.
-  let overlayMap = {};
-  let labelsMap = {}; // ← 전역에 선언 (map 스코프 오류 방지)
+  /* ====== 상태 ====== */
+  let overlayGroupsByKey = {};  // { "htu01": [labels...], "prem1": [labels...] }
+  let STR = {};                 // strings map (key → text)
 
   /* ====== 유틸 ====== */
   function grid() {
@@ -223,25 +239,21 @@
     );
   }
 
-  // 이미지 후보들을 순차 로딩(확장자/경로 폴백)
-  function createImage(num) {
+  // fileBase(확장자 없는 파일명)로 이미지 후보를 순차 로딩
+  function createImageByFileBase(fileBase) {
     const img = new Image();
-    img.alt = `사용법 ${num}`;
+    img.alt = fileBase;
     img.decoding = "async";
     img.loading = "eager";
     const cands = [];
-    for (const d of IMG_DIRS) {
-      for (const e of IMG_EXTS) {
-        cands.push(`${d}/${IMG_PREFIX}${num}.${e}`);
-      }
-    }
+    for (const d of IMG_DIRS) for (const e of IMG_EXTS) cands.push(`${d}/${fileBase}.${e}`);
     let i = 0;
     img.onerror = () => {
       i++;
       if (i < cands.length) img.src = cands[i];
       else img.onerror = null;
     };
-    img.src = cands[i];
+    img.src = cands[0];
     return img;
   }
 
@@ -249,7 +261,7 @@
     if (!hex) return null;
     let s = String(hex).trim();
     if (s.startsWith("0x")) s = s.slice(2);
-    if (s.startsWith("#")) s = s.slice(1);
+    if (s.startsWith("#"))  s = s.slice(1);
     if (s.length === 8) {
       const a = parseInt(s.slice(0, 2), 16) / 255;
       const r = parseInt(s.slice(2, 4), 16);
@@ -269,95 +281,60 @@
   function anchorClass(align = "TopStart") {
     const a = String(align).toLowerCase();
     if (a.includes("center")) return "anchor-topcenter";
-    if (a.includes("end")) return "anchor-topend";
+    if (a.includes("end"))    return "anchor-topend";
     return "anchor-topstart";
   }
 
-  // 카드 위에 라벨을 그려주는 함수(오버레이 JSON 호환)
-  function layoutLabels(card, labels, STR) {
+  function layoutLabels(card, labels) {
     let ol = card.querySelector(".overlay");
-    if (!ol) {
-      ol = document.createElement("div");
-      ol.className = "overlay";
-      card.appendChild(ol);
-    }
+    if (!ol) { ol = document.createElement("div"); ol.className = "overlay"; card.appendChild(ol); }
     ol.innerHTML = "";
 
-    const rect = card.getBoundingClientRect();
-    const W = rect.width;
-    const H = rect.height;
+    const rect  = card.getBoundingClientRect();
+    const W     = rect.width;
+    const H     = rect.height;
+    const BASE_H= 600;
     const scale = H / BASE_H;
 
     (labels || []).forEach((cfg) => {
       const el = document.createElement("div");
       el.className = "olabel " + anchorClass(cfg.align);
-      const text = (STR && STR[cfg.key]) || cfg.key || "";
-      el.textContent = text;
+      const txt = (STR && STR[cfg.key]) || cfg.key || "";
+      el.textContent = txt;
 
       if (cfg.bold) el.style.fontWeight = "700";
       if (cfg.sizeSp) el.style.fontSize = cfg.sizeSp + "px";
       if (cfg.lineHeightSp) el.style.lineHeight = cfg.lineHeightSp + "px";
-      if (cfg.textAlign)
-        el.style.textAlign =
-          { Center: "center", End: "right", Start: "left" }[cfg.textAlign] ||
-          "left";
-      const col = parseColorHex(cfg.colorHex);
-      if (col) el.style.color = col;
-      if (cfg.maxWidthPercent)
-        el.style.maxWidth = cfg.maxWidthPercent * W + "px";
+      if (cfg.textAlign) el.style.textAlign = ({Center:"center", End:"right", Start:"left"}[cfg.textAlign] || "left");
+      const col = parseColorHex(cfg.colorHex); if (col) el.style.color = col;
+      if (cfg.maxWidthPercent) el.style.maxWidth = (cfg.maxWidthPercent * W) + "px";
 
-      if (
-        typeof cfg.xPercent === "number" &&
-        typeof cfg.yPercent === "number"
-      ) {
-        el.style.left = cfg.xPercent * 100 + "%";
-        el.style.top = cfg.yPercent * 100 + "%";
+      if (typeof cfg.xPercent === "number" && typeof cfg.yPercent === "number") {
+        el.style.left = (cfg.xPercent * 100) + "%";
+        el.style.top  = (cfg.yPercent * 100) + "%";
       } else {
         const a = String(cfg.align || "").toLowerCase();
-        const baseX = a.includes("center") ? W / 2 : a.includes("end") ? W : 0;
+        const baseX = a.includes("center") ? W/2 : (a.includes("end") ? W : 0);
         const dx = (cfg.dx || 0) * scale;
         const dy = (cfg.dy || 0) * scale;
-        el.style.left = baseX + dx + "px";
-        el.style.top = dy + "px";
+        el.style.left = (baseX + dx) + "px";
+        el.style.top  = dy + "px";
       }
       ol.appendChild(el);
     });
   }
 
-  // 오버레이 페이지 매핑:
-  // 1) 키가 htuNN_* 이면 NN 매핑
-  // 2) 키에 2자리 숫자 있으면 그 숫자를 페이지로
-  // 3) prem1_* 그룹은 23으로 매핑(없을 때만)
-  function buildMap(pages) {
-    const mapObj = {};
-    let premCandidate = null;
-
-    (pages || []).forEach((group) => {
-      const any = group.find((it) => it && typeof it.key === "string");
-      const key = any ? any.key : "";
-
-      let m = key.match(/htu(\d{2})_/i);
-      if (m) {
-        mapObj[m[1]] = group;
-        return;
-      }
-
-      const anyWithDigits = group.find((it) => /\d{2}/.test(it.key || ""));
-      if (anyWithDigits) {
-        const m2 = (anyWithDigits.key || "").match(/(\d{2})/);
-        if (m2) {
-          mapObj[m2[1]] = group;
-          return;
-        }
-      }
-
-      if (!premCandidate && group.some((it) => /^prem1_/i.test(it.key || ""))) {
-        premCandidate = group;
-      }
+  // pages 배열(오버레이 JSON)의 각 그룹에서 "그룹 키"를 뽑아 맵 구성
+  //  - 첫 아이템의 key에서 언더스코어 앞부분(htu01_title → htu01 / prem1_... → prem1)
+  function buildOverlayGroupsByKey(pages) {
+    const out = {};
+    (pages || []).forEach(group => {
+      const any = group && group.find && group.find(it => it && typeof it.key === "string");
+      if (!any) return;
+      const m = any.key.match(/^([a-z]+[0-9]+)_/i); // htu01_..., prem1_...
+      if (m) out[m[1]] = group;
     });
-
-    if (!mapObj["23"] && premCandidate) mapObj["23"] = premCandidate;
-    return mapObj;
+    return out;
   }
 
   async function loadJson(url) {
@@ -370,60 +347,39 @@
       return null;
     }
   }
+  async function loadJsonFirstOk(urls) {
+    for (const u of urls) {
+      const j = await loadJson(u);
+      if (j) return j;
+    }
+    return null;
+  }
 
   /* ====== 메인 렌더 ====== */
   async function init() {
-    const qs = new URLSearchParams(location.search);
-    const w = parseInt(qs.get("w"), 10);
-    if (w && w >= 280 && w <= 1400) {
-     const el = document.getElementById("howtoGrid") || document.querySelector(".howtouse-grid");
-     if (el) { el.style.maxWidth = w + "px"; el.style.margin = "0 auto"; }
-    }
-
     const container = grid();
-    if (!container) {
-      console.error("[howtouse] grid container not found");
-      return;
-    }
+    if (!container) { console.error("[howtouse] grid container not found"); return; }
     container.innerHTML = "";
 
-    let overlays = null,
-      strings = null;
-    [overlays, strings] = await Promise.all([
+    // JSON 로딩
+    const [overlays, strings] = await Promise.all([
       loadJson(OVERLAYS_JSON),
-      loadJson(STRINGS_JSON),
+      loadJsonFirstOk(STRINGS_JSON_CANDIDATES)
     ]);
-    overlayMap =
-      overlays && Array.isArray(overlays.pages)
-        ? buildMap(overlays.pages)
-        : {};
-    console.log("[howtouse] overlayMap keys:", Object.keys(overlayMap));
+    overlayGroupsByKey = overlays && Array.isArray(overlays.pages) ? buildOverlayGroupsByKey(overlays.pages) : {};
+    STR = strings || {};
 
-    // 렌더 순서를 재정렬: 1..19, 23, 20, 21, 22
-    const renderOrder = (function(){
-      const arr = [];
-      for (let n = 1; n <= TOTAL_PAGES; n++) arr.push(n);
-      // 23을 빼고
-      const idx23 = arr.indexOf(23);
-      if (idx23 !== -1) arr.splice(idx23, 1);
-      // 19 다음(= 19의 다음 인덱스)에 23을 꽂는다
-      const idx19 = arr.indexOf(19);
-      arr.splice(idx19 + 1, 0, 23);
-      return arr;
-    })();
-
-
-    for (const i of renderOrder) {
-      const num = String(i).padStart(2, "0");
-
-      // 카드
+    // 카드 렌더
+    for (const pg of RENDER_PAGES) {
       const a = document.createElement("a");
       a.className = "howtouse-item";
       a.target = "_blank";
-      a.rel = "noopener";
-      a.href = `${IMG_DIRS[0]}/${IMG_PREFIX}${num}.jpg`;
+      a.rel    = "noopener";
 
-      const img = createImage(num);
+      // 파일 링크(원본 열기)
+      a.href = `${IMG_DIRS[0]}/${pg.file}.jpg`;
+
+      const img = createImageByFileBase(pg.file);
       a.appendChild(img);
 
       const ol = document.createElement("div");
@@ -432,18 +388,14 @@
 
       container.appendChild(a);
 
-      // 오버레이
-      const labels = overlayMap[num];
+      // 라벨 렌더
+      const labels = overlayGroupsByKey[pg.key];
       if (labels) {
-        const STR = strings || {};
-        const render = () => layoutLabels(a, labels, STR);
+        const render = () => layoutLabels(a, labels);
         img.addEventListener("load", render);
         render();
-        if ("ResizeObserver" in window) {
-          new ResizeObserver(render).observe(a);
-        } else {
-          window.addEventListener("resize", render);
-        }
+        if ("ResizeObserver" in window) new ResizeObserver(render).observe(a);
+        else window.addEventListener("resize", render);
       }
     }
 
@@ -454,12 +406,10 @@
   function injectPreviewToolbar(container) {
     const qs = new URLSearchParams(location.search);
     const pv = (qs.get("preview") || qs.get("pv") || "").toLowerCase();
-    const enabled = pv === "1" || pv === "on" || pv === "true";
-    if (!enabled) return;
+    if (!(pv === "1" || pv === "on" || pv === "true")) return;
 
     const bar = document.createElement("div");
-    bar.style.cssText =
-      "position:sticky;top:8px;z-index:10;margin:8px 0 12px;padding:8px;border:1px solid #1e2230;border-radius:10px;background:#0f1320;color:#cfd6e4;display:flex;flex-wrap:wrap;align-items:center;gap:10px";
+    bar.style.cssText = "position:sticky;top:8px;z-index:10;margin:8px 0 12px;padding:8px;border:1px solid #1e2230;border-radius:10px;background:#0f1320;color:#cfd6e4;display:flex;flex-wrap:wrap;align-items:center;gap:10px";
     bar.innerHTML = `
       <strong style="font-size:12px">미리보기</strong>
       <label style="display:inline-flex;align-items:center;gap:6px">
@@ -471,7 +421,6 @@
 
     const rng = bar.querySelector("#pv-width");
     const out = bar.querySelector("#pv-width-val");
-
     const apply = () => {
       const px = Number(rng.value || 720);
       out.textContent = px + "px";
@@ -499,10 +448,10 @@
     document.head.appendChild(s);
   })();
 
-  // 시작
   window.addEventListener("load", init);
 })();
 </script>
+
 <style>
 /* ====== 에디터용 스타일 ====== */
 #howtoEditorBar{
