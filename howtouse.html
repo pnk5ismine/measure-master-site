@@ -218,9 +218,13 @@
   }
   const OVERLAYS_JSON = pickOverlayJson();
 
-  // 문자열 JSON: 여러 경로 폴백(어느 걸 만들어두셨든 1개만 있어도 OK)
+ 
+  // 문자열 JSON: 여러 경로 폴백(어느 파일 하나만 있어도 OK)
   const STRINGS_JSON_CANDIDATES = [
-    "/assets/data/strings_ko.json"
+    "/assets/data/strings_ko.json?v=pc28",
+    "/assets/data/strings_ko_pc.json?v=pc28",
+    "/assets/data/strings_ko.json",
+    "/assets/data/strings_ko_pc.json"
   ];
 
   /* ====== 상태 ====== */
@@ -296,8 +300,7 @@
     (labels || []).forEach((cfg) => {
       const el = document.createElement("div");
       el.className = "olabel " + anchorClass(cfg.align);
-      const txt = (STR && STR[cfg.key]) || cfg.key || "";
-      el.textContent = txt;
+      el.textContent = pickLabelText(cfg, STR);
 
       if (cfg.bold) el.style.fontWeight = "700";
       if (cfg.sizeSp) el.style.fontSize = cfg.sizeSp + "px";
@@ -351,6 +354,85 @@
     }
     return null;
   }
+// strings JSON을 평평한 {key: text} 맵으로 정규화
+function normalizeStrings(j) {
+  if (!j) return {};
+  // 1) 이미 {key: text} 평평한 형태
+  if (typeof j === "object" && !Array.isArray(j)) {
+    // 흔한 래핑 케이스들
+    if (j.strings && typeof j.strings === "object") return { ...j.strings };
+    if (j.ko && typeof j.ko === "object") return { ...j.ko };
+    // 그 외엔 최상위가 바로 {key:text}라고 가정
+    return { ...j };
+  }
+  // 2) 배열형 [{key, text}] / [{key, value}] 지원
+  if (Array.isArray(j)) {
+    const out = {};
+    j.forEach(it => {
+      const k = it && (it.key || it.id || it.name);
+      const v = it && (it.text || it.value || it.label);
+      if (k && (v || v === "")) out[k] = String(v);
+    });
+    return out;
+  }
+  return {};
+}
+
+// 오버레이 pages를 {그룹키: 라벨배열}로 정규화
+function normalizeOverlays(ov) {
+  const out = {};
+  if (!ov) return out;
+
+  // A) { pages: [...] }가 있는 경우
+  const pages = Array.isArray(ov.pages) ? ov.pages : null;
+  if (pages) {
+    pages.forEach(group => {
+      // A-1) group이 곧 라벨 배열인 케이스
+      if (Array.isArray(group)) {
+        const any = group.find(it => it && typeof it.key === "string");
+        if (any) {
+          const m = any.key.match(/^([a-z]+[0-9]+)_/i); // htu01_..., prem1_...
+          const gk = m ? m[1] : null;
+          if (gk) out[gk] = group;
+        }
+        return;
+      }
+      // A-2) group이 객체이고 내부에 items/labels/data 같은 배열이 있는 케이스
+      if (group && typeof group === "object") {
+        const gk = group.key || group.id || group.name || null; // htu01 / prem1
+        const labels = group.items || group.labels || group.data || null;
+        if (gk && Array.isArray(labels)) {
+          out[String(gk)] = labels;
+        } else {
+          // 혹시 group 안에 또 배열만 있는 경우
+          const innerArr = Object.values(group).find(v => Array.isArray(v));
+          if (gk && innerArr) out[String(gk)] = innerArr;
+        }
+      }
+    });
+    return out;
+  }
+
+  // B) 최상위가 {htu01:[...], prem1:[...]} 형태
+  if (typeof ov === "object") {
+    Object.keys(ov).forEach(k => {
+      if (/^(htu\d{2}|prem\d+)$/i.test(k) && Array.isArray(ov[k])) {
+        out[k] = ov[k];
+      }
+    });
+  }
+  return out;
+}
+
+// 한 라벨의 표시 텍스트 선택: strings → cfg.text/label → cfg.key
+function pickLabelText(cfg, STR) {
+  const k = cfg.key || cfg.id || cfg.name;
+  if (k && STR && STR[k]) return STR[k];
+  if (cfg.text)   return cfg.text;
+  if (cfg.label)  return cfg.label;
+  return k || "";
+}
+
 
   /* ====== 메인 렌더 ====== */
   async function init() {
@@ -363,8 +445,14 @@
       loadJson(OVERLAYS_JSON),
       loadJsonFirstOk(STRINGS_JSON_CANDIDATES)
     ]);
-    overlayGroupsByKey = overlays && Array.isArray(overlays.pages) ? buildOverlayGroupsByKey(overlays.pages) : {};
-    STR = strings || {};
+   // ✅ 정규화
+   overlayGroupsByKey = normalizeOverlays(overlays);
+   STR = normalizeStrings(strings);
+
+   // 디버그(필요 시)
+   console.log("[howtouse] overlay keys:", Object.keys(overlayGroupsByKey));
+   console.log("[howtouse] strings sample:",
+     Object.keys(STR).slice(0, 8).map(k => [k, STR[k]]))
 
     // 카드 렌더
     for (const pg of RENDER_PAGES) {
