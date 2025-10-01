@@ -52,7 +52,7 @@
     [
       { "key":"htu09_1_pai","align":"TopCenter","dx":0,"dy":30,"sizeSp":20,"lineHeightSp":30,"bold":true,"textAlign":"Center" },
       { "key":"htu09_2_you","align":"TopCenter","dx":0,"dy":290,"sizeSp":13,"lineHeightSp":16,"bold":false,"textAlign":"Start" },
-      { "key":"htu09_3_the","align":"TopCenter","dx":0,"dy":402,"sizeSp":13,"lineHeightSp":16,"bold":false,"textAlign":"Start","colorHex":"0xFFF44336" }
+      { "key":"htu09_3_the","align":"TopCenter","dx":0,"dy":420,"sizeSp":13,"lineHeightSp":16,"bold":false,"textAlign":"Start","colorHex":"0xFFF44336" }
     ],
     [
       { "key":"htu10_1_mea","align":"TopCenter","dx":0,"dy":25,"sizeSp":25,"lineHeightSp":30,"bold":true,"textAlign":"Center" },
