@@ -140,9 +140,9 @@
     [
       { "key":"prem1_1_pre","align":"TopCenter","dx":0,"dy":30,"sizeSp":25,"lineHeightSp":30,"bold":true,"textAlign":"Center" },
       { "key":"prem1_2_1ca","align":"TopCenter","dx":0,"dy":120,"sizeSp":15,"lineHeightSp":17,"bold":false,"textAlign":"Start" },
-      { "key":"prem1_3_2au","align":"TopCenter","dx":0,"dy":210,"sizeSp":15,"lineHeightSp":17,"bold":false,"textAlign":"Start" },
-      { "key":"prem1_4_3up","align":"TopCenter","dx":0,"dy":350,"sizeSp":15,"lineHeightSp":17,"bold":false,"textAlign":"Start" },
-      { "key":"prem1_5_com","align":"TopCenter","dx":0,"dy":500,"sizeSp":30,"lineHeightSp":30,"bold":true,"textAlign":"Center","colorHex":"#FFFF0000" }
+      { "key":"prem1_3_2au","align":"TopCenter","dx":0,"dy":220,"sizeSp":15,"lineHeightSp":17,"bold":false,"textAlign":"Start" },
+      { "key":"prem1_4_3up","align":"TopCenter","dx":0,"dy":360,"sizeSp":15,"lineHeightSp":17,"bold":false,"textAlign":"Start" },
+      { "key":"prem1_5_com","align":"TopCenter","dx":0,"dy":510,"sizeSp":30,"lineHeightSp":30,"bold":true,"textAlign":"Center","colorHex":"#FFFF0000" }
     ]
   ]
 }
