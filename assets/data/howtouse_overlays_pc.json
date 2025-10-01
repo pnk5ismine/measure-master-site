@@ -466,9 +466,9 @@
     ],
     [
       {"key": "htu19_1_acc","align": "TopCenter","textAlign": "Center","bold": true,"sizeSp": 27, "lineHeightSp": 30,"dx": 0, "dy": 30},
-      {"key": "htu19_2_the","align": "TopCenter", "textAlign": "Center", "bold": false, "sizeSp": 14, "lineHeightSp": 17, "dx": 0,"dy": 70},
-      {"key": "htu19_3_dra","align": "TopCenter", "textAlign": "Center", "bold": false, "sizeSp": 14,"lineHeightSp": 17,"dx": 0, "dy": 320},
-      {"key": "htu19_4_som", "align": "TopCenter","textAlign": "Center", "bold": false,"sizeSp": 12,"lineHeightSp": 15,"colorHex": "#FFFF0000", "dx": 0, "dy": 500}
+      {"key": "htu19_2_the","align": "TopCenter", "textAlign": "Center", "bold": false, "sizeSp": 14, "lineHeightSp": 17, "dx": 0,"dy": 65},
+      {"key": "htu19_3_dra","align": "TopCenter", "textAlign": "Center", "bold": false, "sizeSp": 14,"lineHeightSp": 17,"dx": 0, "dy": 340},
+      {"key": "htu19_4_som", "align": "TopCenter","textAlign": "Center", "bold": false,"sizeSp": 12,"lineHeightSp": 15,"colorHex": "#FFFF0000", "dx": 0, "dy": 480}
     ],
     [
       {
@@ -594,11 +594,11 @@
       {"key": "htu22_4_tha", "align": "TopCenter", "textAlign": "Center", "bold": true,"sizeSp": 18, "lineHeightSp": 20,"dx": 0,"dy": 512}
     ],
     [ { "key":"htu23_1_ref","align":"TopCenter","dx":0,"dy":30,"sizeSp":25,"lineHeightSp":25,"bold":true,"textAlign":"Center" },
-      { "key":"htu23_2_cli","align":"TopCenter","dx":0,"dy":140,"sizeSp":16,"lineHeightSp":20,"bold":false,"textAlign":"Start","colorHex": "#FFFF0000" },
-      { "key":"htu23_3_poi","align":"TopCenter","dx":0,"dy":280,"sizeSp":16,"lineHeightSp":20,"bold":false,"textAlign":"Start" },
-      { "key":"htu23_4_lin","align":"TopCenter","dx":0,"dy":350,"sizeSp":16,"lineHeightSp":20,"bold":false,"textAlign":"Start" },
-      { "key":"htu23_5_cen","align":"TopCenter","dx":0,"dy":500,"sizeSp":16,"lineHeightSp":20,"bold":false,"textAlign":"Start" },
-      { "key":"htu23_6_fun","align":"TopCenter","dx":0,"dy":600,"sizeSp":13,"lineHeightSp":20,"bold":false,"textAlign":"Center","colorHex": "#FFFF0000" }
+      { "key":"htu23_2_cli","align":"TopCenter","dx":0,"dy":160,"sizeSp":16,"lineHeightSp":20,"bold":false,"textAlign":"Start","colorHex": "#FFFF0000" },
+      { "key":"htu23_3_poi","align":"TopCenter","dx":0,"dy":230,"sizeSp":16,"lineHeightSp":20,"bold":false,"textAlign":"Start" },
+      { "key":"htu23_4_lin","align":"TopCenter","dx":0,"dy":360,"sizeSp":16,"lineHeightSp":20,"bold":false,"textAlign":"Start" },
+      { "key":"htu23_5_cen","align":"TopCenter","dx":0,"dy":490,"sizeSp":16,"lineHeightSp":20,"bold":false,"textAlign":"Start" },
+      { "key":"htu23_6_fun","align":"TopCenter","dx":0,"dy":550,"sizeSp":13,"lineHeightSp":20,"bold":false,"textAlign":"Center","colorHex": "#FFFF0000" }
     ],
     [
       {
