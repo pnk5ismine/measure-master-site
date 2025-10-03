@@ -1,4 +1,3 @@
-// /js/reviews-ui.js
 var MMReviews = (function(){
   // ---------- DOM refs ----------
   function $(s){ return document.querySelector(s); }
@@ -287,7 +286,7 @@ var MMReviews = (function(){
 
           elReadView.innerHTML = html;
 
-          // 글쓰기 이동
+          // 글쓰기 이동(읽기 화면)
           var btnToCompose = $("#btn-to-compose");
           if (btnToCompose){
             btnToCompose.addEventListener("click", function(){
@@ -295,6 +294,7 @@ var MMReviews = (function(){
                 if (!s || !s.user){
                   document.body.classList.add('show-auth');        // 모바일 인증 패널 표시
                   document.getElementById('tab-login')?.click();   // 로그인 탭으로
+                  document.getElementById('leftAuth')?.scrollIntoView({behavior:'smooth', block:'start'});
                   return;
                 }
                 history.replaceState(null,"","/reviews.html?compose=1");
@@ -303,7 +303,7 @@ var MMReviews = (function(){
             });
           }
 
-          // 수정(저자만)
+          // 수정/삭제/갤러리/공유 동일 (생략 없는 기존 로직)
           var btnEdit = $("#btn-edit");
           if (btnEdit){
             btnEdit.addEventListener("click", function(){
@@ -312,7 +312,7 @@ var MMReviews = (function(){
               if (fContent) fContent.value = data.content || "";
               if (elWriteForm) elWriteForm.setAttribute("data-editing", data.id);
 
-              var sess2 = sess; // 위에서 구해둠
+              var sess2 = sess;
               var noticeBox = $("#noticeBox");
               var cb = $("#isNotice");
               if (noticeBox){
@@ -331,7 +331,6 @@ var MMReviews = (function(){
             });
           }
 
-          // 삭제(저자만)
           var btnDelete = $("#btn-delete");
           if (btnDelete){
             btnDelete.addEventListener("click", function(){
@@ -357,13 +356,9 @@ var MMReviews = (function(){
             });
           }
 
-          // 갤러리
           renderGallery(id, data.image_url);
-
-          // 조회수 +1 (실패 무시)
           try{ sb.rpc("inc_review_view", { _id:id })["catch"](function(){}); }catch(_){}
 
-          // 공유
           var copyBtn  = $("#btnCopyLink");
           var shareTip = $("#shareTip");
           var shareUrl = location.origin + "/reviews.html?id=" + id;
@@ -649,7 +644,14 @@ var MMReviews = (function(){
       showList();
       loadList().then(function(){
         window.mmAuth.getSession().then(function(s){
-          if (s && s.user){ showWrite(); }
+          if (s && s.user){
+            showWrite();
+          }else{
+            // ★ 미로그인: 모바일 인증 패널 강제 표시
+            document.body.classList.add('show-auth');
+            document.getElementById('tab-login')?.click();
+            document.getElementById('leftAuth')?.scrollIntoView({behavior:'smooth', block:'start'});
+          }
         });
       });
       return;
@@ -692,6 +694,20 @@ var MMReviews = (function(){
 
     if (fImage){ fImage.addEventListener("change", onFileChange); }
     if (elWriteForm){ elWriteForm.addEventListener("submit", saveWriteForm); }
+
+    // ★ 리스트 화면의 "글쓰기" 버튼을 누를 때 미로그인이면 로그인 패널 표시
+    if (elBtnCompose){
+      elBtnCompose.addEventListener("click", function(e){
+        window.mmAuth?.getSession().then(function(s){
+          if (!s || !s.user){
+            e.preventDefault();
+            document.body.classList.add('show-auth');
+            document.getElementById('tab-login')?.click();
+            document.getElementById('leftAuth')?.scrollIntoView({behavior:'smooth', block:'start'});
+          }
+        });
+      });
+    }
 
     // 인증 핸들
     if (window.mmAuth){
@@ -778,7 +794,7 @@ var MMReviews = (function(){
             }
           })();
 
-          // 3) 라우팅 실행 (이게 else 블록에 들어가 있으면 안 돼요!)
+          // 3) 라우팅 실행
           routeAfterAuth();
         });
       });
