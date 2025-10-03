@@ -492,140 +492,172 @@ var MMReviews = (function(){
   }
 
   // ---------- 저장(신규/수정) ----------
-  function saveWriteForm(e){
-    e.preventDefault();
-    var sb = window.mmAuth && window.mmAuth.sb;
+// ---------- 저장(신규/수정) ----------
+function saveWriteForm(e){
+  e.preventDefault();
+
+  (async () => {
+    const sb = window.mmAuth && window.mmAuth.sb;
     if (!sb){ alert("Supabase 준비 전"); return; }
 
-    window.mmAuth.getSession().then(function(sess){
+    try{
+      const sess = await window.mmAuth.getSession();
       if (!sess || !sess.user){ alert("로그인이 필요합니다."); return; }
-      var user = sess.user;
+      const user = sess.user;
 
       if (!fContent || !fContent.value.trim()){
         if (elFormStatus) elFormStatus.textContent = "내용을 입력하세요.";
         return;
       }
-      if (elBtnSubmit){ elBtnSubmit.disabled = true; elBtnSubmit.textContent = "저장 중…"; }
 
-      var editingId = elWriteForm ? elWriteForm.getAttribute("data-editing") : null;
-      var title = fTitle && fTitle.value ? fTitle.value.trim() : "";
-      var content = fContent.value.trim();
-      var nickname = (window.mmAuth.isAdmin(user.email) ? "관리자"
+      if (elBtnSubmit){ elBtnSubmit.disabled = true; elBtnSubmit.textContent = "저장 중…"; }
+      if (elFormStatus) elFormStatus.textContent = "";
+
+      const editingId = elWriteForm ? elWriteForm.getAttribute("data-editing") : null;
+      const title   = fTitle && fTitle.value ? fTitle.value.trim() : "";
+      const content = fContent.value.trim();
+      const nickname = (window.mmAuth.isAdmin(user.email) ? "관리자"
         : (user.user_metadata && user.user_metadata.full_name) ? user.user_metadata.full_name
         : (user.email ? user.email.split("@")[0] : "익명"));
 
-      // 업로드 함수
-      function uploadFilesLimit(remain, cb){
-        var files = chosenFiles.slice(0, remain);
-        var uploaded = [];
-        if (!files.length){ cb(null, uploaded); return; }
-
-        (function up(i){
-          if (i>=files.length){ cb(null, uploaded); return; }
-          var file = files[i];
-          var ext = (file.name.split(".").pop()||"jpg").toLowerCase();
-          var ok = ("jpg jpeg png webp gif").indexOf(ext) >= 0 ? ext : "jpg";
-          var key = user.id + "/" + Date.now() + "_" + Math.random().toString(36).slice(2) + "." + ok;
-          sb.storage.from("reviews").upload(key, file, { upsert:false, cacheControl:"3600" })
-            .then(function(up){
-              if (up.error){ cb(up.error); return; }
-              var pub = sb.storage.from("reviews").getPublicUrl(key);
-              var url = pub && pub.data ? pub.data.publicUrl : "";
-              uploaded.push({ path:key, url:url });
-              up(i+1);
-            })["catch"](function(err){ cb(err); });
-        })(0);
-      }
-
       // 공지 플래그
-      var noticeFlag = false;
-      var cbNotice = $("#isNotice");
+      let noticeFlag = false;
+      const cbNotice = $("#isNotice");
       if (cbNotice && window.mmAuth.isAdmin(user.email)) noticeFlag = !!cbNotice.checked;
 
+      // (개선) 업로드: 실패가 있어도 나머지 계속 진행하는 Best-effort 방식
+      async function uploadFilesBestEffort(remain){
+        const files = chosenFiles.slice(0, remain);
+        const uploaded = [];
+        const failed   = [];
+        for (let i=0;i<files.length;i++){
+          const file = files[i];
+          try{
+            const ext = (file.name.split(".").pop()||"jpg").toLowerCase();
+            const ok  = ("jpg jpeg png webp gif").indexOf(ext) >= 0 ? ext : "jpg";
+            const key = user.id + "/" + Date.now() + "_" + Math.random().toString(36).slice(2) + "." + ok;
+
+            const { error: upErr } = await sb.storage.from("reviews").upload(key, file, { upsert:false, cacheControl:"3600" });
+            if (upErr) throw upErr;
+
+            const pub = sb.storage.from("reviews").getPublicUrl(key);
+            const url = pub && pub.data ? pub.data.publicUrl : "";
+            uploaded.push({ path:key, url:url });
+          }catch(err){
+            failed.push({ file, error: err });
+            // 계속 진행 (부분 성공 허용)
+          }
+        }
+        return { uploaded, failed };
+      }
+
       if (editingId){
-        // -------- 수정 흐름 --------
-        // 1) 텍스트 업데이트
-        sb.from("reviews").update({ title:title, content:content, is_notice:noticeFlag }).eq("id", editingId)
-          .then(function(upd){
-            if (upd.error){ throw upd.error; }
+        // ================= 수정 플로우 =================
+        // 1) 텍스트 먼저 업데이트
+        {
+          const { error: updErr } = await sb.from("reviews")
+            .update({ title, content, is_notice: noticeFlag })
+            .eq("id", editingId);
+          if (updErr) throw updErr;
+        }
 
-            // 2) 삭제 체크
-            var dels = elEditImages ? elEditImages.querySelectorAll('input[data-del="img"]:checked') : [];
-            var pathsToRemove = [];
-            function deleteNextDel(idx, done){
-              if (!dels || idx>=dels.length){ done(); return; }
-              var el = dels[idx];
-              var isLegacy = (el.getAttribute("data-legacy")==="1");
-              var path     = el.getAttribute("data-path") || "";
-              var imgId    = el.getAttribute("data-imgid") || null;
+        // 2) 삭제 체크된 기존 이미지 정리
+        const delInputs = elEditImages ? elEditImages.querySelectorAll('input[data-del="img"]:checked') : [];
+        const pathsToRemove = [];
 
-              function next(){ deleteNextDel(idx+1, done); }
+        for (let i=0;i<delInputs.length;i++){
+          const el = delInputs[i];
+          const isLegacy = (el.getAttribute("data-legacy")==="1");
+          const path     = el.getAttribute("data-path") || "";
+          const imgId    = el.getAttribute("data-imgid") || null;
 
-              if (!isLegacy && imgId){
-                // review_images 행 삭제
-                sb.from("review_images").delete().eq("id", imgId).then(function(){ if(path) pathsToRemove.push(path); next(); })["catch"](function(){ if(path) pathsToRemove.push(path); next(); });
-              }else if (isLegacy){
-                // reviews 레거시 컬럼 제거
-                sb.from("reviews").update({ image_url:null, image_path:null }).eq("id", editingId)
-                  .then(function(){ if(path) pathsToRemove.push(path); next(); })["catch"](function(){ if(path) pathsToRemove.push(path); next(); });
-              }else{
-                if (path) pathsToRemove.push(path);
-                next();
-              }
+          try{
+            if (!isLegacy && imgId){
+              await sb.from("review_images").delete().eq("id", imgId);
+              if (path) pathsToRemove.push(path);
+            }else if (isLegacy){
+              await sb.from("reviews").update({ image_url:null, image_path:null }).eq("id", editingId);
+              if (path) pathsToRemove.push(path);
+            }else{
+              if (path) pathsToRemove.push(path);
             }
+          }catch(_){
+            if (path) pathsToRemove.push(path); // 실패해도 스토리지만 시도
+          }
+        }
 
-            deleteNextDel(0, function(){
-              // 스토리지 제거
-              function removeStorage(pList, cb2){
-                if (!pList.length){ cb2(); return; }
-                sb.storage.from("reviews").remove(pList).then(function(){ cb2(); })["catch"](function(){ cb2(); });
-              }
+        // 3) 남은 슬롯 계산 후 업로드
+        const totalThumbs = elEditImages ? elEditImages.querySelectorAll('input[data-del="img"]').length : 0;
+        const delChecked  = elEditImages ? elEditImages.querySelectorAll('input[data-del="img"]:checked').length : 0;
+        const existing    = Math.max(0, totalThumbs - delChecked);
+        const remain      = Math.max(0, MAX_FILES - existing);
 
-              // 3) 남은 슬롯 계산 → 업로드 → 메타 insert
-              var totalThumbs = elEditImages ? elEditImages.querySelectorAll('input[data-del="img"]').length : 0;
-              var delChecked  = elEditImages ? elEditImages.querySelectorAll('input[data-del="img"]:checked').length : 0;
-              var existing = Math.max(0, totalThumbs - delChecked);
-              var remain = Math.max(0, MAX_FILES - existing);
+        const { uploaded, failed } = await uploadFilesBestEffort(remain);
 
-              uploadFilesLimit(remain, function(errUp, uploaded){
-                if (errUp){
-                  removeStorage(pathsToRemove, function(){ afterAll(errUp); });
-                  return;
-                }
-                function insertMeta(list, cb3){
-                  if (!list.length){ cb3(); return; }
-                  var rows = [];
-                  for (var i=0;i<list.length;i++){
-                    rows.push({ review_id:editingId, url:list[i].url, path:list[i].path });
-                  }
-                  sb.from("review_images").insert(rows).then(function(ins){
-                    cb3(ins.error || null);
-                  })["catch"](function(e){ cb3(e); });
-                }
-                insertMeta(uploaded, function(errMeta){
-                  removeStorage(pathsToRemove, function(){
-                    afterAll(errMeta || null);
-                  });
-                });
-              });
-            });
+        // 4) 메타 insert
+        if (uploaded.length){
+          const rows = uploaded.map(u => ({ review_id: editingId, url: u.url, path: u.path }));
+          const { error: metaErr } = await sb.from("review_images").insert(rows);
+          if (metaErr) throw metaErr;
+        }
 
-            function afterAll(err){
-              if (err){
-                if (elFormStatus) elFormStatus.textContent = "저장 일부 실패: " + (err.message||err);
-                if (elBtnSubmit){ elBtnSubmit.disabled=false; elBtnSubmit.textContent="저장"; }
-                return;
-              }
-              location.href = "/reviews.html?id=" + editingId;
-            }
-          })["catch"](function(e){
-            if (elFormStatus) elFormStatus.textContent = "수정 실패: " + (e.message||e);
-            if (elBtnSubmit){ elBtnSubmit.disabled=false; elBtnSubmit.textContent="저장"; }
-          });
+        // 5) 스토리지에서 체크 삭제
+        if (pathsToRemove.length){
+          try{ await sb.storage.from("reviews").remove(pathsToRemove); }catch(_){}
+        }
 
+        // 완료
+        if (failed.length && elFormStatus){
+          elFormStatus.textContent = `일부 이미지 업로드 실패(${failed.length}장). 나머지는 저장되었어요.`;
+          // 살짝 딜레이 후 이동
+          setTimeout(()=>{ location.href = "/reviews.html?id=" + editingId; }, 600);
+        }else{
+          location.href = "/reviews.html?id=" + editingId;
+        }
         return;
       }
 
+      // ================= 신규 작성 플로우 =================
+      const { uploaded, failed } = await uploadFilesBestEffort(MAX_FILES);
+
+      // 첫 이미지를 레거시 필드로도 보관(호환)
+      const image_path = uploaded[0]?.path || null;
+      const image_url  = uploaded[0]?.url  || null;
+
+      // 글 insert
+      const { data: ins, error: insErr } = await sb
+        .from("reviews")
+        .insert({
+          title, content, is_notice: noticeFlag,
+          user_id: user.id, author_email: user.email, nickname,
+          image_path, image_url
+        })
+        .select("id")
+        .single();
+      if (insErr) throw insErr;
+
+      // 메타 insert (여러 장)
+      if (uploaded.length){
+        const rows = uploaded.map(u => ({ review_id: ins.id, url: u.url, path: u.path }));
+        const { error: metaErr } = await sb.from("review_images").insert(rows);
+        if (metaErr) throw metaErr;
+      }
+
+      // 완료
+      if (failed.length && elFormStatus){
+        elFormStatus.textContent = `일부 이미지(${failed.length}장) 업로드 실패. 나머지는 저장되었어요.`;
+        setTimeout(()=>{ location.href="/reviews.html"; }, 700);
+      }else{
+        location.href="/reviews.html";
+      }
+
+    }catch(err){
+      console.error("[write/save] error:", err);
+      if (elFormStatus) elFormStatus.textContent = "저장 실패: " + (err?.message || err);
+      if (elBtnSubmit){ elBtnSubmit.disabled = false; elBtnSubmit.textContent = "저장"; }
+    }
+  })();
+}
       // -------- 신규 작성 --------
       uploadFilesLimit(MAX_FILES, function(errUp, uploaded){
         if (errUp){
