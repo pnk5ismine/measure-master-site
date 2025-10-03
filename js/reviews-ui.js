@@ -293,8 +293,11 @@ var MMReviews = (function(){
             btnToCompose.addEventListener("click", function(){
               window.mmAuth.getSession().then(function(s){
                 if (!s || !s.user){
-                  document.body.classList.add('show-auth');        // ★ 모바일 인증 패널 표시
-                  document.getElementById('tab-login')?.click();   // ★ 로그인 탭으로
+                  // 모바일/PC 모두 인증 패널 열기 + 로그인 탭 선택
+                  if (isMobile()){ document.body.classList.add('show-auth'); }
+                  var tl = document.getElementById('tab-login');
+                  if (tl && typeof tl.click === 'function') tl.click();
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
                   return;
                 }
                 history.replaceState(null,"","/reviews.html?compose=1");
@@ -351,7 +354,7 @@ var MMReviews = (function(){
                     }
                   }
                   // 글 삭제
-                  sb.from("reviews").delete().eq("id", id).then(function(del){
+                  sb.from("reviews").delete().eq("id", id).then(function(){
                     if (toRemove.length){
                       sb.storage.from("reviews").remove(toRemove).then(function(){ location.href="/reviews.html"; })["catch"](function(){ location.href="/reviews.html"; });
                     }else{
@@ -698,91 +701,111 @@ var MMReviews = (function(){
     if (fImage){ fImage.addEventListener("change", onFileChange); }
     if (elWriteForm){ elWriteForm.addEventListener("submit", saveWriteForm); }
 
+    // “글쓰기” 버튼: 클릭 시 즉시 처리(페이지 리로드 없이)
+    if (elBtnCompose){
+      elBtnCompose.addEventListener('click', function(e){
+        e.preventDefault();
+        if (!window.mmAuth){ location.href = "/reviews.html?compose=1"; return; }
+        window.mmAuth.getSession().then(function(s){
+          if (s && s.user){
+            showWrite();
+            try { history.replaceState(null,"","/reviews.html?compose=1"); } catch(_){}
+          } else {
+            // PC/모바일 공통: 인증 패널 열고 로그인 탭으로
+            if (isMobile()){ document.body.classList.add('show-auth'); }
+            var tl = document.getElementById('tab-login');
+            if (tl && typeof tl.click === 'function') tl.click();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+          }
+        });
+      });
+    }
+
     // 인증 핸들
     if (window.mmAuth){
       window.mmAuth.whenReady(function(){
         refreshAuthUI();
 
-        // [REPLACE] reviews 페이지 인증 핸들러 (모바일 submit 안정화)
+        // [REPLACE] reviews 페이지 인증 핸들러 (모바일 submit 안정화 + 구형 브라우저 호환)
         (function () {
-          const sb = window.mmAuth.sb;
+          var sb = window.mmAuth.sb;
 
-          const loginForm   = document.getElementById('loginForm');
-          const signupForm  = document.getElementById('signupForm');
-          const btnLogout   = document.getElementById('btn-logout');
-          const loginStatus = document.getElementById('loginStatus');
-          const signupStatus= document.getElementById('signupStatus');
+          var loginForm   = document.getElementById('loginForm');
+          var signupForm  = document.getElementById('signupForm');
+          var btnLogout   = document.getElementById('btn-logout');
+          var loginStatus = document.getElementById('loginStatus');
+          var signupStatus= document.getElementById('signupStatus');
 
           // 탭 전환
-          const tabLogin  = document.getElementById('tab-login');
-          const tabSignup = document.getElementById('tab-signup');
+          var tabLogin  = document.getElementById('tab-login');
+          var tabSignup = document.getElementById('tab-signup');
           function setTab(which){
             if (tabLogin)  tabLogin.classList.toggle('active',  which==='login');
             if (tabSignup) tabSignup.classList.toggle('active', which==='signup');
             if (loginForm)  loginForm.hidden  = (which!=='login');
             if (signupForm) signupForm.hidden = (which!=='signup');
           }
-          if (tabLogin)  tabLogin.onclick  = () => setTab('login');
-          if (tabSignup) tabSignup.onclick = () => setTab('signup');
+          if (tabLogin)  tabLogin.onclick  = function(){ setTab('login'); };
+          if (tabSignup) tabSignup.onclick = function(){ setTab('signup'); };
 
           // 로그인: 폼 submit에서만 처리
           if (loginForm){
-            loginForm.addEventListener('submit', async (e) => {
-              e.preventDefault(); // ★ 새로고침 방지
-              const email = (document.getElementById('login-email')?.value || '').trim().toLowerCase();
-              const pw    = document.getElementById('login-password')?.value || '';
+            loginForm.addEventListener('submit', function(e){
+              e.preventDefault();
+              var email = ((document.getElementById('login-email')||{}).value || '').trim().toLowerCase();
+              var pw    = (document.getElementById('login-password')||{}).value || '';
               if (loginStatus) loginStatus.textContent = '로그인 중…';
-              try {
-                const { error } = await (window.mmAuth?.signIn
-                  ? window.mmAuth.signIn(email, pw)
-                  : sb.auth.signInWithPassword({ email, password: pw }));
-                if (error){
-                  if (loginStatus) loginStatus.textContent = '로그인 실패: ' + (error.message || '에러');
-                  return;
-                }
-                if (loginStatus) loginStatus.textContent = '로그인 성공';
-                document.body.classList.remove('show-auth');  // 모바일: 인증 패널 닫기
-                refreshAuthUI();
-              } catch (err) {
-                if (loginStatus) loginStatus.textContent = '로그인 에러: ' + (err?.message || err);
-              }
+              var hasSignIn = (window.mmAuth && typeof window.mmAuth.signIn === 'function');
+              (hasSignIn ? window.mmAuth.signIn(email, pw)
+                         : sb.auth.signInWithPassword({ email: email, password: pw }))
+                .then(function(res){
+                  var err = res && res.error;
+                  if (err){
+                    if (loginStatus) loginStatus.textContent = '로그인 실패: ' + (err.message || '에러');
+                    return;
+                  }
+                  if (loginStatus) loginStatus.textContent = '로그인 성공';
+                  document.body.classList.remove('show-auth');
+                  refreshAuthUI();
+                })["catch"](function(err){
+                  if (loginStatus) loginStatus.textContent = '로그인 에러: ' + ((err && err.message) || err);
+                });
             });
           }
 
           // 가입: 폼 submit에서 처리
           if (signupForm){
-            signupForm.addEventListener('submit', async (e) => {
+            signupForm.addEventListener('submit', function(e){
               e.preventDefault();
-              const email = (document.getElementById('signup-email')?.value || '').trim().toLowerCase();
-              const p1    = document.getElementById('signup-password')?.value || '';
-              const p2    = document.getElementById('signup-password2')?.value || '';
+              var email = ((document.getElementById('signup-email')||{}).value || '').trim().toLowerCase();
+              var p1    = (document.getElementById('signup-password')||{}).value || '';
+              var p2    = (document.getElementById('signup-password2')||{}).value || '';
               if (signupStatus) signupStatus.textContent = '가입 중…';
-              if (p1 !== p2){ signupStatus.textContent = '비밀번호 확인이 일치하지 않습니다.'; return; }
-              if (p1.length < 8){ signupStatus.textContent = '비밀번호는 8자 이상'; return; }
-              try {
-                const { error } = await (window.mmAuth?.signUp
-                  ? window.mmAuth.signUp(email, p1)
-                  : sb.auth.signUp({ email, password: p1 }));
-                if (error){ signupStatus.textContent = '가입 실패: ' + (error.message || '에러'); return; }
-                signupStatus.textContent = '가입 완료';
-                (document.getElementById('tab-login')||{}).click?.(); // 가입 후 로그인 탭으로 전환
-              } catch (err) {
-                signupStatus.textContent = '가입 에러: ' + (err?.message || err);
-              }
+              if (p1 !== p2){ if (signupStatus) signupStatus.textContent = '비밀번호 확인이 일치하지 않습니다.'; return; }
+              if (p1.length < 8){ if (signupStatus) signupStatus.textContent = '비밀번호는 8자 이상'; return; }
+              var hasSignUp = (window.mmAuth && typeof window.mmAuth.signUp === 'function');
+              (hasSignUp ? window.mmAuth.signUp(email, p1)
+                         : sb.auth.signUp({ email: email, password: p1 }))
+                .then(function(res){
+                  var err = res && res.error;
+                  if (err){ if (signupStatus) signupStatus.textContent = '가입 실패: ' + (err.message || '에러'); return; }
+                  if (signupStatus) signupStatus.textContent = '가입 완료';
+                  // 로그인 탭으로
+                  if (tabLogin && typeof tabLogin.click === 'function') tabLogin.click();
+                })["catch"](function(err){
+                  if (signupStatus) signupStatus.textContent = '가입 에러: ' + ((err && err.message) || err);
+                });
             });
           }
 
           // 로그아웃
-          const btnLogoutEl = btnLogout;
-          if (btnLogoutEl){
-            btnLogoutEl.addEventListener('click', async (e) => {
+          if (btnLogout){
+            btnLogout.addEventListener('click', function(e){
               e.preventDefault();
-              try{
-                if (window.mmAuth?.signOut) await window.mmAuth.signOut();
-                else await sb.auth.signOut();
-              } finally {
-                refreshAuthUI();
-              }
+              var hasSignOut = (window.mmAuth && typeof window.mmAuth.signOut === 'function');
+              (hasSignOut ? window.mmAuth.signOut() : sb.auth.signOut())
+                .then(function(){ refreshAuthUI(); })
+                ["catch"](function(){ refreshAuthUI(); });
             });
           }
         })();
@@ -806,19 +829,18 @@ var MMReviews = (function(){
       if (compose === "1"){
         showList();
         loadList().then(function(){
-          if (window.mmAuth){
-            window.mmAuth.getSession().then(function(s){
-              if (s && s.user){
-                showWrite();
-              } else {
-                if (isMobile()){
-                  document.body.classList.add('show-auth');
-                  document.getElementById('tab-login')?.click();
-                  window.scrollTo({ top: 0, behavior: 'smooth' });
-                }
-              }
-            });
-          }
+          if (!window.mmAuth){ return; }
+          window.mmAuth.getSession().then(function(s){
+            if (s && s.user){
+              showWrite();
+            } else {
+              // PC/모바일 모두 인증 패널 노출 + 로그인 탭 선택
+              if (isMobile()){ document.body.classList.add('show-auth'); }
+              var tl = document.getElementById('tab-login');
+              if (tl && typeof tl.click === 'function') tl.click();
+              window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+          });
         });
         return;
       }
@@ -842,4 +864,4 @@ var MMReviews = (function(){
   }
 
   return { init:init, _debug:_debug };
-})(); 
+})();
