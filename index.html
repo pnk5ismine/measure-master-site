@@ -294,5 +294,11 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="/js/mm-auth.js?v=auth_r1"></script>
 <script src="/js/index.js?v=rev1"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function(){
+  const b=document.getElementById('logout-btn');
+  if(b){ b.addEventListener('click', async function(e){ e.preventDefault(); try{ await window.mmAuth?.signOut?.(); } finally { location.reload(); } }); }
+});
+</script>
 </body>
 </html>

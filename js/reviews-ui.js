@@ -1,4 +1,4 @@
-//// /js/reviews-ui.js
+// /js/reviews-ui.js
 var MMReviews = (function(){
   // ---------- DOM refs ----------
   function $(s){ return document.querySelector(s); }
@@ -151,7 +151,7 @@ var MMReviews = (function(){
 
         if (!ids.length){ renderWithCounts({}); return; }
 
-        window.mmAuth.sb.from("review_counts")
+        sb.from("review_counts")
           .select("review_id, view_count, comment_count")
           .in("review_id", ids)
           .then(function(r2){
@@ -245,7 +245,7 @@ var MMReviews = (function(){
           var name = displayName(data);
           var title = (data.is_notice ? "[일림] " : "") + (data.title || "(제목 없음)");
 
-          // 버튼 묶음 구성(문자열 안전)
+          // 버튼 묶음
           var actionsRight = '<button class="btn" type="button" id="btn-to-compose">글쓰기</button>';
           if (isOwner){
             actionsRight += '<button class="btn secondary" type="button" id="btn-edit">수정</button>';
@@ -293,11 +293,8 @@ var MMReviews = (function(){
             btnToCompose.addEventListener("click", function(){
               window.mmAuth.getSession().then(function(s){
                 if (!s || !s.user){
-                  // 모바일/PC 모두 인증 패널 열기 + 로그인 탭 선택
-                  if (isMobile()){ document.body.classList.add('show-auth'); }
-                  var tl = document.getElementById('tab-login');
-                  if (tl && typeof tl.click === 'function') tl.click();
-                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                  document.body.classList.add('show-auth');        // 모바일 인증 패널 표시
+                  document.getElementById('tab-login')?.click();   // 로그인 탭으로
                   return;
                 }
                 history.replaceState(null,"","/reviews.html?compose=1");
@@ -316,7 +313,6 @@ var MMReviews = (function(){
               if (elWriteForm) elWriteForm.setAttribute("data-editing", data.id);
 
               var sess2 = sess; // 위에서 구해둠
-              // 관리자 공지 체크박스
               var noticeBox = $("#noticeBox");
               var cb = $("#isNotice");
               if (noticeBox){
@@ -328,7 +324,6 @@ var MMReviews = (function(){
                   if (cb) cb.checked = false;
                 }
               }
-              // 기존 이미지 썸네일
               if (elEditImages){
                 elEditImages.hidden = false;
                 renderEditImagesForEditMode(data.id, data.image_url, data.image_path);
@@ -341,19 +336,15 @@ var MMReviews = (function(){
           if (btnDelete){
             btnDelete.addEventListener("click", function(){
               if (!confirm("정말 삭제할까요? 이 작업은 되돌릴 수 없습니다.")) return;
-              // 댓글 먼저 삭제(제약 없는 환경 대비)
               sb.from("comments").delete().eq("review_id", id).then(function(){
-                // 레거시 단일 이미지 스토리지 정리
                 var toRemove = [];
                 if (data.image_path) toRemove.push(data.image_path);
-                // 메타/스토리지(여러 장)
                 sb.from("review_images").select("path").eq("review_id", id).then(function(rm){
                   if (!rm.error && rm.data){
                     for (var i=0;i<rm.data.length;i++){
                       if (rm.data[i].path) toRemove.push(rm.data[i].path);
                     }
                   }
-                  // 글 삭제
                   sb.from("reviews").delete().eq("id", id).then(function(){
                     if (toRemove.length){
                       sb.storage.from("reviews").remove(toRemove).then(function(){ location.href="/reviews.html"; })["catch"](function(){ location.href="/reviews.html"; });
@@ -369,10 +360,8 @@ var MMReviews = (function(){
           // 갤러리
           renderGallery(id, data.image_url);
 
-          // 조회수 +1 (RPC 실패해도 조용히 무시)
-          try{
-            sb.rpc("inc_review_view", { _id:id })["catch"](function(){});
-          }catch(_){}
+          // 조회수 +1 (실패 무시)
+          try{ sb.rpc("inc_review_view", { _id:id })["catch"](function(){}); }catch(_){}
 
           // 공유
           var copyBtn  = $("#btnCopyLink");
@@ -459,15 +448,12 @@ var MMReviews = (function(){
   function onFileChange(){
     if (!fImage || !elSelectPreviews) return;
     var files = fImage.files ? Array.prototype.slice.call(fImage.files) : [];
-    // 누적 중복 제거(name+size+lastModified)
     function key(f){ return (f.name||"")+"__"+(f.size||0)+"__"+(f.lastModified||0); }
     var map = {};
-    // 기존 누적 + 신규
     for (var i=0;i<chosenFiles.length;i++){ map[key(chosenFiles[i])] = chosenFiles[i]; }
     for (var j=0;j<files.length;j++){ map[key(files[j])] = files[j]; }
     chosenFiles = []; for (var k in map){ if (map.hasOwnProperty(k)) chosenFiles.push(map[k]); }
 
-    // 슬롯 제한 계산: 편집 모드면 기존 - 삭제체크 수 고려
     var slot = MAX_FILES;
     if (elWriteForm && elWriteForm.getAttribute("data-editing")){
       var totalThumbs = elEditImages ? elEditImages.querySelectorAll('input[data-del="img"]').length : 0;
@@ -477,7 +463,6 @@ var MMReviews = (function(){
     }
     if (chosenFiles.length > slot) chosenFiles = chosenFiles.slice(0, slot);
 
-    // 미리보기 렌더
     elSelectPreviews.innerHTML = "";
     for (var x=0;x<chosenFiles.length;x++){
       (function(f){
@@ -492,215 +477,191 @@ var MMReviews = (function(){
   }
 
   // ---------- 저장(신규/수정) ----------
-// ---------- 저장(신규/수정) ----------
-function saveWriteForm(e){
-  e.preventDefault();
+  function saveWriteForm(e){
+    e.preventDefault();
 
-  (async () => {
-    const sb = window.mmAuth && window.mmAuth.sb;
-    if (!sb){ alert("Supabase 준비 전"); return; }
+    (async () => {
+      const sb = window.mmAuth && window.mmAuth.sb;
+      if (!sb){ alert("Supabase 준비 전"); return; }
 
-    try{
-      const sess = await window.mmAuth.getSession();
-      if (!sess || !sess.user){ alert("로그인이 필요합니다."); return; }
-      const user = sess.user;
+      try{
+        const sess = await window.mmAuth.getSession();
+        if (!sess || !sess.user){ alert("로그인이 필요합니다."); return; }
+        const user = sess.user;
 
-      if (!fContent || !fContent.value.trim()){
-        if (elFormStatus) elFormStatus.textContent = "내용을 입력하세요.";
-        return;
-      }
+        if (!fContent || !fContent.value.trim()){
+          if (elFormStatus) elFormStatus.textContent = "내용을 입력하세요.";
+          return;
+        }
 
-      if (elBtnSubmit){ elBtnSubmit.disabled = true; elBtnSubmit.textContent = "저장 중…"; }
-      if (elFormStatus) elFormStatus.textContent = "";
+        if (elBtnSubmit){ elBtnSubmit.disabled = true; elBtnSubmit.textContent = "저장 중…"; }
+        if (elFormStatus) elFormStatus.textContent = "";
 
-      const editingId = elWriteForm ? elWriteForm.getAttribute("data-editing") : null;
-      const title   = fTitle && fTitle.value ? fTitle.value.trim() : "";
-      const content = fContent.value.trim();
-      const nickname = (window.mmAuth.isAdmin(user.email) ? "관리자"
-        : (user.user_metadata && user.user_metadata.full_name) ? user.user_metadata.full_name
-        : (user.email ? user.email.split("@")[0] : "익명"));
+        const editingId = elWriteForm ? elWriteForm.getAttribute("data-editing") : null;
+        const title   = fTitle && fTitle.value ? fTitle.value.trim() : "";
+        const content = fContent.value.trim();
+        const nickname = (window.mmAuth.isAdmin(user.email) ? "관리자"
+          : (user.user_metadata && user.user_metadata.full_name) ? user.user_metadata.full_name
+          : (user.email ? user.email.split("@")[0] : "익명"));
 
-      // 공지 플래그
-      let noticeFlag = false;
-      const cbNotice = $("#isNotice");
-      if (cbNotice && window.mmAuth.isAdmin(user.email)) noticeFlag = !!cbNotice.checked;
+        // 공지 플래그
+        let noticeFlag = false;
+        const cbNotice = $("#isNotice");
+        if (cbNotice && window.mmAuth.isAdmin(user.email)) noticeFlag = !!cbNotice.checked;
 
-      // (개선) 업로드: 실패가 있어도 나머지 계속 진행하는 Best-effort 방식
-      async function uploadFilesBestEffort(remain){
-        const files = chosenFiles.slice(0, remain);
-        const uploaded = [];
-        const failed   = [];
-        for (let i=0;i<files.length;i++){
-          const file = files[i];
-          try{
-            const ext = (file.name.split(".").pop()||"jpg").toLowerCase();
-            const ok  = ("jpg jpeg png webp gif").indexOf(ext) >= 0 ? ext : "jpg";
-            const key = user.id + "/" + Date.now() + "_" + Math.random().toString(36).slice(2) + "." + ok;
+        // 업로드(부분성공 허용)
+        async function uploadFilesBestEffort(remain){
+          const files = chosenFiles.slice(0, remain);
+          const uploaded = [];
+          const failed   = [];
+          for (let i=0;i<files.length;i++){
+            const file = files[i];
+            try{
+              const ext = (file.name.split(".").pop()||"jpg").toLowerCase();
+              const ok  = ("jpg jpeg png webp gif").indexOf(ext) >= 0 ? ext : "jpg";
+              const key = user.id + "/" + Date.now() + "_" + Math.random().toString(36).slice(2) + "." + ok;
 
-            const { error: upErr } = await sb.storage.from("reviews").upload(key, file, { upsert:false, cacheControl:"3600" });
-            if (upErr) throw upErr;
+              const { error: upErr } = await sb.storage.from("reviews").upload(key, file, { upsert:false, cacheControl:"3600" });
+              if (upErr) throw upErr;
 
-            const pub = sb.storage.from("reviews").getPublicUrl(key);
-            const url = pub && pub.data ? pub.data.publicUrl : "";
-            uploaded.push({ path:key, url:url });
-          }catch(err){
-            failed.push({ file, error: err });
-            // 계속 진행 (부분 성공 허용)
+              const pub = sb.storage.from("reviews").getPublicUrl(key);
+              const url = pub && pub.data ? pub.data.publicUrl : "";
+              uploaded.push({ path:key, url:url });
+            }catch(err){
+              failed.push({ file, error: err });
+            }
           }
-        }
-        return { uploaded, failed };
-      }
-
-      if (editingId){
-        // ================= 수정 플로우 =================
-        // 1) 텍스트 먼저 업데이트
-        {
-          const { error: updErr } = await sb.from("reviews")
-            .update({ title, content, is_notice: noticeFlag })
-            .eq("id", editingId);
-          if (updErr) throw updErr;
+          return { uploaded, failed };
         }
 
-        // 2) 삭제 체크된 기존 이미지 정리
-        const delInputs = elEditImages ? elEditImages.querySelectorAll('input[data-del="img"]:checked') : [];
-        const pathsToRemove = [];
+        if (editingId){
+          // 수정 플로우
+          {
+            const { error: updErr } = await sb.from("reviews")
+              .update({ title, content, is_notice: noticeFlag })
+              .eq("id", editingId);
+            if (updErr) throw updErr;
+          }
 
-        for (let i=0;i<delInputs.length;i++){
-          const el = delInputs[i];
-          const isLegacy = (el.getAttribute("data-legacy")==="1");
-          const path     = el.getAttribute("data-path") || "";
-          const imgId    = el.getAttribute("data-imgid") || null;
+          const delInputs = elEditImages ? elEditImages.querySelectorAll('input[data-del="img"]:checked') : [];
+          const pathsToRemove = [];
 
-          try{
-            if (!isLegacy && imgId){
-              await sb.from("review_images").delete().eq("id", imgId);
-              if (path) pathsToRemove.push(path);
-            }else if (isLegacy){
-              await sb.from("reviews").update({ image_url:null, image_path:null }).eq("id", editingId);
-              if (path) pathsToRemove.push(path);
-            }else{
+          for (let i=0;i<delInputs.length;i++){
+            const el = delInputs[i];
+            const isLegacy = (el.getAttribute("data-legacy")==="1");
+            const path     = el.getAttribute("data-path") || "";
+            const imgId    = el.getAttribute("data-imgid") || null;
+
+            try{
+              if (!isLegacy && imgId){
+                await sb.from("review_images").delete().eq("id", imgId);
+                if (path) pathsToRemove.push(path);
+              }else if (isLegacy){
+                await sb.from("reviews").update({ image_url:null, image_path:null }).eq("id", editingId);
+                if (path) pathsToRemove.push(path);
+              }else{
+                if (path) pathsToRemove.push(path);
+              }
+            }catch(_){
               if (path) pathsToRemove.push(path);
             }
-          }catch(_){
-            if (path) pathsToRemove.push(path); // 실패해도 스토리지만 시도
           }
+
+          const totalThumbs = elEditImages ? elEditImages.querySelectorAll('input[data-del="img"]').length : 0;
+          const delChecked  = elEditImages ? elEditImages.querySelectorAll('input[data-del="img"]:checked').length : 0;
+          const existing    = Math.max(0, totalThumbs - delChecked);
+          const remain      = Math.max(0, MAX_FILES - existing);
+
+          const { uploaded, failed } = await uploadFilesBestEffort(remain);
+
+          if (uploaded.length){
+            const rows = uploaded.map(u => ({ review_id: editingId, url: u.url, path: u.path }));
+            const { error: metaErr } = await sb.from("review_images").insert(rows);
+            if (metaErr) throw metaErr;
+          }
+
+          if (pathsToRemove.length){
+            try{ await sb.storage.from("reviews").remove(pathsToRemove); }catch(_){}
+          }
+
+          if (failed.length && elFormStatus){
+            elFormStatus.textContent = `일부 이미지 업로드 실패(${failed.length}장). 나머지는 저장되었습니다.`;
+            setTimeout(()=>{ location.href = "/reviews.html?id=" + editingId; }, 600);
+          }else{
+            location.href = "/reviews.html?id=" + editingId;
+          }
+          return;
         }
 
-        // 3) 남은 슬롯 계산 후 업로드
-        const totalThumbs = elEditImages ? elEditImages.querySelectorAll('input[data-del="img"]').length : 0;
-        const delChecked  = elEditImages ? elEditImages.querySelectorAll('input[data-del="img"]:checked').length : 0;
-        const existing    = Math.max(0, totalThumbs - delChecked);
-        const remain      = Math.max(0, MAX_FILES - existing);
+        // 신규 작성
+        const { uploaded, failed } = await uploadFilesBestEffort(MAX_FILES);
 
-        const { uploaded, failed } = await uploadFilesBestEffort(remain);
+        const image_path = uploaded[0]?.path || null;
+        const image_url  = uploaded[0]?.url  || null;
 
-        // 4) 메타 insert
+        const { data: ins, error: insErr } = await sb
+          .from("reviews")
+          .insert({
+            title, content, is_notice: noticeFlag,
+            user_id: user.id, author_email: user.email, nickname,
+            image_path, image_url
+          })
+          .select("id")
+          .single();
+        if (insErr) throw insErr;
+
         if (uploaded.length){
-          const rows = uploaded.map(u => ({ review_id: editingId, url: u.url, path: u.path }));
+          const rows = uploaded.map(u => ({ review_id: ins.id, url: u.url, path: u.path }));
           const { error: metaErr } = await sb.from("review_images").insert(rows);
           if (metaErr) throw metaErr;
         }
 
-        // 5) 스토리지에서 체크 삭제
-        if (pathsToRemove.length){
-          try{ await sb.storage.from("reviews").remove(pathsToRemove); }catch(_){}
-        }
-
-        // 완료
         if (failed.length && elFormStatus){
-          elFormStatus.textContent = `일부 이미지 업로드 실패(${failed.length}장). 나머지는 저장되었어요.`;
-          // 살짝 딜레이 후 이동
-          setTimeout(()=>{ location.href = "/reviews.html?id=" + editingId; }, 600);
+          elFormStatus.textContent = `일부 이미지(${failed.length}장) 업로드 실패. 나머지는 저장되었습니다.`;
+          setTimeout(()=>{ location.href="/reviews.html"; }, 700);
         }else{
-          location.href = "/reviews.html?id=" + editingId;
+          location.href="/reviews.html";
         }
-        return;
+
+      }catch(err){
+        console.error("[write/save] error:", err);
+        if (elFormStatus) elFormStatus.textContent = "저장 실패: " + (err?.message || err);
+        if (elBtnSubmit){ elBtnSubmit.disabled = false; elBtnSubmit.textContent = "저장"; }
       }
-
-      // ================= 신규 작성 플로우 =================
-      const { uploaded, failed } = await uploadFilesBestEffort(MAX_FILES);
-
-      // 첫 이미지를 레거시 필드로도 보관(호환)
-      const image_path = uploaded[0]?.path || null;
-      const image_url  = uploaded[0]?.url  || null;
-
-      // 글 insert
-      const { data: ins, error: insErr } = await sb
-        .from("reviews")
-        .insert({
-          title, content, is_notice: noticeFlag,
-          user_id: user.id, author_email: user.email, nickname,
-          image_path, image_url
-        })
-        .select("id")
-        .single();
-      if (insErr) throw insErr;
-
-      // 메타 insert (여러 장)
-      if (uploaded.length){
-        const rows = uploaded.map(u => ({ review_id: ins.id, url: u.url, path: u.path }));
-        const { error: metaErr } = await sb.from("review_images").insert(rows);
-        if (metaErr) throw metaErr;
-      }
-
-      // 완료
-      if (failed.length && elFormStatus){
-        elFormStatus.textContent = `일부 이미지(${failed.length}장) 업로드 실패. 나머지는 저장되었어요.`;
-        setTimeout(()=>{ location.href="/reviews.html"; }, 700);
-      }else{
-        location.href="/reviews.html";
-      }
-
-    }catch(err){
-      console.error("[write/save] error:", err);
-      if (elFormStatus) elFormStatus.textContent = "저장 실패: " + (err?.message || err);
-      if (elBtnSubmit){ elBtnSubmit.disabled = false; elBtnSubmit.textContent = "저장"; }
-    }
-  })();
-}
-      // -------- 신규 작성 --------
-      uploadFilesLimit(MAX_FILES, function(errUp, uploaded){
-        if (errUp){
-          if (elFormStatus) elFormStatus.textContent = "이미지 업로드 실패: " + (errUp.message||errUp);
-          if (elBtnSubmit){ elBtnSubmit.disabled=false; elBtnSubmit.textContent="저장"; }
-          return;
-        }
-        var image_path = null, image_url = null;
-        if (uploaded[0]){ image_path = uploaded[0].path; image_url = uploaded[0].url; }
-
-        sb.from("reviews").insert({
-          title:title, content:content, is_notice:noticeFlag,
-          user_id:user.id, author_email:user.email, nickname:nickname,
-          image_path:image_path, image_url:image_url
-        }).select("id").single()
-        .then(function(ins){
-          if (ins.error){ throw ins.error; }
-          var newId = ins.data.id;
-          if (!uploaded.length){ location.href="/reviews.html"; return; }
-          var rows = [];
-          for (var i=0;i<uploaded.length;i++){
-            rows.push({ review_id:newId, url:uploaded[i].url, path:uploaded[i].path });
-          }
-          sb.from("review_images").insert(rows).then(function(add){
-            if (add.error){
-              if (elFormStatus) elFormStatus.textContent = "메타 저장 실패: " + add.error.message;
-              if (elBtnSubmit){ elBtnSubmit.disabled=false; elBtnSubmit.textContent="저장"; }
-              return;
-            }
-            location.href="/reviews.html";
-          });
-        })["catch"](function(e){
-          if (elFormStatus) elFormStatus.textContent = "저장 실패: " + (e.message||e);
-          if (elBtnSubmit){ elBtnSubmit.disabled=false; elBtnSubmit.textContent="저장"; }
-        });
-      });
-    });
+    })();
   }
 
   // ---------- 뷰 전환 ----------
   function showList(){ if(elListView) elListView.hidden=false; if(elReadView) elReadView.hidden=true; if(elWriteForm) elWriteForm.hidden=true; }
   function showRead(){ if(elListView) elListView.hidden=true;  if(elReadView) elReadView.hidden=false; if(elWriteForm) elWriteForm.hidden=true; }
   function showWrite(){if(elListView) elListView.hidden=true;  if(elReadView) elReadView.hidden=true;  if(elWriteForm) elWriteForm.hidden=false; }
+
+  // ---------- 라우팅 ----------
+  function routeAfterAuth(){
+    var q = new URLSearchParams(location.search);
+    var id = q.get("id");
+    var compose = q.get("compose");
+    var edit = q.get("edit");
+
+    if (id){ showRead(); loadOne(id); return; }
+
+    if (compose==="1"){
+      showList();
+      loadList().then(function(){
+        window.mmAuth.getSession().then(function(s){
+          if (s && s.user){ showWrite(); }
+        });
+      });
+      return;
+    }
+
+    if (edit){
+      showList(); loadList();
+      return;
+    }
+
+    showList(); loadList();
+  }
 
   // ---------- 부트스트랩 & 라우팅 ----------
   function init(){
@@ -721,7 +682,6 @@ function saveWriteForm(e){
     elSelectPreviews = $("#selectPreviews");
     elEditImages = $("#editImages");
 
-    // 대기 텍스트 비우기
     if (elAuthInfo)   elAuthInfo.textContent   = "";
     if (elAuthStatus) elAuthStatus.textContent = "";
 
@@ -733,158 +693,101 @@ function saveWriteForm(e){
     if (fImage){ fImage.addEventListener("change", onFileChange); }
     if (elWriteForm){ elWriteForm.addEventListener("submit", saveWriteForm); }
 
-    // “글쓰기” 버튼: 클릭 시 즉시 처리(페이지 리로드 없이)
-    if (elBtnCompose){
-      elBtnCompose.addEventListener('click', function(e){
-        e.preventDefault();
-        if (!window.mmAuth){ location.href = "/reviews.html?compose=1"; return; }
-        window.mmAuth.getSession().then(function(s){
-          if (s && s.user){
-            showWrite();
-            try { history.replaceState(null,"","/reviews.html?compose=1"); } catch(_){}
-          } else {
-            // PC/모바일 공통: 인증 패널 열고 로그인 탭으로
-            if (isMobile()){ document.body.classList.add('show-auth'); }
-            var tl = document.getElementById('tab-login');
-            if (tl && typeof tl.click === 'function') tl.click();
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-          }
-        });
-      });
-    }
-
     // 인증 핸들
     if (window.mmAuth){
       window.mmAuth.whenReady(function(){
-        refreshAuthUI();
+        // 1) 상태 동기화
+        refreshAuthUI().finally(function(){
 
-        // [REPLACE] reviews 페이지 인증 핸들러 (모바일 submit 안정화 + 구형 브라우저 호환)
-        (function () {
-          var sb = window.mmAuth.sb;
+          // 2) 인증 폼/버튼 핸들러 설치 (모바일 submit 안정화)
+          (function () {
+            const sb = window.mmAuth.sb;
 
-          var loginForm   = document.getElementById('loginForm');
-          var signupForm  = document.getElementById('signupForm');
-          var btnLogout   = document.getElementById('btn-logout');
-          var loginStatus = document.getElementById('loginStatus');
-          var signupStatus= document.getElementById('signupStatus');
+            const loginForm   = document.getElementById('loginForm');
+            const signupForm  = document.getElementById('signupForm');
+            const btnLogout   = document.getElementById('btn-logout');
+            const loginStatus = document.getElementById('loginStatus');
+            const signupStatus= document.getElementById('signupStatus');
 
-          // 탭 전환
-          var tabLogin  = document.getElementById('tab-login');
-          var tabSignup = document.getElementById('tab-signup');
-          function setTab(which){
-            if (tabLogin)  tabLogin.classList.toggle('active',  which==='login');
-            if (tabSignup) tabSignup.classList.toggle('active', which==='signup');
-            if (loginForm)  loginForm.hidden  = (which!=='login');
-            if (signupForm) signupForm.hidden = (which!=='signup');
-          }
-          if (tabLogin)  tabLogin.onclick  = function(){ setTab('login'); };
-          if (tabSignup) tabSignup.onclick = function(){ setTab('signup'); };
+            const tabLogin  = document.getElementById('tab-login');
+            const tabSignup = document.getElementById('tab-signup');
+            function setTab(which){
+              if (tabLogin)  tabLogin.classList.toggle('active',  which==='login');
+              if (tabSignup) tabSignup.classList.toggle('active', which==='signup');
+              if (loginForm)  loginForm.hidden  = (which!=='login');
+              if (signupForm) signupForm.hidden = (which!=='signup');
+            }
+            if (tabLogin)  tabLogin.onclick  = () => setTab('login');
+            if (tabSignup) tabSignup.onclick = () => setTab('signup');
 
-          // 로그인: 폼 submit에서만 처리
-          if (loginForm){
-            loginForm.addEventListener('submit', function(e){
-              e.preventDefault();
-              var email = ((document.getElementById('login-email')||{}).value || '').trim().toLowerCase();
-              var pw    = (document.getElementById('login-password')||{}).value || '';
-              if (loginStatus) loginStatus.textContent = '로그인 중…';
-              var hasSignIn = (window.mmAuth && typeof window.mmAuth.signIn === 'function');
-              (hasSignIn ? window.mmAuth.signIn(email, pw)
-                         : sb.auth.signInWithPassword({ email: email, password: pw }))
-                .then(function(res){
-                  var err = res && res.error;
-                  if (err){
-                    if (loginStatus) loginStatus.textContent = '로그인 실패: ' + (err.message || '에러');
+            if (loginForm){
+              loginForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const email = (document.getElementById('login-email')?.value || '').trim().toLowerCase();
+                const pw    = document.getElementById('login-password')?.value || '';
+                if (loginStatus) loginStatus.textContent = '로그인 중…';
+                try {
+                  const { error } = await (window.mmAuth?.signIn
+                    ? window.mmAuth.signIn(email, pw)
+                    : sb.auth.signInWithPassword({ email, password: pw }));
+                  if (error){
+                    if (loginStatus) loginStatus.textContent = '로그인 실패: ' + (error.message || '에러');
                     return;
                   }
                   if (loginStatus) loginStatus.textContent = '로그인 성공';
                   document.body.classList.remove('show-auth');
                   refreshAuthUI();
-                })["catch"](function(err){
-                  if (loginStatus) loginStatus.textContent = '로그인 에러: ' + ((err && err.message) || err);
-                });
-            });
-          }
-
-          // 가입: 폼 submit에서 처리
-          if (signupForm){
-            signupForm.addEventListener('submit', function(e){
-              e.preventDefault();
-              var email = ((document.getElementById('signup-email')||{}).value || '').trim().toLowerCase();
-              var p1    = (document.getElementById('signup-password')||{}).value || '';
-              var p2    = (document.getElementById('signup-password2')||{}).value || '';
-              if (signupStatus) signupStatus.textContent = '가입 중…';
-              if (p1 !== p2){ if (signupStatus) signupStatus.textContent = '비밀번호 확인이 일치하지 않습니다.'; return; }
-              if (p1.length < 8){ if (signupStatus) signupStatus.textContent = '비밀번호는 8자 이상'; return; }
-              var hasSignUp = (window.mmAuth && typeof window.mmAuth.signUp === 'function');
-              (hasSignUp ? window.mmAuth.signUp(email, p1)
-                         : sb.auth.signUp({ email: email, password: p1 }))
-                .then(function(res){
-                  var err = res && res.error;
-                  if (err){ if (signupStatus) signupStatus.textContent = '가입 실패: ' + (err.message || '에러'); return; }
-                  if (signupStatus) signupStatus.textContent = '가입 완료';
-                  // 로그인 탭으로
-                  if (tabLogin && typeof tabLogin.click === 'function') tabLogin.click();
-                })["catch"](function(err){
-                  if (signupStatus) signupStatus.textContent = '가입 에러: ' + ((err && err.message) || err);
-                });
-            });
-          }
-
-          // 로그아웃
-          if (btnLogout){
-            btnLogout.addEventListener('click', function(e){
-              e.preventDefault();
-              var hasSignOut = (window.mmAuth && typeof window.mmAuth.signOut === 'function');
-              (hasSignOut ? window.mmAuth.signOut() : sb.auth.signOut())
-                .then(function(){ refreshAuthUI(); })
-                ["catch"](function(){ refreshAuthUI(); });
-            });
-          }
-        })();
-      });
-      window.mmAuth.onChange(function(){ refreshAuthUI(); });
-    }
-
-    // === 라우팅: whenReady 바깥에서 즉시 실행 (모바일에서도 목록 즉시 로드) ===
-    (function route(){
-      var q = new URLSearchParams(location.search);
-      var id = q.get("id");
-      var compose = q.get("compose");
-      var edit = q.get("edit");
-
-      if (id){
-        showRead();
-        loadOne(id);
-        return;
-      }
-
-      if (compose === "1"){
-        showList();
-        loadList().then(function(){
-          if (!window.mmAuth){ return; }
-          window.mmAuth.getSession().then(function(s){
-            if (s && s.user){
-              showWrite();
-            } else {
-              // PC/모바일 모두 인증 패널 노출 + 로그인 탭 선택
-              if (isMobile()){ document.body.classList.add('show-auth'); }
-              var tl = document.getElementById('tab-login');
-              if (tl && typeof tl.click === 'function') tl.click();
-              window.scrollTo({ top: 0, behavior: 'smooth' });
+                } catch (err) {
+                  if (loginStatus) loginStatus.textContent = '로그인 에러: ' + (err?.message || err);
+                }
+              });
             }
-          });
+
+            if (signupForm){
+              signupForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const email = (document.getElementById('signup-email')?.value || '').trim().toLowerCase();
+                const p1    = document.getElementById('signup-password')?.value || '';
+                const p2    = document.getElementById('signup-password2')?.value || '';
+                if (signupStatus) signupStatus.textContent = '가입 중…';
+                if (p1 !== p2){ signupStatus.textContent = '비밀번호 확인이 일치하지 않습니다.'; return; }
+                if (p1.length < 8){ signupStatus.textContent = '비밀번호는 8자 이상'; return; }
+                try {
+                  const { error } = await (window.mmAuth?.signUp
+                    ? window.mmAuth.signUp(email, p1)
+                    : sb.auth.signUp({ email, password: p1 }));
+                  if (error){ signupStatus.textContent = '가입 실패: ' + (error.message || '에러'); return; }
+                  signupStatus.textContent = '가입 완료';
+                  setTab('login');
+                } catch (err) {
+                  signupStatus.textContent = '가입 에러: ' + (err?.message || err);
+                }
+              });
+            }
+
+            if (btnLogout){
+              btnLogout.addEventListener('click', async (e) => {
+                e.preventDefault();
+                try{
+                  if (window.mmAuth?.signOut) await window.mmAuth.signOut();
+                  else await sb.auth.signOut();
+                } finally {
+                  refreshAuthUI();
+                }
+              });
+            }
+          })();
+
+          // 3) 라우팅 실행 (이게 else 블록에 들어가 있으면 안 돼요!)
+          routeAfterAuth();
         });
-        return;
-      }
+      });
 
-      if (edit){
-        showList(); loadList();
-        return;
-      }
-
-      // 기본
-      showList(); loadList();
-    })();
+      window.mmAuth.onChange(function(){ refreshAuthUI(); });
+    }else{
+      // mmAuth 미탑재 시에도 목록은 보이게
+      routeAfterAuth();
+    }
 
     var y = $("#year");
     if (y) y.textContent = (new Date()).getFullYear();
