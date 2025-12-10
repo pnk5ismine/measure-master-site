@@ -15,11 +15,10 @@
   <link rel="icon" type="image/png" href="/images/mm_logo_small.png?v=rev4" />
   <link rel="alternate icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='28' fill='%230e1422'/%3E%3Ctext x='32' y='39' font-size='28' text-anchor='middle' fill='%235eead4'%3EM%3C/text%3E%3C/svg%3E"/>
 
-  <!-- 주요 이미지 프리로드 -->
-  <link rel="preload" as="image" href="/images/mm_logo_small.png" />
-  <link rel="preload" as="image" href="/images/mm_photo1.jpg" />
-  <link rel="preload" as="image" href="/images/mm_photo2.jpg" />
-  <link rel="preload" as="image" href="/images/mm_photo3.jpg" />
+  <!-- 주요 이미지 프리로드 (Play 스토어용 스크린샷 재사용) -->
+  <link rel="preload" as="image" href="/images/index/home1.jpg" />
+  <link rel="preload" as="image" href="/images/index/sm_01.jpg" />
+  <link rel="preload" as="image" href="/images/index/sm_03.jpg" />
 
   <style>
     :root {
@@ -676,21 +675,21 @@
         <div class="hero-visual-inner">
           <div class="phone-frame">
             <div class="phone-inner">
-              <img src="/images/mm_photo1.jpg"
-                   alt="Measure Master 측정 화면"
-                   loading="eager"
-                   fetchpriority="high"
-                   onerror="this.onerror=null; this.src='/images/mm_photo1.png';" />
+              <img src="/images/index/home1.jpg"
+                 alt="Measure Master 메인 측정 화면"
+                 loading="eager"
+                 fetchpriority="high"
+                 onerror="this.onerror=null; this.src='/images/index/screen_full.jpg';" />
             </div>
           </div>
-          <div class="hero-thumbs">
-            <img src="/images/mm_photo2.jpg" alt="측정 예시 2"
-                 loading="lazy"
-                 onerror="this.onerror=null; this.src='/images/mm_photo2.png';" />
-            <img src="/images/mm_photo3.jpg" alt="측정 예시 3"
-                 loading="lazy"
-                 onerror="this.onerror=null; this.src='/images/mm_photo3.png';" />
-          </div>
+            <div class="hero-thumbs">
+              <img src="/images/index/sm_01.jpg" alt="스크린 모드 예시 1"
+                   loading="lazy"
+                   onerror="this.onerror=null; this.src='/images/index/sm_02.jpg';" />
+              <img src="/images/index/sm_03.jpg" alt="스크린 모드 예시 2"
+                   loading="lazy"
+                   onerror="this.onerror=null; this.src='/images/index/sm_02.jpg';" />
+            </div>
           <div class="hero-tagline">
             화면은 플레이스토어 스크린샷을 기반으로 구성되었습니다.
           </div>
@@ -774,27 +773,27 @@
       </p>
       <div class="shots">
         <figure class="shot">
-          <img src="/images/mm_photo1.jpg" alt="주요 측정 화면"
+          <img src="/images/index/pm_01.jpg" alt="퍼스펙티브 모드 측정 화면"
                loading="lazy"
-               onerror="this.onerror=null; this.src='/images/mm_photo1.png';" />
+               onerror="this.onerror=null; this.src='/images/index/pm_00.jpg';" />
           <figcaption class="shot-caption">
-            기준 사각형을 설정한 뒤, 위에 놓인 대상의 길이·면적을 측정하는 기본 화면.
+            기준 사각형을 설정한 뒤, 사진 속 대상의 길이·면적을 보정해 계산하는 화면 예시입니다.
           </figcaption>
         </figure>
         <figure class="shot">
-          <img src="/images/mm_photo2.jpg" alt="복수 도형 측정 화면"
-               loading="lazy"
-               onerror="this.onerror=null; this.src='/images/mm_photo2.png';" />
-          <figcaption class="shot-caption">
-            여러 개의 도형을 나눠 그려 각각의 면적 및 합계를 확인하는 예시.
-          </figcaption>
+            <img src="/images/index/AR_02.jpg" alt="AR 모드로 실제 공간 측정"
+                 loading="lazy"
+                 onerror="this.onerror=null; this.src='/images/index/AR_03.jpg';" />
+            <figcaption class="shot-caption">
+              AR 모드를 이용해 실제 공간에서 선분 길이를 측정하는 화면 예시입니다.
+            </figcaption>
         </figure>
         <figure class="shot">
-          <img src="/images/mm_photo3.jpg" alt="결과 요약 화면"
+          <img src="/images/index/config_01_ko.jpg" alt="측정 설정 및 모드 설명 화면"
                loading="lazy"
-               onerror="this.onerror=null; this.src='/images/mm_photo3.png';" />
+               onerror="this.onerror=null; this.src='/images/index/config_01_en.jpg';" />
           <figcaption class="shot-caption">
-            사진 위에 표시된 치수를 그대로 캡처하여 보고용 이미지로 활용할 수 있습니다.
+            측정 단위, 기준 사각형 정보 등 주요 옵션을 설정하는 화면입니다.
           </figcaption>
         </figure>
       </div>
