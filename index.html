@@ -3,227 +3,852 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Measure Master — 사진 보정 · 길이/면적 계산</title>
-  <meta name="description" content="A4 같이 각 길이를 아는 기준 직사각형으로 투시 보정 후 길이/면적을 계산하는 Measure Master 앱" />
+  <title>Measure Master — 사진 보정 · 길이·면적 계산</title>
+  <meta name="description" content="현장 사진 속 왜곡을 보정하고 길이·면적을 빠르게 계산하는 Measure Master. 기준 사각형(A4 등)만 있으면 어디서나 근사치 측정 가능." />
+
+  <!-- 캐시 방지 -->
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
+
   <!-- 파비콘 -->
-<link rel="icon" type="image/png" href="/images/mm_logo_small.png?v=rev4" />
-<link rel="alternate icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='28' fill='%230e1422'/%3E%3Ctext x='32' y='39' font-size='28' text-anchor='middle' fill='%235eead4'%3EM%3C/text%3E%3C/svg%3E"/>
-  
-<!-- 로고/히어로 이미지 프리로드(깜빡임 감소) -->
+  <link rel="icon" type="image/png" href="/images/mm_logo_small.png?v=rev4" />
+  <link rel="alternate icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='28' fill='%230e1422'/%3E%3Ctext x='32' y='39' font-size='28' text-anchor='middle' fill='%235eead4'%3EM%3C/text%3E%3C/svg%3E"/>
+
+  <!-- 주요 이미지 프리로드 -->
   <link rel="preload" as="image" href="/images/mm_logo_small.png" />
   <link rel="preload" as="image" href="/images/mm_photo1.jpg" />
   <link rel="preload" as="image" href="/images/mm_photo2.jpg" />
   <link rel="preload" as="image" href="/images/mm_photo3.jpg" />
 
   <style>
-    :root { --bg:#0b0d12; --card:#121622; --muted:#9aa4b2; --pri:#5eead4; --border:#1e2230; }
-    *{box-sizing:border-box}
-    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,'Noto Sans KR',sans-serif;background:var(--bg);color:#e7edf5}
-    a{color:var(--pri);text-decoration:none} a:hover{text-decoration:underline}
-    header,main,footer{max-width:1100px;margin:0 auto;padding:16px}
-    header{display:flex;align-items:center;justify-content:space-between;gap:12px}
-    .brand{display:flex;align-items:center;gap:10px}
-    .logo-img{width:28px;height:28px;border-radius:6px;object-fit:contain;background:#0e1422}
-    nav a{margin-left:16px;color:#cfd6e4}
-    .lang{display:flex;gap:6px;align-items:center}
-    .lang button{border:1px solid var(--border);background:#0f1320;color:#e7edf5;border-radius:999px;padding:6px 10px;cursor:pointer}
-    .lang button.active{outline:2px solid #2dd; font-weight:600}
+    :root {
+      --bg:#050816;
+      --bg-soft:#060b1b;
+      --surface:#0d1224;
+      --surface-soft:#12172a;
+      --border:#222742;
+      --text:#e7edf5;
+      --muted:#9aa4b2;
+      --accent:#5eead4;
+      --accent-soft:rgba(94,234,212,.08);
+      --danger:#f97373;
+    }
 
-    /* 2열 레이아웃 */
-    .layout{
-      display:grid;
-      grid-template-columns: 1fr;
-      gap:18px;
+    * { box-sizing:border-box; }
+    html, body { margin:0; padding:0; }
+    body {
+      font-family: system-ui,-apple-system,Segoe UI,Roboto,'Noto Sans KR',sans-serif;
+      background:
+        radial-gradient(circle at 0 0, rgba(94,234,212,.23), transparent 55%),
+        radial-gradient(circle at 100% 100%, rgba(59,130,246,.18), transparent 55%),
+        var(--bg);
+      color:var(--text);
+      min-height:100vh;
+    }
+    a { color:var(--accent); text-decoration:none; }
+    a:hover { text-decoration:underline; }
+
+    .page {
+      max-width:1180px;
+      margin:0 auto;
+      padding:16px 16px 40px;
+    }
+
+    /* 헤더 */
+    header {
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:12px;
+      padding:6px 0 10px;
+    }
+    .brand {
+      display:flex;
+      align-items:center;
+      gap:10px;
+    }
+    .logo-img {
+      width:32px;
+      height:32px;
+      border-radius:10px;
+      object-fit:contain;
+      background:#0e1422;
+      box-shadow:0 0 0 1px rgba(148,163,184,.4), 0 10px 35px rgba(15,23,42,.9);
+    }
+    .brand-title {
+      display:flex;
+      flex-direction:column;
+      gap:2px;
+    }
+    .brand-title strong {
+      font-size:17px;
+      letter-spacing:-0.02em;
+    }
+    .brand-sub {
+      font-size:11px;
+      color:var(--muted);
+    }
+    .pill {
+      font-size:11px;
+      padding:3px 8px;
+      border-radius:999px;
+      border:1px solid rgba(148,163,184,.4);
+      background:rgba(15,23,42,.9);
+      color:var(--muted);
+    }
+
+    nav {
+      display:flex;
+      align-items:center;
+      gap:12px;
+      font-size:13px;
+    }
+    nav a {
+      color:#cdd5f0;
+      padding:6px 10px;
+      border-radius:999px;
+      border:1px solid transparent;
+      white-space:nowrap;
+    }
+    nav a:hover {
+      border-color:rgba(148,163,184,.5);
+      background:rgba(15,23,42,.86);
+      text-decoration:none;
+    }
+    nav a.nav-cta {
+      border-color:rgba(94,234,212,.7);
+      background:rgba(15,23,42,.96);
+      color:var(--accent);
+      font-weight:600;
+    }
+
+    .lang {
+      display:flex;
+      gap:6px;
+      align-items:center;
+    }
+    .lang button {
+      border:1px solid rgba(148,163,184,.5);
+      background:rgba(15,23,42,.9);
+      color:var(--text);
+      border-radius:999px;
+      padding:4px 10px;
+      cursor:pointer;
+      font-size:11px;
+    }
+    .lang button.active {
+      border-color:var(--accent);
+      box-shadow:0 0 0 1px rgba(94,234,212,.6);
+      font-weight:600;
+    }
+
+    /* 레이아웃 */
+    main {
+      display:flex;
+      flex-direction:column;
+      gap:32px;
       margin-top:16px;
     }
-    @media (min-width:1024px){
-      .layout{
-        grid-template-columns: 1.2fr .8fr;
-        align-items: stretch;
+
+    .hero {
+      display:grid;
+      grid-template-columns:1.25fr .95fr;
+      gap:28px;
+      align-items:center;
+    }
+    @media (max-width:900px){
+      .hero {
+        grid-template-columns:1fr;
       }
     }
 
-/* 방문자수: 데스크톱에선 오른쪽 열(컬럼 2)로 고정 */
-.visit-counter{
-  margin-top:12px;
-  color:#e7edf5;                       /* 어두운 배경 대비 */
-  background:rgba(255,255,255,.06);
-  border:1px solid rgba(255,255,255,.12);
-  border-radius:10px;
-  padding:6px 10px;
-  text-align:center;
-}
-
-@media (min-width:1024px){
-  .visit-counter { grid-column: 2 / 3; }
-}
-
-    .card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:22px}
-    .muted{color:var(--muted)}
-    footer{margin:30px auto 60px;text-align:center;color:var(--muted);font-size:14px}
-    hr{border:none;border-top:1px solid var(--border);margin:16px 0}
-
-    .left-col, .right-col{ display:flex; }
-    .left-col { flex-direction: column; gap: 0; }
-    .hero-dark, .card{ display:flex; flex-direction:column; height:100%; }
-
-    .hero-dark{
-      background:#0f1320; color:#e7edf5; border:1px solid var(--border);
-      border-radius:16px; padding:22px;
+    .hero-text-block {
+      padding:22px 22px 20px;
+      border-radius:24px;
+      background:linear-gradient(135deg, rgba(15,23,42,.96), rgba(15,23,42,.94));
+      border:1px solid rgba(148,163,184,.45);
+      box-shadow:
+        0 18px 55px rgba(15,23,42,.9),
+        0 0 0 1px rgba(15,23,42,.9) inset;
+      position:relative;
+      overflow:hidden;
     }
-    .hero-dark h1{ margin:0 0 6px; font-size:clamp(26px,4.8vw,40px); letter-spacing:-0.02em; }
-    .hero-dark p{ margin:0; color:#d7dee9; font-size:clamp(14px,2.6vw,18px); }
-
-    .hero-text { background:#fff; color:#000; padding:20px; text-align:center; }
-    .hero-text h2 { margin:0 0 8px; font-size:clamp(20px,3vw,28px); }
-    .hero-text p  { margin:0; font-size:clamp(14px,2vw,18px); }
-
-    .hero-photos {
-      display:flex; justify-content:center; gap:12px; background:#fff; padding:16px;
+    .hero-kicker {
+      font-size:11px;
+      letter-spacing:0.16em;
+      text-transform:uppercase;
+      color:var(--accent);
+      margin-bottom:10px;
     }
-    .hero-photos img {
-      width:30%; max-width:220px; height:auto; border-radius:8px;
+    .hero-title {
+      margin:0 0 10px;
+      font-size:clamp(26px,4vw,36px);
+      letter-spacing:-0.03em;
+    }
+    .hero-highlight {
+      background:linear-gradient(90deg, rgba(94,234,212,.25), transparent);
+      padding:1px 6px;
+      border-radius:999px;
+    }
+    .hero-lead {
+      margin:0 0 12px;
+      font-size:14px;
+      color:#d5d9e8;
+      line-height:1.6;
+    }
+    .hero-note {
+      font-size:12px;
+      color:var(--muted);
     }
 
-    .right-col{grid-column:1}
-    @media(min-width:1024px){ .right-col{grid-column:2} }
-    .auth-head{ display:flex; align-items:center; gap:8px; margin-bottom:10px }
-
-    .tabbar{ display:flex; gap:8px; margin:8px 0 14px }
-    .tabbar button{
-      background:#0f1320;border:1px solid var(--border);color:#e7edf5;border-radius:999px;padding:6px 10px;cursor:pointer
+    .hero-actions {
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      margin-top:18px;
+      align-items:center;
     }
-    .tabbar button.active{outline:2px solid #2dd}
+    .btn {
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      gap:6px;
+      padding:10px 14px;
+      border-radius:999px;
+      border:1px solid var(--accent);
+      background:linear-gradient(135deg, rgba(56,189,248,.08), rgba(34,211,238,.18));
+      color:var(--text);
+      cursor:pointer;
+      font-size:13px;
+      font-weight:600;
+      text-decoration:none;
+      box-shadow:0 12px 35px rgba(15,23,42,.9);
+    }
+    .btn:hover { filter:brightness(1.08); text-decoration:none; }
+    .btn-ghost {
+      border-color:rgba(148,163,184,.4);
+      background:rgba(15,23,42,.9);
+      color:var(--muted);
+      font-weight:500;
+    }
+    .btn-ghost:hover {
+      border-color:rgba(148,163,184,.7);
+      color:var(--text);
+    }
 
-    .field{display:flex;flex-direction:column;gap:6px;margin:10px 0 2px}
-    input{width:100%;padding:10px 12px;border-radius:12px;border:1px solid var(--border);background:#0f1320;color:#e7edf5}
-    button.primary{margin-top:10px;padding:10px 14px;background:#1d2639;color:#e7edf5;border:1px solid var(--border);border-radius:12px;cursor:pointer}
-    button.primary:hover{background:#223049}
+    .hero-meta {
+      display:flex;
+      flex-wrap:wrap;
+      gap:12px;
+      margin-top:14px;
+      font-size:11px;
+      color:var(--muted);
+    }
+    .hero-meta span {
+      display:inline-flex;
+      align-items:center;
+      gap:4px;
+    }
+    .hero-dot {
+      width:6px;
+      height:6px;
+      border-radius:999px;
+      background:var(--accent);
+      box-shadow:0 0 0 4px rgba(94,234,212,.25);
+    }
 
-    .span-2{grid-column:1}
-    @media(min-width:1024px){ .span-2{grid-column:1 / -1} }
-    .featurelist{display:grid;grid-template-columns:1fr;gap:12px}
-    @media(min-width:700px){.featurelist{grid-template-columns:1fr 1fr}}
-    .feature{border:1px dashed var(--border);border-radius:14px;padding:14px;background:#0f1320}
-@media (max-width: 700px){
-  header{
-    display:grid !important;
-    grid-template-columns: 1fr auto;
-    grid-template-areas:
-      "brand lang"
-      "nav   nav";
-    align-items:center;
-    gap:8px;
-  }
-  .brand{ grid-area: brand; }
-  .lang{  grid-area: lang; display:flex; justify-content:flex-end; }
-  header nav{
-    grid-area: nav;
-    width:100%;
-    display:flex;
-    flex-wrap:wrap;          /* 길면 다음 줄로 자동 줄바꿈 */
-    gap:8px;
-  }
-  header nav a{
-    margin:0;                /* 데스크톱용 여백 제거 */
-    padding:8px 10px;
-    border:1px solid var(--border, #1e2230);
-    border-radius:999px;
-    background:#0f1320;
-    color:#e7edf5;
-    font-size:13px;          /* 기본 모바일 메뉴 글자 */
-    line-height:1.1;
-    white-space:nowrap;      /* 단어 중간 줄바꿈 방지 */
-  }
-  header nav a.nav-privacy{
-    font-size:12px;          /* 개인정보처리방침만 살짝 더 작게 */
-    letter-spacing:-0.2px;
-  }
-  .layout{
-    display:flex;
-    flex-direction:column;
-  }
-  .left-col { order:1; }   /* 본문 먼저 */
-  .left-col .hero-photos{ order:1; }  /* ✅ 이미지 가장 위 */
-  .left-col .hero-dark  { order:2; }
-  .left-col .hero-text  { order:3; }
-  .span-2   { order:2; }   /* ✅ “왜 Measure Master인가요?” 4개 홍보문 */
-  .right-col { order:3; }  /* 인증 카드(우측 칼럼) 아래 */
-}
+    .hero-visual {
+      position:relative;
+      padding:12px;
+      border-radius:26px;
+      background:radial-gradient(circle at 0 0, rgba(94,234,212,.14), transparent 55%), rgba(15,23,42,.96);
+      border:1px solid rgba(148,163,184,.35);
+      box-shadow:0 18px 60px rgba(15,23,42,.96);
+      overflow:hidden;
+    }
+    .hero-visual-inner {
+      border-radius:20px;
+      background:var(--bg-soft);
+      padding:10px;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+    }
+    .phone-frame {
+      border-radius:20px;
+      padding:6px;
+      background:radial-gradient(circle at 0 0, rgba(94,234,212,.3), transparent 55%), #020617;
+      border:1px solid rgba(148,163,184,.4);
+      box-shadow:0 16px 45px rgba(15,23,42,1);
+    }
+    .phone-inner {
+      border-radius:16px;
+      overflow:hidden;
+      background:#000;
+      aspect-ratio:9/19.5;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+    }
+    .phone-inner img {
+      width:100%;
+      height:100%;
+      object-fit:cover;
+    }
+
+    .hero-thumbs {
+      display:flex;
+      gap:10px;
+      margin-top:10px;
+    }
+    .hero-thumbs img {
+      flex:1;
+      border-radius:12px;
+      border:1px solid rgba(148,163,184,.35);
+      background:#020617;
+      max-height:90px;
+      object-fit:cover;
+    }
+
+    .hero-tagline {
+      font-size:11px;
+      color:var(--muted);
+      margin-top:8px;
+    }
+
+    /* 섹션 공통 */
+    section {
+      border-radius:24px;
+      padding:20px 18px 18px;
+      background:rgba(15,23,42,.92);
+      border:1px solid rgba(30,64,175,.55);
+      box-shadow:0 18px 55px rgba(15,23,42,.95);
+    }
+    section.section-soft {
+      background:rgba(10,16,35,.92);
+      border-color:rgba(15,23,42,.9);
+    }
+    section h2 {
+      margin:0 0 10px;
+      font-size:18px;
+      letter-spacing:-0.02em;
+    }
+    section p.section-lead {
+      margin:0 0 12px;
+      font-size:13px;
+      color:var(--muted);
+    }
+
+    /* 대상/페르소나 */
+    .who-grid {
+      display:grid;
+      grid-template-columns:repeat(3,minmax(0,1fr));
+      gap:12px;
+      margin-top:10px;
+    }
+    @media (max-width:900px){
+      .who-grid {
+        grid-template-columns:1fr;
+      }
+    }
+    .who-card {
+      padding:12px 12px 11px;
+      border-radius:16px;
+      border:1px solid rgba(51,65,85,.9);
+      background:radial-gradient(circle at 0 0, rgba(94,234,212,.18), transparent 60%), #020617;
+      font-size:13px;
+    }
+    .who-title {
+      font-weight:600;
+      margin-bottom:4px;
+    }
+    .who-tag {
+      display:inline-flex;
+      margin-bottom:6px;
+      padding:2px 6px;
+      border-radius:999px;
+      background:rgba(15,23,42,.96);
+      border:1px solid rgba(148,163,184,.45);
+      font-size:10px;
+      color:var(--muted);
+    }
+    .who-body {
+      font-size:12px;
+      color:var(--muted);
+      line-height:1.6;
+    }
+
+    /* 기능 */
+    .feat-grid {
+      display:grid;
+      grid-template-columns:repeat(3,minmax(0,1fr));
+      gap:12px;
+      margin-top:10px;
+    }
+    @media (max-width:900px){
+      .feat-grid { grid-template-columns:1fr; }
+    }
+    .feat-card {
+      padding:12px 12px 11px;
+      border-radius:16px;
+      border:1px solid rgba(51,65,85,.9);
+      background:#020617;
+      font-size:13px;
+    }
+    .feat-pill {
+      font-size:10px;
+      color:var(--accent);
+      margin-bottom:4px;
+    }
+    .feat-title {
+      font-weight:600;
+      margin-bottom:4px;
+    }
+    .feat-body {
+      font-size:12px;
+      color:var(--muted);
+      line-height:1.6;
+    }
+
+    /* 스크린샷 */
+    .shots {
+      display:grid;
+      grid-template-columns:repeat(3,minmax(0,1fr));
+      gap:10px;
+      margin-top:10px;
+    }
+    @media (max-width:900px){
+      .shots { grid-template-columns:1fr; }
+    }
+    .shot {
+      border-radius:16px;
+      overflow:hidden;
+      border:1px solid rgba(51,65,85,.9);
+      background:#020617;
+    }
+    .shot img {
+      width:100%;
+      height:210px;
+      object-fit:cover;
+      display:block;
+    }
+    .shot-caption {
+      padding:8px 10px 9px;
+      font-size:11px;
+      color:var(--muted);
+    }
+
+    /* 정확도 / 안내 */
+    .note-list {
+      margin:6px 0 0;
+      padding-left:17px;
+      font-size:12px;
+      color:var(--muted);
+    }
+    .note-list li { margin-bottom:4px; }
+
+    /* CTA */
+    .cta {
+      text-align:center;
+      padding:22px 16px 18px;
+      background:radial-gradient(circle at 0 0, rgba(94,234,212,.22), transparent 55%), rgba(15,23,42,.96);
+      border-color:rgba(94,234,212,.55);
+    }
+    .cta h2 { font-size:19px; }
+    .cta p { font-size:13px; color:#d5d9e8; margin:4px 0 14px; }
+    .cta-actions {
+      display:flex;
+      flex-wrap:wrap;
+      gap:10px;
+      justify-content:center;
+      margin-bottom:8px;
+    }
+    .cta-sub {
+      font-size:11px;
+      color:var(--muted);
+    }
+
+    /* Auth 영역 */
+    #auth {
+      max-width:480px;
+      margin:0 auto;
+    }
+    .auth-headline {
+      font-size:14px;
+      font-weight:600;
+      margin-bottom:4px;
+    }
+    .auth-caption {
+      font-size:12px;
+      color:var(--muted);
+      margin-bottom:10px;
+    }
+    .tabbar {
+      display:inline-flex;
+      gap:6px;
+      padding:3px;
+      border-radius:999px;
+      background:rgba(15,23,42,.95);
+      border:1px solid rgba(51,65,85,.9);
+      margin-bottom:10px;
+    }
+    .tabbar button {
+      border:none;
+      background:transparent;
+      color:var(--muted);
+      padding:5px 10px;
+      border-radius:999px;
+      font-size:12px;
+      cursor:pointer;
+    }
+    .tabbar button.active {
+      background:rgba(15,23,42,1);
+      color:var(--text);
+      box-shadow:0 0 0 1px rgba(94,234,212,.55);
+    }
+    .field {
+      display:flex;
+      flex-direction:column;
+      gap:4px;
+      margin:8px 0 4px;
+      font-size:12px;
+    }
+    .field label { color:#e2e8f0; }
+    input {
+      width:100%;
+      padding:8px 10px;
+      border-radius:10px;
+      border:1px solid rgba(51,65,85,.9);
+      background:rgba(15,23,42,.95);
+      color:var(--text);
+      font-size:13px;
+    }
+    input::placeholder {
+      color:#64748b;
+    }
+    .primary {
+      margin-top:10px;
+      padding:9px 12px;
+      border-radius:999px;
+      border:1px solid rgba(94,234,212,.7);
+      background:rgba(15,23,42,.98);
+      color:var(--text);
+      font-size:13px;
+      font-weight:600;
+      cursor:pointer;
+    }
+    .primary:hover {
+      filter:brightness(1.07);
+    }
+    #logout-btn {
+      margin-left:6px;
+      margin-top:10px;
+      padding:8px 10px;
+      border-radius:999px;
+      border:1px solid rgba(51,65,85,.9);
+      background:rgba(15,23,42,.98);
+      color:var(--muted);
+      font-size:12px;
+      cursor:pointer;
+    }
+
+    /* 방문자 카운터 */
+    #visitCounterHome {
+      margin-top:10px;
+      font-size:11px;
+      color:var(--muted);
+      text-align:center;
+      padding:6px 8px;
+      border-radius:999px;
+      background:rgba(15,23,42,.96);
+      border:1px dashed rgba(51,65,85,.9);
+    }
+
+    footer {
+      margin-top:22px;
+      padding-top:10px;
+      border-top:1px solid rgba(30,64,175,.6);
+      font-size:12px;
+      color:var(--muted);
+      text-align:center;
+    }
+    footer a { color:var(--muted); }
+
+    /* 모바일 헤더 정리 */
+    @media (max-width:720px){
+      header {
+        flex-wrap:wrap;
+        align-items:flex-start;
+      }
+      nav {
+        order:3;
+        width:100%;
+        justify-content:flex-start;
+        flex-wrap:wrap;
+      }
+      nav a {
+        padding:6px 8px;
+        font-size:12px;
+        border-radius:999px;
+        border:1px solid rgba(51,65,85,.9);
+        background:rgba(15,23,42,.96);
+      }
+      nav a.nav-cta {
+        border-color:rgba(94,234,212,.7);
+      }
+    }
   </style>
-
 </head>
 <body>
-<header>
-  <div class="brand">
-    <!-- 로고: /images로 통일 + 다단계 폴백 + eager -->
-    <img
-      src="/images/mm_logo_small.png"
-      alt="Measure Master"
-      class="logo-img no-lazy"
-      width="28" height="28"
-      loading="eager" fetchpriority="high"
-      onerror="
-        if(this.dataset.fbk!=='png'){ this.dataset.fbk='png'; this.src='/images/mm_logo_small.png'; }
-        else { this.onerror=null; this.src='data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2228%22 height=%2228%22><rect width=%2228%22 height=%2228%22 rx=%226%22 fill=%22%230e1422%22/><text x=%2250%25%22 y=%2254%25%22 text-anchor=%22middle%22 dominant-baseline=%22middle%22 font-size=%2214%22 fill=%22%235eead4%22>MM</text></svg>'; }
-      "
-    />
-    <strong>Measure Master</strong>
-    <span class="pill" style="background:#0f1320;border:1px solid var(--border);border-radius:999px;padding:4px 8px;">v1</span>
-  </div>
-  <nav>
-    <a href="#auth">로그인</a>
-    <a href="/howtouse.html">사용법</a>
-    <a href="/reviews.html">사용후기</a>
-    <a href="/privacy.html" class="nav-privacy">개인정보처리방침</a>
-  </nav>
-  <div class="lang">
-    <button type="button" data-lang-btn="ko">🇰🇷 한국어</button>
-    <button type="button" data-lang-btn="en">🇬🇧 English</button>
-  </div>
-</header>
+<div class="page">
+  <header>
+    <div class="brand">
+      <img
+        src="/images/mm_logo_small.png"
+        alt="Measure Master"
+        class="logo-img"
+        width="32" height="32"
+        loading="eager" fetchpriority="high"
+        onerror="
+          if(this.dataset.fbk!=='png'){ this.dataset.fbk='png'; this.src='/images/mm_logo_small.png'; }
+          else { this.onerror=null; this.src='data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2232%22 height=%2232%22><rect width=%2232%22 height=%2232%22 rx=%2210%22 fill=%220e1422%22/><text x=%2250%25%22 y=%2254%25%22 text-anchor=%22middle%22 dominant-baseline=%22middle%22 font-size=%2215%22 fill=%225eead4%22>MM</text></svg>'; }
+        "
+      />
+      <div class="brand-title">
+        <strong>Measure Master</strong>
+        <div class="brand-sub">사진 보정 · 길이·면적 계산 도구</div>
+      </div>
+      <span class="pill">v1 · 현장 테스트 중</span>
+    </div>
 
-<main>
-  <div class="layout">
-    <section class="left-col">
-      <div class="hero-dark">
-        <h1>사진 속 왜곡을 보정해 정확한 길이·면적을 계산</h1>
-        <p>A4 같은 기준 사각형으로 투시 보정 후 길이/면적을 산출합니다. 현장에서 빠르고 간편하게.</p>
+    <nav>
+      <a href="#who">누구에게 필요한가</a>
+      <a href="#features">핵심 기능</a>
+      <a href="#screens">화면 미리보기</a>
+      <a href="#auth" class="nav-cta">테스터 로그인</a>
+      <a href="/howtouse.html">사용법</a>
+      <a href="/reviews.html">사용후기</a>
+      <a href="/privacy.html">개인정보</a>
+    </nav>
+
+    <div class="lang">
+      <button type="button" data-lang-btn="ko" class="active">🇰🇷 KO</button>
+      <button type="button" data-lang-btn="en">🇬🇧 EN</button>
+    </div>
+  </header>
+
+  <main>
+    <!-- HERO -->
+    <section class="hero section-soft">
+      <div class="hero-text-block">
+        <div class="hero-kicker">현장 사진만으로 끝내는 측정</div>
+        <h1 class="hero-title">
+          <span class="hero-highlight">사진 속 왜곡을 보정</span>해<br/>
+          길이·면적을 한 번에 계산합니다.
+        </h1>
+        <p class="hero-lead">
+          A4 용지처럼 크기를 아는 기준 사각형만 있으면,<br/>
+          현장 사진 한 장으로 길이·면적을 근사 계산할 수 있습니다.<br/>
+          줄자 들고 오기 애매한 순간, <strong>Measure Master</strong>로 대신 재 보세요.
+        </p>
+        <p class="hero-note">
+          초정밀 공학 측정이 아닌, <strong>현장 의사결정을 위한 근사값</strong>에 최적화되어 있습니다.
+        </p>
+
+        <div class="hero-actions">
+          <!-- TODO: 실제 스토어 링크로 href 교체 -->
+          <a class="btn" href="#" target="_blank" rel="noopener">
+            Google Play에서 설치 (예정)
+          </a>
+          <a class="btn btn-ghost" href="/howtouse.html">
+            어떻게 쓰나요?
+          </a>
+        </div>
+
+        <div class="hero-meta">
+          <span><span class="hero-dot"></span> 사진 보정 + 자유 도형 측정</span>
+          <span>한국어 우선 설계 · 현장 비즈니스맨용</span>
+        </div>
       </div>
 
-      <div class="hero-text">
-        <h2>귀하는 어떻게 잴 것입니까?</h2>
-        <p>Measure Master는 현장의 불편을 줄이는 새로운 방식의 길이/면적 측정 도구입니다.</p>
-      </div>
+      <aside class="hero-visual" aria-label="앱 화면 미리보기">
+        <div class="hero-visual-inner">
+          <div class="phone-frame">
+            <div class="phone-inner">
+              <img src="/images/mm_photo1.jpg"
+                   alt="Measure Master 측정 화면"
+                   loading="eager"
+                   fetchpriority="high"
+                   onerror="this.onerror=null; this.src='/images/mm_photo1.png';" />
+            </div>
+          </div>
+          <div class="hero-thumbs">
+            <img src="/images/mm_photo2.jpg" alt="측정 예시 2"
+                 loading="lazy"
+                 onerror="this.onerror=null; this.src='/images/mm_photo2.png';" />
+            <img src="/images/mm_photo3.jpg" alt="측정 예시 3"
+                 loading="lazy"
+                 onerror="this.onerror=null; this.src='/images/mm_photo3.png';" />
+          </div>
+          <div class="hero-tagline">
+            화면은 플레이스토어 스크린샷을 기반으로 구성되었습니다.
+          </div>
+        </div>
+      </aside>
+    </section>
 
-      <!-- 히어로 사진 3장: eager + 고정 크기(레이아웃 안정) -->
-      <div class="hero-photos">
-        <img src="/images/mm_photo1.jpg" alt="샘플1" class="no-lazy" loading="eager" fetchpriority="high" width="660" height="440"
-             onerror="this.onerror=null; this.src='/images/mm_photo1.png';" />
-        <img src="/images/mm_photo2.jpg" alt="샘플2" class="no-lazy" loading="eager" fetchpriority="high" width="660" height="440"
-             onerror="this.onerror=null; this.src='/images/mm_photo2.png';" />
-        <img src="/images/mm_photo3.jpg" alt="샘플3" class="no-lazy" loading="eager" fetchpriority="high" width="660" height="440"
-             onerror="this.onerror=null; this.src='/images/mm_photo3.png';" />
+    <!-- WHO -->
+    <section id="who">
+      <h2>Measure Master, 이런 경우에 잘 맞습니다.</h2>
+      <p class="section-lead">
+        “정확히 0.1mm 단위까지” 보다는, <strong>현장에서 바로 의사결정</strong>을 내려야 하는 상황에 초점을 맞췄습니다.
+      </p>
+      <div class="who-grid">
+        <div class="who-card">
+          <div class="who-tag">현장 견적</div>
+          <div class="who-title">시공·리모델링 견적을 빠르게 잡고 싶을 때</div>
+          <div class="who-body">
+            현장 사진만 남겨놓고 나중에 도면으로 다시 재느라 시간 쓰지 마세요.
+            A4 용지 등 기준 사각형만 같이 찍어두면 길이·면적을 다시 계산할 수 있습니다.
+          </div>
+        </div>
+        <div class="who-card">
+          <div class="who-tag">공간·면적 확인</div>
+          <div class="who-title">창호, 도어, 바닥재 등 대략 면적 확인이 필요할 때</div>
+          <div class="who-body">
+            “이 정도면 몇 ㎡ 나올까?”가 궁금할 때,
+            자유 도형 그리기 기능으로 대략적인 면적을 바로 확인할 수 있습니다.
+          </div>
+        </div>
+        <div class="who-card">
+          <div class="who-tag">보고용 자료</div>
+          <div class="who-title">사진 위에 수치를 올려 보고자료로 쓰고 싶을 때</div>
+          <div class="who-body">
+            사진 위에 치수를 직접 표시하고 캡처·공유하여
+            고객/동료와의 커뮤니케이션용 자료로 활용할 수 있습니다.
+          </div>
+        </div>
       </div>
     </section>
 
-    <!-- (우) 인증 카드 -->
-    <section id="auth" class="card right-col">
-      <div class="auth-head">
-        <h3 style="margin:0">회원가입 · 로그인</h3>
-        <!-- 상태 텍스트 제거 -->
+    <!-- FEATURE -->
+    <section id="features" class="section-soft">
+      <h2>핵심 기능 한눈에 보기</h2>
+      <p class="section-lead">
+        사진 투시 보정부터 곡선 길이 측정까지, 현장에서 자주 쓰는 기능들을 중심으로 구성했습니다.
+      </p>
+      <div class="feat-grid">
+        <div class="feat-card">
+          <div class="feat-pill">투시 보정</div>
+          <div class="feat-title">기준 사각형으로 사진 속 왜곡 보정</div>
+          <div class="feat-body">
+            A4 용지처럼 크기를 아는 직사각형을 한 번 설정해 두면,
+            그 위에 놓인 대상의 길이와 면적을 보정해서 계산합니다.
+          </div>
+        </div>
+        <div class="feat-card">
+          <div class="feat-pill">자유 도형</div>
+          <div class="feat-title">직선·곡선·복잡한 형상까지 길이·면적 근사 계산</div>
+          <div class="feat-body">
+            불규칙한 경계선도 손가락으로 따라 그리면 되고,
+            앱이 전체 길이·면적을 합산해 보여줍니다.
+          </div>
+        </div>
+        <div class="feat-card">
+          <div class="feat-pill">현장 친화 UI</div>
+          <div class="feat-title">작은 화면에서도 보이게, 최대한 단순하게</div>
+          <div class="feat-body">
+            현장에서 장갑을 끼고 있어도 조작 가능하도록
+            버튼 수와 화면 단계를 줄이는 방향으로 설계하고 있습니다.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- SCREENSHOTS -->
+    <section id="screens">
+      <h2>화면 미리보기</h2>
+      <p class="section-lead">
+        아래 이미지는 플레이스토어에 사용 중인 스크린샷을 기반으로 합니다.
+      </p>
+      <div class="shots">
+        <figure class="shot">
+          <img src="/images/mm_photo1.jpg" alt="주요 측정 화면"
+               loading="lazy"
+               onerror="this.onerror=null; this.src='/images/mm_photo1.png';" />
+          <figcaption class="shot-caption">
+            기준 사각형을 설정한 뒤, 위에 놓인 대상의 길이·면적을 측정하는 기본 화면.
+          </figcaption>
+        </figure>
+        <figure class="shot">
+          <img src="/images/mm_photo2.jpg" alt="복수 도형 측정 화면"
+               loading="lazy"
+               onerror="this.onerror=null; this.src='/images/mm_photo2.png';" />
+          <figcaption class="shot-caption">
+            여러 개의 도형을 나눠 그려 각각의 면적 및 합계를 확인하는 예시.
+          </figcaption>
+        </figure>
+        <figure class="shot">
+          <img src="/images/mm_photo3.jpg" alt="결과 요약 화면"
+               loading="lazy"
+               onerror="this.onerror=null; this.src='/images/mm_photo3.png';" />
+          <figcaption class="shot-caption">
+            사진 위에 표시된 치수를 그대로 캡처하여 보고용 이미지로 활용할 수 있습니다.
+          </figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <!-- 정확도 / 한계 안내 -->
+    <section class="section-soft">
+      <h2>정확도와 한계에 대하여</h2>
+      <p class="section-lead">
+        Measure Master는 “줄자+현장 감각”을 스마트폰으로 옮겨오는 도구입니다.
+        다음과 같은 특성을 이해하고 사용하시면 좋습니다.
+      </p>
+      <ul class="note-list">
+        <li>초정밀 공학 측정이 아니라, <strong>의사결정용 근사값</strong>을 목표로 합니다.</li>
+        <li>기준 사각형의 실제 길이/폭 수치를 정확하게 입력할수록 결과의 신뢰도가 올라갑니다.</li>
+        <li>사진 각도, 화질, 렌즈 왜곡 등에 따라 오차가 발생할 수 있습니다.</li>
+        <li>법적/계약상 정확도가 필요한 측량에는, 반드시 별도의 전문 장비·절차를 사용해야 합니다.</li>
+      </ul>
+    </section>
+
+    <!-- CTA -->
+    <section class="cta" id="download">
+      <h2>지금 바로, 사진 한 장으로 길이·면적을 재 보세요.</h2>
+      <p>
+        아직은 지인·테스터 위주로 개선 중이지만,<br/>
+        실제 현장에서 바로 써볼 수 있는 수준까지 계속 다듬어 나가고 있습니다.
+      </p>
+      <div class="cta-actions">
+        <a class="btn" href="#" target="_blank" rel="noopener">
+          Google Play에서 설치 (예정)
+        </a>
+        <a class="btn btn-ghost" href="/reviews.html">
+          사용 후기 남기기
+        </a>
+      </div>
+      <div class="cta-sub">
+        설치가 어려우신 분은 <a href="/howtouse.html">사용법 페이지</a>를 먼저 확인해 주세요.
+      </div>
+      <div id="visitCounterHome">방문수 로딩중…</div>
+    </section>
+
+    <!-- AUTH -->
+    <section id="auth">
+      <div class="auth-headline">테스터 · 후기 작성자를 위한 계정</div>
+      <div class="auth-caption">
+        아래에서 이메일 계정을 등록하신 뒤, <a href="/reviews.html">사용후기 페이지</a>에서 피드백을 남겨주세요.
       </div>
 
-      <!-- 기본값: 가입 탭/폼이 보이도록(쿠키/로컬스토리지 초기화에도 노출) -->
       <div id="auth-tabs" class="tabbar" aria-hidden="false">
         <button type="button" id="tab-signup" class="active">가입</button>
         <button type="button" id="tab-login">로그인</button>
       </div>
 
-      <!-- 가입 폼: 기본 표시 -->
+      <!-- 가입 폼 -->
       <form id="signup-form" autocomplete="on">
         <div class="field">
           <label for="signup-email">이메일</label>
@@ -238,10 +863,13 @@
           <input id="signup-password2" name="password2" type="password" required minlength="8" placeholder="한 번 더 입력">
         </div>
         <button type="submit" class="primary">회원가입</button>
-        <p class="muted" style="margin:8px 0 0">이미 계정이 있으신가요? <a href="#" id="go-login">로그인</a></p>
+        <p style="margin:6px 0 0; font-size:12px; color:var(--muted);">
+          이미 계정이 있으신가요?
+          <a href="#" id="go-login">로그인으로 이동</a>
+        </p>
       </form>
 
-      <!-- 로그인 폼: 기본 숨김 -->
+      <!-- 로그인 폼 -->
       <form id="login-form" autocomplete="on" hidden>
         <div class="field">
           <label for="login-email">이메일</label>
@@ -252,53 +880,36 @@
           <input id="login-password" name="password" type="password" required minlength="8" placeholder="8자 이상">
         </div>
         <button type="submit" class="primary">로그인</button>
-        <button type="button" id="logout-btn" style="margin-left:8px;display:none">로그아웃</button>
+        <button type="button" id="logout-btn" style="display:none">로그아웃</button>
       </form>
-
-      <p class="muted" style="margin-top:10px">
-        후기를 남기시려면 <a href="/reviews.html">사용후기 페이지</a>로 이동하세요.
-      </p>
-      <div id="visitCounterHome" class="visit-counter">방문수 로딩중…</div>
     </section>
+  </main>
 
-    <!-- 기능 요약 -->
-    <section class="card span-2">
-      <h3>왜 Measure Master인가요?</h3>
-      <div class="featurelist">
-        <div class="feature">
-          <strong>정확한 투시 보정</strong>
-          <p class="muted">A4 용지처럼 생긴 기준 직사각형 폭과 높이 수치를 지정해 주면 사진속의 측정 대상을 기준 사각형을 이용,  투시 보정해 길이·면적을 신뢰성 있게 계산.</p>
-        </div>
-        <div class="feature">
-          <strong>실측 친화 UI</strong>
-          <p class="muted"> 비정형 직선 도형이나 무작위 곡선 도형의 길이/면적 계산도 현장에서 휴대폰으로 즉각 처리토록 설계.</p>
-        </div>
-        <div class="feature">
-          <strong>빠른 결과</strong>
-          <p class="muted">보정 후 즉시 길이 합계, 면적 합계 표시. 내보내기 및 공유도 간편.</p>
-        </div>
-        <div class="feature">
-          <strong>피드백 루프</strong>
-          <p class="muted">사용자 후기 기반 개선. 버그 리포트/요청은 후기 게시판으로 알려주세요.</p>
-        </div>
-      </div>
-    </section>
-  </div>
-</main>
+  <footer>
+    © <span id="year"></span> Measure Master. All rights reserved.
+    · <a href="/privacy.html">개인정보처리방침</a>
+  </footer>
+</div>
 
-<footer>
-  © <span id="year"></span> Measure Master. All rights reserved.
-</footer>
-
-<!-- Supabase -->
+<!-- Supabase & 기존 스크립트 유지 -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="/js/mm-auth.js?v=auth_r1"></script>
 <script src="/js/index.js?v=rev1"></script>
 <script>
-document.addEventListener('DOMContentLoaded', function(){
-  const b=document.getElementById('logout-btn');
-  if(b){ b.addEventListener('click', async function(e){ e.preventDefault(); try{ await window.mmAuth?.signOut?.(); } finally { location.reload(); } }); }
-});
+  document.addEventListener('DOMContentLoaded', function(){
+    // 로그아웃 버튼
+    const b = document.getElementById('logout-btn');
+    if (b) {
+      b.addEventListener('click', async function(e){
+        e.preventDefault();
+        try { await window.mmAuth?.signOut?.(); }
+        finally { location.reload(); }
+      });
+    }
+    // 연도 표시
+    const y = document.getElementById('year');
+    if (y) y.textContent = new Date().getFullYear();
+  });
 </script>
 </body>
 </html>
