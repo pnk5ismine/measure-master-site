@@ -12,10 +12,10 @@
   <meta http-equiv="Expires" content="0">
 
   <!-- 파비콘 -->
-  <link rel="icon" type="image/png" href="/images/mm_logo.png?v=rev5" />
+  <link rel="icon" type="image/png" href="/images/mm_logo_small.png?v=rev4" />
   <link rel="alternate icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='28' fill='%230e1422'/%3E%3Ctext x='32' y='39' font-size='28' text-anchor='middle' fill='%235eead4'%3EM%3C/text%3E%3C/svg%3E"/>
 
-  <!-- 주요 이미지 프리로드 (Play 스토어용 스크린샷 재사용) -->
+  <!-- 주요 이미지 프리로드 (images/index 폴더 사용) -->
   <link rel="preload" as="image" href="/images/index/home1.jpg" />
   <link rel="preload" as="image" href="/images/index/sm_01.jpg" />
   <link rel="preload" as="image" href="/images/index/sm_03.jpg" />
@@ -142,7 +142,7 @@
       font-weight:600;
     }
 
-    /* 레이아웃 */
+    /* 메인 레이아웃 */
     main {
       display:flex;
       flex-direction:column;
@@ -150,16 +150,13 @@
       margin-top:16px;
     }
 
+    /* HERO 전체: 세로 스택 */
     .hero {
-      display:grid;
-      grid-template-columns:1.25fr .95fr;
-      gap:28px;
-      align-items:center;
-    }
-    @media (max-width:900px){
-      .hero {
-        grid-template-columns:1fr;
-      }
+      display:flex;
+      flex-direction:column;
+      gap:18px;
+      margin-top:4px;
+      padding-top:4px;
     }
 
     .hero-text-block {
@@ -172,6 +169,10 @@
         0 0 0 1px rgba(15,23,42,.9) inset;
       position:relative;
       overflow:hidden;
+
+      max-width:720px;
+      margin:0 auto;
+      text-align:center;
     }
     .hero-kicker {
       font-size:11px;
@@ -207,7 +208,88 @@
       gap:10px;
       margin-top:18px;
       align-items:center;
+      justify-content:center;
     }
+    .hero-meta {
+      display:flex;
+      flex-wrap:wrap;
+      gap:12px;
+      margin-top:14px;
+      font-size:11px;
+      color:var(--muted);
+      justify-content:center;
+      text-align:center;
+    }
+    .hero-meta span {
+      display:inline-flex;
+      align-items:center;
+      gap:4px;
+    }
+    .hero-dot {
+      width:6px;
+      height:6px;
+      border-radius:999px;
+      background:var(--accent);
+      box-shadow:0 0 0 4px rgba(94,234,212,.25);
+    }
+
+    /* HERO 이미지 3개 가로 배열 */
+    .hero-visual-row {
+      width:100%;
+      max-width:960px;
+      margin:0 auto;
+      display:grid;
+      grid-template-columns:repeat(3,minmax(0,1fr));
+      gap:12px;
+    }
+    .hero-shot {
+      border-radius:20px;
+      padding:8px;
+      background:radial-gradient(circle at 0 0, rgba(94,234,212,.18), transparent 60%), #020617;
+      border:1px solid rgba(148,163,184,.35);
+      box-shadow:0 14px 40px rgba(15,23,42,.85);
+      display:flex;
+      align-items:center;
+      justify-content:center;
+    }
+    .hero-shot.main-shot .phone-frame {
+      width:100%;
+      border-radius:18px;
+    }
+    .phone-frame {
+      border-radius:20px;
+      padding:6px;
+      background:radial-gradient(circle at 0 0, rgba(94,234,212,.3), transparent 55%), #020617;
+      border:1px solid rgba(148,163,184,.4);
+      box-shadow:0 16px 45px rgba(15,23,42,1);
+    }
+    .phone-inner {
+      border-radius:16px;
+      overflow:hidden;
+      background:#000;
+      aspect-ratio:9/19.5;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+    }
+    .phone-inner img {
+      width:100%;
+      height:100%;
+      object-fit:cover;
+    }
+    .hero-shot img {
+      display:block;
+      width:100%;
+      border-radius:14px;
+      object-fit:cover;
+    }
+    @media (max-width:900px){
+      .hero-visual-row {
+        grid-template-columns:1fr;
+      }
+    }
+
+    /* 버튼 공통 */
     .btn {
       display:inline-flex;
       align-items:center;
@@ -236,86 +318,6 @@
       color:var(--text);
     }
 
-    .hero-meta {
-      display:flex;
-      flex-wrap:wrap;
-      gap:12px;
-      margin-top:14px;
-      font-size:11px;
-      color:var(--muted);
-    }
-    .hero-meta span {
-      display:inline-flex;
-      align-items:center;
-      gap:4px;
-    }
-    .hero-dot {
-      width:6px;
-      height:6px;
-      border-radius:999px;
-      background:var(--accent);
-      box-shadow:0 0 0 4px rgba(94,234,212,.25);
-    }
-
-    .hero-visual {
-      position:relative;
-      padding:12px;
-      border-radius:26px;
-      background:radial-gradient(circle at 0 0, rgba(94,234,212,.14), transparent 55%), rgba(15,23,42,.96);
-      border:1px solid rgba(148,163,184,.35);
-      box-shadow:0 18px 60px rgba(15,23,42,.96);
-      overflow:hidden;
-    }
-    .hero-visual-inner {
-      border-radius:20px;
-      background:var(--bg-soft);
-      padding:10px;
-      display:flex;
-      flex-direction:column;
-      gap:10px;
-    }
-    .phone-frame {
-      border-radius:20px;
-      padding:6px;
-      background:radial-gradient(circle at 0 0, rgba(94,234,212,.3), transparent 55%), #020617;
-      border:1px solid rgba(148,163,184,.4);
-      box-shadow:0 16px 45px rgba(15,23,42,1);
-    }
-    .phone-inner {
-      border-radius:16px;
-      overflow:hidden;
-      background:#000;
-      aspect-ratio:9/19.5;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-    }
-    .phone-inner img {
-      width:100%;
-      height:100%;
-      object-fit:cover;
-    }
-
-    .hero-thumbs {
-      display:flex;
-      gap:10px;
-      margin-top:10px;
-    }
-    .hero-thumbs img {
-      flex:1;
-      border-radius:12px;
-      border:1px solid rgba(148,163,184,.35);
-      background:#020617;
-      max-height:90px;
-      object-fit:cover;
-    }
-
-    .hero-tagline {
-      font-size:11px;
-      color:var(--muted);
-      margin-top:8px;
-    }
-
     /* 섹션 공통 */
     section {
       border-radius:24px;
@@ -339,7 +341,7 @@
       color:var(--muted);
     }
 
-    /* 대상/페르소나 */
+    /* WHO 섹션 */
     .who-grid {
       display:grid;
       grid-template-columns:repeat(3,minmax(0,1fr));
@@ -347,9 +349,7 @@
       margin-top:10px;
     }
     @media (max-width:900px){
-      .who-grid {
-        grid-template-columns:1fr;
-      }
+      .who-grid { grid-template-columns:1fr; }
     }
     .who-card {
       padding:12px 12px 11px;
@@ -378,7 +378,7 @@
       line-height:1.6;
     }
 
-    /* 기능 */
+    /* 기능 섹션 */
     .feat-grid {
       display:grid;
       grid-template-columns:repeat(3,minmax(0,1fr));
@@ -410,7 +410,7 @@
       line-height:1.6;
     }
 
-    /* 스크린샷 */
+    /* 스크린샷 섹션 */
     .shots {
       display:grid;
       grid-template-columns:repeat(3,minmax(0,1fr));
@@ -438,7 +438,7 @@
       color:var(--muted);
     }
 
-    /* 정확도 / 안내 */
+    /* 정확도 안내 */
     .note-list {
       margin:6px 0 0;
       padding-left:17px;
@@ -447,7 +447,7 @@
     }
     .note-list li { margin-bottom:4px; }
 
-    /* CTA */
+    /* CTA 섹션 */
     .cta {
       text-align:center;
       padding:22px 16px 18px;
@@ -537,9 +537,7 @@
       font-weight:600;
       cursor:pointer;
     }
-    .primary:hover {
-      filter:brightness(1.07);
-    }
+    .primary:hover { filter:brightness(1.07); }
     #logout-btn {
       margin-left:6px;
       margin-top:10px;
@@ -640,6 +638,7 @@
   <main>
     <!-- HERO -->
     <section class="hero section-soft">
+      <!-- 1) 맨 위 가운데 정렬 텍스트 카드 -->
       <div class="hero-text-block">
         <div class="hero-kicker">현장 사진만으로 끝내는 측정</div>
         <h1 class="hero-title">
@@ -671,30 +670,37 @@
         </div>
       </div>
 
-      <aside class="hero-visual" aria-label="앱 화면 미리보기">
-        <div class="hero-visual-inner">
+      <!-- 2) 그 아래 3개 이미지 가로 배열 -->
+      <div class="hero-visual-row" aria-label="앱 화면 미리보기">
+        <!-- 가운데 큰 화면 -->
+        <div class="hero-shot main-shot">
           <div class="phone-frame">
             <div class="phone-inner">
               <img src="/images/index/home1.jpg"
-                 alt="Measure Master 메인 측정 화면"
-                 loading="eager"
-                 fetchpriority="high"
-                 onerror="this.onerror=null; this.src='/images/index/screen_full.jpg';" />
+                   alt="Measure Master 메인 측정 화면"
+                   loading="eager"
+                   fetchpriority="high"
+                   onerror="this.onerror=null; this.src='/images/index/screen_full.jpg';" />
             </div>
-          </div>
-            <div class="hero-thumbs">
-              <img src="/images/index/sm_01.jpg" alt="스크린 모드 예시 1"
-                   loading="lazy"
-                   onerror="this.onerror=null; this.src='/images/index/sm_02.jpg';" />
-              <img src="/images/index/sm_03.jpg" alt="스크린 모드 예시 2"
-                   loading="lazy"
-                   onerror="this.onerror=null; this.src='/images/index/sm_02.jpg';" />
-            </div>
-          <div class="hero-tagline">
-            화면은 플레이스토어 스크린샷을 기반으로 구성되었습니다.
           </div>
         </div>
-      </aside>
+
+        <!-- 왼쪽 서브 이미지 -->
+        <div class="hero-shot">
+          <img src="/images/index/sm_01.jpg"
+               alt="스크린 모드 예시 1"
+               loading="lazy"
+               onerror="this.onerror=null; this.src='/images/index/sm_02.jpg';" />
+        </div>
+
+        <!-- 오른쪽 서브 이미지 -->
+        <div class="hero-shot">
+          <img src="/images/index/sm_03.jpg"
+               alt="스크린 모드 예시 2"
+               loading="lazy"
+               onerror="this.onerror=null; this.src='/images/index/sm_02.jpg';" />
+        </div>
+      </div>
     </section>
 
     <!-- WHO -->
@@ -781,12 +787,12 @@
           </figcaption>
         </figure>
         <figure class="shot">
-            <img src="/images/index/AR_02.jpg" alt="AR 모드로 실제 공간 측정"
-                 loading="lazy"
-                 onerror="this.onerror=null; this.src='/images/index/AR_03.jpg';" />
-            <figcaption class="shot-caption">
-              AR 모드를 이용해 실제 공간에서 선분 길이를 측정하는 화면 예시입니다.
-            </figcaption>
+          <img src="/images/index/AR_02.jpg" alt="AR 모드로 실제 공간 측정"
+               loading="lazy"
+               onerror="this.onerror=null; this.src='/images/index/AR_03.jpg';" />
+          <figcaption class="shot-caption">
+            AR 모드를 이용해 실제 공간에서 선분 길이를 측정하는 화면 예시입니다.
+          </figcaption>
         </figure>
         <figure class="shot">
           <img src="/images/index/config_01_ko.jpg" alt="측정 설정 및 모드 설명 화면"
@@ -890,7 +896,7 @@
   </footer>
 </div>
 
-<!-- Supabase & 기존 스크립트 유지 -->
+<!-- Supabase & 기존 스크립트 -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="/js/mm-auth.js?v=auth_r1"></script>
 <script src="/js/index.js?v=rev1"></script>
