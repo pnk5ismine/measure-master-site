@@ -1,24 +1,23 @@
 <!doctype html>
-<html lang="ko" data-lang="ko">
+<html lang="en" data-lang="en">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Measure Master — 사진 보정 · 길이·면적 계산</title>
-  <meta name="description" content="현장 사진 속 왜곡을 보정하고 길이·면적을 빠르게 계산하는 Measure Master. 기준 사각형(A4 등)만 있으면 어디서나 근사치 측정 가능." />
+  <title>Measure Master — 3-in-1 measuring tool</title>
+  <meta name="description" content="Measure Master is a 3-in-1 measuring tool that combines AR measuring, photo perspective correction, and on-screen measurement in a single app." />
 
-  <!-- 캐시 방지 -->
+  <!-- No cache -->
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
 
-  <!-- 파비콘 -->
+  <!-- Favicon -->
   <link rel="icon" type="image/png" href="/images/mm_logo_small.png?v=rev4" />
-  <link rel="alternate icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='28' fill='%230e1422'/%3E%3Ctext x='32' y='39' font-size='28' text-anchor='middle' fill='%235eead4'%3EM%3C/text%3E%3C/svg%3E"/>
 
-  <!-- 주요 이미지 프리로드 (images/index 폴더 사용) -->
-  <link rel="preload" as="image" href="/images/index/home1.jpg" />
+  <!-- Preload key images -->
+  <link rel="preload" as="image" href="/images/index/ar_00.png" />
+  <link rel="preload" as="image" href="/images/index/pm_00.jpg" />
   <link rel="preload" as="image" href="/images/index/sm_01.jpg" />
-  <link rel="preload" as="image" href="/images/index/sm_03.jpg" />
 
   <style>
     :root {
@@ -37,7 +36,7 @@
     * { box-sizing:border-box; }
     html, body { margin:0; padding:0; }
     body {
-      font-family: system-ui,-apple-system,Segoe UI,Roboto,'Noto Sans KR',sans-serif;
+      font-family: system-ui,-apple-system,Segoe UI,Roboto,'Noto Sans',sans-serif;
       background:
         radial-gradient(circle at 0 0, rgba(94,234,212,.23), transparent 55%),
         radial-gradient(circle at 100% 100%, rgba(59,130,246,.18), transparent 55%),
@@ -54,7 +53,7 @@
       padding:16px 16px 40px;
     }
 
-    /* 헤더 */
+    /* Header */
     header {
       display:flex;
       align-items:center;
@@ -102,6 +101,8 @@
       align-items:center;
       gap:12px;
       font-size:13px;
+      flex-wrap:wrap;
+      justify-content:flex-end;
     }
     nav a {
       color:#cdd5f0;
@@ -142,7 +143,6 @@
       font-weight:600;
     }
 
-    /* 메인 레이아웃 */
     main {
       display:flex;
       flex-direction:column;
@@ -150,28 +150,18 @@
       margin-top:16px;
     }
 
-    /* HERO 전체: 세로 스택 */
+    /* HERO with main frame + 3 mode cards */
     .hero {
-      display:flex;
-      flex-direction:column;
-      gap:18px;
-      margin-top:4px;
-      padding-top:4px;
+      border-radius:24px;
+      padding:22px 18px 20px;
+      background:radial-gradient(circle at 0 0, rgba(94,234,212,.16), transparent 55%), rgba(10,16,35,.96);
+      border:1px solid rgba(30,64,175,.7);
+      box-shadow:0 18px 55px rgba(15,23,42,.95);
     }
 
-    .hero-text-block {
-      padding:22px 22px 20px;
-      border-radius:24px;
-      background:linear-gradient(135deg, rgba(15,23,42,.96), rgba(15,23,42,.94));
-      border:1px solid rgba(148,163,184,.45);
-      box-shadow:
-        0 18px 55px rgba(15,23,42,.9),
-        0 0 0 1px rgba(15,23,42,.9) inset;
-      position:relative;
-      overflow:hidden;
-
-      max-width:720px;
-      margin:0 auto;
+    .hero-header {
+      max-width:780px;
+      margin:0 auto 24px auto;
       text-align:center;
     }
     .hero-kicker {
@@ -179,117 +169,32 @@
       letter-spacing:0.16em;
       text-transform:uppercase;
       color:var(--accent);
-      margin-bottom:10px;
+      margin-bottom:8px;
     }
     .hero-title {
-      margin:0 0 10px;
-      font-size:clamp(26px,4vw,36px);
+      margin:0 0 8px;
+      font-size:clamp(28px,4vw,36px);
       letter-spacing:-0.03em;
     }
-    .hero-highlight {
-      background:linear-gradient(90deg, rgba(94,234,212,.25), transparent);
-      padding:1px 6px;
-      border-radius:999px;
+    .hero-subtitle {
+      margin:0 0 6px;
+      font-size:16px;
+      color:#cdd5f0;
     }
-    .hero-lead {
-      margin:0 0 12px;
-      font-size:14px;
-      color:#d5d9e8;
-      line-height:1.6;
-    }
-    .hero-note {
-      font-size:12px;
+    .hero-tagline {
+      margin:0;
+      font-size:13px;
       color:var(--muted);
     }
-
     .hero-actions {
       display:flex;
       flex-wrap:wrap;
       gap:10px;
-      margin-top:18px;
+      margin-top:16px;
       align-items:center;
       justify-content:center;
-    }
-    .hero-meta {
-      display:flex;
-      flex-wrap:wrap;
-      gap:12px;
-      margin-top:14px;
-      font-size:11px;
-      color:var(--muted);
-      justify-content:center;
-      text-align:center;
-    }
-    .hero-meta span {
-      display:inline-flex;
-      align-items:center;
-      gap:4px;
-    }
-    .hero-dot {
-      width:6px;
-      height:6px;
-      border-radius:999px;
-      background:var(--accent);
-      box-shadow:0 0 0 4px rgba(94,234,212,.25);
     }
 
-    /* HERO 이미지 3개 가로 배열 */
-    .hero-visual-row {
-      width:100%;
-      max-width:960px;
-      margin:0 auto;
-      display:grid;
-      grid-template-columns:repeat(3,minmax(0,1fr));
-      gap:12px;
-    }
-    .hero-shot {
-      border-radius:20px;
-      padding:8px;
-      background:radial-gradient(circle at 0 0, rgba(94,234,212,.18), transparent 60%), #020617;
-      border:1px solid rgba(148,163,184,.35);
-      box-shadow:0 14px 40px rgba(15,23,42,.85);
-      display:flex;
-      align-items:center;
-      justify-content:center;
-    }
-    .hero-shot.main-shot .phone-frame {
-      width:100%;
-      border-radius:18px;
-    }
-    .phone-frame {
-      border-radius:20px;
-      padding:6px;
-      background:radial-gradient(circle at 0 0, rgba(94,234,212,.3), transparent 55%), #020617;
-      border:1px solid rgba(148,163,184,.4);
-      box-shadow:0 16px 45px rgba(15,23,42,1);
-    }
-    .phone-inner {
-      border-radius:16px;
-      overflow:hidden;
-      background:#000;
-      aspect-ratio:9/19.5;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-    }
-    .phone-inner img {
-      width:100%;
-      height:100%;
-      object-fit:cover;
-    }
-    .hero-shot img {
-      display:block;
-      width:100%;
-      border-radius:14px;
-      object-fit:cover;
-    }
-    @media (max-width:900px){
-      .hero-visual-row {
-        grid-template-columns:1fr;
-      }
-    }
-
-    /* 버튼 공통 */
     .btn {
       display:inline-flex;
       align-items:center;
@@ -318,7 +223,52 @@
       color:var(--text);
     }
 
-    /* 섹션 공통 */
+    .hero-modes {
+      display:grid;
+      grid-template-columns:repeat(3,minmax(0,1fr));
+      gap:14px;
+      margin-top:10px;
+    }
+    @media (max-width:900px){
+      .hero-modes {
+        grid-template-columns:1fr;
+      }
+    }
+
+    .mode-card {
+      border-radius:20px;
+      padding:12px 12px 14px;
+      background:#020617;
+      border:1px solid rgba(51,65,85,.9);
+      box-shadow:0 14px 40px rgba(15,23,42,.9);
+      display:flex;
+      flex-direction:column;
+      gap:8px;
+    }
+    .mode-image-wrap {
+      border-radius:16px;
+      overflow:hidden;
+      background:#000;
+      border:1px solid rgba(30,64,175,.6);
+    }
+    .mode-image-wrap img {
+      width:100%;
+      height:190px;
+      object-fit:cover;
+      display:block;
+    }
+    .mode-title {
+      font-size:15px;
+      font-weight:600;
+      margin-top:4px;
+    }
+    .mode-body {
+      font-size:13px;
+      color:var(--muted);
+      line-height:1.5;
+    }
+
+    /* Sections */
     section {
       border-radius:24px;
       padding:20px 18px 18px;
@@ -341,7 +291,7 @@
       color:var(--muted);
     }
 
-    /* WHO 섹션 */
+    /* WHO section */
     .who-grid {
       display:grid;
       grid-template-columns:repeat(3,minmax(0,1fr));
@@ -378,7 +328,7 @@
       line-height:1.6;
     }
 
-    /* 기능 섹션 */
+    /* Features */
     .feat-grid {
       display:grid;
       grid-template-columns:repeat(3,minmax(0,1fr));
@@ -410,7 +360,7 @@
       line-height:1.6;
     }
 
-    /* 스크린샷 섹션 */
+    /* Screenshots */
     .shots {
       display:grid;
       grid-template-columns:repeat(3,minmax(0,1fr));
@@ -438,7 +388,7 @@
       color:var(--muted);
     }
 
-    /* 정확도 안내 */
+    /* Accuracy / limits */
     .note-list {
       margin:6px 0 0;
       padding-left:17px;
@@ -447,7 +397,7 @@
     }
     .note-list li { margin-bottom:4px; }
 
-    /* CTA 섹션 */
+    /* CTA */
     .cta {
       text-align:center;
       padding:22px 16px 18px;
@@ -468,7 +418,7 @@
       color:var(--muted);
     }
 
-    /* Auth 영역 */
+    /* Auth */
     #auth {
       max-width:480px;
       margin:0 auto;
@@ -550,7 +500,7 @@
       cursor:pointer;
     }
 
-    /* 방문자 카운터 */
+    /* Visit counter */
     #visitCounterHome {
       margin-top:10px;
       font-size:11px;
@@ -572,7 +522,7 @@
     }
     footer a { color:var(--muted); }
 
-    /* 모바일 헤더 정리 */
+    /* Mobile header tweaks */
     @media (max-width:720px){
       header {
         flex-wrap:wrap;
@@ -582,7 +532,6 @@
         order:3;
         width:100%;
         justify-content:flex-start;
-        flex-wrap:wrap;
       }
       nav a {
         padding:6px 8px;
@@ -603,169 +552,161 @@
     <div class="brand">
       <img
         src="/images/mm_logo_small.png"
-        alt="Measure Master"
+        alt="Measure Master logo"
         class="logo-img"
         width="32" height="32"
         loading="eager" fetchpriority="high"
-        onerror="
-          if(this.dataset.fbk!=='png'){ this.dataset.fbk='png'; this.src='/images/mm_logo_small.png'; }
-          else { this.onerror=null; this.src='data:image/svg+xml;utf8,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2232%22 height=%2232%22><rect width=%2232%22 height=%2232%22 rx=%2210%22 fill=%220e1422%22/><text x=%2250%25%22 y=%2254%25%22 text-anchor=%22middle%22 dominant-baseline=%22middle%22 font-size=%2215%22 fill=%225eead4%22>MM</text></svg>'; }
-        "
       />
       <div class="brand-title">
         <strong>Measure Master</strong>
-        <div class="brand-sub">사진 보정 · 길이·면적 계산 도구</div>
+        <div class="brand-sub">3-in-1 measuring tool</div>
       </div>
-      <span class="pill">v1 · 현장 테스트 중</span>
+      <span class="pill">v1 · field testing</span>
     </div>
 
     <nav>
-      <a href="#who">누구에게 필요한가</a>
-      <a href="#features">핵심 기능</a>
-      <a href="#screens">화면 미리보기</a>
-      <a href="#auth" class="nav-cta">테스터 로그인</a>
-      <a href="/howtouse.html">사용법</a>
-      <a href="/reviews.html">사용후기</a>
-      <a href="/privacy.html">개인정보</a>
+      <a href="#who">Who it’s for</a>
+      <a href="#features">Key features</a>
+      <a href="#screens">Screenshots</a>
+      <a href="#auth" class="nav-cta">Tester login</a>
+      <a href="/howtouse.html">How to use</a>
+      <a href="/reviews.html">Reviews</a>
+      <a href="/privacy.html">Privacy</a>
     </nav>
 
     <div class="lang">
-      <button type="button" data-lang-btn="ko" class="active">🇰🇷 KO</button>
-      <button type="button" data-lang-btn="en">🇬🇧 EN</button>
+      <button type="button" data-lang-btn="en" class="active">EN</button>
+      <button type="button" data-lang-btn="ko">KO</button>
     </div>
   </header>
 
   <main>
     <!-- HERO -->
-    <section class="hero section-soft">
-      <!-- 1) 맨 위 가운데 정렬 텍스트 카드 -->
-      <div class="hero-text-block">
-        <div class="hero-kicker">현장 사진만으로 끝내는 측정</div>
-        <h1 class="hero-title">
-          <span class="hero-highlight">사진 속 왜곡을 보정</span>해<br/>
-          길이·면적을 한 번에 계산합니다.
-        </h1>
-        <p class="hero-lead">
-          A4 용지처럼 크기를 아는 기준 사각형만 있으면,<br/>
-          현장 사진 한 장으로 길이·면적을 근사 계산할 수 있습니다.<br/>
-          줄자 들고 오기 애매한 순간, <strong>Measure Master</strong>로 대신 재 보세요.
-        </p>
-        <p class="hero-note">
-          초정밀 공학 측정이 아닌, <strong>현장 의사결정을 위한 근사값</strong>에 최적화되어 있습니다.
+    <section class="hero">
+      <div class="hero-header">
+        <div class="hero-kicker">All-in-one measuring app</div>
+        <h1 class="hero-title">3-in-1 measuring tool</h1>
+        <p class="hero-subtitle">AR, photo perspective, and on-screen.</p>
+        <p class="hero-tagline">
+          Measure real-world distances, correct perspective in photos, and draw shapes directly on your screen — all in one place.
         </p>
 
         <div class="hero-actions">
-          <!-- TODO: 실제 스토어 링크로 href 교체 -->
+          <!-- TODO: replace with real Play Store link -->
           <a class="btn" href="#" target="_blank" rel="noopener">
-            Google Play에서 설치 (예정)
+            Get it on Google Play (soon)
           </a>
           <a class="btn btn-ghost" href="/howtouse.html">
-            어떻게 쓰나요?
+            See how it works
           </a>
-        </div>
-
-        <div class="hero-meta">
-          <span><span class="hero-dot"></span> 사진 보정 + 자유 도형 측정</span>
-          <span>한국어 우선 설계 · 현장 비즈니스맨용</span>
         </div>
       </div>
 
-      <!-- 2) 그 아래 3개 이미지 가로 배열 -->
-      <div class="hero-visual-row" aria-label="앱 화면 미리보기">
-        <!-- 가운데 큰 화면 -->
-        <div class="hero-shot main-shot">
-          <div class="phone-frame">
-            <div class="phone-inner">
-              <img src="/images/index/home1.jpg"
-                   alt="Measure Master 메인 측정 화면"
-                   loading="eager"
-                   fetchpriority="high"
-                   onerror="this.onerror=null; this.src='/images/index/screen_full.jpg';" />
-            </div>
+      <div class="hero-modes">
+        <!-- AR mode -->
+        <article class="mode-card">
+          <div class="mode-image-wrap">
+            <img src="/images/index/ar_00.png"
+                 alt="AR mode measuring a table in a living room"
+                 loading="lazy" />
           </div>
-        </div>
+          <div class="mode-title">AR mode</div>
+          <div class="mode-body">
+            Measure real-time distance between two points indoors using the AR camera.
+          </div>
+        </article>
 
-        <!-- 왼쪽 서브 이미지 -->
-        <div class="hero-shot">
-          <img src="/images/index/sm_01.jpg"
-               alt="스크린 모드 예시 1"
-               loading="lazy"
-               onerror="this.onerror=null; this.src='/images/index/sm_02.jpg';" />
-        </div>
+        <!-- Photo perspective mode -->
+        <article class="mode-card">
+          <div class="mode-image-wrap">
+            <img src="/images/index/pm_00.jpg"
+                 alt="Photo perspective mode measuring a building facade"
+                 loading="lazy" />
+          </div>
+          <div class="mode-title">Photo perspective mode</div>
+          <div class="mode-body">
+            Estimate the actual perimeter or area in a photo using a basic reference rectangle and perspective correction.
+          </div>
+        </article>
 
-        <!-- 오른쪽 서브 이미지 -->
-        <div class="hero-shot">
-          <img src="/images/index/sm_03.jpg"
-               alt="스크린 모드 예시 2"
-               loading="lazy"
-               onerror="this.onerror=null; this.src='/images/index/sm_02.jpg';" />
-        </div>
+        <!-- On-screen mode -->
+        <article class="mode-card">
+          <div class="mode-image-wrap">
+            <img src="/images/index/sm_01.jpg"
+                 alt="On-screen mode with free-drawn shapes and area labels"
+                 loading="lazy" />
+          </div>
+          <div class="mode-title">On-screen mode</div>
+          <div class="mode-body">
+            Draw shapes directly on your screen and get approximate length and area immediately.
+          </div>
+        </article>
       </div>
     </section>
 
     <!-- WHO -->
     <section id="who">
-      <h2>Measure Master, 이런 경우에 잘 맞습니다.</h2>
+      <h2>Who is Measure Master for?</h2>
       <p class="section-lead">
-        “정확히 0.1mm 단위까지” 보다는, <strong>현장에서 바로 의사결정</strong>을 내려야 하는 상황에 초점을 맞췄습니다.
+        It’s optimized not for ultra-precise engineering work, but for <strong>fast decisions on site</strong>.
       </p>
       <div class="who-grid">
         <div class="who-card">
-          <div class="who-tag">현장 견적</div>
-          <div class="who-title">시공·리모델링 견적을 빠르게 잡고 싶을 때</div>
+          <div class="who-tag">Job-site estimates</div>
+          <div class="who-title">Contractors and remodelers</div>
           <div class="who-body">
-            현장 사진만 남겨놓고 나중에 도면으로 다시 재느라 시간 쓰지 마세요.
-            A4 용지 등 기준 사각형만 같이 찍어두면 길이·면적을 다시 계산할 수 있습니다.
+            Take one photo on site instead of drawing a quick sketch.
+            As long as you include a known rectangle (like A4 paper), you can revisit the photo later and estimate lengths and areas.
           </div>
         </div>
         <div class="who-card">
-          <div class="who-tag">공간·면적 확인</div>
-          <div class="who-title">창호, 도어, 바닥재 등 대략 면적 확인이 필요할 때</div>
+          <div class="who-tag">Area checks</div>
+          <div class="who-title">Doors, windows, flooring, and more</div>
           <div class="who-body">
-            “이 정도면 몇 ㎡ 나올까?”가 궁금할 때,
-            자유 도형 그리기 기능으로 대략적인 면적을 바로 확인할 수 있습니다.
+            When you just need to know “about how many square meters this is,”
+            trace the outline and see the approximate area on the spot.
           </div>
         </div>
         <div class="who-card">
-          <div class="who-tag">보고용 자료</div>
-          <div class="who-title">사진 위에 수치를 올려 보고자료로 쓰고 싶을 때</div>
+          <div class="who-tag">Visual reports</div>
+          <div class="who-title">Photos with dimensions on top</div>
           <div class="who-body">
-            사진 위에 치수를 직접 표시하고 캡처·공유하여
-            고객/동료와의 커뮤니케이션용 자료로 활용할 수 있습니다.
+            Overlay measurements directly on the photo, capture the screen,
+            and share it as a simple report with clients or colleagues.
           </div>
         </div>
       </div>
     </section>
 
-    <!-- FEATURE -->
+    <!-- FEATURES -->
     <section id="features" class="section-soft">
-      <h2>핵심 기능 한눈에 보기</h2>
+      <h2>Key features</h2>
       <p class="section-lead">
-        사진 투시 보정부터 곡선 길이 측정까지, 현장에서 자주 쓰는 기능들을 중심으로 구성했습니다.
+        From photo perspective correction to curved line length, Measure Master focuses on the tools you actually use in the field.
       </p>
       <div class="feat-grid">
         <div class="feat-card">
-          <div class="feat-pill">투시 보정</div>
-          <div class="feat-title">기준 사각형으로 사진 속 왜곡 보정</div>
+          <div class="feat-pill">Perspective correction</div>
+          <div class="feat-title">Fix distortion with a reference rectangle</div>
           <div class="feat-body">
-            A4 용지처럼 크기를 아는 직사각형을 한 번 설정해 두면,
-            그 위에 놓인 대상의 길이와 면적을 보정해서 계산합니다.
+            Place a reference rectangle with known dimensions (for example, A4 paper).
+            Using that, the app corrects perspective and estimates length and area on the photo.
           </div>
         </div>
         <div class="feat-card">
-          <div class="feat-pill">자유 도형</div>
-          <div class="feat-title">직선·곡선·복잡한 형상까지 길이·면적 근사 계산</div>
+          <div class="feat-pill">Free-form shapes</div>
+          <div class="feat-title">Measure complex outlines</div>
           <div class="feat-body">
-            불규칙한 경계선도 손가락으로 따라 그리면 되고,
-            앱이 전체 길이·면적을 합산해 보여줍니다.
+            Trace straight or curved boundaries with your finger.
+            The app adds up total length and area for each shape and for the overall selection.
           </div>
         </div>
         <div class="feat-card">
-          <div class="feat-pill">현장 친화 UI</div>
-          <div class="feat-title">작은 화면에서도 보이게, 최대한 단순하게</div>
+          <div class="feat-pill">Field-friendly UI</div>
+          <div class="feat-title">Designed for small screens and quick use</div>
           <div class="feat-body">
-            현장에서 장갑을 끼고 있어도 조작 가능하도록
-            버튼 수와 화면 단계를 줄이는 방향으로 설계하고 있습니다.
+            The interface minimizes steps and button count so you can operate it quickly
+            even when you are on site, wearing gloves, or in a hurry.
           </div>
         </div>
       </div>
@@ -773,145 +714,142 @@
 
     <!-- SCREENSHOTS -->
     <section id="screens">
-      <h2>화면 미리보기</h2>
+      <h2>Screenshots</h2>
       <p class="section-lead">
-        아래 이미지는 플레이스토어에 사용 중인 스크린샷을 기반으로 합니다.
+        These screenshots are the same ones used on the Google Play listing.
       </p>
       <div class="shots">
         <figure class="shot">
-          <img src="/images/index/pm_01.jpg" alt="퍼스펙티브 모드 측정 화면"
-               loading="lazy"
-               onerror="this.onerror=null; this.src='/images/index/pm_00.jpg';" />
+          <img src="/images/index/pm_01.jpg" alt="Perspective-corrected measuring screen"
+               loading="lazy" />
           <figcaption class="shot-caption">
-            기준 사각형을 설정한 뒤, 사진 속 대상의 길이·면적을 보정해 계산하는 화면 예시입니다.
+            Set up a reference rectangle, then measure lengths and areas in the corrected view.
           </figcaption>
         </figure>
         <figure class="shot">
-          <img src="/images/index/AR_02.jpg" alt="AR 모드로 실제 공간 측정"
-               loading="lazy"
-               onerror="this.onerror=null; this.src='/images/index/AR_03.jpg';" />
+          <img src="/images/index/AR_02.jpg" alt="AR measuring screen"
+               loading="lazy" />
           <figcaption class="shot-caption">
-            AR 모드를 이용해 실제 공간에서 선분 길이를 측정하는 화면 예시입니다.
+            Use AR mode to measure a segment directly in 3D space.
           </figcaption>
         </figure>
         <figure class="shot">
-          <img src="/images/index/config_01_ko.jpg" alt="측정 설정 및 모드 설명 화면"
-               loading="lazy"
-               onerror="this.onerror=null; this.src='/images/index/config_01_en.jpg';" />
+          <img src="/images/index/config_01_en.jpg" alt="Configuration and mode settings"
+               loading="lazy" />
           <figcaption class="shot-caption">
-            측정 단위, 기준 사각형 정보 등 주요 옵션을 설정하는 화면입니다.
+            Configure units, reference rectangle values, and other options before you measure.
           </figcaption>
         </figure>
       </div>
     </section>
 
-    <!-- 정확도 / 한계 안내 -->
+    <!-- ACCURACY / LIMITS -->
     <section class="section-soft">
-      <h2>정확도와 한계에 대하여</h2>
+      <h2>About accuracy and limitations</h2>
       <p class="section-lead">
-        Measure Master는 “줄자+현장 감각”을 스마트폰으로 옮겨오는 도구입니다.
-        다음과 같은 특성을 이해하고 사용하시면 좋습니다.
+        Measure Master aims to bring the feel of “tape measure + field sense” into your phone.
+        Please keep the following in mind.
       </p>
       <ul class="note-list">
-        <li>초정밀 공학 측정이 아니라, <strong>의사결정용 근사값</strong>을 목표로 합니다.</li>
-        <li>기준 사각형의 실제 길이/폭 수치를 정확하게 입력할수록 결과의 신뢰도가 올라갑니다.</li>
-        <li>사진 각도, 화질, 렌즈 왜곡 등에 따라 오차가 발생할 수 있습니다.</li>
-        <li>법적/계약상 정확도가 필요한 측량에는, 반드시 별도의 전문 장비·절차를 사용해야 합니다.</li>
+        <li>It targets <strong>approximate values for decision-making</strong>, not certified engineering-grade measurements.</li>
+        <li>The more accurate your reference rectangle dimensions are, the more reliable the results will be.</li>
+        <li>Camera angle, photo quality, and lens distortion can all introduce error.</li>
+        <li>For legal or contractual measurements, you must still use proper professional tools and procedures.</li>
       </ul>
     </section>
 
     <!-- CTA -->
     <section class="cta" id="download">
-      <h2>지금 바로, 사진 한 장으로 길이·면적을 재 보세요.</h2>
+      <h2>Try measuring with just a photo.</h2>
       <p>
-        아직은 지인·테스터 위주로 개선 중이지만,<br/>
-        실제 현장에서 바로 써볼 수 있는 수준까지 계속 다듬어 나가고 있습니다.
+        The app is currently in tester-only mode, but it is already usable for real-world jobs.<br/>
+        We are iterating based on feedback from people who actually work on site.
       </p>
       <div class="cta-actions">
         <a class="btn" href="#" target="_blank" rel="noopener">
-          Google Play에서 설치 (예정)
+          Get it on Google Play (soon)
         </a>
         <a class="btn btn-ghost" href="/reviews.html">
-          사용 후기 남기기
+          Leave a review
         </a>
       </div>
       <div class="cta-sub">
-        설치가 어려우신 분은 <a href="/howtouse.html">사용법 페이지</a>를 먼저 확인해 주세요.
+        If you have trouble installing, please check the <a href="/howtouse.html">How to use</a> page first.
       </div>
-      <div id="visitCounterHome">방문수 로딩중…</div>
+      <div id="visitCounterHome">Loading visit count…</div>
     </section>
 
     <!-- AUTH -->
     <section id="auth">
-      <div class="auth-headline">테스터 · 후기 작성자를 위한 계정</div>
+      <div class="auth-headline">Account for testers and reviewers</div>
       <div class="auth-caption">
-        아래에서 이메일 계정을 등록하신 뒤, <a href="/reviews.html">사용후기 페이지</a>에서 피드백을 남겨주세요.
+        Create an account below, then go to the <a href="/reviews.html">Reviews</a> page to leave feedback.
       </div>
 
       <div id="auth-tabs" class="tabbar" aria-hidden="false">
-        <button type="button" id="tab-signup" class="active">가입</button>
-        <button type="button" id="tab-login">로그인</button>
+        <button type="button" id="tab-signup" class="active">Sign up</button>
+        <button type="button" id="tab-login">Log in</button>
       </div>
 
-      <!-- 가입 폼 -->
+      <!-- Sign up form -->
       <form id="signup-form" autocomplete="on">
         <div class="field">
-          <label for="signup-email">이메일</label>
+          <label for="signup-email">Email</label>
           <input id="signup-email" name="email" type="email" required placeholder="you@example.com">
         </div>
         <div class="field">
-          <label for="signup-password">비밀번호</label>
-          <input id="signup-password" name="password" type="password" required minlength="8" placeholder="8자 이상">
+          <label for="signup-password">Password</label>
+          <input id="signup-password" name="password" type="password" required minlength="8" placeholder="At least 8 characters">
         </div>
         <div class="field">
-          <label for="signup-password2">비밀번호 확인</label>
-          <input id="signup-password2" name="password2" type="password" required minlength="8" placeholder="한 번 더 입력">
+          <label for="signup-password2">Confirm password</label>
+          <input id="signup-password2" name="password2" type="password" required minlength="8" placeholder="Type it again">
         </div>
-        <button type="submit" class="primary">회원가입</button>
+        <button type="submit" class="primary">Create account</button>
         <p style="margin:6px 0 0; font-size:12px; color:var(--muted);">
-          이미 계정이 있으신가요?
-          <a href="#" id="go-login">로그인으로 이동</a>
+          Already have an account?
+          <a href="#" id="go-login">Go to log in</a>
         </p>
       </form>
 
-      <!-- 로그인 폼 -->
+      <!-- Login form -->
       <form id="login-form" autocomplete="on" hidden>
         <div class="field">
-          <label for="login-email">이메일</label>
+          <label for="login-email">Email</label>
           <input id="login-email" name="email" type="email" required placeholder="you@example.com">
         </div>
         <div class="field">
-          <label for="login-password">비밀번호</label>
-          <input id="login-password" name="password" type="password" required minlength="8" placeholder="8자 이상">
+          <label for="login-password">Password</label>
+          <input id="login-password" name="password" type="password" required minlength="8" placeholder="At least 8 characters">
         </div>
-        <button type="submit" class="primary">로그인</button>
-        <button type="button" id="logout-btn" style="display:none">로그아웃</button>
+        <button type="submit" class="primary">Log in</button>
+        <button type="button" id="logout-btn" style="display:none">Log out</button>
       </form>
     </section>
   </main>
 
   <footer>
     © <span id="year"></span> Measure Master. All rights reserved.
-    · <a href="/privacy.html">개인정보처리방침</a>
+    · <a href="/privacy.html">Privacy policy</a>
   </footer>
 </div>
 
-<!-- Supabase & 기존 스크립트 -->
+<!-- Supabase & existing scripts -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="/js/mm-auth.js?v=auth_r1"></script>
 <script src="/js/index.js?v=rev1"></script>
 <script>
   document.addEventListener('DOMContentLoaded', function(){
-    // 로그아웃 버튼
-    const b = document.getElementById('logout-btn');
-    if (b) {
-      b.addEventListener('click', async function(e){
+    // Logout
+    const btn = document.getElementById('logout-btn');
+    if (btn) {
+      btn.addEventListener('click', async function(e){
         e.preventDefault();
         try { await window.mmAuth?.signOut?.(); }
         finally { location.reload(); }
       });
     }
-    // 연도 표시
+    // Year
     const y = document.getElementById('year');
     if (y) y.textContent = new Date().getFullYear();
   });
