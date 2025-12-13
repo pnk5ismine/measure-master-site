@@ -390,7 +390,28 @@
 <script src="/js/mm-auth.js?v=auth_r1"></script>
 <script src="/js/reviews-ui.js?v=rev15"></script>
 <script>
-   document.addEventListener('DOMContentLoaded', ()=> { MMReviews.init(); });
+  document.addEventListener('DOMContentLoaded', () => {
+    // 1) 항상 기본은 "목록"부터 보이게 강제
+    const listView  = document.getElementById('listView');
+    const readView  = document.getElementById('readView');
+    const writeForm = document.getElementById('writeForm');
+
+    if (listView)  listView.hidden  = false;
+    if (readView)  readView.hidden  = true;
+    if (writeForm) writeForm.hidden = true;
+
+    // 2) MMReviews.init() 호출 시 에러 방지 + 로깅
+    if (window.MMReviews && typeof window.MMReviews.init === 'function') {
+      try {
+        window.MMReviews.init();
+      } catch (err) {
+        console.error('MMReviews.init() failed:', err);
+      }
+    } else {
+      console.warn('MMReviews is not defined. Check /js/reviews-ui.js path and global name.');
+    }
+  });
 </script>
+
 </body>
 </html>
