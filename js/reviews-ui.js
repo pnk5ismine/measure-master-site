@@ -1,818 +1,155 @@
-var MMReviews = (function(){
-  // ---------- DOM refs ----------
-  function $(s){ return document.querySelector(s); }
+// /js/reviews-ui.js
+// 새 Supabase 프로젝트의 "reviews" 테이블을 읽어서 목록에 표시하는 최소 버전
 
-  var elAuthInfo   = null;
-  var elAuthStatus = null;
-  var elListView   = null;
-  var elReadView   = null;
-  var elWriteForm  = null;
-  var elListBody   = null;
-  var elBtnCompose = null;
-  var elBtnSubmit  = null;
-  var elFormStatus = null;
+(function (global) {
+  // 🔧 이 두 줄은 반드시 "본인 프로젝트 값"으로 바꿔 넣으세요.
+  const SUPABASE_URL = 'https://dyoeqoeuoziaiiflqtdt.supabase.co';
+  const SUPABASE_KEY = 'sb_secret_zDzZx9uEcu8BRZEunp5R9w_F_NQ_kWR';
 
-  var fTitle = null, fContent = null, fImage = null;
-  var elSelectPreviews = null, elEditImages = null;
-
-  var MAX_FILES = 6;
-  var chosenFiles = []; // 새로 선택한 파일 누적(미리보기용)
-  var MOBILE_MAX = 700;
-
-  function isMobile(){
-    try { return window.matchMedia("(max-width:"+MOBILE_MAX+"px)").matches; }
-    catch(_){ return false; }
-  }
-  function safeText(el, s){ if(el) el.textContent = s; }
-  function escapeHtml(s){
-    if (s===null || s===undefined) return "";
-    return String(s).replace(/[&<>"']/g, function(m){
-      if(m==="&")return"&amp;"; if(m==="<")return"&lt;"; if(m===">")return"&gt;"; if(m==='"')return"&quot;"; return"&#39;";
-    });
-  }
-  function fmtDate(iso){
-    try{ var d=new Date(iso);
-      return d.toLocaleString("ko-KR",{year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'});
-    }catch(_){ return iso||""; }
-  }
-  function displayName(row){
-    var email = row && row.author_email ? row.author_email : "";
-    if (window.mmAuth && window.mmAuth.isAdmin(email)) return "관리자";
-    if (row && row.nickname) return row.nickname;
-    if (email){ var p=email.split("@"); return p[0]||"익명"; }
-    return "익명";
+  if (!global.supabase) {
+    console.error('[MMReviews] supabase-js가 로드되지 않았습니다. CDN 스크립트를 확인하세요.');
+    return;
   }
 
-  // ---------- 인증 UI(좌측 패널) ----------
-  function refreshAuthUI(){
-    return window.mmAuth.getSession().then(function(session){
-      var logged = !!(session && session.user);
-      safeText(elAuthStatus, logged ? ("로그인: "+(session.user.email||"")) : "로그아웃 상태");
-      safeText(elAuthInfo,   logged ? ("로그인: "+(session.user.email||"")) : "로그아웃 상태");
+  const supabase = global.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-      // 좌측 로그인 패널의 버튼/필드 토글
-      var authTabs   = $("#authTabs");
-      var loginForm  = $("#loginForm");
-      var signupForm = $("#signupForm");
-      var btnLogin   = $("#btn-login");
-      var btnLogout  = $("#btn-logout");
-      var loginEmailField = $("#login-email") ? $("#login-email").closest(".field") : null;
-      var loginPwField    = $("#login-password") ? $("#login-password").closest(".field") : null;
+  const MMReviews = {
+    async init() {
+      this.cacheDom();
+      await this.loadList();
+    },
 
-      if (logged){
-        if (authTabs) authTabs.setAttribute("hidden","");
-        if (signupForm) signupForm.setAttribute("hidden","");
-        if (loginForm)  loginForm.hidden = false;
-        if (loginEmailField) loginEmailField.hidden = true;
-        if (loginPwField)    loginPwField.hidden = true;
-        if (btnLogin)  btnLogin.hidden  = true;
-        if (btnLogout) btnLogout.hidden = false;
-      }else{
-        if (authTabs) authTabs.removeAttribute("hidden");
-        if (signupForm) signupForm.setAttribute("hidden","");
-        if (loginForm)  loginForm.hidden = false;
-        if (loginEmailField) loginEmailField.hidden = false;
-        if (loginPwField)    loginPwField.hidden = false;
-        if (btnLogin)  btnLogin.hidden  = false;
-        if (btnLogout) btnLogout.hidden = true;
+    cacheDom() {
+      this.$listBody   = document.getElementById('listBody');
+      this.$listView   = document.getElementById('listView');
+      this.$readView   = document.getElementById('readView');
+      this.$writeForm  = document.getElementById('writeForm');
+      this.$listLoginHint = document.getElementById('listLoginHint');
+
+      // 안전장치
+      if (!this.$listBody) {
+        console.error('[MMReviews] #listBody 를 찾지 못했습니다.');
       }
-    })["catch"](function(){
-      safeText(elAuthStatus,"로그아웃 상태");
-      safeText(elAuthInfo,"로그아웃 상태");
-    });
-  }
+    },
 
-  // ---------- 목록 ----------
-  function attachRowClicks(){
-    if (!elListBody) return;
-    var trs = elListBody.querySelectorAll("tr.row-item");
-    for (var k=0;k<trs.length;k++){
-      (function(tr){
-        tr.addEventListener("click", function(){
-          var id = tr.getAttribute("data-id");
-          location.href = "/reviews.html?id=" + id;
-        });
-      })(trs[k]);
-    }
-  }
+    async loadList() {
+      if (!this.$listBody) return;
 
-  function loadList(){
-    if (!elListBody) return Promise.resolve();
-    var sb = window.mmAuth && window.mmAuth.sb;
-    if (!sb){
-      elListBody.innerHTML = '<tr><td colspan="5" class="muted">로딩 실패: Supabase 준비 전</td></tr>';
-      return Promise.resolve();
-    }
-    return sb.from("reviews")
-      .select("id, title, content, nickname, author_email, created_at, view_count, is_notice")
-      .order("is_notice",{ascending:false})
-      .order("created_at",{ascending:false})
-      .limit(100)
-      .then(function(res){
-        if (res.error){
-          elListBody.innerHTML = '<tr><td colspan="5" class="muted">목록 로드 실패: '+escapeHtml(res.error.message)+'</td></tr>';
-          return;
-        }
-        var data = res.data||[];
-        if (!data.length){
-          elListBody.innerHTML = '<tr><td colspan="5" class="muted">등록된 후기가 없습니다.</td></tr>';
-          return;
-        }
+      // 로딩 중 표시
+      this.$listBody.innerHTML = '';
+      const tr = document.createElement('tr');
+      const td = document.createElement('td');
+      td.colSpan = 5;
+      td.textContent = '목록을 불러오는 중입니다…';
+      tr.appendChild(td);
+      this.$listBody.appendChild(tr);
 
-        var ids = []; for (var i=0;i<data.length;i++) ids.push(data[i].id);
+      // Supabase에서 리뷰 목록 가져오기
+      const { data, error } = await supabase
+        .from('reviews')
+        .select('id, title, content, nickname, view_count, created_at, is_notice')
+        .order('is_notice', { ascending: false })
+        .order('created_at', { ascending: false });
 
-        function renderWithCounts(map){
-          var html = "";
-          for (var j=0;j<data.length;j++){
-            var row = data[j];
-            var stat = map[row.id] || { v: Number(row.view_count||0), c: 0 };
-            var nick = escapeHtml(displayName(row));
-            var titleHtml = row.title ? "["+escapeHtml(row.title)+"] " : "";
-            var bodyHtml  = (row.is_notice ? '<span class="notice-tag">[알림]</span> ' : '') + titleHtml + escapeHtml(row.content||"");
-            var when = fmtDate(row.created_at);
-            var trCls = row.is_notice ? "row-item notice" : "row-item";
-
-            html += ''
-              + '<tr data-id="'+row.id+'" class="'+trCls+'" style="cursor:pointer">'
-              +   '<td class="cell-no">'+(j+1)+'</td>'
-              +   '<td class="cell-nick">'+nick+'</td>'
-              +   '<td class="cell-body">'
-              +     '<div class="m-line1"><span class="nick m-only">'+nick+'</span>'+bodyHtml+'</div>'
-              +     '<div class="m-line2 m-only"><span>조회 '+stat.v+' ('+stat.c+')</span><span>'+when+'</span></div>'
-              +   '</td>'
-              +   '<td class="cell-stats">'+stat.v+' ('+stat.c+')</td>'
-              +   '<td class="cell-time">'+when+'</td>'
-              + '</tr>';
-          }
-          elListBody.innerHTML = html;
-          attachRowClicks();
-        }
-
-        if (!ids.length){ renderWithCounts({}); return; }
-
-        sb.from("review_counts")
-          .select("review_id, view_count, comment_count")
-          .in("review_id", ids)
-          .then(function(r2){
-            var map = {};
-            if (!r2.error && r2.data){
-              for (var i=0;i<r2.data.length;i++){
-                var rr = r2.data[i];
-                map[rr.review_id] = { v:Number(rr.view_count||0), c:Number(rr.comment_count||0) };
-              }
-            }
-            renderWithCounts(map);
-          })["catch"](function(){ renderWithCounts({}); });
-      })["catch"](function(err){
-        elListBody.innerHTML = '<tr><td colspan="5" class="muted">목록 로드 실패: '+escapeHtml(err && err.message)+'</td></tr>';
-      });
-  }
-
-  // ---------- 갤러리(읽기) ----------
-  function renderGallery(reviewId, fallbackUrl){
-    var sb = window.mmAuth && window.mmAuth.sb;
-    var box = $("#galleryThumbs");
-    var lb  = $("#lb");
-    var lbImg = $("#lbImg");
-    if (!box || !sb) return;
-
-    sb.from("review_images").select("id,url").eq("review_id", reviewId).order("created_at",{ascending:true})
-      .then(function(r){
-        var urls = [];
-        if (!r.error && r.data && r.data.length){
-          for (var i=0;i<r.data.length;i++) urls.push(r.data[i].url);
-        }
-        if (!urls.length && fallbackUrl) urls = [fallbackUrl];
-
-        if (!urls.length){ box.innerHTML = ""; return; }
-
-        var html = "";
-        for (var i=0;i<urls.length;i++){
-          html += '<div class="thumb-card"><img class="thumb-img" src="'+urls[i]+'" data-idx="'+i+'" alt=""></div>';
-        }
-        box.innerHTML = html;
-
-        if (!lb || !lbImg) return;
-        var cur = 0;
-        function openAt(i){ cur=i; lbImg.src=urls[cur]; lb.hidden=false; document.body.style.overflow="hidden"; }
-        function close(){ lb.hidden=true; document.body.style.overflow=""; }
-        function prev(){ cur=(cur-1+urls.length)%urls.length; lbImg.src=urls[cur]; }
-        function next(){ cur=(cur+1)%urls.length; lbImg.src=urls[cur]; }
-
-        var imgs = box.querySelectorAll("img.thumb-img");
-        for (var k=0;k<imgs.length;k++){
-          (function(img){
-            img.addEventListener("click", function(){ openAt(Number(img.getAttribute("data-idx"))); });
-          })(imgs[k]);
-        }
-        var x = lb.querySelector(".lb-close"), p = lb.querySelector(".lb-prev"), n = lb.querySelector(".lb-next");
-        if (x) x.addEventListener("click", close);
-        if (p) p.addEventListener("click", prev);
-        if (n) n.addEventListener("click", next);
-        lb.addEventListener("click", function(e){ if(e.target===lb) close(); });
-        document.addEventListener("keydown", function(e){
-          if (lb.hidden) return;
-          if (e.key==="Escape") close();
-          if (e.key==="ArrowLeft") prev();
-          if (e.key==="ArrowRight") next();
-        });
-      });
-  }
-
-  // ---------- 읽기 ----------
-  function loadOne(id){
-    if (!elReadView) return Promise.resolve();
-    var sb = window.mmAuth && window.mmAuth.sb;
-    if (!sb){
-      elReadView.innerHTML = '<p class="muted">불러오기 실패: Supabase 준비 전</p>';
-      return Promise.resolve();
-    }
-
-    return sb.from("reviews")
-      .select("id, user_id, title, content, created_at, nickname, author_email, image_url, image_path, is_notice")
-      .eq("id", id).single()
-      .then(function(r){
-        if (r.error){
-          elReadView.innerHTML = '<p class="muted">불러오기 실패: '+escapeHtml(r.error.message)+'</p>';
-          return;
-        }
-        var data = r.data;
-
-        return window.mmAuth.getSession().then(function(sess){
-          var me = sess && sess.user ? sess.user : null;
-          var isOwner = !!(me && data.user_id && me.id === data.user_id);
-          var name = displayName(data);
-          var title = (data.is_notice ? "[일림] " : "") + (data.title || "(제목 없음)");
-
-          // 버튼 묶음
-          var actionsRight = '<button class="btn" type="button" id="btn-to-compose">글쓰기</button>';
-          if (isOwner){
-            actionsRight += '<button class="btn secondary" type="button" id="btn-edit">수정</button>';
-            actionsRight += '<button class="btn secondary" type="button" id="btn-delete">삭제</button>';
-          }
-
-          var html = ''
-            + '<div class="top-actions">'
-            +   '<a class="btn secondary" href="/reviews.html">목록보기</a>'
-            +   '<div style="display:flex; gap:8px; align-items:center">'+actionsRight+'</div>'
-            + '</div>'
-            + '<h3 style="margin:0 0 6px">'+escapeHtml(title)+'</h3>'
-            + '<div class="muted" style="margin-bottom:10px">'+escapeHtml(name)+' · '+fmtDate(data.created_at)+'</div>'
-            + '<div style="white-space:pre-wrap;word-break:break-word">'+escapeHtml(data.content||"")+'</div>'
-            + '<div id="lb" class="lightbox" hidden>'
-            +   '<button class="lb-close" aria-label="닫기">×</button>'
-            +   '<button class="lb-prev" aria-label="이전">‹</button>'
-            +   '<img id="lbImg" alt="">'
-            +   '<button class="lb-next" aria-label="다음">›</button>'
-            + '</div>'
-            + '<div id="galleryThumbs" class="thumbs" style="margin-top:12px"></div>'
-            + '<div class="reaction-bar" id="reactBar"></div>'
-            + '<div class="comments" id="commentsBox">'
-            +   '<h4 style="margin:16px 0 8px">댓글</h4>'
-            +   '<div id="commentList"></div>'
-            +   '<form id="commentForm" class="comment-form" hidden>'
-            +     '<textarea id="commentText" placeholder="댓글을 입력해 주세요"></textarea>'
-            +     '<label style="display:flex;align-items:center;gap:6px;white-space:nowrap">'
-            +       '<input type="checkbox" id="commentSecret"> 비밀글'
-            +     '</label>'
-            +     '<button class="btn" id="btnComment">등록</button>'
-            +   '</form>'
-            +   '<div id="commentLoginHint" class="muted">댓글을 쓰려면 로그인하세요.</div>'
-            + '</div>'
-            + '<div class="bottom-actions">'
-            +   '<button class="btn secondary icon" type="button" id="btnCopyLink" title="링크 복사">🔗 <span>공유</span></button>'
-            +   '<span id="shareTip" class="status"></span>'
-            + '</div>';
-
-          elReadView.innerHTML = html;
-
-          // 글쓰기 이동(읽기 화면)
-          var btnToCompose = $("#btn-to-compose");
-          if (btnToCompose){
-            btnToCompose.addEventListener("click", function(){
-              window.mmAuth.getSession().then(function(s){
-                if (!s || !s.user){
-                  document.body.classList.add('show-auth');        // 모바일 인증 패널 표시
-                  document.getElementById('tab-login')?.click();   // 로그인 탭으로
-                  document.getElementById('leftAuth')?.scrollIntoView({behavior:'smooth', block:'start'});
-                  return;
-                }
-                history.replaceState(null,"","/reviews.html?compose=1");
-                showWrite();
-              });
-            });
-          }
-
-          // 수정/삭제/갤러리/공유 동일 (생략 없는 기존 로직)
-          var btnEdit = $("#btn-edit");
-          if (btnEdit){
-            btnEdit.addEventListener("click", function(){
-              showWrite();
-              if (fTitle)   fTitle.value   = data.title   || "";
-              if (fContent) fContent.value = data.content || "";
-              if (elWriteForm) elWriteForm.setAttribute("data-editing", data.id);
-
-              var sess2 = sess;
-              var noticeBox = $("#noticeBox");
-              var cb = $("#isNotice");
-              if (noticeBox){
-                if (window.mmAuth.isAdmin(sess2 && sess2.user ? sess2.user.email : "")){
-                  noticeBox.removeAttribute("hidden");
-                  if (cb) cb.checked = !!data.is_notice;
-                }else{
-                  noticeBox.setAttribute("hidden","");
-                  if (cb) cb.checked = false;
-                }
-              }
-              if (elEditImages){
-                elEditImages.hidden = false;
-                renderEditImagesForEditMode(data.id, data.image_url, data.image_path);
-              }
-            });
-          }
-
-          var btnDelete = $("#btn-delete");
-          if (btnDelete){
-            btnDelete.addEventListener("click", function(){
-              if (!confirm("정말 삭제할까요? 이 작업은 되돌릴 수 없습니다.")) return;
-              sb.from("comments").delete().eq("review_id", id).then(function(){
-                var toRemove = [];
-                if (data.image_path) toRemove.push(data.image_path);
-                sb.from("review_images").select("path").eq("review_id", id).then(function(rm){
-                  if (!rm.error && rm.data){
-                    for (var i=0;i<rm.data.length;i++){
-                      if (rm.data[i].path) toRemove.push(rm.data[i].path);
-                    }
-                  }
-                  sb.from("reviews").delete().eq("id", id).then(function(){
-                    if (toRemove.length){
-                      sb.storage.from("reviews").remove(toRemove).then(function(){ location.href="/reviews.html"; })["catch"](function(){ location.href="/reviews.html"; });
-                    }else{
-                      location.href="/reviews.html";
-                    }
-                  });
-                });
-              });
-            });
-          }
-
-          renderGallery(id, data.image_url);
-          try{ sb.rpc("inc_review_view", { _id:id })["catch"](function(){}); }catch(_){}
-
-          var copyBtn  = $("#btnCopyLink");
-          var shareTip = $("#shareTip");
-          var shareUrl = location.origin + "/reviews.html?id=" + id;
-          function copyPlainText(text){
-            if (navigator.clipboard && window.isSecureContext){
-              return navigator.clipboard.writeText(text);
-            }
-            return new Promise(function(resolve, reject){
-              try{
-                var ta=document.createElement("textarea");
-                ta.value=text; ta.setAttribute("readonly",""); ta.style.position="fixed"; ta.style.left="-9999px";
-                document.body.appendChild(ta); ta.select();
-                var ok=document.execCommand("copy");
-                document.body.removeChild(ta);
-                if (ok) resolve(); else reject(new Error("execCommand copy 실패"));
-              }catch(err){ reject(err); }
-            });
-          }
-          if (copyBtn){
-            copyBtn.addEventListener("click", function(){
-              copyPlainText(shareUrl).then(function(){
-                if (shareTip) shareTip.textContent="링크를 복사했습니다. (붙여넣기)";
-                setTimeout(function(){ if(shareTip) shareTip.textContent=""; },2000);
-              })["catch"](function(){
-                if (shareTip) shareTip.textContent="복사 실패";
-                setTimeout(function(){ if(shareTip) shareTip.textContent=""; },2000);
-              });
-            });
-          }
-        });
-      })["catch"](function(err){
-        elReadView.innerHTML = '<p class="muted">불러오기 실패: '+escapeHtml(err && err.message)+'</p>';
-      });
-  }
-
-  // ---------- 편집 모드: 기존 이미지 썸네일 + 삭제 체크 ----------
-  function renderEditImagesForEditMode(reviewId, fallbackUrl, fallbackPath){
-    if (!elEditImages) return;
-    var sb = window.mmAuth && window.mmAuth.sb;
-    elEditImages.hidden = false;
-    elEditImages.innerHTML = '<div class="muted">기존 이미지를 불러오는 중…</div>';
-    if (!sb){
-      elEditImages.innerHTML = '<div class="muted">클라이언트 준비 전</div>';
-      return;
-    }
-    sb.from("review_images")
-      .select("id,url,path,created_at")
-      .eq("review_id", reviewId)
-      .order("created_at",{ascending:true})
-      .then(function(res){
-        var rows = [];
-        if (!res.error && res.data && res.data.length) rows = res.data;
-        if (!rows.length && fallbackUrl){
-          rows = [{ id:null, url:fallbackUrl, path:(fallbackPath||null), _legacy:true }];
-        }
-        if (!rows.length){
-          elEditImages.innerHTML = '<div class="muted">기존 이미지가 없습니다.</div>';
-          return;
-        }
-        var html = "";
-        for (var i=0;i<rows.length;i++){
-          var r = rows[i];
-          html += ''
-            + '<div class="thumb-card">'
-            +   '<img class="thumb-img" src="'+r.url+'" alt="">'
-            +   '<label style="font-size:13px;color:#444;margin-top:6px; display:block; text-align:center">'
-            +     '<input type="checkbox"'
-            +       ' data-del="img"'
-            +       ' data-imgid="'+(r.id||'')+'"'
-            +       ' data-path="'+(r.path||'')+'"'
-            +       ' data-legacy="'+(r._legacy ? '1':'0')+'"> 삭제'
-            +   '</label>'
-            + '</div>';
-        }
-        elEditImages.innerHTML = html;
-      })["catch"](function(){
-        elEditImages.innerHTML = '<div class="muted">이미지 로드 실패</div>';
-      });
-  }
-
-  // ---------- 파일 선택 미리보기 ----------
-  function onFileChange(){
-    if (!fImage || !elSelectPreviews) return;
-    var files = fImage.files ? Array.prototype.slice.call(fImage.files) : [];
-    function key(f){ return (f.name||"")+"__"+(f.size||0)+"__"+(f.lastModified||0); }
-    var map = {};
-    for (var i=0;i<chosenFiles.length;i++){ map[key(chosenFiles[i])] = chosenFiles[i]; }
-    for (var j=0;j<files.length;j++){ map[key(files[j])] = files[j]; }
-    chosenFiles = []; for (var k in map){ if (map.hasOwnProperty(k)) chosenFiles.push(map[k]); }
-
-    var slot = MAX_FILES;
-    if (elWriteForm && elWriteForm.getAttribute("data-editing")){
-      var totalThumbs = elEditImages ? elEditImages.querySelectorAll('input[data-del="img"]').length : 0;
-      var delChecked  = elEditImages ? elEditImages.querySelectorAll('input[data-del="img"]:checked').length : 0;
-      var existing = Math.max(0, totalThumbs - delChecked);
-      slot = Math.max(0, MAX_FILES - existing);
-    }
-    if (chosenFiles.length > slot) chosenFiles = chosenFiles.slice(0, slot);
-
-    elSelectPreviews.innerHTML = "";
-    for (var x=0;x<chosenFiles.length;x++){
-      (function(f){
-        var url = URL.createObjectURL(f);
-        var wrap = document.createElement("div"); wrap.className = "thumb-card";
-        var img  = document.createElement("img"); img.className = "thumb-img"; img.src = url;
-        wrap.appendChild(img);
-        elSelectPreviews.appendChild(wrap);
-      })(chosenFiles[x]);
-    }
-    try{ fImage.value = ""; }catch(_){}
-  }
-
-  // ---------- 저장(신규/수정) ----------
-  function saveWriteForm(e){
-    e.preventDefault();
-
-    (async () => {
-      const sb = window.mmAuth && window.mmAuth.sb;
-      if (!sb){ alert("Supabase 준비 전"); return; }
-
-      try{
-        const sess = await window.mmAuth.getSession();
-        if (!sess || !sess.user){ alert("로그인이 필요합니다."); return; }
-        const user = sess.user;
-
-        if (!fContent || !fContent.value.trim()){
-          if (elFormStatus) elFormStatus.textContent = "내용을 입력하세요.";
-          return;
-        }
-
-        if (elBtnSubmit){ elBtnSubmit.disabled = true; elBtnSubmit.textContent = "저장 중…"; }
-        if (elFormStatus) elFormStatus.textContent = "";
-
-        const editingId = elWriteForm ? elWriteForm.getAttribute("data-editing") : null;
-        const title   = fTitle && fTitle.value ? fTitle.value.trim() : "";
-        const content = fContent.value.trim();
-        const nickname = (window.mmAuth.isAdmin(user.email) ? "관리자"
-          : (user.user_metadata && user.user_metadata.full_name) ? user.user_metadata.full_name
-          : (user.email ? user.email.split("@")[0] : "익명"));
-
-        // 공지 플래그
-        let noticeFlag = false;
-        const cbNotice = $("#isNotice");
-        if (cbNotice && window.mmAuth.isAdmin(user.email)) noticeFlag = !!cbNotice.checked;
-
-        // 업로드(부분성공 허용)
-        async function uploadFilesBestEffort(remain){
-          const files = chosenFiles.slice(0, remain);
-          const uploaded = [];
-          const failed   = [];
-          for (let i=0;i<files.length;i++){
-            const file = files[i];
-            try{
-              const ext = (file.name.split(".").pop()||"jpg").toLowerCase();
-              const ok  = ("jpg jpeg png webp gif").indexOf(ext) >= 0 ? ext : "jpg";
-              const key = user.id + "/" + Date.now() + "_" + Math.random().toString(36).slice(2) + "." + ok;
-
-              const { error: upErr } = await sb.storage.from("reviews").upload(key, file, { upsert:false, cacheControl:"3600" });
-              if (upErr) throw upErr;
-
-              const pub = sb.storage.from("reviews").getPublicUrl(key);
-              const url = pub && pub.data ? pub.data.publicUrl : "";
-              uploaded.push({ path:key, url:url });
-            }catch(err){
-              failed.push({ file, error: err });
-            }
-          }
-          return { uploaded, failed };
-        }
-
-        if (editingId){
-          // 수정 플로우
-          {
-            const { error: updErr } = await sb.from("reviews")
-              .update({ title, content, is_notice: noticeFlag })
-              .eq("id", editingId);
-            if (updErr) throw updErr;
-          }
-
-          const delInputs = elEditImages ? elEditImages.querySelectorAll('input[data-del="img"]:checked') : [];
-          const pathsToRemove = [];
-
-          for (let i=0;i<delInputs.length;i++){
-            const el = delInputs[i];
-            const isLegacy = (el.getAttribute("data-legacy")==="1");
-            const path     = el.getAttribute("data-path") || "";
-            const imgId    = el.getAttribute("data-imgid") || null;
-
-            try{
-              if (!isLegacy && imgId){
-                await sb.from("review_images").delete().eq("id", imgId);
-                if (path) pathsToRemove.push(path);
-              }else if (isLegacy){
-                await sb.from("reviews").update({ image_url:null, image_path:null }).eq("id", editingId);
-                if (path) pathsToRemove.push(path);
-              }else{
-                if (path) pathsToRemove.push(path);
-              }
-            }catch(_){
-              if (path) pathsToRemove.push(path);
-            }
-          }
-
-          const totalThumbs = elEditImages ? elEditImages.querySelectorAll('input[data-del="img"]').length : 0;
-          const delChecked  = elEditImages ? elEditImages.querySelectorAll('input[data-del="img"]:checked').length : 0;
-          const existing    = Math.max(0, totalThumbs - delChecked);
-          const remain      = Math.max(0, MAX_FILES - existing);
-
-          const { uploaded, failed } = await uploadFilesBestEffort(remain);
-
-          if (uploaded.length){
-            const rows = uploaded.map(u => ({ review_id: editingId, url: u.url, path: u.path }));
-            const { error: metaErr } = await sb.from("review_images").insert(rows);
-            if (metaErr) throw metaErr;
-          }
-
-          if (pathsToRemove.length){
-            try{ await sb.storage.from("reviews").remove(pathsToRemove); }catch(_){}
-          }
-
-          if (failed.length && elFormStatus){
-            elFormStatus.textContent = `일부 이미지 업로드 실패(${failed.length}장). 나머지는 저장되었습니다.`;
-            setTimeout(()=>{ location.href = "/reviews.html?id=" + editingId; }, 600);
-          }else{
-            location.href = "/reviews.html?id=" + editingId;
-          }
-          return;
-        }
-
-        // 신규 작성
-        const { uploaded, failed } = await uploadFilesBestEffort(MAX_FILES);
-
-        const image_path = uploaded[0]?.path || null;
-        const image_url  = uploaded[0]?.url  || null;
-
-        const { data: ins, error: insErr } = await sb
-          .from("reviews")
-          .insert({
-            title, content, is_notice: noticeFlag,
-            user_id: user.id, author_email: user.email, nickname,
-            image_path, image_url
-          })
-          .select("id")
-          .single();
-        if (insErr) throw insErr;
-
-        if (uploaded.length){
-          const rows = uploaded.map(u => ({ review_id: ins.id, url: u.url, path: u.path }));
-          const { error: metaErr } = await sb.from("review_images").insert(rows);
-          if (metaErr) throw metaErr;
-        }
-
-        if (failed.length && elFormStatus){
-          elFormStatus.textContent = `일부 이미지(${failed.length}장) 업로드 실패. 나머지는 저장되었습니다.`;
-          setTimeout(()=>{ location.href="/reviews.html"; }, 700);
-        }else{
-          location.href="/reviews.html";
-        }
-
-      }catch(err){
-        console.error("[write/save] error:", err);
-        if (elFormStatus) elFormStatus.textContent = "저장 실패: " + (err?.message || err);
-        if (elBtnSubmit){ elBtnSubmit.disabled = false; elBtnSubmit.textContent = "저장"; }
+      if (error) {
+        console.error('[MMReviews] 목록 로드 실패:', error);
+        td.textContent = '목록 로드 실패: ' + (error.message || '알 수 없는 오류');
+        return;
       }
-    })();
-  }
 
-  // ---------- 뷰 전환 ----------
-  function showList(){ if(elListView) elListView.hidden=false; if(elReadView) elReadView.hidden=true; if(elWriteForm) elWriteForm.hidden=true; }
-  function showRead(){ if(elListView) elListView.hidden=true;  if(elReadView) elReadView.hidden=false; if(elWriteForm) elWriteForm.hidden=true; }
-  function showWrite(){if(elListView) elListView.hidden=true;  if(elReadView) elReadView.hidden=true;  if(elWriteForm) elWriteForm.hidden=false; }
+      if (!data || data.length === 0) {
+        td.textContent = '등록된 후기가 아직 없습니다.';
+        return;
+      }
 
-  // ---------- 라우팅 ----------
-  function routeAfterAuth(){
-    var q = new URLSearchParams(location.search);
-    var id = q.get("id");
-    var compose = q.get("compose");
-    var edit = q.get("edit");
+      // 목록 렌더링
+      this.$listBody.innerHTML = '';
+      data.forEach((row, idx) => {
+        const tr = document.createElement('tr');
 
-    if (id){ showRead(); loadOne(id); return; }
+        // 번호
+        const tdNo = document.createElement('td');
+        tdNo.className = 'cell-no';
+        tdNo.textContent = String(idx + 1);
+        tr.appendChild(tdNo);
 
-    if (compose==="1"){
-      showList();
-      loadList().then(function(){
-        window.mmAuth.getSession().then(function(s){
-          if (s && s.user){
-            showWrite();
-          }else{
-            // ★ 미로그인: 모바일 인증 패널 강제 표시
-            document.body.classList.add('show-auth');
-            document.getElementById('tab-login')?.click();
-            document.getElementById('leftAuth')?.scrollIntoView({behavior:'smooth', block:'start'});
-          }
+        // 닉네임
+        const tdNick = document.createElement('td');
+        tdNick.className = 'cell-nick';
+        tdNick.textContent = row.nickname || '-';
+        tr.appendChild(tdNick);
+
+        // 내용(제목 + 앞부분)
+        const tdBody = document.createElement('td');
+        tdBody.className = 'cell-body';
+
+        const line1 = document.createElement('div');
+        line1.className = 'm-line1';
+        line1.textContent = row.title || '(제목 없음)';
+
+        const line2 = document.createElement('div');
+        line2.className = 'm-line2';
+        const spanViews = document.createElement('span');
+        spanViews.textContent = `조회 ${row.view_count ?? 0}`;
+        const spanTime = document.createElement('span');
+        spanTime.textContent = this.formatDate(row.created_at);
+        line2.appendChild(spanViews);
+        line2.appendChild(spanTime);
+
+        tdBody.appendChild(line1);
+        tdBody.appendChild(line2);
+
+        tr.appendChild(tdBody);
+
+        // 조회수
+        const tdStats = document.createElement('td');
+        tdStats.className = 'cell-stats';
+        tdStats.textContent = String(row.view_count ?? 0);
+        tr.appendChild(tdStats);
+
+        // 작성시각
+        const tdTime = document.createElement('td');
+        tdTime.className = 'cell-time';
+        tdTime.textContent = this.formatDateTime(row.created_at);
+        tr.appendChild(tdTime);
+
+        // 클릭 시 (나중에) 읽기 뷰로 연결할 수 있도록 id 저장
+        tr.dataset.id = row.id;
+        tr.style.cursor = 'pointer';
+        tr.addEventListener('click', () => {
+          // TODO: 이후 단계에서 readView 구현
+          alert('읽기 화면은 다음 단계에서 연결합니다.\n\n제목: ' + (row.title || ''));
         });
+
+        // 공지글 표시 (있으면)
+        if (row.is_notice) {
+          tr.classList.add('notice');
+        }
+
+        this.$listBody.appendChild(tr);
       });
-      return;
+    },
+
+    formatDate(iso) {
+      if (!iso) return '';
+      const d = new Date(iso);
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      return `${y}-${m}-${day}`;
+    },
+
+    formatDateTime(iso) {
+      if (!iso) return '';
+      const d = new Date(iso);
+      const y = d.getFullYear();
+      const m = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      const hh = String(d.getHours()).padStart(2, '0');
+      const mm = String(d.getMinutes()).padStart(2, '0');
+      return `${y}-${m}-${day} ${hh}:${mm}`;
     }
+  };
 
-    if (edit){
-      showList(); loadList();
-      return;
-    }
-
-    showList(); loadList();
-  }
-
-  // ---------- 부트스트랩 & 라우팅 ----------
-  function init(){
-    // DOM 캐시
-    elAuthInfo   = $("#authInfo");
-    elAuthStatus = $("#authStatus");
-    elListView   = $("#listView");
-    elReadView   = $("#readView");
-    elWriteForm  = $("#writeForm");
-    elListBody   = $("#listBody");
-    elBtnCompose = $("#btn-compose");
-    elBtnSubmit  = $("#btn-submit");
-    elFormStatus = $("#formStatus");
-
-    fTitle = $("#title");
-    fContent = $("#content");
-    fImage = $("#image");
-    elSelectPreviews = $("#selectPreviews");
-    elEditImages = $("#editImages");
-
-    if (elAuthInfo)   elAuthInfo.textContent   = "";
-    if (elAuthStatus) elAuthStatus.textContent = "";
-
-    if (fImage && fImage.getAttribute("data-max")){
-      var n = parseInt(fImage.getAttribute("data-max"),10);
-      if (!isNaN(n)) MAX_FILES = n;
-    }
-
-    if (fImage){ fImage.addEventListener("change", onFileChange); }
-    if (elWriteForm){ elWriteForm.addEventListener("submit", saveWriteForm); }
-
-    // ★ 리스트 화면의 "글쓰기" 버튼을 누를 때 미로그인이면 로그인 패널 표시
-    if (elBtnCompose){
-      elBtnCompose.addEventListener("click", function(e){
-        window.mmAuth?.getSession().then(function(s){
-          if (!s || !s.user){
-            e.preventDefault();
-            document.body.classList.add('show-auth');
-            document.getElementById('tab-login')?.click();
-            document.getElementById('leftAuth')?.scrollIntoView({behavior:'smooth', block:'start'});
-          }
-        });
-      });
-    }
-
-    // 인증 핸들
-    if (window.mmAuth){
-      window.mmAuth.whenReady(function(){
-        // 1) 상태 동기화
-        refreshAuthUI().finally(function(){
-
-          // 2) 인증 폼/버튼 핸들러 설치 (모바일 submit 안정화)
-          (function () {
-            const sb = window.mmAuth.sb;
-
-            const loginForm   = document.getElementById('loginForm');
-            const signupForm  = document.getElementById('signupForm');
-            const btnLogout   = document.getElementById('btn-logout');
-            const loginStatus = document.getElementById('loginStatus');
-            const signupStatus= document.getElementById('signupStatus');
-
-            const tabLogin  = document.getElementById('tab-login');
-            const tabSignup = document.getElementById('tab-signup');
-            function setTab(which){
-              if (tabLogin)  tabLogin.classList.toggle('active',  which==='login');
-              if (tabSignup) tabSignup.classList.toggle('active', which==='signup');
-              if (loginForm)  loginForm.hidden  = (which!=='login');
-              if (signupForm) signupForm.hidden = (which!=='signup');
-            }
-            if (tabLogin)  tabLogin.onclick  = () => setTab('login');
-            if (tabSignup) tabSignup.onclick = () => setTab('signup');
-
-            if (loginForm){
-              loginForm.addEventListener('submit', async (e) => {
-                e.preventDefault();
-                const email = (document.getElementById('login-email')?.value || '').trim().toLowerCase();
-                const pw    = document.getElementById('login-password')?.value || '';
-                if (loginStatus) loginStatus.textContent = '로그인 중…';
-                try {
-                  const { error } = await (window.mmAuth?.signIn
-                    ? window.mmAuth.signIn(email, pw)
-                    : sb.auth.signInWithPassword({ email, password: pw }));
-                  if (error){
-                    if (loginStatus) loginStatus.textContent = '로그인 실패: ' + (error.message || '에러');
-                    return;
-                  }
-                  if (loginStatus) loginStatus.textContent = '로그인 성공';
-                  document.body.classList.remove('show-auth');
-                  refreshAuthUI();
-                } catch (err) {
-                  if (loginStatus) loginStatus.textContent = '로그인 에러: ' + (err?.message || err);
-                }
-              });
-            }
-
-            if (signupForm){
-              signupForm.addEventListener('submit', async (e) => {
-                e.preventDefault();
-                const email = (document.getElementById('signup-email')?.value || '').trim().toLowerCase();
-                const p1    = document.getElementById('signup-password')?.value || '';
-                const p2    = document.getElementById('signup-password2')?.value || '';
-                if (signupStatus) signupStatus.textContent = '가입 중…';
-                if (p1 !== p2){ signupStatus.textContent = '비밀번호 확인이 일치하지 않습니다.'; return; }
-                if (p1.length < 8){ signupStatus.textContent = '비밀번호는 8자 이상'; return; }
-                try {
-                  const { error } = await (window.mmAuth?.signUp
-                    ? window.mmAuth.signUp(email, p1)
-                    : sb.auth.signUp({ email, password: p1 }));
-                  if (error){ signupStatus.textContent = '가입 실패: ' + (error.message || '에러'); return; }
-                  signupStatus.textContent = '가입 완료';
-                  setTab('login');
-                } catch (err) {
-                  signupStatus.textContent = '가입 에러: ' + (err?.message || err);
-                }
-              });
-            }
-
-            if (btnLogout){
-              btnLogout.addEventListener('click', async (e) => {
-                e.preventDefault();
-                try{
-                  if (window.mmAuth?.signOut) await window.mmAuth.signOut();
-                  else await sb.auth.signOut();
-                } finally {
-                  refreshAuthUI();
-                }
-              });
-            }
-          })();
-
-          // 3) 라우팅 실행
-          routeAfterAuth();
-        });
-      });
-
-      window.mmAuth.onChange(function(){ refreshAuthUI(); });
-    }else{
-      // mmAuth 미탑재 시에도 목록은 보이게
-      routeAfterAuth();
-    }
-
-    var y = $("#year");
-    if (y) y.textContent = (new Date()).getFullYear();
-  }
-
-  function _debug(){
-    console.log("[MMReviews] el", !!elListView, !!elReadView, !!elWriteForm, !!elListBody);
-    if (window.mmAuth && window.mmAuth._debugPing) window.mmAuth._debugPing();
-  }
-
-  return { init:init, _debug:_debug };
-})();
+  global.MMReviews = MMReviews;
+})(window);
