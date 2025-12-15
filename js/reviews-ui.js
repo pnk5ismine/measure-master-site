@@ -4,7 +4,7 @@
 (function (global) {
   // 🔧 이 두 줄은 반드시 "본인 프로젝트 값"으로 바꿔 넣으세요.
   const SUPABASE_URL = 'https://dyoeqoeuoziaiiflqtdt.supabase.co';
-  const SUPABASE_KEY = 'sb_secret_zDzZx9uEcu8BRZEunp5R9w_F_NQ_kWR';
+  const SUPABASE_KEY = 'sb_publishable_0-sfEJvu_n2_uSAlZKKdqA_QCjX-P_S ';
 
   if (!global.supabase) {
     console.error('[MMReviews] supabase-js가 로드되지 않았습니다. CDN 스크립트를 확인하세요.');
