@@ -2,8 +2,8 @@
 import { createClient } from '@supabase/supabase-js'
 
 // 👉 Supabase 대시보드 Project Settings → API 에서 복사
-const SUPABASE_URL = "https://snxjcbaaysgfunpsohzg.supabase.co"
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNueGpjYmFheXNnZnVucHNvaHpnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY1OTk3MzQsImV4cCI6MjA3MjE3NTczNH0.T8b9PpabXkCvwW2W57Qbr-h--JLZB6errlyP5IwsYyk"
+const SUPABASE_URL = "https://dyoeqoeuoziaiiflqtdt.supabase.co"
+const SUPABASE_ANON_KEY = "sb_publishable_0-sfEJvu_n2_uSAlZKKdqA_QCjX-P_S"
 
 // 클라이언트 생성
-export const supabase = createClient(https://snxjcbaaysgfunpsohzg.supabase.co, eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNueGpjYmFheXNnZnVucHNvaHpnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY1OTk3MzQsImV4cCI6MjA3MjE3NTczNH0.T8b9PpabXkCvwW2W57Qbr-h--JLZB6errlyP5IwsYyk)
+export const supabase = createClient(https://dyoeqoeuoziaiiflqtdt.supabase.co, sb_publishable_0-sfEJvu_n2_uSAlZKKdqA_QCjX-P_S)

@@ -15,6 +15,7 @@
   <link rel="icon" type="image/png" href="/images/mm_logo_small.png?v=rev4" />
 
   <!-- Preload key images -->
+  <link rel="preload" as="image" href="/images/mm_main1_en.jpg" />
   <link rel="preload" as="image" href="/images/index/ar_00.png" />
   <link rel="preload" as="image" href="/images/index/pm_00.jpg" />
   <link rel="preload" as="image" href="/images/index/sm_01.jpg" />
@@ -148,6 +149,51 @@
       flex-direction:column;
       gap:32px;
       margin-top:16px;
+    }
+
+    /* ========== NEW TOP HERO LAYOUT: image left + auth right ========== */
+    .hero-top {
+      display:grid;
+      grid-template-columns:2fr 1fr; /* left 2/3, right 1/3 */
+      gap:18px;
+      margin-bottom:24px;
+      align-items:stretch;
+    }
+    .hero-main-image {
+      border-radius:24px;
+      overflow:hidden;
+      border:1px solid rgba(30,64,175,.7);
+      box-shadow:0 18px 55px rgba(15,23,42,.95);
+      background:#020617;
+    }
+    .hero-main-image img {
+      display:block;
+      width:100%;
+      height:100%;
+      object-fit:cover;
+    }
+    /* auth 섹션을 오른쪽 카드처럼 */
+    .hero-auth {
+      max-width:none;
+      margin:0;
+      align-self:stretch;
+      background:rgba(15,23,42,.96);
+      border-radius:24px;
+      border:1px solid rgba(30,64,175,.7);
+      padding:18px 16px 16px;
+      box-shadow:0 18px 55px rgba(15,23,42,.95);
+    }
+
+    @media (max-width:900px){
+      .hero-top {
+        grid-template-columns:1fr;
+      }
+      .hero-main-image {
+        order:1;
+      }
+      .hero-auth {
+        order:2;
+      }
     }
 
     /* HERO with main frame + 3 mode cards */
@@ -418,7 +464,7 @@
       color:var(--muted);
     }
 
-    /* Auth */
+    /* Auth (공통 스타일) */
     #auth {
       max-width:480px;
       margin:0 auto;
@@ -581,7 +627,64 @@
   </header>
 
   <main>
-    <!-- HERO -->
+    <!-- NEW TOP ROW: main image (left) + auth panel (right) -->
+    <section class="hero-top">
+      <div class="hero-main-image">
+        <img src="/images/mm_main1_en.jpg"
+             alt="Measure Master main 3-in-1 illustration"
+             loading="eager" />
+      </div>
+
+      <!-- AUTH (moved here from bottom) -->
+      <section id="auth" class="hero-auth">
+        <div class="auth-headline">Account for testers and reviewers</div>
+        <div class="auth-caption">
+          Create an account below, then go to the <a href="/reviews.html">Reviews</a> page to leave feedback.
+        </div>
+
+        <div id="auth-tabs" class="tabbar" aria-hidden="false">
+          <button type="button" id="tab-signup" class="active">Sign up</button>
+          <button type="button" id="tab-login">Log in</button>
+        </div>
+
+        <!-- Sign up form -->
+        <form id="signup-form" autocomplete="on">
+          <div class="field">
+            <label for="signup-email">Email</label>
+            <input id="signup-email" name="email" type="email" required placeholder="you@example.com">
+          </div>
+          <div class="field">
+            <label for="signup-password">Password</label>
+            <input id="signup-password" name="password" type="password" required minlength="4" placeholder="At least 4 characters">
+          </div>
+          <div class="field">
+            <label for="signup-password2">Confirm password</label>
+            <input id="signup-password2" name="password2" type="password" required minlength="4" placeholder="Type it again">
+          </div>
+          <button type="submit" class="primary">Create account</button>
+          <p style="margin:6px 0 0; font-size:12px; color:var(--muted);">
+            Already have an account?
+            <a href="#" id="go-login">Go to log in</a>
+          </p>
+        </form>
+
+        <!-- Login form -->
+        <form id="login-form" autocomplete="on" hidden>
+          <div class="field">
+            <label for="login-email">Email</label>
+            <input id="login-email" name="email" type="email" required placeholder="you@example.com">
+          </div>
+          <div class="field">
+            <label for="login-password">Password</label>
+            <input id="login-password" name="password" type="password" required minlength="4" placeholder="At least 4 characters">
+          </div>
+          <button type="submit" class="primary">Log in</button>
+          <button type="button" id="logout-btn" style="display:none">Log out</button>
+        </form>
+      </section>
+    </section>
+
+    <!-- HERO (existing copy + mode cards) -->
     <section class="hero">
       <div class="hero-header">
         <div class="hero-kicker">All-in-one measuring app</div>
@@ -778,54 +881,6 @@
       </div>
       <div id="visitCounterHome">Loading visit count…</div>
     </section>
-
-    <!-- AUTH -->
-    <section id="auth">
-      <div class="auth-headline">Account for testers and reviewers</div>
-      <div class="auth-caption">
-        Create an account below, then go to the <a href="/reviews.html">Reviews</a> page to leave feedback.
-      </div>
-
-      <div id="auth-tabs" class="tabbar" aria-hidden="false">
-        <button type="button" id="tab-signup" class="active">Sign up</button>
-        <button type="button" id="tab-login">Log in</button>
-      </div>
-
-      <!-- Sign up form -->
-      <form id="signup-form" autocomplete="on">
-        <div class="field">
-          <label for="signup-email">Email</label>
-          <input id="signup-email" name="email" type="email" required placeholder="you@example.com">
-        </div>
-        <div class="field">
-          <label for="signup-password">Password</label>
-          <input id="signup-password" name="password" type="password" required minlength="4" placeholder="At least 4 characters">
-        </div>
-        <div class="field">
-          <label for="signup-password2">Confirm password</label>
-          <input id="signup-password2" name="password2" type="password" required minlength="4" placeholder="Type it again">
-        </div>
-        <button type="submit" class="primary">Create account</button>
-        <p style="margin:6px 0 0; font-size:12px; color:var(--muted);">
-          Already have an account?
-          <a href="#" id="go-login">Go to log in</a>
-        </p>
-      </form>
-
-      <!-- Login form -->
-      <form id="login-form" autocomplete="on" hidden>
-        <div class="field">
-          <label for="login-email">Email</label>
-          <input id="login-email" name="email" type="email" required placeholder="you@example.com">
-        </div>
-        <div class="field">
-          <label for="login-password">Password</label>
-          <input id="login-password" name="password" type="password" required minlength="4" placeholder="At least 8 characters">
-        </div>
-        <button type="submit" class="primary">Log in</button>
-        <button type="button" id="logout-btn" style="display:none">Log out</button>
-      </form>
-    </section>
   </main>
 
   <footer>
@@ -836,7 +891,7 @@
 
 <!-- Supabase & existing scripts -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="/js/mm-auth.js?v=auth_r2"></script> <!-- 버전 쪽은 그냥 숫자만 바꿔도 OK (캐시 무효용) -->
+<script src="/js/mm-auth.js?v=auth_r2"></script>
 <script src="/js/index.js?v=rev1"></script>
 <script>
   document.addEventListener('DOMContentLoaded', function(){
