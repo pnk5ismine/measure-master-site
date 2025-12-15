@@ -2,11 +2,9 @@
 // Home(index.html)의 "Tester login" 섹션용 간단 Auth + members 연동
 
 (function (global) {
-  // 🔧 여기 두 값은 *반드시* 본인 Supabase 프로젝트 값으로 바꿔 넣어야 합니다.
-  //    - URL: https://<project-ref>.supabase.co
-  //    - KEY: sb_publishable_ 로 시작하는 ANON/PUBLIC 키
-  const SUPABASE_URL = 'https://dyoeqoeuoziaiiflqtdt.supabase.co';
-  const SUPABASE_KEY = 'sb_publishable_0-sfEJvu_n2_uSAlZKKdqA_QCjX-P_S';
+  // 🔧 꼭 본인 Supabase 프로젝트 값으로 바꿔 넣으세요!
+  const SUPABASE_URL = 'https://YOUR_PROJECT_REF.supabase.co';
+  const SUPABASE_KEY = 'sb_publishable_XXXXXXXXXXXXXXXXXXXXXXXX';
 
   if (!global.supabase) {
     console.error('[mmAuth] supabase-js not loaded. Check CDN script.');
@@ -33,7 +31,7 @@
             nickname: nickname,
             is_admin: false
           },
-          { onConflict: 'user_id' } // 이미 있으면 업데이트
+          { onConflict: 'user_id' }
         );
 
       if (error) {
@@ -56,7 +54,6 @@
       const goLoginLink = document.getElementById('go-login');
 
       if (!signupForm && !loginForm) {
-        // 이 페이지에는 회원가입 UI가 없는 경우
         return;
       }
 
@@ -74,7 +71,6 @@
         if (tabSignup)  tabSignup.classList.remove('active');
       }
 
-      // 탭 전환
       if (tabSignup) {
         tabSignup.addEventListener('click', (e) => {
           e.preventDefault();
@@ -94,13 +90,19 @@
         });
       }
 
-      // 회원가입 처리
+      // 회원가입
       if (signupForm) {
         signupForm.addEventListener('submit', async (e) => {
           e.preventDefault();
-          const email = (document.getElementById('signup-email')?.value || '').trim();
-          const pw    = document.getElementById('signup-password')?.value || '';
-          const pw2   = document.getElementById('signup-password2')?.value || '';
+          const emailRaw = document.getElementById('signup-email')?.value || '';
+          const pwRaw    = document.getElementById('signup-password')?.value || '';
+          const pw2Raw   = document.getElementById('signup-password2')?.value || '';
+
+          const email = emailRaw.trim().toLowerCase();
+          const pw    = pwRaw.trim();
+          const pw2   = pw2Raw.trim();
+
+          console.log('[mmAuth] signUp email =', email, 'pw.length =', pw.length);
 
           if (!email) {
             alert('Please enter your email.');
@@ -121,7 +123,6 @@
           });
 
           if (error) {
-            // ❗ 여기 메시지를 잘 봐 주세요. 예: "Password should be at least 6 characters"
             alert('Sign-up failed: ' + (error.message || 'Unknown error'));
             console.error('[mmAuth] signUp error:', error);
             return;
@@ -130,19 +131,47 @@
           const user = data.user;
           await ensureMemberForUser(user);
 
-          alert('Sign-up successful.\nIf email confirmation is required, please check your inbox.');
-          showLogin();
-          const loginEmail = document.getElementById('login-email');
-          if (loginEmail) loginEmail.value = email;
+          // 💡 가입 후 바로 로그인까지 자동 시도
+          try {
+            const { data: loginData, error: loginError } =
+              await client.auth.signInWithPassword({ email, password: pw });
+
+            if (loginError) {
+              alert(
+                'Signed up, but auto login failed: ' +
+                (loginError.message || 'Unknown error')
+              );
+              console.error('[mmAuth] auto signIn error:', loginError);
+              showLogin();
+              const loginEmail = document.getElementById('login-email');
+              if (loginEmail) loginEmail.value = email;
+              return;
+            }
+
+            await ensureMemberForUser(loginData.user);
+            alert('Sign-up and login successful.');
+            if (logoutBtn) logoutBtn.style.display = 'inline-block';
+            showLogin();
+            const loginEmail = document.getElementById('login-email');
+            if (loginEmail) loginEmail.value = email;
+          } catch (e2) {
+            console.error('[mmAuth] auto-login exception:', e2);
+            showLogin();
+          }
         });
       }
 
-      // 로그인 처리
+      // 로그인
       if (loginForm) {
         loginForm.addEventListener('submit', async (e) => {
           e.preventDefault();
-          const email = (document.getElementById('login-email')?.value || '').trim();
-          const pw    = document.getElementById('login-password')?.value || '';
+          const emailRaw = document.getElementById('login-email')?.value || '';
+          const pwRaw    = document.getElementById('login-password')?.value || '';
+
+          const email = emailRaw.trim().toLowerCase();
+          const pw    = pwRaw.trim();
+
+          console.log('[mmAuth] login email =', email, 'pw.length =', pw.length);
 
           if (!email || !pw) {
             alert('Please enter both email and password.');
@@ -155,7 +184,7 @@
           });
 
           if (error) {
-            alert('Login failed: ' + (error.message || 'Unknown error'));
+            alert('Login failed: ' + (error.message || 'Invalid login'));
             console.error('[mmAuth] signIn error:', error);
             return;
           }
@@ -168,11 +197,10 @@
         });
       }
 
-      // 초기 세션 상태 체크
+      // 초기 세션 상태
       try {
         const { data } = await client.auth.getUser();
         if (data && data.user) {
-          // 이미 로그인 되어 있는 상태
           await ensureMemberForUser(data.user);
           showLogin();
           const loginEmail = document.getElementById('login-email');
@@ -181,7 +209,6 @@
           }
           if (logoutBtn) logoutBtn.style.display = 'inline-block';
         } else {
-          // 미로그인 → 기본은 회원가입 탭
           showSignup();
           if (logoutBtn) logoutBtn.style.display = 'none';
         }
