@@ -3,8 +3,8 @@
 
 (function (global) {
   // 🔧 꼭 본인 Supabase 프로젝트 값으로 바꿔 넣으세요!
-  const SUPABASE_URL = 'https://YOUR_PROJECT_REF.supabase.co';
-  const SUPABASE_KEY = 'sb_publishable_XXXXXXXXXXXXXXXXXXXXXXXX';
+  const SUPABASE_URL = 'https://dyoeqoeuoziaiiflqtdt.supabase.co';
+  const SUPABASE_KEY = 'sb_publishable_0-sfEJvu_n2_uSAlZKKdqA_QCjX-P_S';
 
   if (!global.supabase) {
     console.error('[mmAuth] supabase-js not loaded. Check CDN script.');
