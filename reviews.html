@@ -386,16 +386,51 @@
   © <span id="year"></span> Measure Master. All rights reserved.
 </footer>
 <!-- Supabase -->
+<!-- Supabase + 공유 auth 모듈 -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="/js/mm-auth.js?v=auth_r1"></script>
+<script src="/js/mm-auth.js?v=auth_r2"></script>
 <script src="/js/reviews-ui.js?v=rev16"></script>
+
 <script>
-  document.addEventListener('DOMContentLoaded', () => {
-    if (window.MMReviews) {
-      MMReviews.init();
+  document.addEventListener('DOMContentLoaded', async () => {
+    // 1) 먼저 로그인 상태를 Supabase에서 가져와서 화면에 반영
+    try {
+      const authInfoEl = document.getElementById('authInfo');
+
+      if (window.mmAuth && window.mmAuth.supabase) {
+        const { data } = await window.mmAuth.supabase.auth.getUser();
+        const user = data && data.user ? data.user : null;
+
+        if (authInfoEl) {
+          if (user) {
+            authInfoEl.textContent = '로그인: ' + (user.email || '');
+          } else {
+            authInfoEl.textContent = '로그인되어 있지 않습니다. 글쓰기는 로그인 후 가능합니다.';
+          }
+        }
+      } else {
+        console.warn('[reviews] mmAuth.supabase not found');
+        if (authInfoEl) {
+          authInfoEl.textContent = '로그인 정보를 불러오지 못했습니다.';
+        }
+      }
+    } catch (e) {
+      console.error('[reviews] auth check error:', e);
+      const authInfoEl = document.getElementById('authInfo');
+      if (authInfoEl) {
+        authInfoEl.textContent = '로그인 상태 확인 중 오류가 발생했습니다.';
+      }
+    }
+
+    // 2) 기존 리뷰 UI 초기화
+    if (window.MMReviews && typeof window.MMReviews.init === 'function') {
+      try {
+        await window.MMReviews.init();
+      } catch (e) {
+        console.error('[reviews] MMReviews.init error:', e);
+      }
     }
   });
 </script>
-
 </body>
 </html>
