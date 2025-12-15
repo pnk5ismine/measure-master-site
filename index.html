@@ -836,11 +836,16 @@
 
 <!-- Supabase & existing scripts -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="/js/mm-auth.js?v=auth_r1"></script>
+<script src="/js/mm-auth.js?v=auth_r2"></script> <!-- 버전 쪽은 그냥 숫자만 바꿔도 OK (캐시 무효용) -->
 <script src="/js/index.js?v=rev1"></script>
 <script>
   document.addEventListener('DOMContentLoaded', function(){
-    // Logout
+    // 홈 회원가입/로그인 UI 초기화
+    if (window.mmAuth && typeof window.mmAuth.initHomeAuth === 'function') {
+      window.mmAuth.initHomeAuth();
+    }
+
+    // Logout 버튼
     const btn = document.getElementById('logout-btn');
     if (btn) {
       btn.addEventListener('click', async function(e){
@@ -849,6 +854,7 @@
         finally { location.reload(); }
       });
     }
+
     // Year
     const y = document.getElementById('year');
     if (y) y.textContent = new Date().getFullYear();

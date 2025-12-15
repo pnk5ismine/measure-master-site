@@ -1,253 +1,200 @@
-/* /js/mm-auth.js — 통합 인증 모듈 (drop-in) */
-(function () {
-  if (!window.supabase) {
-    console.error("[mmAuth] supabase-js 가 먼저 로드되어야 합니다.");
+// /js/mm-auth.js
+// Home(index.html)의 "Tester login" 섹션용 간단 Auth + members 연동
+
+(function (global) {
+  // 🔧 여기 두 값은 *반드시* 본인 Supabase 프로젝트 값으로 바꿔 넣어야 합니다.
+  //    - URL: https://<project-ref>.supabase.co
+  //    - KEY: sb_publishable_ 로 시작하는 ANON/PUBLIC 키
+  const SUPABASE_URL = 'https://dyoeqoeuoziaiiflqtdt.supabase.co';
+  const SUPABASE_KEY = 'sb_publishable_0-sfEJvu_n2_uSAlZKKdqA_QCjX-P_S';
+
+  if (!global.supabase) {
+    console.error('[mmAuth] supabase-js not loaded. Check CDN script.');
     return;
   }
 
-  // === 프로젝트 설정 ===
-  const SUPABASE_URL  = "https://snxjcbaaysgfunpsohzg.supabase.co";
-  const SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNueGpjYmFheXNnZnVucHNvaHpnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY1OTk3MzQsImV4cCI6MjA3MjE3NTczNH0.T8b9PpabXkCvwW2W57Qbr-h--JLZB6errlyP5IwsYyk";
+  const client = global.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-  // 필요하면 관리자 메일 채워 넣으세요 (리뷰 목록에서 "관리자" 표기용)
-  const ADMIN_EMAILS = [
-    // "admin@example.com",
-  ];
-
-  // === 클라이언트 생성 ===
-  const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON, {
-    auth: {
-      persistSession: true,
-      autoRefreshToken: true,
-      detectSessionInUrl: true,
-    },
-  });
-
-  // === 상태 & 이벤트 ===
-  let currentSession = null;
-  let ready = false;
-
-  const changeHandlers = [];
-  const readyHandlers  = [];
-
-  function fireChange() {
-    changeHandlers.forEach(fn => {
-      try { fn(currentSession); } catch (e) { /* noop */ }
-    });
-  }
-  function fireReady() {
-    ready = true;
-    while (readyHandlers.length) {
-      const fn = readyHandlers.shift();
-      try { fn(currentSession); } catch (e) { /* noop */ }
-    }
-  }
-
-  // 최초 세션 동기화
-  (async () => {
+  // members 테이블에 (user_id, email, nickname) upsert
+  async function ensureMemberForUser(user) {
     try {
-      const { data: { session } } = await sb.auth.getSession();
-      currentSession = session || null;
-    } catch (_) {
-      currentSession = null;
-    } finally {
-      fireReady();
-      fireChange();
-    }
-  })();
+      if (!user) return;
+      const email = user.email || '';
+      const nickname =
+        (email && email.split('@')[0]) ||
+        'tester';
 
-  // 세션 변화 구독
-  sb.auth.onAuthStateChange((_event, session) => {
-    currentSession = session || null;
-    fireChange();
-  });
+      const { error } = await client
+        .from('members')
+        .upsert(
+          {
+            user_id: user.id,
+            email: email,
+            nickname: nickname,
+            is_admin: false
+          },
+          { onConflict: 'user_id' } // 이미 있으면 업데이트
+        );
 
-  // === 공개 API ===
-  async function getSession() {
-    try {
-      const { data: { session } } = await sb.auth.getSession();
-      currentSession = session || null;
-      return currentSession;
+      if (error) {
+        console.error('[mmAuth] members upsert error:', error);
+      }
     } catch (e) {
-      return null;
+      console.error('[mmAuth] ensureMemberForUser exception:', e);
     }
   }
 
-  function onChange(handler) {
-    if (typeof handler === "function") changeHandlers.push(handler);
-  }
+  const mmAuth = {
+    supabase: client,
 
-  function whenReady(handler) {
-    if (typeof handler !== "function") return;
-    if (ready) {
-      // 다음 틱에 호출(동기 호출로 인한 레이아웃 경쟁 방지)
-      setTimeout(() => handler(currentSession), 0);
-    } else {
-      readyHandlers.push(handler);
-    }
-  }
+    async initHomeAuth() {
+      const tabSignup   = document.getElementById('tab-signup');
+      const tabLogin    = document.getElementById('tab-login');
+      const signupForm  = document.getElementById('signup-form');
+      const loginForm   = document.getElementById('login-form');
+      const logoutBtn   = document.getElementById('logout-btn');
+      const goLoginLink = document.getElementById('go-login');
 
-  function isAdmin(email) {
-    if (!email) return false;
-    return ADMIN_EMAILS.includes(String(email).toLowerCase());
-  }
+      if (!signupForm && !loginForm) {
+        // 이 페이지에는 회원가입 UI가 없는 경우
+        return;
+      }
 
-  // 로그인/가입/로그아웃 래퍼
-  function signIn(email, password) {
-    return sb.auth.signInWithPassword({ email, password });
-  }
-  function signUp(email, password) {
-    return sb.auth.signUp({ email, password });
-  }
-  function signOut() {
-    return sb.auth.signOut();
-  }
+      function showSignup() {
+        if (signupForm) signupForm.hidden = false;
+        if (loginForm)  loginForm.hidden  = true;
+        if (tabSignup)  tabSignup.classList.add('active');
+        if (tabLogin)   tabLogin.classList.remove('active');
+      }
 
-  function _debugPing() {
-    console.log("[mmAuth] ready:", ready, "session:", currentSession);
-  }
+      function showLogin() {
+        if (signupForm) signupForm.hidden = true;
+        if (loginForm)  loginForm.hidden  = false;
+        if (tabLogin)   tabLogin.classList.add('active');
+        if (tabSignup)  tabSignup.classList.remove('active');
+      }
 
-  // 전역 노출 (기존 키 보존 + 새 키 추가)
-/* /js/mm-auth.js — 통합 인증 모듈 (drop-in) */
-(function () {
-  if (!window.supabase) {
-    console.error("[mmAuth] supabase-js 가 먼저 로드되어야 합니다.");
-    return;
-  }
+      // 탭 전환
+      if (tabSignup) {
+        tabSignup.addEventListener('click', (e) => {
+          e.preventDefault();
+          showSignup();
+        });
+      }
+      if (tabLogin) {
+        tabLogin.addEventListener('click', (e) => {
+          e.preventDefault();
+          showLogin();
+        });
+      }
+      if (goLoginLink) {
+        goLoginLink.addEventListener('click', (e) => {
+          e.preventDefault();
+          showLogin();
+        });
+      }
 
-  // === 프로젝트 설정 ===
-  const SUPABASE_URL  = "https://snxjcbaaysgfunpsohzg.supabase.co";
-  const SUPABASE_ANON = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNueGpjYmFheXNnZnVucHNvaHpnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY1OTk3MzQsImV4cCI6MjA3MjE3NTczNH0.T8b9PpabXkCvwW2W57Qbr-h--JLZB6errlyP5IwsYyk";
+      // 회원가입 처리
+      if (signupForm) {
+        signupForm.addEventListener('submit', async (e) => {
+          e.preventDefault();
+          const email = (document.getElementById('signup-email')?.value || '').trim();
+          const pw    = document.getElementById('signup-password')?.value || '';
+          const pw2   = document.getElementById('signup-password2')?.value || '';
 
-  const ADMIN_EMAILS = [
-    // "admin@example.com",
-  ];
+          if (!email) {
+            alert('Please enter your email.');
+            return;
+          }
+          if (pw !== pw2) {
+            alert('Passwords do not match.');
+            return;
+          }
+          if (pw.length < 4) {
+            alert('Please use a password with at least 4 characters.');
+            return;
+          }
 
-  // === 클라이언트 생성 ===
-  const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON, {
-    auth: {
-      persistSession: true,
-      autoRefreshToken: true,
-      detectSessionInUrl: true,
+          const { data, error } = await client.auth.signUp({
+            email,
+            password: pw
+          });
+
+          if (error) {
+            // ❗ 여기 메시지를 잘 봐 주세요. 예: "Password should be at least 6 characters"
+            alert('Sign-up failed: ' + (error.message || 'Unknown error'));
+            console.error('[mmAuth] signUp error:', error);
+            return;
+          }
+
+          const user = data.user;
+          await ensureMemberForUser(user);
+
+          alert('Sign-up successful.\nIf email confirmation is required, please check your inbox.');
+          showLogin();
+          const loginEmail = document.getElementById('login-email');
+          if (loginEmail) loginEmail.value = email;
+        });
+      }
+
+      // 로그인 처리
+      if (loginForm) {
+        loginForm.addEventListener('submit', async (e) => {
+          e.preventDefault();
+          const email = (document.getElementById('login-email')?.value || '').trim();
+          const pw    = document.getElementById('login-password')?.value || '';
+
+          if (!email || !pw) {
+            alert('Please enter both email and password.');
+            return;
+          }
+
+          const { data, error } = await client.auth.signInWithPassword({
+            email,
+            password: pw
+          });
+
+          if (error) {
+            alert('Login failed: ' + (error.message || 'Unknown error'));
+            console.error('[mmAuth] signIn error:', error);
+            return;
+          }
+
+          const user = data.user;
+          await ensureMemberForUser(user);
+
+          alert('Logged in successfully.');
+          if (logoutBtn) logoutBtn.style.display = 'inline-block';
+        });
+      }
+
+      // 초기 세션 상태 체크
+      try {
+        const { data } = await client.auth.getUser();
+        if (data && data.user) {
+          // 이미 로그인 되어 있는 상태
+          await ensureMemberForUser(data.user);
+          showLogin();
+          const loginEmail = document.getElementById('login-email');
+          if (loginEmail && data.user.email) {
+            loginEmail.value = data.user.email;
+          }
+          if (logoutBtn) logoutBtn.style.display = 'inline-block';
+        } else {
+          // 미로그인 → 기본은 회원가입 탭
+          showSignup();
+          if (logoutBtn) logoutBtn.style.display = 'none';
+        }
+      } catch (e) {
+        console.error('[mmAuth] getUser failed:', e);
+        showSignup();
+      }
     },
-  });
 
-  // === 상태 & 이벤트 ===
-  let currentSession = null;
-  let ready = false;
-
-  const changeHandlers = [];
-  const readyHandlers  = [];
-
-  function fireChange() {
-    changeHandlers.forEach(fn => { try { fn(currentSession); } catch (_) {} });
-  }
-  function fireReady() {
-    ready = true;
-    while (readyHandlers.length) {
-      const fn = readyHandlers.shift();
-      try { fn(currentSession); } catch (_) {}
+    async signOut() {
+      await client.auth.signOut();
     }
-  }
-
-  // 최초 세션 동기화
-  (async () => {
-    try {
-      const { data: { session } } = await sb.auth.getSession();
-      currentSession = session || null;
-    } catch (_) {
-      currentSession = null;
-    } finally {
-      fireReady();
-      fireChange();
-    }
-  })();
-
-  // 세션 변화 구독
-  sb.auth.onAuthStateChange((_event, session) => {
-    currentSession = session || null;
-    fireChange();
-  });
-
-  // === 공개 API ===
-  async function getSession() {
-    try {
-      const { data: { session } } = await sb.auth.getSession();
-      currentSession = session || null;
-      return currentSession;
-    } catch (_) {
-      return null;
-    }
-  }
-
-  function onChange(handler) {
-    if (typeof handler === "function") changeHandlers.push(handler);
-  }
-
-  function whenReady(handler) {
-    if (typeof handler !== "function") return;
-    if (ready) { setTimeout(() => handler(currentSession), 0); }
-    else { readyHandlers.push(handler); }
-  }
-
-  function isAdmin(email) {
-    if (!email) return false;
-    return ADMIN_EMAILS.includes(String(email).toLowerCase());
-  }
-
-  // 입력 정규화
-  const normEmail = (s) => String(s || "").trim().toLowerCase();
-  const normPw    = (s) => String(s || "");
-
-  // 로그인/가입/로그아웃 래퍼 (입력 정규화)
-  function signIn(email, password) {
-    return sb.auth.signInWithPassword({ email: normEmail(email), password: normPw(password) });
-  }
-  function signUp(email, password) {
-    return sb.auth.signUp({ email: normEmail(email), password: normPw(password) });
-  }
-  function signOut() {
-    return sb.auth.signOut();
-  }
-
-  function _debugPing() {
-    console.log("[mmAuth] ready:", ready, "session:", currentSession);
-  }
-
-  // 간단 진단
-  async function _diag() {
-    const ref = SUPABASE_URL.replace(/^https?:\/\//, "").split(".")[0];
-    const { data: { session } } = await sb.auth.getSession();
-    return {
-      url: SUPABASE_URL,
-      ref,
-      anon: SUPABASE_ANON.slice(0, 6) + "…" + SUPABASE_ANON.slice(-6),
-      hasSession: !!session,
-      user: session?.user?.email || null,
-    };
-  }
-
-  // 전역 노출
-  window.mmAuth = {
-    // 기존
-    sb,
-    isAdmin,
-    getSession,
-    signIn,
-    signUp,
-    // 추가
-    signOut,
-    onChange,
-    whenReady,
-    _debugPing,
-    _diag,
-    meta: {
-      url: SUPABASE_URL,
-      ref: SUPABASE_URL.replace(/^https?:\/\//, "").split(".")[0],
-      anon: SUPABASE_ANON.slice(0, 6) + "…" + SUPABASE_ANON.slice(-6),
-    },
-    version: "2025-10-03.r1"
   };
-})();
 
-})();
+  global.mmAuth = mmAuth;
+})(window);
