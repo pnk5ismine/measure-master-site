@@ -155,6 +155,10 @@
         if (this.$formStatus) {
           this.$formStatus.textContent = 'Saving...';
         }
+        if (!this.user) {
+          alert('Please log in on the home page before writing a review.');
+          return;
+        }
 
         const nickname =
           (this.user.email && this.user.email.split('@')[0]) || 'tester';
@@ -166,7 +170,8 @@
             title,
             content,
             nickname,
-            author_email
+            author_email,
+            author_id: this.user && this.user.id ? this.user.id : null
           })
           .select()
           .single();
