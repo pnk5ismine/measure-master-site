@@ -46,10 +46,11 @@
     cacheDom() {
       this.$listBody      = document.getElementById('listBody');
       this.$listView      = document.getElementById('listView');
-      this.$readView      = document.getElementById('readView');
+      this.$readView      = document.getElementById('readView');   // (not used yet)
       this.$writeForm     = document.getElementById('writeForm');
       this.$listLoginHint = document.getElementById('listLoginHint');
       this.$btnCompose    = document.getElementById('btn-compose');
+      this.$btnCancel     = document.getElementById('btn-cancel');
       this.$formStatus    = document.getElementById('formStatus');
       this.$inputTitle    = document.getElementById('title');
       this.$inputContent  = document.getElementById('content');
@@ -89,7 +90,6 @@
       const compose = params.get('compose');
 
       if (compose === '1' || compose === 'true') {
-        // URL에서 글쓰기 요청 → 로그인 되어 있으면 바로 글쓰기 화면
         if (this.user) {
           this.showWriteView();
         } else {
@@ -110,7 +110,6 @@
       if (this.$listView)  this.$listView.hidden  = true;
       if (this.$readView)  this.$readView.hidden  = true;
       if (this.$writeForm) this.$writeForm.hidden = false;
-      // 스크롤을 위로 올려서 폼이 바로 보이게
       window.scrollTo({ top: 0, behavior: 'smooth' });
     },
 
@@ -118,15 +117,21 @@
       if (!this.$btnCompose) return;
 
       this.$btnCompose.addEventListener('click', (e) => {
-        // href="/reviews.html?compose=1" 이지만, 페이지 리로드 없이 처리
         e.preventDefault();
 
-        if (!this.user) {
+        if (!this.user || !this.user.id) {
           alert('Please log in on the home page before writing a review.');
           return;
         }
         this.showWriteView();
       });
+
+      if (this.$btnCancel) {
+        this.$btnCancel.addEventListener('click', (e) => {
+          e.preventDefault();
+          this.showListView();
+        });
+      }
     },
 
     setupWriteForm() {
@@ -135,9 +140,16 @@
       this.$writeForm.addEventListener('submit', async (e) => {
         e.preventDefault();
 
-        if (!this.user) {
-          alert('Please log in on the home page before writing a review.');
-          return;
+        // 로그인 여부 다시 확인
+        if (!this.user || !this.user.id) {
+          await this.refreshUser();
+          if (!this.user || !this.user.id) {
+            alert('Please log in on the home page before writing a review.');
+            if (this.$formStatus) {
+              this.$formStatus.textContent = 'Not logged in.';
+            }
+            return;
+          }
         }
 
         const title   = (this.$inputTitle?.value || '').trim();
@@ -155,14 +167,12 @@
         if (this.$formStatus) {
           this.$formStatus.textContent = 'Saving...';
         }
-        if (!this.user) {
-          alert('Please log in on the home page before writing a review.');
-          return;
-        }
 
+        const user = this.user;
         const nickname =
-          (this.user.email && this.user.email.split('@')[0]) || 'tester';
-        const author_email = this.user.email || null;
+          (user.email && user.email.split('@')[0]) || 'tester';
+        const author_email = user.email || null;
+        const author_id = user.id;   // ★ reviews.author_id 에 들어갈 값
 
         const { data, error } = await this.supabase
           .from('reviews')
@@ -171,7 +181,7 @@
             content,
             nickname,
             author_email,
-            author_id: this.user && this.user.id ? this.user.id : null
+            author_id
           })
           .select()
           .single();
@@ -179,12 +189,11 @@
         if (error) {
           console.error(
             '[MMReviews] insert review error:',
-              error,
-              error?.message,
-              error?.code,
-              JSON.stringify(error, null, 2)
-            );
-
+            error,
+            error?.message,
+            error?.code,
+            JSON.stringify(error, null, 2)
+          );
           if (this.$formStatus) {
             this.$formStatus.textContent =
               'Failed to save the review: ' + (error.message || 'Unknown error');
@@ -195,11 +204,10 @@
         if (this.$formStatus) {
           this.$formStatus.textContent = 'Review saved.';
         }
-        // 폼 비우기
+
         if (this.$inputTitle)   this.$inputTitle.value = '';
         if (this.$inputContent) this.$inputContent.value = '';
 
-        // 목록으로 돌아가서 다시 로드
         this.showListView();
         await this.loadList();
       });
@@ -208,7 +216,6 @@
     async loadList() {
       if (!this.$listBody) return;
 
-      // Loading row
       this.$listBody.innerHTML = '';
       const tr = document.createElement('tr');
       const td = document.createElement('td');
@@ -239,25 +246,27 @@
       data.forEach((row, idx) => {
         const tr = document.createElement('tr');
 
-        // 번호
+        // No.
         const tdNo = document.createElement('td');
         tdNo.className = 'cell-no';
         tdNo.textContent = String(idx + 1);
         tr.appendChild(tdNo);
 
-        // 닉네임
+        // Nickname
         const tdNick = document.createElement('td');
         tdNick.className = 'cell-nick';
         tdNick.textContent = row.nickname || '-';
         tr.appendChild(tdNick);
 
-        // 본문 (목록에서 1~2줄 요약)
+        // Title + summary
         const tdBody = document.createElement('td');
         tdBody.className = 'cell-body';
 
         const line1 = document.createElement('div');
         line1.className = 'm-line1';
-        line1.textContent = row.title || '(No title)';
+        line1.textContent = row.is_notice
+          ? '[NOTICE] ' + (row.title || '(No title)')
+          : (row.title || '(No title)');
 
         const line2 = document.createElement('div');
         line2.className = 'm-line2';
@@ -272,24 +281,24 @@
         tdBody.appendChild(line2);
         tr.appendChild(tdBody);
 
-        // 조회수
+        // Views
         const tdStats = document.createElement('td');
         tdStats.className = 'cell-stats';
         tdStats.textContent = String(row.view_count ?? 0);
         tr.appendChild(tdStats);
 
-        // 작성시각
+        // Created at
         const tdTime = document.createElement('td');
         tdTime.className = 'cell-time';
         tdTime.textContent = this.formatDateTime(row.created_at);
         tr.appendChild(tdTime);
 
-        // (나중에) 읽기 화면용 클릭 핸들러
+        // Click handler (later can be full read view)
         tr.dataset.id = row.id;
         tr.style.cursor = 'pointer';
         tr.addEventListener('click', () => {
           alert(
-            'Reading view will be implemented in the next step.\n\nTitle: ' +
+            'Reading view will be implemented later.\n\nTitle: ' +
               (row.title || '')
           );
         });
