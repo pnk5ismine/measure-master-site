@@ -655,20 +655,23 @@
           </div>
           <div class="field">
             <label for="signup-password">Password</label>
-            <input id="signup-password" name="password" type="password" required minlength="4" placeholder="At least 4 characters">
+            <input id="signup-password" name="password" type="password"
+                   required minlength="6" placeholder="At least 6 characters">
           </div>
           <div class="field">
             <label for="signup-password2">Confirm password</label>
-            <input id="signup-password2" name="password2" type="password" required minlength="4" placeholder="Type it again">
-          </div>
-          <button type="submit" class="primary">Create account</button>
+            <input id="signup-password2" name="password2" type="password"
+                   required minlength="6" placeholder="Type it again">
+          </div> 
+         <button type="submit" class="primary">Create account</button>
           <p style="margin:6px 0 0; font-size:12px; color:var(--muted);">
             Already have an account?
             <a href="#" id="go-login">Go to log in</a>
           </p>
         </form>
 
-        <!-- Login form -->
+ 
+         <!-- Login form -->
         <form id="login-form" autocomplete="on" hidden>
           <div class="field">
             <label for="login-email">Email</label>
@@ -676,11 +679,13 @@
           </div>
           <div class="field">
             <label for="login-password">Password</label>
-            <input id="login-password" name="password" type="password" required minlength="4" placeholder="At least 4 characters">
+            <input id="login-password" name="password" type="password"
+                   required minlength="6" placeholder="At least 6 characters">
           </div>
           <button type="submit" class="primary">Log in</button>
           <button type="button" id="logout-btn" style="display:none">Log out</button>
         </form>
+
       </section>
     </section>
 
