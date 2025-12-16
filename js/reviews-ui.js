@@ -1,5 +1,5 @@
 // /js/reviews-ui.js
-// Reviews page UI: list + write view, using the *same* Supabase client as mm-auth.js
+// Reviews page UI: list + read + write view, using the *same* Supabase client as mm-auth.js
 
 (function (global) {
   const MMReviews = {
@@ -38,6 +38,7 @@
       this.cacheDom();
       this.setupComposeButton();
       this.setupWriteForm();
+      this.setupReadActions();
       this.applyAuthHint();
       this.handleInitialViewFromQuery();
       await this.loadList();
@@ -46,14 +47,22 @@
     cacheDom() {
       this.$listBody      = document.getElementById('listBody');
       this.$listView      = document.getElementById('listView');
-      this.$readView      = document.getElementById('readView');   // (not used yet)
+      this.$readView      = document.getElementById('readView');
       this.$writeForm     = document.getElementById('writeForm');
+
       this.$listLoginHint = document.getElementById('listLoginHint');
       this.$btnCompose    = document.getElementById('btn-compose');
       this.$btnCancel     = document.getElementById('btn-cancel');
       this.$formStatus    = document.getElementById('formStatus');
       this.$inputTitle    = document.getElementById('title');
       this.$inputContent  = document.getElementById('content');
+
+      // Read view DOM
+      this.$readTitle     = document.getElementById('readTitle');
+      this.$readMeta      = document.getElementById('readMeta');
+      this.$readContent   = document.getElementById('readContent');
+      this.$btnBackList   = document.getElementById('btn-back-list');
+      this.$btnGoCompose  = document.getElementById('btn-go-compose');
 
       if (!this.$listBody) {
         console.error('[MMReviews] #listBody not found.');
@@ -113,18 +122,28 @@
       window.scrollTo({ top: 0, behavior: 'smooth' });
     },
 
+    showReadView() {
+      if (this.$listView)  this.$listView.hidden  = true;
+      if (this.$readView)  this.$readView.hidden  = false;
+      if (this.$writeForm) this.$writeForm.hidden = true;
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    },
+
     setupComposeButton() {
-      if (!this.$btnCompose) return;
+      if (this.$btnCompose) {
+        this.$btnCompose.addEventListener('click', async (e) => {
+          e.preventDefault();
 
-      this.$btnCompose.addEventListener('click', (e) => {
-        e.preventDefault();
-
-        if (!this.user || !this.user.id) {
-          alert('Please log in on the home page before writing a review.');
-          return;
-        }
-        this.showWriteView();
-      });
+          if (!this.user || !this.user.id) {
+            await this.refreshUser();
+          }
+          if (!this.user || !this.user.id) {
+            alert('Please log in on the home page before writing a review.');
+            return;
+          }
+          this.showWriteView();
+        });
+      }
 
       if (this.$btnCancel) {
         this.$btnCancel.addEventListener('click', (e) => {
@@ -172,7 +191,7 @@
         const nickname =
           (user.email && user.email.split('@')[0]) || 'tester';
         const author_email = user.email || null;
-        const author_id = user.id;   // ★ reviews.author_id 에 들어갈 값
+        const author_id = user.id;   // reviews.author_id
 
         const { data, error } = await this.supabase
           .from('reviews')
@@ -211,6 +230,77 @@
         this.showListView();
         await this.loadList();
       });
+    },
+
+    setupReadActions() {
+      if (this.$btnBackList) {
+        this.$btnBackList.addEventListener('click', (e) => {
+          e.preventDefault();
+          this.showListView();
+        });
+      }
+      if (this.$btnGoCompose) {
+        this.$btnGoCompose.addEventListener('click', async (e) => {
+          e.preventDefault();
+          if (!this.user || !this.user.id) {
+            await this.refreshUser();
+          }
+          if (!this.user || !this.user.id) {
+            alert('Please log in on the home page before writing a review.');
+            return;
+          }
+          this.showWriteView();
+        });
+      }
+    },
+
+    async openReview(id) {
+      if (!id) return;
+
+      const { data, error } = await this.supabase
+        .from('reviews')
+        .select('id, title, content, nickname, view_count, created_at, is_notice')
+        .eq('id', id)
+        .single();
+
+      if (error) {
+        console.error('[MMReviews] openReview error:', error);
+        alert('Failed to load the review.');
+        return;
+      }
+
+      if (this.$readTitle) {
+        this.$readTitle.textContent = data.title || '(No title)';
+      }
+
+      if (this.$readMeta) {
+        const nick = data.nickname || '-';
+        const dateStr = this.formatDateTime(data.created_at);
+        const views = data.view_count ?? 0;
+        this.$readMeta.textContent =
+          `${nick} · ${dateStr} · Views ${views}`;
+      }
+
+      if (this.$readContent) {
+        this.$readContent.textContent = data.content || '';
+      }
+
+      // view_count 증가 시도 (정책 때문에 실패해도 화면에는 영향 X)
+      try {
+        const currentViews = data.view_count ?? 0;
+        const { error: updErr } = await this.supabase
+          .from('reviews')
+          .update({ view_count: currentViews + 1 })
+          .eq('id', id);
+
+        if (updErr) {
+          console.warn('[MMReviews] view_count update error:', updErr);
+        }
+      } catch (e) {
+        console.warn('[MMReviews] view_count update exception:', e);
+      }
+
+      this.showReadView();
     },
 
     async loadList() {
@@ -293,14 +383,11 @@
         tdTime.textContent = this.formatDateTime(row.created_at);
         tr.appendChild(tdTime);
 
-        // Click handler (later can be full read view)
+        // 클릭하면 읽기 뷰로 이동
         tr.dataset.id = row.id;
         tr.style.cursor = 'pointer';
         tr.addEventListener('click', () => {
-          alert(
-            'Reading view will be implemented later.\n\nTitle: ' +
-              (row.title || '')
-          );
+          this.openReview(row.id);
         });
 
         if (row.is_notice) {
@@ -326,7 +413,7 @@
       const y = d.getFullYear();
       const m = String(d.getMonth() + 1).padStart(2, '0');
       const day = String(d.getDate()).padStart(2, '0');
-      const hh = String(d.getHours()).padStart(2, '0');
+      const hh = String(d.getHours() + 0).padStart(2, '0'); // local time 기준
       const mm = String(d.getMinutes()).padStart(2, '0');
       return `${y}-${m}-${day} ${hh}:${mm}`;
     }
