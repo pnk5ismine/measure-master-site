@@ -44,6 +44,7 @@
 
   const mmAuth = {
     supabase: client,
+    sb: client,
 
     async initHomeAuth() {
       const tabSignup   = document.getElementById('tab-signup');
@@ -112,7 +113,7 @@
             alert('Passwords do not match.');
             return;
           }
-          if (pw.length < 4) {
+          if (pw.length < 6) {
             alert('Please use a password with at least 4 characters.');
             return;
           }

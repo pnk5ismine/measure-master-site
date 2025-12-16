@@ -479,50 +479,52 @@
   document.addEventListener('DOMContentLoaded', async () => {
     console.log('[reviews] DOM ready');
 
-    const authInfoEl = document.getElementById('authInfo');
+    const authInfoEl   = document.getElementById('authInfo');   // 제목 아래 작은 글씨
+    const authStatusEl = document.getElementById('authStatus'); // 왼쪽 카드 상단 상태문구
 
-    // 1) Shared Supabase client from mm-auth.js
     if (!window.mmAuth || !window.mmAuth.supabase) {
       console.warn('[reviews] mmAuth.supabase not found');
-      if (authInfoEl) {
-        authInfoEl.textContent = 'Failed to load login info.';
-      }
+      if (authInfoEl)   authInfoEl.textContent   = 'Could not load login status.';
+      if (authStatusEl) authStatusEl.textContent = 'Could not load login status.';
       return;
     }
 
     const client = window.mmAuth.supabase;
 
     try {
-      // 2) Get current user
+      // 2) 현재 로그인 사용자 조회
       const { data, error } = await client.auth.getUser();
       console.log('[reviews] getUser result:', data, error);
 
       const user = data && data.user ? data.user : null;
 
-      if (authInfoEl) {
-        if (error) {
-          authInfoEl.textContent =
-            'An error occurred while checking login status: ' +
-            (error.message || '');
-        } else if (user) {
-          authInfoEl.textContent = 'Logged in as: ' + (user.email || '');
-          document.body.classList.add('is-logged-in');
-        } else {
-          authInfoEl.textContent =
-            'You are not logged in. Please log in before writing a review.';
-          document.body.classList.remove('is-logged-in');
-        }
+      const setText = (text) => {
+        if (authInfoEl)   authInfoEl.textContent   = text;
+        if (authStatusEl) authStatusEl.textContent = text;
+      };
+
+      if (error) {
+        setText(
+          'Error while checking login status: ' +
+          (error.message || '')
+        );
+        document.body.classList.remove('is-logged-in');
+      } else if (user) {
+        setText('Logged in as: ' + (user.email || ''));
+        document.body.classList.add('is-logged-in');
+      } else {
+        setText('You are not logged in. Writing a review requires login.');
+        document.body.classList.remove('is-logged-in');
       }
 
-      // 3) Initialize reviews UI (existing logic)
+      // 3) 리뷰 UI 초기화 (위에서 만든 공용 client와 user 넘겨주기)
       if (window.MMReviews && typeof window.MMReviews.init === 'function') {
         await window.MMReviews.init(client, user);
       }
     } catch (e) {
       console.error('[reviews] auth init error:', e);
-      if (authInfoEl) {
-        authInfoEl.textContent = 'An error occurred while checking login status.';
-      }
+      if (authInfoEl)   authInfoEl.textContent   = 'An error occurred while checking login status.';
+      if (authStatusEl) authStatusEl.textContent = 'An error occurred while checking login status.';
     }
   });
 </script>

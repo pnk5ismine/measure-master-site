@@ -1,35 +1,78 @@
 // /js/reviews-ui.js
-// 새 Supabase 프로젝트의 "reviews" 테이블을 읽어서 목록에 표시하는 최소 버전
+// "reviews" 테이블 목록을 표시하는 모듈.
+// ❗ Supabase client는 mm-auth.js에서 만든 것을 재사용합니다.
 
 (function (global) {
-  // 🔧 이 두 줄은 반드시 "본인 프로젝트 값"으로 바꿔 넣으세요.
-  const SUPABASE_URL = 'https://dyoeqoeuoziaiiflqtdt.supabase.co';
-  const SUPABASE_KEY = 'sb_publishable_0-sfEJvu_n2_uSAlZKKdqA_QCjX-P_S ';
-
-  if (!global.supabase) {
-    console.error('[MMReviews] supabase-js가 로드되지 않았습니다. CDN 스크립트를 확인하세요.');
-    return;
-  }
-
-  const supabase = global.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-
   const MMReviews = {
-    async init() {
+    supabase: null,
+    user: null,
+
+    /**
+     * 초기화
+     * @param {object} supabaseClient - (선택) mm-auth.js에서 넘겨주는 client
+     * @param {object|null} currentUser - (선택) 이미 조회해 둔 user 객체
+     */
+    async init(supabaseClient, currentUser) {
+      console.log('[MMReviews] init called with client, user =', !!supabaseClient, !!currentUser);
+
+      // 1) 우선 인자로 받은 client 사용
+      if (supabaseClient && supabaseClient.auth) {
+        this.supabase = supabaseClient;
+      }
+      // 2) 아니면 mmAuth.supabase 사용
+      else if (global.mmAuth && global.mmAuth.supabase) {
+        this.supabase = global.mmAuth.supabase;
+      }
+
+      if (!this.supabase) {
+        console.error('[MMReviews] No Supabase client available.');
+        return;
+      }
+
+      this.user = currentUser || null;
       this.cacheDom();
-      await this.loadList();
+      this.applyAuthHint();   // 로그인 안내 문구 갱신
+      await this.loadList();  // 목록 로딩
     },
 
     cacheDom() {
-      this.$listBody   = document.getElementById('listBody');
-      this.$listView   = document.getElementById('listView');
-      this.$readView   = document.getElementById('readView');
-      this.$writeForm  = document.getElementById('writeForm');
+      this.$listBody      = document.getElementById('listBody');
+      this.$listView      = document.getElementById('listView');
+      this.$readView      = document.getElementById('readView');
+      this.$writeForm     = document.getElementById('writeForm');
       this.$listLoginHint = document.getElementById('listLoginHint');
+      this.$btnCompose    = document.getElementById('btn-compose');
 
-      // 안전장치
       if (!this.$listBody) {
-        console.error('[MMReviews] #listBody 를 찾지 못했습니다.');
+        console.error('[MMReviews] #listBody not found.');
       }
+    },
+
+    // 로그인 상태에 따라 하단 안내 문구 갱신
+    applyAuthHint() {
+      if (!this.$listLoginHint) return;
+
+      if (this.user) {
+        this.$listLoginHint.textContent =
+          'You are logged in as ' + (this.user.email || '') + '. You can write a review.';
+      } else {
+        this.$listLoginHint.textContent =
+          'To write a review, please sign up / log in on the home page.';
+      }
+    },
+
+    // 필요할 경우 이 함수로 최신 user를 다시 불러올 수도 있습니다.
+    async refreshUser() {
+      if (!this.supabase) return null;
+      const { data, error } = await this.supabase.auth.getUser();
+      if (error) {
+        console.warn('[MMReviews] refreshUser error:', error);
+        this.user = null;
+      } else {
+        this.user = data && data.user ? data.user : null;
+      }
+      this.applyAuthHint();
+      return this.user;
     },
 
     async loadList() {
@@ -40,25 +83,26 @@
       const tr = document.createElement('tr');
       const td = document.createElement('td');
       td.colSpan = 5;
-      td.textContent = '목록을 불러오는 중입니다…';
+      td.textContent = 'Loading reviews…';
       tr.appendChild(td);
       this.$listBody.appendChild(tr);
 
       // Supabase에서 리뷰 목록 가져오기
-      const { data, error } = await supabase
+      const { data, error } = await this.supabase
         .from('reviews')
         .select('id, title, content, nickname, view_count, created_at, is_notice')
         .order('is_notice', { ascending: false })
         .order('created_at', { ascending: false });
 
       if (error) {
-        console.error('[MMReviews] 목록 로드 실패:', error);
-        td.textContent = '목록 로드 실패: ' + (error.message || '알 수 없는 오류');
+        console.error('[MMReviews] Failed to load list:', error);
+        td.textContent =
+          'Failed to load the list: ' + (error.message || 'Unknown error');
         return;
       }
 
       if (!data || data.length === 0) {
-        td.textContent = '등록된 후기가 아직 없습니다.';
+        td.textContent = 'No reviews have been posted yet.';
         return;
       }
 
@@ -79,18 +123,18 @@
         tdNick.textContent = row.nickname || '-';
         tr.appendChild(tdNick);
 
-        // 내용(제목 + 앞부분)
+        // 본문(목록 요약)
         const tdBody = document.createElement('td');
         tdBody.className = 'cell-body';
 
         const line1 = document.createElement('div');
         line1.className = 'm-line1';
-        line1.textContent = row.title || '(제목 없음)';
+        line1.textContent = row.title || '(No title)';
 
         const line2 = document.createElement('div');
         line2.className = 'm-line2';
         const spanViews = document.createElement('span');
-        spanViews.textContent = `조회 ${row.view_count ?? 0}`;
+        spanViews.textContent = `Views ${row.view_count ?? 0}`;
         const spanTime = document.createElement('span');
         spanTime.textContent = this.formatDate(row.created_at);
         line2.appendChild(spanViews);
@@ -98,7 +142,6 @@
 
         tdBody.appendChild(line1);
         tdBody.appendChild(line2);
-
         tr.appendChild(tdBody);
 
         // 조회수
@@ -107,21 +150,19 @@
         tdStats.textContent = String(row.view_count ?? 0);
         tr.appendChild(tdStats);
 
-        // 작성시각
+        // 작성 시각
         const tdTime = document.createElement('td');
         tdTime.className = 'cell-time';
         tdTime.textContent = this.formatDateTime(row.created_at);
         tr.appendChild(tdTime);
 
-        // 클릭 시 (나중에) 읽기 뷰로 연결할 수 있도록 id 저장
+        // 클릭 시 읽기 뷰로 변경 (지금은 간단한 알림만)
         tr.dataset.id = row.id;
         tr.style.cursor = 'pointer';
         tr.addEventListener('click', () => {
-          // TODO: 이후 단계에서 readView 구현
-          alert('읽기 화면은 다음 단계에서 연결합니다.\n\n제목: ' + (row.title || ''));
+          alert('Reading view will be implemented in the next step.\n\nTitle: ' + (row.title || ''));
         });
 
-        // 공지글 표시 (있으면)
         if (row.is_notice) {
           tr.classList.add('notice');
         }
