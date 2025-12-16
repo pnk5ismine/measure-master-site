@@ -1,6 +1,5 @@
 // /js/reviews-ui.js
-// "reviews" 테이블 목록을 표시하는 모듈.
-// ❗ Supabase client는 mm-auth.js에서 만든 것을 재사용합니다.
+// Reviews page UI: list + write view, using the *same* Supabase client as mm-auth.js
 
 (function (global) {
   const MMReviews = {
@@ -8,18 +7,23 @@
     user: null,
 
     /**
-     * 초기화
-     * @param {object} supabaseClient - (선택) mm-auth.js에서 넘겨주는 client
-     * @param {object|null} currentUser - (선택) 이미 조회해 둔 user 객체
+     * Initialize reviews module
+     * @param {object} supabaseClient - Supabase client (from mmAuth)
+     * @param {object|null} currentUser - logged in user (if any)
      */
     async init(supabaseClient, currentUser) {
-      console.log('[MMReviews] init called with client, user =', !!supabaseClient, !!currentUser);
+      console.log(
+        '[MMReviews] init called. client:',
+        !!supabaseClient,
+        'user:',
+        !!currentUser
+      );
 
-      // 1) 우선 인자로 받은 client 사용
+      // 1) Prefer client passed from caller
       if (supabaseClient && supabaseClient.auth) {
         this.supabase = supabaseClient;
       }
-      // 2) 아니면 mmAuth.supabase 사용
+      // 2) Fallback to mmAuth.supabase if present
       else if (global.mmAuth && global.mmAuth.supabase) {
         this.supabase = global.mmAuth.supabase;
       }
@@ -30,9 +34,13 @@
       }
 
       this.user = currentUser || null;
+
       this.cacheDom();
-      this.applyAuthHint();   // 로그인 안내 문구 갱신
-      await this.loadList();  // 목록 로딩
+      this.setupComposeButton();
+      this.setupWriteForm();
+      this.applyAuthHint();
+      this.handleInitialViewFromQuery();
+      await this.loadList();
     },
 
     cacheDom() {
@@ -42,26 +50,27 @@
       this.$writeForm     = document.getElementById('writeForm');
       this.$listLoginHint = document.getElementById('listLoginHint');
       this.$btnCompose    = document.getElementById('btn-compose');
+      this.$formStatus    = document.getElementById('formStatus');
+      this.$inputTitle    = document.getElementById('title');
+      this.$inputContent  = document.getElementById('content');
 
       if (!this.$listBody) {
         console.error('[MMReviews] #listBody not found.');
       }
     },
 
-    // 로그인 상태에 따라 하단 안내 문구 갱신
     applyAuthHint() {
       if (!this.$listLoginHint) return;
 
       if (this.user) {
         this.$listLoginHint.textContent =
-          'You are logged in as ' + (this.user.email || '') + '. You can write a review.';
+          'Logged in as ' + (this.user.email || '') + '. You can write a review.';
       } else {
         this.$listLoginHint.textContent =
           'To write a review, please sign up / log in on the home page.';
       }
     },
 
-    // 필요할 경우 이 함수로 최신 user를 다시 불러올 수도 있습니다.
     async refreshUser() {
       if (!this.supabase) return null;
       const { data, error } = await this.supabase.auth.getUser();
@@ -75,10 +84,119 @@
       return this.user;
     },
 
+    handleInitialViewFromQuery() {
+      const params = new URLSearchParams(window.location.search);
+      const compose = params.get('compose');
+
+      if (compose === '1' || compose === 'true') {
+        // URL에서 글쓰기 요청 → 로그인 되어 있으면 바로 글쓰기 화면
+        if (this.user) {
+          this.showWriteView();
+        } else {
+          this.showListView();
+        }
+      } else {
+        this.showListView();
+      }
+    },
+
+    showListView() {
+      if (this.$listView)  this.$listView.hidden  = false;
+      if (this.$readView)  this.$readView.hidden  = true;
+      if (this.$writeForm) this.$writeForm.hidden = true;
+    },
+
+    showWriteView() {
+      if (this.$listView)  this.$listView.hidden  = true;
+      if (this.$readView)  this.$readView.hidden  = true;
+      if (this.$writeForm) this.$writeForm.hidden = false;
+      // 스크롤을 위로 올려서 폼이 바로 보이게
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    },
+
+    setupComposeButton() {
+      if (!this.$btnCompose) return;
+
+      this.$btnCompose.addEventListener('click', (e) => {
+        // href="/reviews.html?compose=1" 이지만, 페이지 리로드 없이 처리
+        e.preventDefault();
+
+        if (!this.user) {
+          alert('Please log in on the home page before writing a review.');
+          return;
+        }
+        this.showWriteView();
+      });
+    },
+
+    setupWriteForm() {
+      if (!this.$writeForm) return;
+
+      this.$writeForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        if (!this.user) {
+          alert('Please log in on the home page before writing a review.');
+          return;
+        }
+
+        const title   = (this.$inputTitle?.value || '').trim();
+        const content = (this.$inputContent?.value || '').trim();
+
+        if (!title) {
+          alert('Please enter a title.');
+          return;
+        }
+        if (!content) {
+          alert('Please enter the content.');
+          return;
+        }
+
+        if (this.$formStatus) {
+          this.$formStatus.textContent = 'Saving...';
+        }
+
+        const nickname =
+          (this.user.email && this.user.email.split('@')[0]) || 'tester';
+        const author_email = this.user.email || null;
+
+        const { data, error } = await this.supabase
+          .from('reviews')
+          .insert({
+            title,
+            content,
+            nickname,
+            author_email
+          })
+          .select()
+          .single();
+
+        if (error) {
+          console.error('[MMReviews] insert review error:', error);
+          if (this.$formStatus) {
+            this.$formStatus.textContent =
+              'Failed to save the review: ' + (error.message || 'Unknown error');
+          }
+          return;
+        }
+
+        if (this.$formStatus) {
+          this.$formStatus.textContent = 'Review saved.';
+        }
+        // 폼 비우기
+        if (this.$inputTitle)   this.$inputTitle.value = '';
+        if (this.$inputContent) this.$inputContent.value = '';
+
+        // 목록으로 돌아가서 다시 로드
+        this.showListView();
+        await this.loadList();
+      });
+    },
+
     async loadList() {
       if (!this.$listBody) return;
 
-      // 로딩 중 표시
+      // Loading row
       this.$listBody.innerHTML = '';
       const tr = document.createElement('tr');
       const td = document.createElement('td');
@@ -87,7 +205,6 @@
       tr.appendChild(td);
       this.$listBody.appendChild(tr);
 
-      // Supabase에서 리뷰 목록 가져오기
       const { data, error } = await this.supabase
         .from('reviews')
         .select('id, title, content, nickname, view_count, created_at, is_notice')
@@ -106,7 +223,6 @@
         return;
       }
 
-      // 목록 렌더링
       this.$listBody.innerHTML = '';
       data.forEach((row, idx) => {
         const tr = document.createElement('tr');
@@ -123,7 +239,7 @@
         tdNick.textContent = row.nickname || '-';
         tr.appendChild(tdNick);
 
-        // 본문(목록 요약)
+        // 본문 (목록에서 1~2줄 요약)
         const tdBody = document.createElement('td');
         tdBody.className = 'cell-body';
 
@@ -150,17 +266,20 @@
         tdStats.textContent = String(row.view_count ?? 0);
         tr.appendChild(tdStats);
 
-        // 작성 시각
+        // 작성시각
         const tdTime = document.createElement('td');
         tdTime.className = 'cell-time';
         tdTime.textContent = this.formatDateTime(row.created_at);
         tr.appendChild(tdTime);
 
-        // 클릭 시 읽기 뷰로 변경 (지금은 간단한 알림만)
+        // (나중에) 읽기 화면용 클릭 핸들러
         tr.dataset.id = row.id;
         tr.style.cursor = 'pointer';
         tr.addEventListener('click', () => {
-          alert('Reading view will be implemented in the next step.\n\nTitle: ' + (row.title || ''));
+          alert(
+            'Reading view will be implemented in the next step.\n\nTitle: ' +
+              (row.title || '')
+          );
         });
 
         if (row.is_notice) {
