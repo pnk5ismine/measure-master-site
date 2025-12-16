@@ -172,7 +172,14 @@
           .single();
 
         if (error) {
-          console.error('[MMReviews] insert review error:', error);
+          console.error(
+            '[MMReviews] insert review error:',
+              error,
+              error?.message,
+              error?.code,
+              JSON.stringify(error, null, 2)
+            );
+
           if (this.$formStatus) {
             this.$formStatus.textContent =
               'Failed to save the review: ' + (error.message || 'Unknown error');
