@@ -1,8 +1,7 @@
 // /js/mm-auth.js
-// Home(index.html)의 "Tester login" 섹션용 간단 Auth + members 연동
+// 공통 Auth 서비스: index.html + reviews.html 에서 같이 사용
 
 (function (global) {
-  // 🔧 꼭 본인 Supabase 프로젝트 값으로 바꿔 넣으세요!
   const SUPABASE_URL = 'https://dyoeqoeuoziaiiflqtdt.supabase.co';
   const SUPABASE_KEY = 'sb_publishable_0-sfEJvu_n2_uSAlZKKdqA_QCjX-P_S';
 
@@ -11,6 +10,7 @@
     return;
   }
 
+  // 단일 Supabase 클라이언트 (모든 페이지에서 공유)
   const client = global.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
   // members 테이블에 (user_id, email, nickname) upsert
@@ -43,184 +43,103 @@
   }
 
   const mmAuth = {
+    // Supabase client 공유
     supabase: client,
-    sb: client,
+    sb: client, // 옛 코드 호환용 별칭
 
-    async initHomeAuth() {
-      const tabSignup   = document.getElementById('tab-signup');
-      const tabLogin    = document.getElementById('tab-login');
-      const signupForm  = document.getElementById('signup-form');
-      const loginForm   = document.getElementById('login-form');
-      const logoutBtn   = document.getElementById('logout-btn');
-      const goLoginLink = document.getElementById('go-login');
+    /**
+     * 회원 가입
+     * @returns {Promise<{data:any, error:any}>}
+     */
+    async signUp(email, password) {
+      // 여기서는 길이 체크 안 하고 Supabase에게 맡깁니다.
+      // (index.html 쪽에서 6자 이상 정도만 간단히 체크해도 OK)
+      const { data, error } = await client.auth.signUp({
+        email,
+        password
+      });
 
-      if (!signupForm && !loginForm) {
-        return;
+      if (!error && data && data.user) {
+        await ensureMemberForUser(data.user);
       }
+      return { data, error };
+    },
 
-      function showSignup() {
-        if (signupForm) signupForm.hidden = false;
-        if (loginForm)  loginForm.hidden  = true;
-        if (tabSignup)  tabSignup.classList.add('active');
-        if (tabLogin)   tabLogin.classList.remove('active');
+    /**
+     * 로그인
+     * @returns {Promise<{data:any, error:any}>}
+     */
+    async signIn(email, password) {
+      const { data, error } = await client.auth.signInWithPassword({
+        email,
+        password
+      });
+
+      if (!error && data && data.user) {
+        await ensureMemberForUser(data.user);
       }
+      return { data, error };
+    },
 
-      function showLogin() {
-        if (signupForm) signupForm.hidden = true;
-        if (loginForm)  loginForm.hidden  = false;
-        if (tabLogin)   tabLogin.classList.add('active');
-        if (tabSignup)  tabSignup.classList.remove('active');
+    /**
+     * 로그아웃
+     */
+    async signOut() {
+      const { error } = await client.auth.signOut();
+      if (error) {
+        console.error('[mmAuth] signOut error:', error);
       }
+      return { error };
+    },
 
-      if (tabSignup) {
-        tabSignup.addEventListener('click', (e) => {
-          e.preventDefault();
-          showSignup();
-        });
-      }
-      if (tabLogin) {
-        tabLogin.addEventListener('click', (e) => {
-          e.preventDefault();
-          showLogin();
-        });
-      }
-      if (goLoginLink) {
-        goLoginLink.addEventListener('click', (e) => {
-          e.preventDefault();
-          showLogin();
-        });
-      }
-
-      // 회원가입
-      if (signupForm) {
-        signupForm.addEventListener('submit', async (e) => {
-          e.preventDefault();
-          const emailRaw = document.getElementById('signup-email')?.value || '';
-          const pwRaw    = document.getElementById('signup-password')?.value || '';
-          const pw2Raw   = document.getElementById('signup-password2')?.value || '';
-
-          const email = emailRaw.trim().toLowerCase();
-          const pw    = pwRaw.trim();
-          const pw2   = pw2Raw.trim();
-
-          console.log('[mmAuth] signUp email =', email, 'pw.length =', pw.length);
-
-          if (!email) {
-            alert('Please enter your email.');
-            return;
-          }
-          if (pw !== pw2) {
-            alert('Passwords do not match.');
-            return;
-          }
-          if (pw.length < 6) {
-            alert('Please use a password with at least 4 characters.');
-            return;
-          }
-
-          const { data, error } = await client.auth.signUp({
-            email,
-            password: pw
-          });
-
-          if (error) {
-            alert('Sign-up failed: ' + (error.message || 'Unknown error'));
-            console.error('[mmAuth] signUp error:', error);
-            return;
-          }
-
-          const user = data.user;
-          await ensureMemberForUser(user);
-
-          // 💡 가입 후 바로 로그인까지 자동 시도
-          try {
-            const { data: loginData, error: loginError } =
-              await client.auth.signInWithPassword({ email, password: pw });
-
-            if (loginError) {
-              alert(
-                'Signed up, but auto login failed: ' +
-                (loginError.message || 'Unknown error')
-              );
-              console.error('[mmAuth] auto signIn error:', loginError);
-              showLogin();
-              const loginEmail = document.getElementById('login-email');
-              if (loginEmail) loginEmail.value = email;
-              return;
-            }
-
-            await ensureMemberForUser(loginData.user);
-            alert('Sign-up and login successful.');
-            if (logoutBtn) logoutBtn.style.display = 'inline-block';
-            showLogin();
-            const loginEmail = document.getElementById('login-email');
-            if (loginEmail) loginEmail.value = email;
-          } catch (e2) {
-            console.error('[mmAuth] auto-login exception:', e2);
-            showLogin();
-          }
-        });
-      }
-
-      // 로그인
-      if (loginForm) {
-        loginForm.addEventListener('submit', async (e) => {
-          e.preventDefault();
-          const emailRaw = document.getElementById('login-email')?.value || '';
-          const pwRaw    = document.getElementById('login-password')?.value || '';
-
-          const email = emailRaw.trim().toLowerCase();
-          const pw    = pwRaw.trim();
-
-          console.log('[mmAuth] login email =', email, 'pw.length =', pw.length);
-
-          if (!email || !pw) {
-            alert('Please enter both email and password.');
-            return;
-          }
-
-          const { data, error } = await client.auth.signInWithPassword({
-            email,
-            password: pw
-          });
-
-          if (error) {
-            alert('Login failed: ' + (error.message || 'Invalid login'));
-            console.error('[mmAuth] signIn error:', error);
-            return;
-          }
-
-          const user = data.user;
-          await ensureMemberForUser(user);
-
-          alert('Logged in successfully.');
-          if (logoutBtn) logoutBtn.style.display = 'inline-block';
-        });
-      }
-
-      // 초기 세션 상태
+    /**
+     * 현재 세션 가져오기
+     * @returns {Promise<null|object>} Supabase Session or null
+     */
+    async getSession() {
       try {
-        const { data } = await client.auth.getUser();
-        if (data && data.user) {
-          await ensureMemberForUser(data.user);
-          showLogin();
-          const loginEmail = document.getElementById('login-email');
-          if (loginEmail && data.user.email) {
-            loginEmail.value = data.user.email;
-          }
-          if (logoutBtn) logoutBtn.style.display = 'inline-block';
-        } else {
-          showSignup();
-          if (logoutBtn) logoutBtn.style.display = 'none';
+        const { data, error } = await client.auth.getSession();
+        if (error) {
+          console.error('[mmAuth] getSession error:', error);
+          return null;
         }
+        return data.session || null;
       } catch (e) {
-        console.error('[mmAuth] getUser failed:', e);
-        showSignup();
+        console.error('[mmAuth] getSession exception:', e);
+        return null;
       }
     },
 
-    async signOut() {
-      await client.auth.signOut();
+    /**
+     * Auth 상태 변화 구독
+     * 콜백은 (session) 을 인자로 받습니다.
+     */
+    onChange(callback) {
+      if (typeof callback !== 'function') return;
+
+      // 초기 1회 호출
+      this.getSession()
+        .then((session) => {
+          try {
+            callback(session);
+          } catch (e) {
+            console.error('[mmAuth] onChange initial callback error:', e);
+          }
+        })
+        .catch((e) => console.error(e));
+
+      // 상태 변화 구독
+      client.auth.onAuthStateChange((_event, session) => {
+        try {
+          if (session && session.user) {
+            // members 보장
+            ensureMemberForUser(session.user);
+          }
+          callback(session);
+        } catch (e) {
+          console.error('[mmAuth] onChange callback error:', e);
+        }
+      });
     }
   };
 
