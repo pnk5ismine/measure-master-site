@@ -6,7 +6,7 @@
   const MMReviews = {
     supabase: null,
     user: null,
-    bucketName: 'review-images', // Supabase Storage 버킷 이름
+    bucketName: 'review_images', // Supabase Storage 버킷 이름
 
     // ========= 초기화 =========
     /**
@@ -241,7 +241,7 @@
           insertedReview = data;
         }
 
-        // 2) 이미지 파일이 있다면 Storage + review_images 테이블에 저장
+        // 2) 이미지 파일이 있다면 Storage + review_imginfo 테이블에 저장
         try {
           await this.uploadAttachments(insertedReview.id);
         } catch (e2) {
@@ -264,57 +264,64 @@
       });
     },
 
-    // ========= 첨부 이미지 업로드 =========
-    async uploadAttachments(reviewId) {
-      if (!this.$fileInput || !this.$fileInput.files || this.$fileInput.files.length === 0) {
-        return;
-      }
-      const files = Array.from(this.$fileInput.files);
-      const maxFiles = Number(this.$fileInput.dataset.max || '6') || 6;
-      const selected = files.slice(0, maxFiles);
+// ========= 첨부 이미지 업로드 =========
+async uploadAttachments(reviewId) {
+  if (!this.$fileInput || !this.$fileInput.files || this.$fileInput.files.length === 0) {
+    return;
+  }
 
-      for (let i = 0; i < selected.length; i++) {
-        const f = selected[i];
-        const ext = (f.name.split('.').pop() || 'jpg').toLowerCase();
-        const safeExt = ext.replace(/[^a-z0-9]/gi, '') || 'jpg';
-        const path = `${reviewId}/${Date.now()}_${i}.${safeExt}`;
+  const files = Array.from(this.$fileInput.files);
+  const maxFiles = Number(this.$fileInput.dataset.max || '6') || 6;
+  const selected = files.slice(0, maxFiles);
 
-        // 2-1) Storage 업로드
-        const { data: uploadData, error: uploadErr } = await this.supabase
-          .storage
-          .from(this.bucketName)
-          .upload(path, f, {
-            cacheControl: '3600',
-            upsert: false
-          });
+  for (let i = 0; i < selected.length; i++) {
+    const f = selected[i];
 
-        if (uploadErr) {
-          console.error('[MMReviews] upload failed:', f.name, uploadErr);
-          continue;
-        }
+    // 확장자 정리
+    const ext = (f.name.split('.').pop() || 'jpg').toLowerCase();
+    const safeExt = ext.replace(/[^a-z0-9]/gi, '') || 'jpg';
 
-        // 2-2) 퍼블릭 URL 얻기
-        const { data: urlData } = this.supabase
-          .storage
-          .from(this.bucketName)
-          .getPublicUrl(path);
-        const publicUrl = urlData && urlData.publicUrl ? urlData.publicUrl : null;
+    // 예: reviewId/1700000000000_0.jpg
+    const path = `${reviewId}/${Date.now()}_${i}.${safeExt}`;
 
-        // 2-3) review_images 테이블에 기록
-        const { error: imgErr } = await this.supabase
-          .from('review_images')
-          .insert({
-            review_id: reviewId,
-            storage_path: path,
-            public_url: publicUrl,
-            original_name: f.name
-          });
+    // 2-1) Storage 버킷에 업로드
+    const { data: uploadData, error: uploadErr } = await this.supabase
+      .storage
+      .from(this.bucketName)   // 예: 'review_images'
+      .upload(path, f, {
+        cacheControl: '3600',
+        upsert: false
+      });
 
-        if (imgErr) {
-          console.error('[MMReviews] insert review_images error:', imgErr);
-        }
-      }
-    },
+    if (uploadErr) {
+      console.error('[MMReviews] upload failed:', f.name, uploadErr);
+      continue;
+    }
+
+    // 2-2) 퍼블릭 URL 얻기
+    const { data: urlData } = this.supabase
+      .storage
+      .from(this.bucketName)
+      .getPublicUrl(path);
+
+    const publicUrl = urlData && urlData.publicUrl ? urlData.publicUrl : null;
+    console.log('[MMReviews] upload ok:', f.name, '→', path, 'url=', publicUrl);
+
+    // 2-3) review_imginfo 테이블에 기록
+    const { error: imgErr } = await this.supabase
+      .from('review_imginfo')
+      .insert({
+        review_id: reviewId,
+        storage_path: path,
+        public_url: publicUrl,
+        original_name: f.name
+      });
+
+    if (imgErr) {
+      console.error('[MMReviews] insert review_imginfo error:', imgErr);
+    }
+  }
+}
 
     // ========= 목록 로드 =========
     async loadList() {
@@ -432,7 +439,7 @@
 
       // 2) 첨부 이미지들
       const { data: images, error: imgErr } = await this.supabase
-        .from('review_images')
+        .from('review_imginfo')
         .select('id, public_url, original_name, storage_path')
         .eq('review_id', reviewId)
         .order('id', { ascending: true });
