@@ -264,76 +264,65 @@
       });
     },
 
-    // ========= 첨부 이미지 업로드 =========
-    async uploadAttachments(reviewId) {
-      if (
-        !this.$fileInput ||
-        !this.$fileInput.files ||
-        this.$fileInput.files.length === 0
-      ) {
-        return;
-      }
+ // ========= 첨부 이미지 업로드 =========
+async uploadAttachments(reviewId) {
+  if (!this.$fileInput || !this.$fileInput.files || this.$fileInput.files.length === 0) {
+    return;
+  }
 
-      const files = Array.from(this.$fileInput.files);
-      const maxFiles = Number(this.$fileInput.dataset.max || '6') || 6;
-      const selected = files.slice(0, maxFiles);
+  const files = Array.from(this.$fileInput.files);
+  const maxFiles = Number(this.$fileInput.dataset.max || '6') || 6;
+  const selected = files.slice(0, maxFiles);
 
-      for (let i = 0; i < selected.length; i++) {
-        const f = selected[i];
+  for (let i = 0; i < selected.length; i++) {
+    const f = selected[i];
 
-        // 확장자 정리
-        const ext = (f.name.split('.').pop() || 'jpg').toLowerCase();
-        const safeExt = ext.replace(/[^a-z0-9]/gi, '') || 'jpg';
+    // 확장자 정리
+    const ext = (f.name.split('.').pop() || 'jpg').toLowerCase();
+    const safeExt = ext.replace(/[^a-z0-9]/gi, '') || 'jpg';
 
-        // 예: reviewId/1700000000000_0.jpg
-        const path = `${reviewId}/${Date.now()}_${i}.${safeExt}`;
+    // 예: reviewId/1700000000000_0.jpg
+    const path = `${reviewId}/${Date.now()}_${i}.${safeExt}`;
 
-        // 2-1) Storage 버킷에 업로드
-        const { data: uploadData, error: uploadErr } = await this.supabase
-          .storage
-          .from(this.bucketName)   // 예: 'review_images'
-          .upload(path, f, {
-            cacheControl: '3600',
-            upsert: false
-          });
+    // 2-1) Storage 버킷에 업로드
+    const { data: uploadData, error: uploadErr } = await this.supabase
+      .storage
+      .from(this.bucketName)   // 'review_images' 버킷
+      .upload(path, f, {
+        cacheControl: '3600',
+        upsert: false
+      });
 
-        if (uploadErr) {
-          console.error('[MMReviews] upload failed:', f.name, uploadErr);
-          continue;
-        }
+    if (uploadErr) {
+      console.error('[MMReviews] upload failed:', f.name, uploadErr);
+      continue;
+    }
 
-        // 2-2) 퍼블릭 URL 얻기
-        const { data: urlData } = this.supabase
-          .storage
-          .from(this.bucketName)
-          .getPublicUrl(path);
+    // 2-2) 퍼블릭 URL 얻기
+    const { data: urlData } = this.supabase
+      .storage
+      .from(this.bucketName)
+      .getPublicUrl(path);
 
-        const publicUrl =
-          urlData && urlData.publicUrl ? urlData.publicUrl : null;
-        console.log(
-          '[MMReviews] upload ok:',
-          f.name,
-          '→',
-          path,
-          'url=',
-          publicUrl
-        );
+    const publicUrl = urlData && urlData.publicUrl ? urlData.publicUrl : null;
+    console.log('[MMReviews] upload ok:', f.name, '→', path, 'url=', publicUrl);
 
-        // 2-3) review_imginfo 테이블에 기록
-        const { error: imgErr } = await this.supabase
-          .from('review_imginfo')
-          .insert({
-            review_id: reviewId,
-            storage_path: path,
-            public_url: publicUrl,
-            original_name: f.name
-          });
+    // 2-3) review_imginfo 테이블에 기록
+    const { error: imgErr } = await this.supabase
+      .from('review_imginfo')
+      .insert({
+        review_id: reviewId,
+        storage_path: path,
+        public_url: publicUrl,
+        original_name: f.name
+      });
 
-        if (imgErr) {
-          console.error('[MMReviews] insert review_imginfo error:', imgErr);
-        }
-      }
-    },
+    if (imgErr) {
+      console.error('[MMReviews] insert review_imginfo error:', imgErr);
+    }
+  }
+},
+
 
     // ========= 목록 로드 =========
     async loadList() {
