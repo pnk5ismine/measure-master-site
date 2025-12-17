@@ -1,6 +1,6 @@
 // /js/reviews-ui.js
 // Reviews page UI: list + read + write + image upload + comments
-// ⚠️ Supabase client는 index.html / mm-auth.js 에서 만든 것을 재사용합니다.
+// ⚠️ Supabase client 는 index.html / mm-auth.js 에서 만든 것을 재사용합니다.
 
 (function (global) {
   const MMReviews = {
@@ -39,7 +39,7 @@
 
       this.cacheDom();
       this.bindLightbox();       // (옵션) 나중에 쓸 수 있게 준비
-      this.setupComposeButton(); // "글쓰기" 버튼
+      this.setupComposeButton(); // "Write a review" 버튼
       this.setupWriteForm();     // 쓰기 폼 + 이미지 업로드
       this.applyAuthHint();      // "로그인 필요" 안내
 
@@ -49,17 +49,17 @@
 
     // ========= DOM 캐시 =========
     cacheDom() {
-      this.$listBody      = document.getElementById('listBody');
-      this.$listView      = document.getElementById('listView');
-      this.$readView      = document.getElementById('readView');
-      this.$writeForm     = document.getElementById('writeForm');
-      this.$listLoginHint = document.getElementById('listLoginHint');
-      this.$btnCompose    = document.getElementById('btn-compose');
-      this.$formStatus    = document.getElementById('formStatus');
-      this.$inputTitle    = document.getElementById('title');
-      this.$inputContent  = document.getElementById('content');
-      this.$fileInput     = document.getElementById('image');
-      this.$selectPreviews= document.getElementById('selectPreviews');
+      this.$listBody       = document.getElementById('listBody');
+      this.$listView       = document.getElementById('listView');
+      this.$readView       = document.getElementById('readView');
+      this.$writeForm      = document.getElementById('writeForm');
+      this.$listLoginHint  = document.getElementById('listLoginHint');
+      this.$btnCompose     = document.getElementById('btn-compose');
+      this.$formStatus     = document.getElementById('formStatus');
+      this.$inputTitle     = document.getElementById('title');
+      this.$inputContent   = document.getElementById('content');
+      this.$fileInput      = document.getElementById('image');
+      this.$selectPreviews = document.getElementById('selectPreviews');
 
       if (!this.$listBody) {
         console.error('[MMReviews] #listBody not found.');
@@ -130,7 +130,7 @@
       window.scrollTo({ top: 0, behavior: 'smooth' });
     },
 
-    // ========= “글쓰기” 버튼 =========
+    // ========= “Write a review” 버튼 =========
     setupComposeButton() {
       if (!this.$btnCompose) return;
 
@@ -253,9 +253,9 @@
           this.$formStatus.textContent = 'Review saved.';
         }
         // 폼 비우기
-        if (this.$inputTitle)   this.$inputTitle.value   = '';
-        if (this.$inputContent) this.$inputContent.value = '';
-        if (this.$fileInput)    this.$fileInput.value    = '';
+        if (this.$inputTitle)     this.$inputTitle.value     = '';
+        if (this.$inputContent)   this.$inputContent.value   = '';
+        if (this.$fileInput)      this.$fileInput.value      = '';
         if (this.$selectPreviews) this.$selectPreviews.innerHTML = '';
 
         // 다시 목록 모드로
@@ -264,64 +264,76 @@
       });
     },
 
-// ========= 첨부 이미지 업로드 =========
-async uploadAttachments(reviewId) {
-  if (!this.$fileInput || !this.$fileInput.files || this.$fileInput.files.length === 0) {
-    return;
-  }
+    // ========= 첨부 이미지 업로드 =========
+    async uploadAttachments(reviewId) {
+      if (
+        !this.$fileInput ||
+        !this.$fileInput.files ||
+        this.$fileInput.files.length === 0
+      ) {
+        return;
+      }
 
-  const files = Array.from(this.$fileInput.files);
-  const maxFiles = Number(this.$fileInput.dataset.max || '6') || 6;
-  const selected = files.slice(0, maxFiles);
+      const files = Array.from(this.$fileInput.files);
+      const maxFiles = Number(this.$fileInput.dataset.max || '6') || 6;
+      const selected = files.slice(0, maxFiles);
 
-  for (let i = 0; i < selected.length; i++) {
-    const f = selected[i];
+      for (let i = 0; i < selected.length; i++) {
+        const f = selected[i];
 
-    // 확장자 정리
-    const ext = (f.name.split('.').pop() || 'jpg').toLowerCase();
-    const safeExt = ext.replace(/[^a-z0-9]/gi, '') || 'jpg';
+        // 확장자 정리
+        const ext = (f.name.split('.').pop() || 'jpg').toLowerCase();
+        const safeExt = ext.replace(/[^a-z0-9]/gi, '') || 'jpg';
 
-    // 예: reviewId/1700000000000_0.jpg
-    const path = `${reviewId}/${Date.now()}_${i}.${safeExt}`;
+        // 예: reviewId/1700000000000_0.jpg
+        const path = `${reviewId}/${Date.now()}_${i}.${safeExt}`;
 
-    // 2-1) Storage 버킷에 업로드
-    const { data: uploadData, error: uploadErr } = await this.supabase
-      .storage
-      .from(this.bucketName)   // 예: 'review_images'
-      .upload(path, f, {
-        cacheControl: '3600',
-        upsert: false
-      });
+        // 2-1) Storage 버킷에 업로드
+        const { data: uploadData, error: uploadErr } = await this.supabase
+          .storage
+          .from(this.bucketName)   // 예: 'review_images'
+          .upload(path, f, {
+            cacheControl: '3600',
+            upsert: false
+          });
 
-    if (uploadErr) {
-      console.error('[MMReviews] upload failed:', f.name, uploadErr);
-      continue;
-    }
+        if (uploadErr) {
+          console.error('[MMReviews] upload failed:', f.name, uploadErr);
+          continue;
+        }
 
-    // 2-2) 퍼블릭 URL 얻기
-    const { data: urlData } = this.supabase
-      .storage
-      .from(this.bucketName)
-      .getPublicUrl(path);
+        // 2-2) 퍼블릭 URL 얻기
+        const { data: urlData } = this.supabase
+          .storage
+          .from(this.bucketName)
+          .getPublicUrl(path);
 
-    const publicUrl = urlData && urlData.publicUrl ? urlData.publicUrl : null;
-    console.log('[MMReviews] upload ok:', f.name, '→', path, 'url=', publicUrl);
+        const publicUrl =
+          urlData && urlData.publicUrl ? urlData.publicUrl : null;
+        console.log(
+          '[MMReviews] upload ok:',
+          f.name,
+          '→',
+          path,
+          'url=',
+          publicUrl
+        );
 
-    // 2-3) review_imginfo 테이블에 기록
-    const { error: imgErr } = await this.supabase
-      .from('review_imginfo')
-      .insert({
-        review_id: reviewId,
-        storage_path: path,
-        public_url: publicUrl,
-        original_name: f.name
-      });
+        // 2-3) review_imginfo 테이블에 기록
+        const { error: imgErr } = await this.supabase
+          .from('review_imginfo')
+          .insert({
+            review_id: reviewId,
+            storage_path: path,
+            public_url: publicUrl,
+            original_name: f.name
+          });
 
-    if (imgErr) {
-      console.error('[MMReviews] insert review_imginfo error:', imgErr);
-    }
-  }
-}
+        if (imgErr) {
+          console.error('[MMReviews] insert review_imginfo error:', imgErr);
+        }
+      }
+    },
 
     // ========= 목록 로드 =========
     async loadList() {
@@ -484,7 +496,10 @@ async uploadAttachments(reviewId) {
 
       const meta = document.createElement('p');
       meta.className = 'muted';
-      const nick = review.nickname || (review.author_email || '').split('@')[0] || 'anonymous';
+      const nick =
+        review.nickname ||
+        (review.author_email || '').split('@')[0] ||
+        'anonymous';
       meta.textContent =
         `${nick} · ${this.formatDateTime(review.created_at)} · Views ${review.view_count ?? 0}`;
       container.appendChild(meta);
@@ -617,7 +632,8 @@ async uploadAttachments(reviewId) {
         const head = document.createElement('div');
         head.className = 'comment-head';
 
-        const nick = row.nickname ||
+        const nick =
+          row.nickname ||
           (row.author_email || '').split('@')[0] ||
           'anonymous';
         const left = document.createElement('span');
@@ -680,7 +696,7 @@ async uploadAttachments(reviewId) {
       const d = new Date(iso);
       const y = d.getFullYear();
       const m = String(d.getMonth() + 1).padStart(2, '0');
-      const day = String(d.getDate(), 10).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
       return `${y}-${m}-${day}`;
     },
 
@@ -689,7 +705,7 @@ async uploadAttachments(reviewId) {
       const d = new Date(iso);
       const y = d.getFullYear();
       const m = String(d.getMonth() + 1).padStart(2, '0');
-      const day = String(d.getDate(), 10).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
       const hh = String(d.getHours()).padStart(2, '0');
       const mm = String(d.getMinutes()).padStart(2, '0');
       return `${y}-${m}-${day} ${hh}:${mm}`;
