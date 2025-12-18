@@ -480,38 +480,44 @@
         const tdBody = document.createElement('td');
         tdBody.className = 'cell-body';
 
-        const line1 = document.createElement('div');
-        line1.className = 'm-line1';
-        line1.textContent = row.title || '(No title)';
+        // Title row (badge + title)
+        const titleRow = document.createElement('div');
+        titleRow.style.display = 'flex';
+        titleRow.style.alignItems = 'center';
+        titleRow.style.gap = '8px';
+        titleRow.style.minWidth = '0'; // for ellipsis
 
-        const line2 = document.createElement('div');
-        line2.className = 'm-line2';
-        const spanViews = document.createElement('span');
-        spanViews.textContent = `Views ${row.view_count ?? 0}`;
-        const spanTime = document.createElement('span');
-        spanTime.textContent = this.formatDate(row.created_at);
-        line2.appendChild(spanViews);
-        line2.appendChild(spanTime);
+        // Notice badge (only for notice posts)
+        if (row.is_notice) {
+          const badge = document.createElement('span');
+          badge.className = 'notice-badge';
+          badge.textContent = 'Notice';
+          titleRow.appendChild(badge);
+        }
 
-        tdBody.appendChild(line1);
-        tdBody.appendChild(line2);
+        // Title (1 line)
+        const titleDiv = document.createElement('div');
+        titleDiv.className = 'list-title';
+        titleDiv.textContent = row.title || '(No title)';
+        titleDiv.style.minWidth = '0';
+        titleRow.appendChild(titleDiv);
+
+        // Preview (content, 2 lines via CSS)
+        const previewDiv = document.createElement('div');
+        previewDiv.className = 'list-preview';
+        const previewText = (row.content || '').replace(/\s+/g, ' ').trim();
+        previewDiv.textContent = previewText || '';
+
+        // Mobile meta (optional; shows when other columns hidden)
+        const metaDiv = document.createElement('div');
+        metaDiv.className = 'list-meta';
+        metaDiv.innerHTML = `<span>Views ${row.view_count ?? 0}</span><span>${this.formatDate(row.created_at)}</span>`;
+
+        tdBody.appendChild(titleRow);
+        tdBody.appendChild(previewDiv);
+        tdBody.appendChild(metaDiv);
+
         tr.appendChild(tdBody);
-
-        const tdStats = document.createElement('td');
-        tdStats.className = 'cell-stats';
-        tdStats.textContent = String(row.view_count ?? 0);
-        tr.appendChild(tdStats);
-
-        const tdTime = document.createElement('td');
-        tdTime.className = 'cell-time';
-        tdTime.textContent = this.formatDateTime(row.created_at);
-        tr.appendChild(tdTime);
-
-        tr.dataset.id = row.id;
-        tr.style.cursor = 'pointer';
-        tr.addEventListener('click', () => {
-          this.showReadView(row.id);
-        });
 
         if (row.is_notice) {
           tr.classList.add('notice');
