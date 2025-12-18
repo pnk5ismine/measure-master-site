@@ -1,34 +1,27 @@
 // /js/reviews-ui.js
 // Reviews page UI: list + read + write + image upload + comments
-// ⚠️ Supabase client 는 index.html / mm-auth.js 에서 만든 것을 재사용합니다.
+// Supabase client는 index.html / mm-auth.js 에서 만든 것을 재사용합니다.
 
 (function (global) {
   const MMReviews = {
     supabase: null,
     user: null,
     bucketName: 'review_images', // Supabase Storage 버킷 이름
-
-    // 🔹 새로 추가: 여러 번 선택된 파일을 누적해서 관리
-    selectedFiles: [],
+    selectedFiles: [],           // 사용자가 선택한 File 객체들
 
     // ========= 초기화 =========
     /**
      * @param {object} supabaseClient  - mmAuth에서 넘겨준 Supabase client
      * @param {object|null} currentUser - 현재 로그인 유저(or null)
      */
-    async init(supabaseClient, currentUser) {
-      console.log(
-        '[MMReviews] init called. client:',
-        !!supabaseClient,
-        'user:',
-        !!currentUser
-      );
+    init: async function (supabaseClient, currentUser) {
+      console.log('[MMReviews] init called. client:', !!supabaseClient, 'user:', !!currentUser);
 
       // 1) 우선 caller에서 넘겨준 client 사용
       if (supabaseClient && supabaseClient.auth) {
         this.supabase = supabaseClient;
       }
-      // 2) 혹시 없으면 mmAuth.supabase 재사용
+      // 2) 없으면 mmAuth.supabase 재사용
       else if (global.mmAuth && global.mmAuth.supabase) {
         this.supabase = global.mmAuth.supabase;
       }
@@ -41,17 +34,18 @@
       this.user = currentUser || null;
 
       this.cacheDom();
-      this.bindLightbox();       // (옵션) 나중에 쓸 수 있게 준비
-      this.setupComposeButton(); // "Write a review" 버튼
-      this.setupWriteForm();     // 쓰기 폼 + 이미지 업로드
-      this.applyAuthHint();      // "로그인 필요" 안내
+      this.bindLightbox();
+      this.setupComposeButton();
+      this.setupWriteForm();
+      this.applyAuthHint();
 
-      await this.loadList();     // 목록 먼저 로드
-      this.handleInitialViewFromQuery(); // ?compose=1 등 처리
+      // 먼저 목록 로드 후, URL 파라미터 처리
+      await this.loadList();
+      this.handleInitialViewFromQuery();
     },
 
     // ========= DOM 캐시 =========
-    cacheDom() {
+    cacheDom: function () {
       this.$listBody       = document.getElementById('listBody');
       this.$listView       = document.getElementById('listView');
       this.$readView       = document.getElementById('readView');
@@ -70,7 +64,7 @@
     },
 
     // ========= 로그인 안내 문구 =========
-    applyAuthHint() {
+    applyAuthHint: function () {
       if (!this.$listLoginHint) return;
 
       if (this.user) {
@@ -82,7 +76,8 @@
       }
     },
 
-    async refreshUser() {
+    // (필요하면 세션 새로고침)
+    refreshUser: async function () {
       if (!this.supabase) return null;
       const { data, error } = await this.supabase.auth.getUser();
       if (error) {
@@ -96,7 +91,7 @@
     },
 
     // ========= URL 파라미터(글쓰기 바로 열기 등) =========
-    handleInitialViewFromQuery() {
+    handleInitialViewFromQuery: function () {
       const params  = new URLSearchParams(window.location.search);
       const compose = params.get('compose');
 
@@ -112,13 +107,13 @@
     },
 
     // ========= View 전환 =========
-    showListView() {
+    showListView: function () {
       if (this.$listView)  this.$listView.hidden  = false;
       if (this.$readView)  this.$readView.hidden  = true;
       if (this.$writeForm) this.$writeForm.hidden = true;
     },
 
-    async showReadView(reviewId) {
+    showReadView: async function (reviewId) {
       if (this.$listView)  this.$listView.hidden  = true;
       if (this.$writeForm) this.$writeForm.hidden = true;
       if (this.$readView)  this.$readView.hidden  = false;
@@ -126,15 +121,15 @@
       window.scrollTo({ top: 0, behavior: 'smooth' });
     },
 
-    showWriteView() {
+    showWriteView: function () {
       if (this.$listView)  this.$listView.hidden  = true;
       if (this.$readView)  this.$readView.hidden  = true;
       if (this.$writeForm) this.$writeForm.hidden = false;
       window.scrollTo({ top: 0, behavior: 'smooth' });
     },
 
-    // ========= “Write a review” 버튼 =========
-    setupComposeButton() {
+    // ========= “글쓰기” 버튼 =========
+    setupComposeButton: function () {
       if (!this.$btnCompose) return;
 
       this.$btnCompose.addEventListener('click', (e) => {
@@ -148,50 +143,51 @@
       });
     },
 
-// ========= 파일 미리보기(작성 폼) =========
-setupFilePreview() {
-  if (!this.$fileInput || !this.$selectPreviews) return;
+    // ========= 파일 미리보기(작성 폼) =========
+    setupFilePreview: function () {
+      if (!this.$fileInput || !this.$selectPreviews) return;
 
-  const maxFiles = Number(this.$fileInput.dataset.max || '6') || 6;
+      const maxFiles = Number(this.$fileInput.dataset.max || '6') || 6;
 
-  this.$fileInput.addEventListener('change', () => {
-    if (!this.$fileInput.files) return;
+      this.$fileInput.addEventListener('change', () => {
+        if (!this.$fileInput.files) return;
 
-    const newlySelected = Array.from(this.$fileInput.files);
+        // 새로 선택한 파일들
+        const newlySelected = Array.from(this.$fileInput.files);
 
-    // 1) 기존 선택 + 새로 선택한 파일을 합침
-    const merged = (this.selectedFiles || []).concat(newlySelected);
+        // 기존 selectedFiles + 새 파일 합치기
+        const merged = (this.selectedFiles || []).concat(newlySelected);
 
-    // 2) 최대 maxFiles 개까지만 유지
-    this.selectedFiles = merged.slice(0, maxFiles);
+        // 최대 maxFiles 까지만 유지
+        this.selectedFiles = merged.slice(0, maxFiles);
 
-    // 3) 미리보기 다시 그리기
-    this.$selectPreviews.innerHTML = '';
-    this.selectedFiles.forEach((f) => {
-      const url = URL.createObjectURL(f);
-      const wrap = document.createElement('div');
-      wrap.className = 'thumb-card';
+        // 썸네일 다시 그리기
+        this.$selectPreviews.innerHTML = '';
+        this.selectedFiles.forEach((f) => {
+          const url = URL.createObjectURL(f);
+          const wrap = document.createElement('div');
+          wrap.className = 'thumb-card';
 
-      const img = document.createElement('img');
-      img.className = 'thumb-img';
-      img.src = url;
-      img.alt = f.name;
+          const img = document.createElement('img');
+          img.className = 'thumb-img';
+          img.src = url;
+          img.alt = f.name;
 
-      wrap.appendChild(img);
-      this.$selectPreviews.appendChild(wrap);
-    });
+          wrap.appendChild(img);
+          this.$selectPreviews.appendChild(wrap);
+        });
 
-    if (merged.length > maxFiles) {
-      alert('You can attach up to ' + maxFiles + ' images.');
-    }
+        if (merged.length > maxFiles) {
+          alert('You can attach up to ' + maxFiles + ' images.');
+        }
 
-    // 같은 파일을 다시 선택할 수 있도록 value를 비워 둠
-    this.$fileInput.value = '';
-  });
-},
+        // 같은 파일을 다시 선택할 수 있도록 초기화
+        this.$fileInput.value = '';
+      });
+    },
 
     // ========= 쓰기 폼(텍스트 + 이미지 업로드) =========
-    setupWriteForm() {
+    setupWriteForm: function () {
       if (!this.$writeForm) return;
 
       this.setupFilePreview();
@@ -224,134 +220,128 @@ setupFilePreview() {
           (this.user.email && this.user.email.split('@')[0]) || 'tester';
         const author_email = this.user.email || null;
 
-        // 1) 우선 reviews 에 텍스트 글 저장
+        // 1) reviews 테이블에 텍스트 글 저장
         let insertedReview = null;
-        {
-          const { data, error } = await this.supabase
-            .from('reviews')
-            .insert({
-              title,
-              content,
-              nickname,
-              author_email,
-              author_id: this.user.id
-            })
-            .select()
-            .single();
+        const { data, error } = await this.supabase
+          .from('reviews')
+          .insert({
+            title,
+            content,
+            nickname,
+            author_email,
+            author_id: this.user.id
+          })
+          .select()
+          .single();
 
-          if (error) {
-            console.error(
-              '[MMReviews] insert review error:',
-              error,
-              error?.message,
-              error?.code,
-              JSON.stringify(error, null, 2)
-            );
-            if (this.$formStatus) {
-              this.$formStatus.textContent =
-                'Failed to save the review: ' + (error.message || 'Unknown error');
-            }
-            return;
+        if (error) {
+          console.error('[MMReviews] insert review error:', error);
+          if (this.$formStatus) {
+            this.$formStatus.textContent =
+              'Failed to save the review: ' + (error.message || 'Unknown error');
           }
-          insertedReview = data;
+          return;
         }
+        insertedReview = data;
 
-        // 2) 이미지 파일이 있다면 Storage + review_imginfo 테이블에 저장
+        // 2) 첨부 이미지가 있다면 Storage + review_imginfo 저장
         try {
           await this.uploadAttachments(insertedReview.id);
         } catch (e2) {
           console.error('[MMReviews] uploadAttachments exception:', e2);
-          // 이미지 업로드 실패해도 글 자체는 저장된 상태이니, 에러만 로그로 남깁니다.
         }
 
         if (this.$formStatus) {
           this.$formStatus.textContent = 'Review saved.';
         }
-        // 폼 비우기
-        if (this.$inputTitle)     this.$inputTitle.value     = '';
-        if (this.$inputContent)   this.$inputContent.value   = '';
-        if (this.$fileInput)      this.$fileInput.value      = '';
+        // 폼/썸네일 초기화
+        if (this.$inputTitle)   this.$inputTitle.value   = '';
+        if (this.$inputContent) this.$inputContent.value = '';
+        if (this.$fileInput)    this.$fileInput.value    = '';
         if (this.$selectPreviews) this.$selectPreviews.innerHTML = '';
+        this.selectedFiles = [];
 
-        // 다시 목록 모드로
         this.showListView();
         await this.loadList();
       });
     },
 
-// ========= 첨부 이미지 업로드 =========
-async uploadAttachments(reviewId) {
-  // 1) selectedFiles 배열에 쌓인 파일 우선 사용
-  let files = Array.isArray(this.selectedFiles) ? this.selectedFiles : [];
+    // ========= 첨부 이미지 업로드 =========
+    uploadAttachments: async function (reviewId) {
+      // selectedFiles 우선 사용
+      let files = Array.isArray(this.selectedFiles) ? this.selectedFiles : [];
 
-  // 혹시 그래도 비어 있으면(옛날 방식 대비) file input에서 가져오기
-  if ((!files || files.length === 0) && this.$fileInput?.files?.length) {
-    files = Array.from(this.$fileInput.files);
-  }
+      // 혹시 selectedFiles가 비어 있고, input.files가 남아있다면 그걸 사용
+      if ((!files || files.length === 0) && this.$fileInput?.files?.length) {
+        files = Array.from(this.$fileInput.files);
+      }
 
-  if (!files || files.length === 0) {
-    return; // 업로드할 파일 없음
-  }
+      if (!files || files.length === 0) {
+        console.log('[MMReviews] uploadAttachments: no files to upload');
+        return;
+      }
 
-  const maxFiles = Number(this.$fileInput?.dataset.max || '6') || 6;
-  const selected = files.slice(0, maxFiles);
+      const maxFiles = Number(this.$fileInput?.dataset.max || '6') || 6;
+      const selected = files.slice(0, maxFiles);
 
-  for (let i = 0; i < selected.length; i++) {
-    const f = selected[i];
+      console.log('[MMReviews] uploadAttachments: will upload', selected.length, 'files');
 
-    // 확장자 정리
-    const ext = (f.name.split('.').pop() || 'jpg').toLowerCase();
-    const safeExt = ext.replace(/[^a-z0-9]/gi, '') || 'jpg';
+      for (let i = 0; i < selected.length; i++) {
+        const f = selected[i];
 
-    // 예: <reviewId>/1700000000000_0.jpg
-    const path = `${reviewId}/${Date.now()}_${i}.${safeExt}`;
+        // 확장자
+        const ext = (f.name.split('.').pop() || 'jpg').toLowerCase();
+        const safeExt = ext.replace(/[^a-z0-9]/gi, '') || 'jpg';
 
-    // 2-1) Storage 버킷에 업로드
-    const { data: uploadData, error: uploadErr } = await this.supabase
-      .storage
-      .from(this.bucketName)   // 'review_images'
-      .upload(path, f, {
-        cacheControl: '3600',
-        upsert: false
-      });
+        // 예: reviewId/1700000000000_0.jpg
+        const path = `${reviewId}/${Date.now()}_${i}.${safeExt}`;
 
-    if (uploadErr) {
-      console.error('[MMReviews] upload failed:', f.name, uploadErr);
-      continue;
-    }
+        // 2-1) Storage 버킷에 업로드
+        const { data: uploadData, error: uploadErr } = await this.supabase
+          .storage
+          .from(this.bucketName)
+          .upload(path, f, {
+            cacheControl: '3600',
+            upsert: false
+          });
 
-    // 2-2) 퍼블릭 URL 얻기
-    const { data: urlData } = this.supabase
-      .storage
-      .from(this.bucketName)
-      .getPublicUrl(path);
+        if (uploadErr) {
+          console.error('[MMReviews] upload failed:', f.name, uploadErr);
+          continue;
+        }
 
-    const publicUrl = urlData && urlData.publicUrl ? urlData.publicUrl : null;
-    console.log('[MMReviews] upload ok:', f.name, '→', path, 'url=', publicUrl);
+        // 2-2) 퍼블릭 URL 얻기
+        const { data: urlData } = this.supabase
+          .storage
+          .from(this.bucketName)
+          .getPublicUrl(path);
 
-    // 2-3) review_imginfo 테이블에 기록
-    const { error: imgErr } = await this.supabase
-      .from('review_imginfo')
-      .insert({
-        review_id: reviewId,
-        storage_path: path,
-        public_url: publicUrl,
-        original_name: f.name
-      });
+        const publicUrl = urlData && urlData.publicUrl ? urlData.publicUrl : null;
+        console.log('[MMReviews] upload ok:', f.name, '→', path, 'url=', publicUrl);
 
-    if (imgErr) {
-      console.error('[MMReviews] insert review_imginfo error:', imgErr);
-    }
-  }
+        // 2-3) review_imginfo 테이블에 기록
+        const { error: imgErr } = await this.supabase
+          .from('review_imginfo')
+          .insert({
+            review_id: reviewId,
+            storage_path: path,
+            public_url: publicUrl,
+            original_name: f.name
+          });
 
-  // 업로드 끝난 후 상태 정리
-  this.selectedFiles = [];
-  if (this.$fileInput) this.$fileInput.value = '';
-  if (this.$selectPreviews) this.$selectPreviews.innerHTML = '';
-}
+        if (imgErr) {
+          console.error('[MMReviews] insert review_imginfo error:', imgErr);
+        }
+      }
+
+      // 내부 상태 정리
+      this.selectedFiles = [];
+      if (this.$fileInput) this.$fileInput.value = '';
+      if (this.$selectPreviews) this.$selectPreviews.innerHTML = '';
+    },
 
     // ========= 목록 로드 =========
-    async loadList() {
+    loadList: async function () {
       if (!this.$listBody) return;
 
       this.$listBody.innerHTML = '';
@@ -445,7 +435,7 @@ async uploadAttachments(reviewId) {
     },
 
     // ========= 단일 리뷰 + 이미지 + 댓글 로드 =========
-    async loadReview(reviewId) {
+    loadReview: async function (reviewId) {
       if (!this.$readView) return;
 
       this.$readView.innerHTML = 'Loading…';
@@ -483,7 +473,7 @@ async uploadAttachments(reviewId) {
     },
 
     // ========= 읽기 화면 렌더 =========
-    renderReadView(review, images) {
+    renderReadView: function (review, images) {
       const container = this.$readView;
       container.innerHTML = '';
 
@@ -511,10 +501,7 @@ async uploadAttachments(reviewId) {
 
       const meta = document.createElement('p');
       meta.className = 'muted';
-      const nick =
-        review.nickname ||
-        (review.author_email || '').split('@')[0] ||
-        'anonymous';
+      const nick = review.nickname || (review.author_email || '').split('@')[0] || 'anonymous';
       meta.textContent =
         `${nick} · ${this.formatDateTime(review.created_at)} · Views ${review.view_count ?? 0}`;
       container.appendChild(meta);
@@ -548,7 +535,7 @@ async uploadAttachments(reviewId) {
           img.alt = imgRow.original_name || '';
           img.loading = 'lazy';
 
-          // 클릭 시 새 탭으로 크게 보기 (라이트박스 대신)
+          // 클릭 시 새 탭으로 크게 보기
           img.addEventListener('click', () => {
             window.open(imgRow.public_url, '_blank', 'noopener');
           });
@@ -560,7 +547,7 @@ async uploadAttachments(reviewId) {
         container.appendChild(thumbs);
       }
 
-      // 댓글 영역(비어 있는 div만 만들고, loadComments에서 채움)
+      // 댓글 영역
       const commentsSection = document.createElement('section');
       commentsSection.className = 'comments';
       commentsSection.style.marginTop = '20px';
@@ -615,7 +602,7 @@ async uploadAttachments(reviewId) {
     },
 
     // ========= 댓글 로드 =========
-    async loadComments(reviewId) {
+    loadComments: async function (reviewId) {
       const listEl = document.getElementById('commentsList');
       if (!listEl) return;
 
@@ -647,8 +634,7 @@ async uploadAttachments(reviewId) {
         const head = document.createElement('div');
         head.className = 'comment-head';
 
-        const nick =
-          row.nickname ||
+        const nick = row.nickname ||
           (row.author_email || '').split('@')[0] ||
           'anonymous';
         const left = document.createElement('span');
@@ -671,7 +657,7 @@ async uploadAttachments(reviewId) {
     },
 
     // ========= 댓글 쓰기 =========
-    async submitComment(reviewId, text) {
+    submitComment: async function (reviewId, text) {
       if (!this.user) {
         alert('Please log in on the home page before writing a comment.');
         return;
@@ -700,13 +686,12 @@ async uploadAttachments(reviewId) {
     },
 
     // ========= (선택) 라이트박스 바인딩 틀 =========
-    bindLightbox() {
+    bindLightbox: function () {
       // 현재는 이미지 클릭 시 새 탭으로만 열고 있습니다.
-      // 나중에 .lightbox 마크업을 붙이고 싶으면 여기서 구현하면 됩니다.
     },
 
     // ========= 날짜 포맷 =========
-    formatDate(iso) {
+    formatDate: function (iso) {
       if (!iso) return '';
       const d = new Date(iso);
       const y = d.getFullYear();
@@ -715,7 +700,7 @@ async uploadAttachments(reviewId) {
       return `${y}-${m}-${day}`;
     },
 
-    formatDateTime(iso) {
+    formatDateTime: function (iso) {
       if (!iso) return '';
       const d = new Date(iso);
       const y = d.getFullYear();
