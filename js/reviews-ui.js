@@ -279,14 +279,21 @@ setupFilePreview() {
       });
     },
 
- // ========= 첨부 이미지 업로드 =========
+// ========= 첨부 이미지 업로드 =========
 async uploadAttachments(reviewId) {
-  if (!this.$fileInput || !this.$fileInput.files || this.$fileInput.files.length === 0) {
-    return;
+  // 1) selectedFiles 배열에 쌓인 파일 우선 사용
+  let files = Array.isArray(this.selectedFiles) ? this.selectedFiles : [];
+
+  // 혹시 그래도 비어 있으면(옛날 방식 대비) file input에서 가져오기
+  if ((!files || files.length === 0) && this.$fileInput?.files?.length) {
+    files = Array.from(this.$fileInput.files);
   }
 
-  const files = Array.from(this.$fileInput.files);
-  const maxFiles = Number(this.$fileInput.dataset.max || '6') || 6;
+  if (!files || files.length === 0) {
+    return; // 업로드할 파일 없음
+  }
+
+  const maxFiles = Number(this.$fileInput?.dataset.max || '6') || 6;
   const selected = files.slice(0, maxFiles);
 
   for (let i = 0; i < selected.length; i++) {
@@ -296,13 +303,13 @@ async uploadAttachments(reviewId) {
     const ext = (f.name.split('.').pop() || 'jpg').toLowerCase();
     const safeExt = ext.replace(/[^a-z0-9]/gi, '') || 'jpg';
 
-    // 예: reviewId/1700000000000_0.jpg
+    // 예: <reviewId>/1700000000000_0.jpg
     const path = `${reviewId}/${Date.now()}_${i}.${safeExt}`;
 
     // 2-1) Storage 버킷에 업로드
     const { data: uploadData, error: uploadErr } = await this.supabase
       .storage
-      .from(this.bucketName)   // 'review_images' 버킷
+      .from(this.bucketName)   // 'review_images'
       .upload(path, f, {
         cacheControl: '3600',
         upsert: false
@@ -336,8 +343,12 @@ async uploadAttachments(reviewId) {
       console.error('[MMReviews] insert review_imginfo error:', imgErr);
     }
   }
-},
 
+  // 업로드 끝난 후 상태 정리
+  this.selectedFiles = [];
+  if (this.$fileInput) this.$fileInput.value = '';
+  if (this.$selectPreviews) this.$selectPreviews.innerHTML = '';
+}
 
     // ========= 목록 로드 =========
     async loadList() {
