@@ -480,15 +480,22 @@
       </div>
 
       <div class="field">
-        <label for="review-images">
-          Attach images (optional, up to 6)
-        </label>
-        <input id="review-images" type="file" accept="image/*" multiple />
-        <div id="selectPreviews" class="thumbs"></div>
-        <div class="status">
-          Images are uploaded to Supabase Storage. Large images may be resized by the browser or your device.
-        </div>
-      </div>
+       <label for="image">
+         Attach images (optional, up to 6)
+       </label>
+       <input
+         id="image"
+         type="file"
+         accept="image/*"
+         multiple
+         data-max="6"
+       />
+       <div id="selectPreviews" class="thumbs"></div>
+       <div class="status">
+         Images are uploaded to Supabase Storage. Large images may be resized by the browser or your device.
+       </div>
+     </div>
+
 
       <div style="border-top:1px solid #1e293b;margin-top:12px;padding-top:10px;display:flex;align-items:center;gap:8px;justify-content:flex-end;">
         <span id="formStatus" class="status" style="margin-right:auto;"></span>
