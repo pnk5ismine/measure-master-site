@@ -42,6 +42,7 @@
       await this.fetchMemberAndFlags();  // members / is_admin 정보
 
       this.cacheDom();
+      this.setupListClickDelegation();
       this.bindLightbox();
       this.setupComposeButton();
       this.setupWriteForm();
@@ -64,8 +65,10 @@
       this.$inputContent   = document.getElementById('content');
       this.$fileInput      = document.getElementById('image');          // reviews.html의 id="image"
       this.$selectPreviews = document.getElementById('selectPreviews');
+      this.$noticeField    = document.getElementById('noticeField');
+      this.$isNotice       = document.getElementById('isNotice');
 
-      if (!this.$listBody) {
+     if (!this.$listBody) {
         console.error('[MMReviews] #listBody not found.');
       }
     },
@@ -106,6 +109,13 @@
       } else {
         this.$listLoginHint.textContent =
           'To write a review, please sign up / log in on the home page.';
+      }
+      // Notice UI (admin only)
+      if (this.$noticeField) {
+        this.$noticeField.style.display = this.isAdmin ? 'block' : 'none';
+      }
+      if (this.$isNotice) {
+        this.$isNotice.checked = false;
       }
     },
 
@@ -214,7 +224,22 @@
         }
       });
     },
+    // ========= 리스트 클릭(이벤트 위임) =========
+    setupListClickDelegation() {
+      if (!this.$listBody) return;
 
+      // 중복 바인딩 방지
+      if (this._listClickBound) return;
+      this._listClickBound = true;
+
+      this.$listBody.addEventListener('click', (e) => {
+        const tr = e.target.closest('tr[data-id]');
+        if (!tr) return;
+        const id = tr.dataset.id;
+        if (!id) return;
+        this.showReadView(id);
+      });
+    },
     // ========= 수정 모드 시작 =========
     startEditReview(review) {
       if (!this.$writeForm) return;
@@ -283,6 +308,7 @@
 
         const title   = (this.$inputTitle?.value || '').trim();
         const content = (this.$inputContent?.value || '').trim();
+        const is_notice = !!(this.isAdmin && this.$isNotice && this.$isNotice.checked);
 
         if (!title) {
           alert('Please enter a title.');
@@ -313,7 +339,8 @@
               title,
               content,
               nickname,
-              author_email
+              author_email,
+              is_notice
             })
             .eq('id', reviewId)
             .select()
@@ -338,7 +365,8 @@
               content,
               nickname,
               author_email,
-              author_id: this.user.id
+              author_id: this.user.id,
+              is_notice
             })
             .select()
             .single();
