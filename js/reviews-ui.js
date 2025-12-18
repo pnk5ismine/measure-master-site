@@ -8,6 +8,9 @@
     user: null,
     bucketName: 'review_images', // Supabase Storage 버킷 이름
 
+    // 🔹 새로 추가: 여러 번 선택된 파일을 누적해서 관리
+    selectedFiles: [],
+
     // ========= 초기화 =========
     /**
      * @param {object} supabaseClient  - mmAuth에서 넘겨준 Supabase client
@@ -145,35 +148,47 @@
       });
     },
 
-    // ========= 파일 미리보기(작성 폼) =========
-    setupFilePreview() {
-      if (!this.$fileInput || !this.$selectPreviews) return;
+// ========= 파일 미리보기(작성 폼) =========
+setupFilePreview() {
+  if (!this.$fileInput || !this.$selectPreviews) return;
 
-      const maxFiles = Number(this.$fileInput.dataset.max || '6') || 6;
-      this.$fileInput.addEventListener('change', () => {
-        const files = this.$fileInput.files;
-        this.$selectPreviews.innerHTML = '';
-        if (!files || files.length === 0) return;
+  const maxFiles = Number(this.$fileInput.dataset.max || '6') || 6;
 
-        const n = Math.min(files.length, maxFiles);
-        for (let i = 0; i < n; i++) {
-          const f = files[i];
-          const url = URL.createObjectURL(f);
-          const wrap = document.createElement('div');
-          wrap.className = 'thumb-card';
-          const img = document.createElement('img');
-          img.className = 'thumb-img';
-          img.src = url;
-          img.alt = f.name;
-          wrap.appendChild(img);
-          this.$selectPreviews.appendChild(wrap);
-        }
+  this.$fileInput.addEventListener('change', () => {
+    if (!this.$fileInput.files) return;
 
-        if (files.length > maxFiles) {
-          alert('You can attach up to ' + maxFiles + ' images.');
-        }
-      });
-    },
+    const newlySelected = Array.from(this.$fileInput.files);
+
+    // 1) 기존 선택 + 새로 선택한 파일을 합침
+    const merged = (this.selectedFiles || []).concat(newlySelected);
+
+    // 2) 최대 maxFiles 개까지만 유지
+    this.selectedFiles = merged.slice(0, maxFiles);
+
+    // 3) 미리보기 다시 그리기
+    this.$selectPreviews.innerHTML = '';
+    this.selectedFiles.forEach((f) => {
+      const url = URL.createObjectURL(f);
+      const wrap = document.createElement('div');
+      wrap.className = 'thumb-card';
+
+      const img = document.createElement('img');
+      img.className = 'thumb-img';
+      img.src = url;
+      img.alt = f.name;
+
+      wrap.appendChild(img);
+      this.$selectPreviews.appendChild(wrap);
+    });
+
+    if (merged.length > maxFiles) {
+      alert('You can attach up to ' + maxFiles + ' images.');
+    }
+
+    // 같은 파일을 다시 선택할 수 있도록 value를 비워 둠
+    this.$fileInput.value = '';
+  });
+},
 
     // ========= 쓰기 폼(텍스트 + 이미지 업로드) =========
     setupWriteForm() {
