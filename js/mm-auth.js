@@ -11,31 +11,63 @@
   }
 
   // 단일 Supabase 클라이언트 (모든 페이지에서 공유)
-  const client = global.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  const client = global.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
+    auth: {
+      persistSession: true,
+      autoRefreshToken: true,
+      detectSessionInUrl: true
+    }
+  });
 
-  // members 테이블에 (user_id, email, nickname) upsert
+  function normEmail(email) {
+    return String(email || '').trim().toLowerCase();
+  }
+
+  // members 테이블에 (user_id, email, nickname) 보장
+  // ⚠️ 관리자 플래그(is_admin)는 절대 덮어쓰지 않도록 수정
   async function ensureMemberForUser(user) {
     try {
       if (!user) return;
-      const email = user.email || '';
-      const nickname =
-        (email && email.split('@')[0]) ||
-        'tester';
 
-      const { error } = await client
+      const email = normEmail(user.email || '');
+      const nickname = (email && email.split('@')[0]) || 'tester';
+
+      // 1) 기존 레코드 확인
+      const { data: existing, error: selErr } = await client
         .from('members')
-        .upsert(
-          {
-            user_id: user.id,
-            email: email,
-            nickname: nickname,
-            is_admin: false
-          },
-          { onConflict: 'user_id' }
-        );
+        .select('user_id, is_admin')
+        .eq('user_id', user.id)
+        .maybeSingle();
 
-      if (error) {
-        console.error('[mmAuth] members upsert error:', error);
+      if (selErr) {
+        console.error('[mmAuth] members select error:', selErr);
+        return;
+      }
+
+      if (existing) {
+        // 2) 있으면 email/nickname만 업데이트 (is_admin 유지!)
+        const { error: updErr } = await client
+          .from('members')
+          .update({ email, nickname })
+          .eq('user_id', user.id);
+
+        if (updErr) {
+          console.error('[mmAuth] members update error:', updErr);
+        }
+      } else {
+        // 3) 없으면 insert (기본은 false)
+        const { error: insErr } = await client
+          .from('members')
+          .insert({
+            user_id: user.id,
+            email,
+            nickname,
+            is_admin: false
+          });
+
+        if (insErr) {
+          console.error('[mmAuth] members insert error:', insErr);
+        }
       }
     } catch (e) {
       console.error('[mmAuth] ensureMemberForUser exception:', e);
@@ -43,59 +75,63 @@
   }
 
   const mmAuth = {
-    // Supabase client 공유
     supabase: client,
-    sb: client, // 옛 코드 호환용 별칭
+    sb: client, // legacy alias
 
-    /**
-     * 회원 가입
-     * @returns {Promise<{data:any, error:any}>}
-     */
     async signUp(email, password) {
-      // 여기서는 길이 체크 안 하고 Supabase에게 맡깁니다.
-      // (index.html 쪽에서 6자 이상 정도만 간단히 체크해도 OK)
+      const e = normEmail(email);
+
       const { data, error } = await client.auth.signUp({
-        email,
+        email: e,
         password
       });
 
-      if (!error && data && data.user) {
+      console.log('[mmAuth] signUp:', { data, error });
+      if (error) {
+        alert(error.message); // ✅ 원인 즉시 확인
+        return { data, error };
+      }
+
+      if (data && data.user) {
         await ensureMemberForUser(data.user);
       }
       return { data, error };
     },
 
-    /**
-     * 로그인
-     * @returns {Promise<{data:any, error:any}>}
-     */
     async signIn(email, password) {
+      const e = normEmail(email);
+
+      // ✅ 입력값 자체 점검 (공백/undefined로 400 나는 경우 방지)
+      if (!e || !password) {
+        const msg = 'Email or password is empty.';
+        console.warn('[mmAuth] signIn blocked:', { email, passwordLen: (password || '').length });
+        alert(msg);
+        return { data: null, error: { message: msg } };
+      }
+
       const { data, error } = await client.auth.signInWithPassword({
-        email,
+        email: e,
         password
       });
 
-      if (!error && data && data.user) {
+      console.log('[mmAuth] signInWithPassword:', { data, error });
+      if (error) {
+        alert(error.message); // ✅ 400의 진짜 메시지 확인 (핵심)
+        return { data, error };
+      }
+
+      if (data && data.user) {
         await ensureMemberForUser(data.user);
       }
       return { data, error };
     },
 
-    /**
-     * 로그아웃
-     */
     async signOut() {
       const { error } = await client.auth.signOut();
-      if (error) {
-        console.error('[mmAuth] signOut error:', error);
-      }
+      if (error) console.error('[mmAuth] signOut error:', error);
       return { error };
     },
 
-    /**
-     * 현재 세션 가져오기
-     * @returns {Promise<null|object>} Supabase Session or null
-     */
     async getSession() {
       try {
         const { data, error } = await client.auth.getSession();
@@ -110,30 +146,20 @@
       }
     },
 
-    /**
-     * Auth 상태 변화 구독
-     * 콜백은 (session) 을 인자로 받습니다.
-     */
     onChange(callback) {
       if (typeof callback !== 'function') return;
 
-      // 초기 1회 호출
       this.getSession()
         .then((session) => {
-          try {
-            callback(session);
-          } catch (e) {
-            console.error('[mmAuth] onChange initial callback error:', e);
-          }
+          try { callback(session); }
+          catch (e) { console.error('[mmAuth] onChange initial callback error:', e); }
         })
         .catch((e) => console.error(e));
 
-      // 상태 변화 구독
-      client.auth.onAuthStateChange((_event, session) => {
+      client.auth.onAuthStateChange(async (_event, session) => {
         try {
           if (session && session.user) {
-            // members 보장
-            ensureMemberForUser(session.user);
+            await ensureMemberForUser(session.user);
           }
           callback(session);
         } catch (e) {
