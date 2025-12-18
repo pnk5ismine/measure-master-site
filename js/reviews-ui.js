@@ -3,11 +3,14 @@
 // Supabase client는 index.html / mm-auth.js 에서 만든 것을 재사용합니다.
 
 (function (global) {
+(function (global) {
   const MMReviews = {
     supabase: null,
     user: null,
+    member: null,          // members 테이블의 내 레코드
+    isAdmin: false,        // 관리자 여부 플래그
     bucketName: 'review_images', // Supabase Storage 버킷 이름
-    selectedFiles: [],           // 사용자가 선택한 File 객체들
+    editingReviewId: null, // 수정 중인 리뷰 id (새 글이면 null)
 
     // ========= 초기화 =========
     /**
@@ -15,7 +18,12 @@
      * @param {object|null} currentUser - 현재 로그인 유저(or null)
      */
     init: async function (supabaseClient, currentUser) {
-      console.log('[MMReviews] init called. client:', !!supabaseClient, 'user:', !!currentUser);
+      console.log(
+        '[MMReviews] init called. client:', 
+         !!supabaseClient, 
+         'user:', 
+         !!currentUser
+    );
 
       // 1) 우선 caller에서 넘겨준 client 사용
       if (supabaseClient && supabaseClient.auth) {
@@ -32,6 +40,7 @@
       }
 
       this.user = currentUser || null;
+      await this.fetchMemberAndFlags();   // ← 추가
 
       this.cacheDom();
       this.bindLightbox();
@@ -63,18 +72,45 @@
       }
     },
 
+    // ========= 현재 회원(members) + admin 플래그 =========
+    async fetchMemberAndFlags() {
+      this.member = null;
+      this.isAdmin = false;
+
+      if (!this.supabase || !this.user) return;
+
+      const { data, error } = await this.supabase
+        .from('members')
+        .select('user_id, email, nickname, is_admin')
+        .eq('user_id', this.user.id)
+        .maybeSingle();  // 없으면 null, 있으면 1건
+
+      if (error) {
+        console.warn('[MMReviews] fetchMemberAndFlags error:', error);
+        return;
+      }
+
+      if (data) {
+        this.member = data;
+        this.isAdmin = !!data.is_admin;
+      }
+    },
+
     // ========= 로그인 안내 문구 =========
-    applyAuthHint: function () {
+    applyAuthHint() {
       if (!this.$listLoginHint) return;
 
       if (this.user) {
+        const email = this.user.email || '';
+        const adminLabel = this.isAdmin ? ' (admin)' : '';
         this.$listLoginHint.textContent =
-          'Logged in as ' + (this.user.email || '') + '. You can write a review.';
+          'Logged in as ' + email + adminLabel + '. You can write a review.';
       } else {
         this.$listLoginHint.textContent =
           'To write a review, please sign up / log in on the home page.';
       }
     },
+
 
     // (필요하면 세션 새로고침)
     refreshUser: async function () {
@@ -88,6 +124,13 @@
       }
       this.applyAuthHint();
       return this.user;
+    },
+
+    // ========= 이 리뷰를 수정/삭제할 수 있는지? =========
+    canEditReview(review) {
+      if (!this.user || !review) return false;
+      if (this.isAdmin) return true;              // 관리자면 무조건 가능
+      return review.author_id === this.user.id;   // 아니면 작성자 본인만
     },
 
     // ========= URL 파라미터(글쓰기 바로 열기 등) =========
@@ -127,6 +170,61 @@
       if (this.$writeForm) this.$writeForm.hidden = false;
       window.scrollTo({ top: 0, behavior: 'smooth' });
     },
+
+    // ========= 수정 모드 시작 =========
+    startEditReview(review) {
+      if (!this.$writeForm) return;
+      if (!this.canEditReview(review)) {
+        alert('You are not allowed to edit this review.');
+        return;
+      }
+
+      this.editingReviewId = review.id;
+
+      if (this.$inputTitle)   this.$inputTitle.value   = review.title || '';
+      if (this.$inputContent) this.$inputContent.value = review.content || '';
+
+      // 첨부파일은 일단 "추가"만 허용 (기존 것은 유지)
+      if (this.$fileInput) this.$fileInput.value = '';
+      if (this.$selectPreviews) this.$selectPreviews.innerHTML = '';
+
+      if (this.$formStatus) {
+        this.$formStatus.textContent =
+          'Editing existing review. Saving will update this post.';
+      }
+
+      this.showWriteView();
+    },
+
+    // ========= 리뷰 삭제 =========
+    async deleteReview(review) {
+      if (!this.supabase || !review) return;
+      if (!this.canEditReview(review)) {
+        alert('You are not allowed to delete this review.');
+        return;
+      }
+
+      const ok = window.confirm('Delete this review? This cannot be undone.');
+      if (!ok) return;
+
+      // (심플 버전) 텍스트만 삭제. 이미지/메타데이터 정리는 나중에 추가 가능.
+      const { error } = await this.supabase
+        .from('reviews')
+        .delete()
+        .eq('id', review.id);
+
+      if (error) {
+        console.error('[MMReviews] deleteReview error:', error);
+        alert('Failed to delete the review: ' + (error.message || 'Unknown error'));
+        return;
+      }
+
+      alert('Review deleted.');
+      this.editingReviewId = null;
+      this.showListView();
+      await this.loadList();
+    },
+
 
     // ========= “글쓰기” 버튼 =========
     setupComposeButton: function () {
@@ -187,7 +285,7 @@
     },
 
     // ========= 쓰기 폼(텍스트 + 이미지 업로드) =========
-    setupWriteForm: function () {
+    setupWriteForm() {
       if (!this.$writeForm) return;
 
       this.setupFilePreview();
@@ -220,46 +318,84 @@
           (this.user.email && this.user.email.split('@')[0]) || 'tester';
         const author_email = this.user.email || null;
 
-        // 1) reviews 테이블에 텍스트 글 저장
-        let insertedReview = null;
-        const { data, error } = await this.supabase
-          .from('reviews')
-          .insert({
-            title,
-            content,
-            nickname,
-            author_email,
-            author_id: this.user.id
-          })
-          .select()
-          .single();
+        const isEdit = !!this.editingReviewId;
+        let reviewId = this.editingReviewId || null;
+        let savedReview = null;
 
-        if (error) {
-          console.error('[MMReviews] insert review error:', error);
-          if (this.$formStatus) {
-            this.$formStatus.textContent =
-              'Failed to save the review: ' + (error.message || 'Unknown error');
+        if (isEdit) {
+          // ----- UPDATE 기존 글 -----
+          const { data, error } = await this.supabase
+            .from('reviews')
+            .update({
+              title,
+              content,
+              // 닉네임 / 이메일이 바뀌었으면 여기서도 같이 업데이트 가능
+              nickname,
+              author_email
+            })
+            .eq('id', reviewId)
+            .select()
+            .single();
+
+          if (error) {
+            console.error('[MMReviews] update review error:', error);
+            if (this.$formStatus) {
+              this.$formStatus.textContent =
+                'Failed to update the review: ' + (error.message || 'Unknown error');
+            }
+            return;
           }
-          return;
-        }
-        insertedReview = data;
+          savedReview = data;
+          reviewId = data.id;
+        } else {
+          // ----- INSERT 새 글 -----
+          const { data, error } = await this.supabase
+            .from('reviews')
+            .insert({
+              title,
+              content,
+              nickname,
+              author_email,
+              author_id: this.user.id
+            })
+            .select()
+            .single();
 
-        // 2) 첨부 이미지가 있다면 Storage + review_imginfo 저장
+          if (error) {
+            console.error(
+              '[MMReviews] insert review error:',
+              error,
+              error?.message,
+              error?.code,
+              JSON.stringify(error, null, 2)
+            );
+            if (this.$formStatus) {
+              this.$formStatus.textContent =
+                'Failed to save the review: ' + (error.message || 'Unknown error');
+            }
+            return;
+          }
+          savedReview = data;
+          reviewId = data.id;
+        }
+
+        // 첨부 이미지가 있으면 업로드 (편집 시에는 "추가"로 동작)
         try {
-          await this.uploadAttachments(insertedReview.id);
+          await this.uploadAttachments(reviewId);
         } catch (e2) {
           console.error('[MMReviews] uploadAttachments exception:', e2);
         }
 
         if (this.$formStatus) {
-          this.$formStatus.textContent = 'Review saved.';
+          this.$formStatus.textContent = isEdit ? 'Review updated.' : 'Review saved.';
         }
-        // 폼/썸네일 초기화
+
+        // 폼 초기화
+        this.editingReviewId = null;
         if (this.$inputTitle)   this.$inputTitle.value   = '';
         if (this.$inputContent) this.$inputContent.value = '';
         if (this.$fileInput)    this.$fileInput.value    = '';
         if (this.$selectPreviews) this.$selectPreviews.innerHTML = '';
-        this.selectedFiles = [];
 
         this.showListView();
         await this.loadList();
@@ -473,24 +609,58 @@
     },
 
     // ========= 읽기 화면 렌더 =========
-    renderReadView: function (review, images) {
+    renderReadView(review, images) {
       const container = this.$readView;
       container.innerHTML = '';
 
-      // 상단 액션바 (목록으로)
+      const canEdit = this.canEditReview(review);
+
+      // 상단 액션바
       const topActions = document.createElement('div');
       topActions.className = 'top-actions';
+
+      // 왼쪽: 뒤로가기 + 작성일
+      const leftBox = document.createElement('div');
+      leftBox.style.display = 'flex';
+      leftBox.style.alignItems = 'center';
+      leftBox.style.gap = '8px';
+
       const backBtn = document.createElement('button');
       backBtn.className = 'btn secondary';
       backBtn.type = 'button';
       backBtn.textContent = 'Back to list';
       backBtn.addEventListener('click', () => this.showListView());
-      topActions.appendChild(backBtn);
+      leftBox.appendChild(backBtn);
 
       const infoSpan = document.createElement('span');
       infoSpan.className = 'muted';
       infoSpan.textContent = this.formatDateTime(review.created_at);
-      topActions.appendChild(infoSpan);
+      leftBox.appendChild(infoSpan);
+
+      topActions.appendChild(leftBox);
+
+      // 오른쪽: Edit / Delete (작성자 또는 관리자일 때만)
+      if (canEdit) {
+        const rightBox = document.createElement('div');
+        rightBox.style.display = 'flex';
+        rightBox.style.gap = '8px';
+
+        const editBtn = document.createElement('button');
+        editBtn.type = 'button';
+        editBtn.className = 'btn secondary';
+        editBtn.textContent = 'Edit';
+        editBtn.addEventListener('click', () => this.startEditReview(review));
+
+        const delBtn = document.createElement('button');
+        delBtn.type = 'button';
+        delBtn.className = 'btn';
+        delBtn.textContent = 'Delete';
+        delBtn.addEventListener('click', () => this.deleteReview(review));
+
+        rightBox.appendChild(editBtn);
+        rightBox.appendChild(delBtn);
+        topActions.appendChild(rightBox);
+      }
 
       container.appendChild(topActions);
 
@@ -501,7 +671,8 @@
 
       const meta = document.createElement('p');
       meta.className = 'muted';
-      const nick = review.nickname || (review.author_email || '').split('@')[0] || 'anonymous';
+      const nick = review.nickname ||
+        (review.author_email || '').split('@')[0] || 'anonymous';
       meta.textContent =
         `${nick} · ${this.formatDateTime(review.created_at)} · Views ${review.view_count ?? 0}`;
       container.appendChild(meta);
