@@ -165,7 +165,7 @@
      } else {
        this.showListView();
      }
-   }
+   },
 
     // ========= 이 리뷰를 수정/삭제할 수 있는지? =========
     canEditReview(review) {
