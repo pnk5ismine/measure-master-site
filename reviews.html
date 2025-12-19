@@ -274,13 +274,15 @@
       flex-wrap:wrap;
     }
 
-    /* Notices (dark navy) */
-    .table tr.notice td,
-    .table tr.notice .cell-body{
-      color:var(--notice-navy);
-      font-weight:700;
-    }
-    /* Notice badge */
+/* Notices: make it clearly blue */
+.table tr.notice td,
+.table tr.notice .cell-body{
+  color:#2563eb; /* stronger blue */
+}
+.table tr.notice .list-title{
+  color:#2563eb;
+}
+  /* Notice badge */
     .notice-badge{
       display:inline-flex;
       align-items:center;

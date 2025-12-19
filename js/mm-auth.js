@@ -23,56 +23,48 @@
     return String(email || '').trim().toLowerCase();
   }
 
-  // members 테이블에 (user_id, email, nickname) 보장
-  // ⚠️ 관리자 플래그(is_admin)는 절대 덮어쓰지 않도록 수정
-  async function ensureMemberForUser(user) {
-    try {
-      if (!user) return;
+// members 테이블에 (user_id, email, nickname) 보장
+// ⚠️ is_admin은 절대 덮어쓰지 않음(관리자 플래그 유지)
+async function ensureMemberForUser(user) {
+  try {
+    if (!user) return;
 
-      const email = normEmail(user.email || '');
-      const nickname = (email && email.split('@')[0]) || 'tester';
+    const email = user.email || '';
+    const nickname = (email && email.split('@')[0]) || 'tester';
 
-      // 1) 기존 레코드 확인
-      const { data: existing, error: selErr } = await client
+    // 1) 이미 있는지 확인
+    const { data: existing, error: selErr } = await client
+      .from('members')
+      .select('user_id, is_admin')
+      .eq('user_id', user.id)
+      .maybeSingle();
+
+    // 2) 있으면 email/nickname만 업데이트 (is_admin 유지)
+    if (!selErr && existing) {
+      const { error: upErr } = await client
         .from('members')
-        .select('user_id, is_admin')
-        .eq('user_id', user.id)
-        .maybeSingle();
+        .update({ email, nickname })
+        .eq('user_id', user.id);
 
-      if (selErr) {
-        console.error('[mmAuth] members select error:', selErr);
-        return;
-      }
-
-      if (existing) {
-        // 2) 있으면 email/nickname만 업데이트 (is_admin 유지!)
-        const { error: updErr } = await client
-          .from('members')
-          .update({ email, nickname })
-          .eq('user_id', user.id);
-
-        if (updErr) {
-          console.error('[mmAuth] members update error:', updErr);
-        }
-      } else {
-        // 3) 없으면 insert (기본은 false)
-        const { error: insErr } = await client
-          .from('members')
-          .insert({
-            user_id: user.id,
-            email,
-            nickname,
-            is_admin: false
-          });
-
-        if (insErr) {
-          console.error('[mmAuth] members insert error:', insErr);
-        }
-      }
-    } catch (e) {
-      console.error('[mmAuth] ensureMemberForUser exception:', e);
+      if (upErr) console.error('[mmAuth] members update error:', upErr);
+      return;
     }
+
+    // 3) 없으면 새로 insert (새 유저는 기본 false)
+    const { error: insErr } = await client
+      .from('members')
+      .insert({
+        user_id: user.id,
+        email,
+        nickname,
+        is_admin: false
+      });
+
+    if (insErr) console.error('[mmAuth] members insert error:', insErr);
+  } catch (e) {
+    console.error('[mmAuth] ensureMemberForUser exception:', e);
   }
+}
 
   const mmAuth = {
     supabase: client,
