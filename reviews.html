@@ -280,6 +280,21 @@
       color:var(--notice-navy);
       font-weight:700;
     }
+    /* Notice badge */
+    .notice-badge{
+      display:inline-flex;
+      align-items:center;
+      margin-right:8px;
+      padding:2px 8px;
+      border-radius:999px;
+      font-size:11px;
+      font-weight:800;
+      letter-spacing:0.06em;
+      text-transform:uppercase;
+      color:#ffffff;
+      background:var(--notice-navy, #0b1f3a);
+      flex:0 0 auto;
+    }
 
     /* Top / bottom actions in read view */
     .top-actions{
@@ -536,6 +551,15 @@
     <!-- 글쓰기 뷰 -->
     <form id="writeForm" hidden>
       <h2 id="writeTitleHeading">Write a new review</h2>
+
+      <!-- Admin only: Notice toggle -->
+      <div class="field" id="noticeField" style="display:none;">
+        <label style="display:flex; align-items:center; gap:10px;">
+          <input type="checkbox" id="isNotice" />
+          Post as a notice (pinned to top)
+        </label>
+        <div class="status">Only admins can post notices.</div>
+      </div>
 
       <div class="field">
         <label for="title">Title</label>
