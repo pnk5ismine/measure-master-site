@@ -227,19 +227,21 @@
     // ========= 리스트 클릭(이벤트 위임) =========
     setupListClickDelegation() {
       if (!this.$listBody) return;
-
-      // 중복 바인딩 방지
       if (this._listClickBound) return;
       this._listClickBound = true;
 
       this.$listBody.addEventListener('click', (e) => {
         const tr = e.target.closest('tr[data-id]');
         if (!tr) return;
+
         const id = tr.dataset.id;
-        if (!id) return;
+        console.log('[MMReviews] click delegated id=', id);
+
+
         this.showReadView(id);
       });
     },
+
     // ========= 수정 모드 시작 =========
     startEditReview(review) {
       if (!this.$writeForm) return;
