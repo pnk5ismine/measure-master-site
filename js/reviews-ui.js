@@ -49,7 +49,7 @@
       this.applyAuthHint();
 
       await this.loadList();             // 목록 먼저
-      this.handleInitialViewFromQuery(); // ?compose=1 등 처리
+      await this.handleInitialViewFromQuery(); // ?compose=1 등 처리
     },
 
     // ========= DOM 캐시 =========
@@ -134,20 +134,25 @@
     },
 
     // ========= URL 파라미터(글쓰기 바로 열기 등) =========
-    handleInitialViewFromQuery() {
-      const params  = new URLSearchParams(window.location.search);
-      const compose = params.get('compose');
+   async handleInitialViewFromQuery() {
+     const params  = new URLSearchParams(window.location.search);
+     const id      = params.get('id');
+     const compose = params.get('compose');
 
-      if (compose === '1' || compose === 'true') {
-        if (this.user) {
-          this.showWriteView();
-        } else {
-          this.showListView();
-        }
-      } else {
-        this.showListView();
-      }
-    },
+     // ✅ 1) id가 있으면 무조건 읽기 뷰로
+     if (id) {
+       await this.showReadView(id);
+       return;
+     }
+
+     // ✅ 2) compose 처리(기존 로직)
+     if (compose === '1' || compose === 'true') {
+       if (this.user) this.showWriteView();
+       else this.showListView();
+     } else {
+       this.showListView();
+     }
+   }
 
     // ========= 이 리뷰를 수정/삭제할 수 있는지? =========
     canEditReview(review) {
@@ -543,10 +548,16 @@
         metaDiv.className = 'list-meta';
         metaDiv.innerHTML = `<span>Views ${row.view_count ?? 0}</span><span>${this.formatDate(row.created_at)}</span>`;
 
-        tdBody.appendChild(titleRow);
-        tdBody.appendChild(previewDiv);
-        tdBody.appendChild(metaDiv);
+// 링크로 감싸서 클릭이 무조건 동작하게
+const link = document.createElement('a');
+link.className = 'row-link';
+link.href = `/reviews.html?id=${encodeURIComponent(row.id)}`;
 
+        link.appendChild(titleRow);
+        link.appendChild(previewDiv);
+        link.appendChild(metaDiv);
+
+        tdBody.appendChild(link);
         tr.appendChild(tdBody);
 
         if (row.is_notice) {
@@ -609,7 +620,12 @@
       backBtn.className = 'btn secondary';
       backBtn.type = 'button';
       backBtn.textContent = 'Back to list';
-      backBtn.addEventListener('click', () => this.showListView());
+
+      backBtn.addEventListener('click', () => {
+        try { history.pushState({}, '', '/reviews.html'); } catch(e) {}
+        this.showListView();
+      });
+
       leftBox.appendChild(backBtn);
 
       const infoSpan = document.createElement('span');
