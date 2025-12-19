@@ -42,6 +42,7 @@
       await this.fetchMemberAndFlags();  // members / is_admin 정보
 
       this.cacheDom();
+      this.setupGlobalClickFix();
       this.setupListClickDelegation();
       this.bindLightbox();
       this.setupComposeButton();
@@ -70,6 +71,18 @@
 
      if (!this.$listBody) {
         console.error('[MMReviews] #listBody not found.');
+      }
+
+      // [DEBUG] list click delegation (safe)
+      if (this.$listBody && !this._clickDelegationBound) {
+        this._clickDelegationBound = true;
+        this.$listBody.addEventListener('click', (e) => {
+          const tr = e.target.closest('tr[data-id]');
+          console.log('[DEBUG] list click target:', e.target, 'tr:', tr);
+          if (!tr) return;
+          console.log('[DEBUG] clicked id=', tr.dataset.id);
+          this.showReadView(tr.dataset.id);
+        });
       }
     },
 
@@ -567,6 +580,21 @@ link.href = `/reviews.html?id=${encodeURIComponent(row.id)}`;
         this.$listBody.appendChild(tr);
       });
     },
+
+    setupGlobalClickFix() {
+      if (this._globalClickFixBound) return;
+      this._globalClickFixBound = true;
+
+      document.addEventListener('click', (e) => {
+        const tr = e.target.closest('tr[data-id]');
+        if (!tr) return;
+        const id = tr.dataset.id;
+        console.log('[DEBUG] GLOBAL click ->', id);
+        if (!id) return;
+        this.showReadView(id);
+      }, true); // capture
+    },
+
 
     // ========= 단일 리뷰 + 이미지 + 댓글 로드 =========
     async loadReview(reviewId) {
