@@ -10,65 +10,55 @@
   <link rel="preload" as="image" href="/images/mm_logo.png" />
 
   <style>
-    :root {
-      /* ===== OUTER (index-like) ===== */
-      --outer-bg:#050816;
-      --outer-text:#e7edf5;
-      --outer-muted:#9aa4b2;
-      --outer-accent:#5eead4;
+    :root{
+      /* Dark outer (match index) */
+      --bg:#050816;
+      --bg-soft:#060b1b;
+      --text:#e7edf5;
+      --muted:#9aa4b2;
+      --accent:#5eead4;
 
-      /* ===== INNER (light panels) ===== */
-      --bg-card:#ffffff;
-      --border:#d1d5db;
-      --muted:#6b7280;
-      --text:#111827;
-      --accent:#2563eb;
-      --accent-soft:#e0ecff;
+      /* Light inner panels */
+      --panel-bg:#ffffff;
+      --panel-text:#111827;
+      --panel-muted:#6b7280;
+      --panel-border:#d1d5db;
+
       --danger:#dc2626;
 
-      /* Notice color (dark navy) */
-      --notice-navy:#0b1f3a;
+      /* Notice blue */
+      --notice:#1d4ed8;
+      --notice-bg:#eff6ff;
+      --notice-bg-hover:#dbeafe;
+      --notice-border:#93c5fd;
     }
 
     *{box-sizing:border-box}
+    html,body{margin:0;padding:0}
     body{
-      margin:0;
       font-family:system-ui,-apple-system,Segoe UI,Roboto,'Noto Sans',sans-serif;
       background:
         radial-gradient(circle at 0 0, rgba(94,234,212,.23), transparent 55%),
         radial-gradient(circle at 100% 100%, rgba(59,130,246,.18), transparent 55%),
-        var(--outer-bg);
-      color:var(--outer-text);
+        var(--bg);
+      color:var(--text);
       min-height:100vh;
-      display:flex;
-      flex-direction:column;
     }
 
-/* Read view: notice post in blue */
-body.notice-open #readTitle,
-body.notice-open #readView h2 {
-  color:#2563eb;
-}
-body.notice-open #readContent,
-body.notice-open .read-content,
-body.notice-open #readView .comment-body {
-  color:#2563eb;
-}
-
-    header,main,footer{
-      max-width:1100px;
+    a{color:inherit}
+    .page{
+      max-width:1180px;
       margin:0 auto;
-      padding:16px;
+      padding:16px 16px 40px;
     }
 
-    /* Header (index-like) */
+    /* Header (match index style) */
     header{
       display:flex;
       align-items:center;
       justify-content:space-between;
       gap:12px;
-      padding:6px 16px 10px;
-      border-bottom:1px solid rgba(30,64,175,.6);
+      padding:6px 0 10px;
     }
     .brand{
       display:flex;
@@ -83,32 +73,34 @@ body.notice-open #readView .comment-body {
       background:#0e1422;
       box-shadow:0 0 0 1px rgba(148,163,184,.4), 0 10px 35px rgba(15,23,42,.9);
     }
-    .brand strong{
+    .brand-title{
+      display:flex;
+      flex-direction:column;
+      gap:2px;
+    }
+    .brand-title strong{
       font-size:17px;
       letter-spacing:-0.02em;
-      color:var(--outer-text);
     }
     .brand-sub{
       font-size:11px;
-      color:var(--outer-muted);
+      color:var(--muted);
     }
-
     nav{
       display:flex;
-      gap:12px;
       align-items:center;
+      gap:12px;
+      font-size:13px;
       flex-wrap:wrap;
       justify-content:flex-end;
-      font-size:13px;
     }
     nav a{
       color:#cdd5f0;
-      text-decoration:none;
       padding:6px 10px;
       border-radius:999px;
       border:1px solid transparent;
-      background:transparent;
       white-space:nowrap;
+      text-decoration:none;
     }
     nav a:hover{
       border-color:rgba(148,163,184,.5);
@@ -118,47 +110,30 @@ body.notice-open #readView .comment-body {
     nav a[aria-current="page"]{
       border-color:rgba(94,234,212,.7);
       background:rgba(15,23,42,.96);
-      color:var(--outer-accent);
-      font-weight:600;
+      color:var(--accent);
+      font-weight:700;
     }
 
-    main{flex:1;}
+    main{margin-top:14px;}
 
-    /* Layout: left auth, right list/read */
-    .layout{
-      display:grid;
-      grid-template-columns:1fr;
-      gap:18px;
-      align-items:start;
-    }
-    @media (min-width:1024px){
-      .layout{
-        grid-template-columns:minmax(300px,1fr) 3fr;
-        column-gap:18px;
-      }
-      #leftAuth{grid-column:1;align-self:start;}
-      #rightCard{grid-column:2;align-self:stretch;}
-    }
-
-    /* Card (light) */
+    /* Light panel card */
     .card{
-      background:var(--bg-card);
-      color:var(--text);
-      border:1px solid var(--border);
-      border-radius:16px;
+      background:var(--panel-bg);
+      color:var(--panel-text);
+      border:1px solid rgba(30,64,175,.35);
+      border-radius:22px;
       padding:18px;
-      box-shadow:0 10px 25px rgba(15,23,42,.12);
-      display:flex;
-      flex-direction:column;
+      box-shadow:0 18px 55px rgba(15,23,42,.35);
     }
 
-    h1{margin:0 0 8px;font-size:20px;color:var(--text);}
-    h2,.section-title{font-size:16px;margin:0 0 8px;color:var(--text);}
-    body,.table td,.table th,.comment-body,.cell-body{font-size:14px;}
+    h1{margin:0 0 8px;font-size:20px;color:var(--panel-text);}
+    h2{margin:0 0 8px;font-size:18px;color:var(--panel-text);}
+    h3{margin:18px 0 10px;font-size:15px;color:var(--panel-text);}
+    .muted{color:var(--panel-muted);}
+    .status{font-size:12px;color:var(--panel-muted);margin-top:4px;}
 
-    .muted{color:var(--muted);}
-    .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
     .field{display:flex;flex-direction:column;gap:6px;margin:10px 0;}
+    label{font-size:13px;color:var(--panel-text);}
     input[type="text"],
     input[type="email"],
     input[type="password"],
@@ -166,19 +141,19 @@ body.notice-open #readView .comment-body {
       width:100%;
       padding:10px 12px;
       border-radius:12px;
-      border:1px solid var(--border);
+      border:1px solid var(--panel-border);
       background:#fff;
-      color:var(--text);
+      color:var(--panel-text);
       font-size:14px;
     }
     textarea{min-height:160px;resize:vertical;}
-    input[type="file"]{display:block;font-size:13px;color:var(--text);}
+    input[type="file"]{display:block;font-size:13px;}
 
     .btn{
       padding:8px 13px;
       border-radius:10px;
-      border:1px solid var(--accent);
-      background:var(--accent);
+      border:1px solid #2563eb;
+      background:#2563eb;
       color:#fff;
       cursor:pointer;
       font-size:13px;
@@ -189,7 +164,7 @@ body.notice-open #readView .comment-body {
     .btn.secondary{
       background:#f9fafb;
       color:#111827;
-      border:1px solid var(--border);
+      border:1px solid #d1d5db;
     }
     .btn.danger{
       border-color:var(--danger);
@@ -197,141 +172,116 @@ body.notice-open #readView .comment-body {
       color:#fff;
     }
     .btn:hover{filter:brightness(1.03);}
-    .status{
-      font-size:12px;
-      color:var(--muted);
-      margin-top:4px;
-    }
 
-    /* Left auth banner */
-    #leftAuth{align-self:start;}
-    #leftAuth.card{min-height:auto;}
-    #leftAuth .banner-flex{
-      flex:0 0 auto;
-      border:1px dashed var(--border);
-      border-radius:12px;
-      background:#f9fafb;
-      margin-top:16px;
-      min-height:120px;
-    }
-
-    /* Table (list) */
+    /* Table fixed layout */
     .table{
       width:100%;
-      table-layout: fixed; /* 핵심: 내용 길이에 따라 컬럼 폭 흔들리지 않게 */
       border-collapse:collapse;
+      table-layout:fixed; /* 핵심: 내용량에 따라 폭이 흔들리지 않게 */
       background:#fff;
     }
     .table th,.table td{
       border-bottom:1px solid #e5e7eb;
       padding:10px 8px;
       vertical-align:top;
-      color:var(--text);
     }
     .table th{
-      font-weight:600;
+      font-weight:700;
+      color:#111827;
       text-align:left;
       background:#f9fafb;
     }
-    .table tr:hover{background:#f3f4f6;}
+    .table tr:hover td{background:#f3f4f6;}
+
+    /* Column widths */
     .cell-no{width:56px;color:#6b7280;}
-    .cell-nick{width:96px;}
+    .cell-nick{width:110px;}
     .cell-stats{width:90px;text-align:center;color:#6b7280;}
     .cell-time{width:170px;color:#6b7280;text-align:right;}
-    .cell-body{
-      word-break:break-word;
-      white-space:normal;
-    }
+    .cell-body{width:auto;}
 
-    /* 3번째 컬럼(Title & preview) 내부용 */
+    /* List cell: title + preview (2 lines) */
+    .row-link{
+      display:block;
+      text-decoration:none;
+      color:inherit;
+    }
+    .row-link:hover{ text-decoration:none; }
+
+    .title-row{
+      display:flex;
+      align-items:center;
+      gap:8px;
+      min-width:0;
+      margin-bottom:4px;
+    }
     .list-title{
-      font-weight:600;
-      white-space:nowrap;
+      font-weight:700;
+      color:#111827;
       overflow:hidden;
       text-overflow:ellipsis;
-      color:var(--text);
+      white-space:nowrap;
+      min-width:0;
     }
 
     .list-preview{
-      margin-top:4px;
-      color:var(--muted);
+      color:#374151;
       word-break:break-word;
       display:-webkit-box;
-      -webkit-line-clamp:2;       /* 내용 2줄 */
+      -webkit-line-clamp:2;          /* ✅ 2줄 노출 */
       -webkit-box-orient:vertical;
       overflow:hidden;
+      line-height:1.35;
+      margin-bottom:6px;
     }
-    /* Mobile: show small meta line because other columns are hidden */
+
     .list-meta{
-      margin-top:6px;
-      font-size:12px;
-      color:var(--muted);
-      display:none;               /* desktop: hide */
+      display:flex;
       justify-content:space-between;
       gap:10px;
-    }
-    @media (max-width:700px){
-      .list-meta{ display:flex; } /* mobile: show */
+      font-size:12px;
+      color:#6b7280;
     }
 
     .list-footer{
       border-top:1px solid #e5e7eb;
       padding-top:10px;
       display:flex;
-      justify-content:flex-end;
-      margin-top:6px;
+      justify-content:space-between;
       gap:10px;
       align-items:center;
+      margin-top:10px;
       flex-wrap:wrap;
     }
 
-    /* Notices: make it clearly blue */
-    .table tr.notice td,
-    .table tr.notice .cell-body{
-      color:#2563eb; /* stronger blue */
-    }
-    .table tr.notice .list-title{
-      color:#2563eb;
-    }
-  /* Notice badge */
+    /* Notice */
     .notice-badge{
       display:inline-flex;
       align-items:center;
-      margin-right:8px;
-      padding:2px 8px;
-      border-radius:999px;
+      flex:0 0 auto;
       font-size:11px;
       font-weight:800;
-      letter-spacing:0.06em;
-      text-transform:uppercase;
-      color:#fff;
-      background:background:#1d4ed8;
-      flex:0 0 auto;
+      letter-spacing:.02em;
+      padding:2px 8px;
+      border-radius:999px;
+      color:var(--notice);
+      background:#dbeafe;           /* ✅ 배경색 */
+      border:1px solid var(--notice-border);
+      box-shadow:0 2px 8px rgba(29,78,216,.12);
+    }
+    .table tr.notice td{ background:var(--notice-bg); }
+    .table tr.notice:hover td{ background:var(--notice-bg-hover); }
+
+    .table tr.notice .list-title,
+    .table tr.notice .list-preview{ color:var(--notice); }
+
+    /* Read view notice: title + body blue */
+    #readView.notice-read h2,
+    #readView.notice-read .read-content{
+      color:var(--notice);
     }
 
-    /* Top / bottom actions in read view */
-    .top-actions{
-      border-bottom:1px solid #e5e7eb;
-      padding-bottom:10px;
-      margin-bottom:12px;
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      gap:8px;
-    }
-    .bottom-actions{
-      border-top:1px solid #e5e7eb;
-      margin-top:16px;
-      padding-top:10px;
-      display:flex;
-      justify-content:flex-end;
-      align-items:center;
-      gap:8px;
-    }
-
-    /* Thumbnail grid (read view + write preview)
-       PC: 6개 한 줄 / 모바일: 3개씩 두 줄
-    */
+    /* Thumbnails */
     .thumbs{
       display:grid;
       grid-template-columns:repeat(6,minmax(0,1fr));
@@ -339,11 +289,11 @@ body.notice-open #readView .comment-body {
       margin-top:8px;
     }
     @media (max-width:768px){
-      .thumbs{grid-template-columns:repeat(3,minmax(0,1fr));}
+      .thumbs{ grid-template-columns:repeat(3,minmax(0,1fr)); }
     }
     .thumb-card{
       width:100%;
-      aspect-ratio:9 / 16; /* 세로형 9:16 고정 */
+      aspect-ratio:9 / 16;
       border-radius:10px;
       overflow:hidden;
       background:#f9fafb;
@@ -356,8 +306,30 @@ body.notice-open #readView .comment-body {
       display:block;
     }
 
+    /* Read view sections */
+    .top-actions{
+      border-bottom:1px solid #e5e7eb;
+      padding-bottom:10px;
+      margin-bottom:12px;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:8px;
+      flex-wrap:wrap;
+    }
+    .read-meta{
+      margin:6px 0 12px;
+      font-size:13px;
+      color:#6b7280;
+    }
+    .read-content{
+      white-space:pre-wrap;
+      word-break:break-word;
+      color:#111827;
+      line-height:1.55;
+    }
+
     /* Comments */
-    .comments{margin-top:20px;}
     .comment-item{
       border-top:1px solid #e5e7eb;
       padding:10px 0;
@@ -374,285 +346,181 @@ body.notice-open #readView .comment-body {
       word-break:break-word;
       margin-top:6px;
       color:#111827;
+      line-height:1.45;
     }
     .comment-form{
       display:flex;
       gap:8px;
       margin-top:10px;
+      align-items:flex-start;
     }
     .comment-form textarea{
       flex:1;
-      min-height:60px;
+      min-height:70px;
     }
 
+    /* Footer (match index vibe) */
     footer{
-      margin:30px auto 40px;
-      text-align:center;
-      color:var(--outer-muted);
-      font-size:13px;
+      margin-top:22px;
       padding-top:10px;
       border-top:1px solid rgba(30,64,175,.6);
+      font-size:12px;
+      color:var(--muted);
+      text-align:center;
     }
 
-    /* Mobile header & layout tweaks */
-    @media (max-width:700px){
-      header{
-        display:grid;
-        grid-template-columns:1fr;
-        row-gap:8px;
-      }
-      nav{
-        justify-content:flex-start;
-      }
+    /* Mobile tweaks */
+    @media (max-width:720px){
+      header{flex-wrap:wrap;align-items:flex-start;}
+      nav{order:3;width:100%;justify-content:flex-start;}
       nav a{
         padding:6px 8px;
         font-size:12px;
         border-radius:999px;
         border:1px solid rgba(51,65,85,.9);
         background:rgba(15,23,42,.96);
-        color:#cdd5f0;
       }
-      nav a:hover{
-        border-color:rgba(148,163,184,.5);
-        background:rgba(15,23,42,.86);
-      }
+    }
 
-      .layout{
-        display:flex;
-        flex-direction:column;
-      }
-
-      /* 모바일: 인증 패널은 기본적으로 접어두고, 필요 시 show-auth 클래스로 표시 가능 */
-      #leftAuth{display:none;}
-      body.show-auth #leftAuth{display:block;}
-
-      /* 모바일용 리스트: 헤더 숨기고 행을 카드 형태로 */
-      .table thead,
-      .table th{display:none;}
-      .table,
-      .table tbody,
-      .table tr,
-      .table td{
-        display:block;
-        width:100%;
-      }
+    @media (max-width:700px){
+      /* Mobile: hide table header, show as cards */
+      .table thead{display:none;}
+      .table,.table tbody,.table tr,.table td{display:block;width:100%;}
       .table tr{
         border-bottom:1px solid #e5e7eb;
         padding:6px 0;
       }
-      .table td{
-        border:none;
-        padding:4px 6px;
-      }
-      .table td.cell-no,
-      .table td.cell-nick,
-      .table td.cell-stats,
-      .table td.cell-time{
-        display:none;
-      }
-      .cell-body{
-        display:block;
-        -webkit-line-clamp:unset;
-        -webkit-box-orient:unset;
-        overflow:visible;
-      }
+      .table td{border:none;padding:6px 8px;}
+      .cell-no,.cell-nick,.cell-stats,.cell-time{display:none;}
     }
-
-    .row-link{
-      display:block;
-      color:inherit;
-      text-decoration:none;
-    }
-    .row-link:hover .list-title{
-      text-decoration:underline;
-    }
-
   </style>
 </head>
 
 <body>
-<header>
-  <div class="brand">
-    <img src="/images/mm_logo.png"
-         alt="Measure Master"
-         class="logo-img"
-         onerror="this.onerror=null;this.src='/images/mm_logo.png';" />
-    <div class="brand-text">
-      <strong>Measure Master</strong>
-      <div class="brand-sub">3-in-1 measuring tool</div>
-    </div>
-  </div>
-  <nav>
-    <a href="/">Home</a>
-    <a href="/howtouse.html">How to use</a>
-    <a href="/reviews.html" aria-current="page">Reviews</a>
-    <a href="/privacy.html">Privacy</a>
-  </nav>
-</header>
-
-<main>
-  <section class="card">
-    <h1>User reviews</h1>
-    <p id="authInfo" class="muted">Checking login status…</p>
-
-    <!-- 목록 뷰 -->
-    <div id="listView">
-      <table class="table">
-        <colgroup>
-          <col style="width:56px">
-          <col style="width:96px">
-          <col>
-          <col style="width:90px">
-          <col style="width:170px">
-        </colgroup>
-        <thead>
-        <tr>
-          <th class="cell-no">No.</th>
-          <th class="cell-nick">Nickname</th>
-          <th>Title & preview</th>
-          <th class="cell-stats">Views</th>
-          <th class="cell-time">Date</th>
-        </tr>
-        </thead>
-        <tbody id="listBody"></tbody>
-      </table>
-
-      <div class="list-footer">
-        <span id="listLoginHint" class="status">
-          To write a review, please sign up / log in on the home page.
-        </span>
-        <button id="btn-compose" class="btn btn-primary" type="button">
-          Write a review
-        </button>
-      </div>
-    </div>
-
-    <!-- 읽기 뷰 -->
-    <article id="readView" hidden>
-      <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px;">
-        <button type="button" id="btn-back-list" class="btn">← Back to list</button>
-        <div>
-          <button type="button" id="btn-edit-review" class="btn" style="display:none;">Edit</button>
-          <button type="button" id="btn-delete-review" class="btn btn-danger" style="display:none;">Delete</button>
+  <div class="page">
+    <header>
+      <div class="brand">
+        <img src="/images/mm_logo.png" alt="Measure Master" class="logo-img" />
+        <div class="brand-title">
+          <strong>Measure Master</strong>
+          <div class="brand-sub">3-in-1 measuring tool</div>
         </div>
       </div>
 
-      <h2 id="readTitle"></h2>
-      <div class="read-meta" id="readMeta"></div>
-      <div class="read-content" id="readContent"></div>
+      <nav>
+        <a href="/">Home</a>
+        <a href="/howtouse.html">How to use</a>
+        <a href="/reviews.html" aria-current="page">Reviews</a>
+        <a href="/privacy.html">Privacy</a>
+      </nav>
+    </header>
 
-      <div class="read-images" id="readImages" hidden>
-        <div class="thumbs" id="readImagesGrid"></div>
-      </div>
+    <main>
+      <section class="card">
+        <h1>User reviews</h1>
+        <p id="authInfo" class="muted">Checking login status…</p>
 
-      <div class="like-bar">
-        <button type="button" id="btn-like" class="btn">
-          ❤️ Like
-        </button>
-        <span class="like-count">
-          <span id="likeCount">0</span> likes
-        </span>
-      </div>
+        <!-- List view -->
+        <div id="listView">
+          <table class="table">
+            <thead>
+              <tr>
+                <th class="cell-no">No.</th>
+                <th class="cell-nick">Nickname</th>
+                <th>Title & preview</th>
+                <th class="cell-stats">Views</th>
+                <th class="cell-time">Date</th>
+              </tr>
+            </thead>
+            <tbody id="listBody"></tbody>
+          </table>
 
-      <div class="comments" id="comments">
-        <h3>Comments</h3>
-        <ul class="comment-list" id="commentsList"></ul>
-
-        <form id="commentForm" class="comment-form">
-          <div class="field">
-            <label for="commentContent">Add a comment</label>
-            <textarea id="commentContent" placeholder="Write your comment here…"></textarea>
+          <div class="list-footer">
+            <span id="listLoginHint" class="status">
+              To write a review, please sign up / log in on the home page.
+            </span>
+            <button id="btn-compose" class="btn" type="button">Write a review</button>
           </div>
-          <div style="display:flex;justify-content:flex-end;align-items:center;gap:8px;">
-            <span id="commentStatus" class="status" style="margin-right:auto;"></span>
-            <button type="submit" class="btn btn-primary">Post comment</button>
+        </div>
+
+        <!-- Read view -->
+        <article id="readView" hidden></article>
+
+        <!-- Write view -->
+        <form id="writeForm" hidden>
+          <h2 id="writeTitleHeading">Write a new review</h2>
+
+          <!-- Admin only: Notice checkbox -->
+          <div id="noticeField" class="field" style="display:none;">
+            <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
+              <input id="isNotice" type="checkbox" />
+              <span>Post as Notice (admin only)</span>
+            </label>
+            <div class="status">Notice posts are pinned to the top and shown in blue.</div>
+          </div>
+
+          <div class="field">
+            <label for="title">Title</label>
+            <input id="title" type="text" placeholder="Short summary of your experience" required />
+          </div>
+
+          <div class="field">
+            <label for="content">Content</label>
+            <textarea id="content" placeholder="Please write your experience with Measure Master." required></textarea>
+          </div>
+
+          <div class="field">
+            <label for="image">Attach images (optional, up to 6)</label>
+            <input id="image" type="file" accept="image/*" multiple data-max="6" />
+            <div id="selectPreviews" class="thumbs"></div>
+            <div class="status">
+              Images are uploaded to Supabase Storage. Large images may be resized by the browser or your device.
+            </div>
+          </div>
+
+          <div style="border-top:1px solid #e5e7eb;margin-top:12px;padding-top:10px;display:flex;align-items:center;gap:8px;justify-content:flex-end;">
+            <span id="formStatus" class="status" style="margin-right:auto;"></span>
+            <button type="button" id="btn-cancel-write" class="btn secondary">Cancel</button>
+            <button type="submit" class="btn">Save</button>
           </div>
         </form>
-      </div>
-    </article>
+      </section>
+    </main>
 
-    <!-- 글쓰기 뷰 -->
-    <form id="writeForm" hidden>
-      <h2 id="writeTitleHeading">Write a new review</h2>
+    <footer>
+      © <span id="year"></span> Measure Master. All rights reserved.
+    </footer>
+  </div>
 
-      <!-- Admin only: Notice toggle -->
-      <div class="field" id="noticeField" style="display:none;">
-        <label style="display:flex; align-items:center; gap:10px;">
-          <input type="checkbox" id="isNotice" />
-          Post as a notice (pinned to top)
-        </label>
-        <div class="status">Only admins can post notices.</div>
-      </div>
+  <!-- Supabase & JS -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="/js/mm-auth.js?v=auth_r2"></script>
+  <script src="/js/reviews-ui.js?v=rev22"></script>
 
-      <div class="field">
-        <label for="title">Title</label>
-        <input id="title" type="text" placeholder="Short summary of your experience" required />
-      </div>
+  <script>
+    document.addEventListener('DOMContentLoaded', async () => {
+      const y = document.getElementById('year');
+      if (y) y.textContent = new Date().getFullYear();
 
-      <div class="field">
-        <label for="content">Content</label>
-        <textarea id="content" placeholder="Please write your experience with Measure Master." required></textarea>
-      </div>
+      const client = window.mmAuth?.supabase || null;
+      let currentUser = null;
 
-      <div class="field">
-        <label for="image">Attach images (optional, up to 6)</label>
-        <input
-          id="image"
-          type="file"
-          accept="image/*"
-          multiple
-          data-max="6"
-        />
-        <div id="selectPreviews" class="thumbs"></div>
-        <div class="status">
-          Images are uploaded to Supabase Storage. Large images may be resized by the browser or your device.
-        </div>
-      </div>
-
-      <div style="border-top:1px solid #1e293b;margin-top:12px;padding-top:10px;display:flex;align-items:center;gap:8px;justify-content:flex-end;">
-        <span id="formStatus" class="status" style="margin-right:auto;"></span>
-        <button type="button" id="btn-cancel-write" class="btn">Cancel</button>
-        <button type="submit" class="btn btn-primary">Save</button>
-      </div>
-    </form>
-  </section>
-</main>
-
-<footer>
-  © <span id="year"></span> Measure Master. All rights reserved.
-</footer>
-
-<!-- Supabase & JS -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="/js/mm-auth.js?v=auth_r5"></script>
-<script src="/js/reviews-ui.js?v=rev21"></script>
-<script>
-  document.addEventListener('DOMContentLoaded', async () => {
-    // Footer year
-    const y = document.getElementById('year');
-    if (y) y.textContent = new Date().getFullYear();
-
-    const client = window.mmAuth?.supabase || null;
-    let currentUser = null;
-
-    if (client && client.auth) {
-      try {
-        const { data, error } = await client.auth.getUser();
-        console.log('[reviews] getUser result:', { data, error });
-        if (!error && data && data.user) {
-          currentUser = data.user;
+      if (client && client.auth) {
+        try {
+          const { data, error } = await client.auth.getUser();
+          console.log('[reviews] getUser result:', { data, error });
+          if (!error && data && data.user) currentUser = data.user;
+        } catch (e) {
+          console.warn('[reviews] getUser error:', e);
         }
-      } catch (e) {
-        console.warn('[reviews] getUser error:', e);
       }
-    }
 
-    if (window.MMReviews) {
-      await window.MMReviews.init(client, currentUser);
-    } else {
-      console.error('[reviews] MMReviews not loaded');
-    }
-  });
-</script>
+      if (window.MMReviews) {
+        await window.MMReviews.init(client, currentUser);
+      } else {
+        console.error('[reviews] MMReviews not loaded');
+      }
+    });
+  </script>
 </body>
 </html>
