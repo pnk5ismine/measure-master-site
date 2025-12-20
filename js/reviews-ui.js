@@ -629,6 +629,8 @@ link.href = `/reviews.html?id=${encodeURIComponent(row.id)}`;
       await this.loadComments(reviewId);
     },
 
+   console.log('[DEBUG] review keys:', Object.keys(review), 'created_at=', review.created_at);
+
     // ========= 읽기 화면 렌더 =========
     renderReadView(review, images) {
       const container = this.$readView;
