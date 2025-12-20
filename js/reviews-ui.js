@@ -42,6 +42,7 @@
       await this.fetchMemberAndFlags();  // members / is_admin 정보
 
       this.cacheDom();
+ console.log('[reviews-ui] rev20 loaded OK');
       this.setupGlobalClickFix();
       this.setupListClickDelegation();
       this.bindLightbox();
@@ -625,6 +626,7 @@ link.href = `/reviews.html?id=${encodeURIComponent(row.id)}`;
         console.warn('[MMReviews] loadReview images error:', imgErr);
       }
 
+      console.log('[reviews-ui] rev20 loaded OK');
       this.renderReadView(review, images || []);
       await this.loadComments(reviewId);
     },
