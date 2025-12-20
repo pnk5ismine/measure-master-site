@@ -58,10 +58,11 @@
     header {
       display:flex;
       align-items:center;
-      justify-content:space-between;
+      justify-content:flex-start;
       gap:12px;
       padding:6px 0 10px;
     }
+
     .brand {
       display:flex;
       align-items:center;
@@ -97,13 +98,15 @@
       color:var(--muted);
     }
 
+    /* ✅ Desktop nav: right aligned */
     nav {
+      margin-left:auto;            /* brand는 왼쪽, nav는 오른쪽으로 밀기 */
       display:flex;
       align-items:center;
-      gap:12px;
+      gap:10px;
       font-size:13px;
-      flex-wrap:wrap;
       justify-content:flex-end;
+      flex-wrap:nowrap;
     }
     nav a {
       color:#cdd5f0;
@@ -117,13 +120,8 @@
       background:rgba(15,23,42,.86);
       text-decoration:none;
     }
-    nav a.nav-cta {
-      border-color:rgba(94,234,212,.7);
-      background:rgba(15,23,42,.96);
-      color:var(--accent);
-      font-weight:600;
-    }
 
+    /* ✅ language: right aligned (after nav) */
     .lang {
       display:flex;
       gap:6px;
@@ -137,11 +135,18 @@
       padding:4px 10px;
       cursor:pointer;
       font-size:11px;
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
     }
     .lang button.active {
       border-color:var(--accent);
       box-shadow:0 0 0 1px rgba(94,234,212,.6);
       font-weight:600;
+    }
+    .lang .flag {
+      font-size:12px;
+      line-height:1;
     }
 
     main {
@@ -568,27 +573,35 @@
     }
     footer a { color:var(--muted); }
 
-    /* Mobile header tweaks */
+    /* ✅ Mobile header rule */
     @media (max-width:720px){
       header {
         flex-wrap:wrap;
         align-items:flex-start;
+        row-gap:10px;
       }
+      /* brand: left (row 1) */
+      .brand { order:1; }
+      /* lang: right (row 1) */
+      .lang  { order:2; margin-left:auto; }
+      /* nav: row 2 centered */
       nav {
         order:3;
         width:100%;
-        justify-content:flex-start;
+        margin-left:0;
+        justify-content:center;
+        flex-wrap:wrap;
+        gap:8px;
       }
       nav a {
-        padding:6px 8px;
+        padding:6px 10px;
         font-size:12px;
         border-radius:999px;
         border:1px solid rgba(51,65,85,.9);
         background:rgba(15,23,42,.96);
       }
-      nav a.nav-cta {
-        border-color:rgba(94,234,212,.7);
-      }
+      /* ✅ mobile: flags hidden */
+      .lang .flag { display:none; }
     }
   </style>
 </head>
@@ -610,19 +623,22 @@
       <span class="pill">v1 · field testing</span>
     </div>
 
+    <!-- ✅ menu: Home / How to use / Reviews / Privacy -->
     <nav>
-      <a href="#who">Who it’s for</a>
-      <a href="#features">Key features</a>
-      <a href="#screens">Screenshots</a>
-      <a href="#auth" class="nav-cta">Tester login</a>
+      <a href="/">Home</a>
       <a href="/howtouse.html">How to use</a>
       <a href="/reviews.html">Reviews</a>
       <a href="/privacy.html">Privacy</a>
     </nav>
 
+    <!-- ✅ language: desktop shows flags / mobile hides flags -->
     <div class="lang">
-      <button type="button" data-lang-btn="en" class="active">EN</button>
-      <button type="button" data-lang-btn="ko">KO</button>
+      <button type="button" data-lang-btn="ko">
+        <span class="flag" aria-hidden="true">🇰🇷</span>KO
+      </button>
+      <button type="button" data-lang-btn="en" class="active">
+        <span class="flag" aria-hidden="true">🇺🇸</span>EN
+      </button>
     </div>
   </header>
 
@@ -662,16 +678,15 @@
             <label for="signup-password2">Confirm password</label>
             <input id="signup-password2" name="password2" type="password"
                    required minlength="6" placeholder="Type it again">
-          </div> 
-         <button type="submit" class="primary">Create account</button>
+          </div>
+          <button type="submit" class="primary">Create account</button>
           <p style="margin:6px 0 0; font-size:12px; color:var(--muted);">
             Already have an account?
             <a href="#" id="go-login">Go to log in</a>
           </p>
         </form>
 
- 
-         <!-- Login form -->
+        <!-- Login form -->
         <form id="login-form" autocomplete="on" hidden>
           <div class="field">
             <label for="login-email">Email</label>
