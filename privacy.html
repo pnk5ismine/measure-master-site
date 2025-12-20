@@ -6,46 +6,118 @@
   <title data-i18n="privacy.meta.title">개인정보처리방침 · Measure Master</title>
   <meta name="description" content="Measure Master 개인정보 처리에 관한 안내" data-i18n-attr="content=privacy.meta.desc" />
   <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+
   <style>
     :root { --bg:#0b0d12; --card:#121622; --muted:#9aa4b2; --pri:#5eead4; --border:#1e2230; }
     *{box-sizing:border-box}
     body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,'Noto Sans KR',sans-serif;background:var(--bg);color:#e7edf5}
     a{color:var(--pri);text-decoration:none} a:hover{text-decoration:underline}
+
     header,main,footer{max-width:1000px;margin:0 auto;padding:16px}
-    header{display:flex;align-items:center;justify-content:space-between;gap:12px}
+
+    /* ===== Header layout (index.html style) ===== */
+    header{display:flex;flex-direction:column;gap:10px}
+    .header-top{
+      display:flex;align-items:center;justify-content:space-between;gap:12px;
+    }
+    .header-bottom{
+      display:flex;align-items:center;justify-content:center;
+    }
+
     .brand{display:flex;align-items:center;gap:10px}
     .logo{width:26px;height:26px;border-radius:8px;background:linear-gradient(135deg,#26f,#0bf);box-shadow:0 0 24px rgba(94,234,212,.25)}
-    nav a{margin-left:16px;color:#cfd6e4}
+    .pill{font:inherit;background:#0f1320;border:1px solid var(--border);border-radius:999px;padding:4px 10px}
+
+    nav{
+      display:flex;gap:14px;align-items:center;flex-wrap:wrap;
+      justify-content:center;
+    }
+    nav a{color:#cfd6e4}
+
+    .right{
+      display:flex;align-items:center;gap:12px;
+    }
+
     .lang{display:flex;gap:6px;align-items:center}
-    .lang button{border:1px solid var(--border);background:#0f1320;color:#e7edf5;border-radius:999px;padding:6px 10px;cursor:pointer}
+    .lang button{
+      border:1px solid var(--border);
+      background:#0f1320;
+      color:#e7edf5;
+      border-radius:999px;
+      padding:6px 10px;
+      cursor:pointer;
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      font-size:12px;
+    }
     .lang button.active{outline:2px solid #2dd; font-weight:600}
+    .lang .flag{line-height:1}
+    .lang .label{letter-spacing:.04em}
+
     .card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:22px;margin-top:16px}
     .muted{color:var(--muted)}
     h1{margin:6px 0 4px;font-size:28px}
     h2{margin:18px 0 8px;font-size:20px}
     p{line-height:1.7}
     footer{margin:30px auto 60px;text-align:center;color:var(--muted);font-size:14px}
-    .pill{font:inherit;background:#0f1320;border:1px solid var(--border);border-radius:999px;padding:4px 10px}
+
+    /* ===== Desktop: single row feel (brand left, nav+lang right) ===== */
+    @media (min-width: 721px){
+      header{flex-direction:row;align-items:center;justify-content:space-between;gap:12px}
+      .header-top{flex:0 0 auto}
+      .header-bottom{flex:1 1 auto;justify-content:flex-end}
+      .right{justify-content:flex-end}
+      nav{justify-content:flex-end}
+    }
+
+    /* ===== Mobile: 2 rows (brand left + lang right), nav centered ===== */
+    @media (max-width: 720px){
+      .header-top{width:100%}
+      .header-bottom{width:100%}
+      nav{justify-content:center}
+
+      /* 모바일에서는 깃발 숨기고 텍스트만 */
+      .lang .flag{display:none}
+      .lang button{padding:6px 10px}
+    }
   </style>
 </head>
+
 <body>
 <header>
-  <div class="brand">
-    <div class="logo" aria-hidden="true"></div>
-    <strong>Measure Master</strong>
-    <span class="pill">Policy</span>
+  <!-- Row 1 (mobile): brand left, language right -->
+  <div class="header-top">
+    <div class="brand">
+      <div class="logo" aria-hidden="true"></div>
+      <strong>Measure Master</strong>
+      <span class="pill">Policy</span>
+    </div>
+
+    <div class="right">
+      <div class="lang">
+        <button type="button" data-lang-btn="ko">
+          <span class="flag" aria-hidden="true">🇰🇷</span>
+          <span class="label">KO</span>
+        </button>
+        <button type="button" data-lang-btn="en">
+          <span class="flag" aria-hidden="true">🇺🇸</span>
+          <span class="label">EN</span>
+        </button>
+      </div>
+    </div>
   </div>
-  <nav>
-<nav>
-  <a href="/index.html" data-i18n="nav.home">홈</a>
-  <a href="/reviews.html" data-i18n="nav.reviews">사용후기</a>
-  <a href="/privacy.html" data-i18n="nav.privacy">개인정보처리방침</a>
-  <a href="/privacy.html#ar-privacy">AR 카메라 안내</a> <!-- 추가 -->
-</nav>
-  </nav>
-  <div class="lang">
-    <button type="button" data-lang-btn="ko">🇰🇷 한국어</button>
-    <button type="button" data-lang-btn="en">🇬🇧 English</button>
+
+  <!-- Row 2 (mobile): nav centered / Desktop: nav on right -->
+  <div class="header-bottom">
+    <nav>
+      <!-- 메뉴는 항상 영어 (i18n 적용 X) -->
+      <a href="/index.html">Home</a>
+      <a href="/howtouse.html">How to use</a>
+      <a href="/reviews.html">Reviews</a>
+      <a href="/privacy.html">Privacy</a>
+      <a href="/privacy.html#ar-privacy">AR Camera</a>
+    </nav>
   </div>
 </header>
 
@@ -103,53 +175,52 @@
     </p>
   </section>
 
-<section id="ar-privacy" class="card" aria-labelledby="ar-privacy-title">
-  <h2 id="ar-privacy-title" data-i18n="privacy.ar.title">AR 측정(카메라) 기능 관련 개인정보 처리</h2>
-  <p><strong>적용 대상:</strong> MMProject (AR Measuring)</p>
+  <section id="ar-privacy" class="card" aria-labelledby="ar-privacy-title">
+    <h2 id="ar-privacy-title" data-i18n="privacy.ar.title">AR 측정(카메라) 기능 관련 개인정보 처리</h2>
+    <p><strong>적용 대상:</strong> MMProject (AR Measuring)</p>
 
-  <h3>1. 수집하는 정보</h3>
-  <ul>
-    <li>개인정보를 서버로 수집·저장·전송하지 않습니다.</li>
-    <li><strong>카메라(CAMERA)</strong>: 실시간 AR 측정을 위해 카메라 영상을 기기 내에서 처리합니다.</li>
-    <li><strong>사진/미디어 접근(선택)</strong>: 사용자가 갤러리 이미지를 불러올 때에만 사용합니다.</li>
-    <li><strong>사진 저장(선택)</strong>: 사용자가 캡처 저장을 선택한 경우에만 기기 갤러리에 저장합니다.</li>
-  </ul>
+    <h3>1. 수집하는 정보</h3>
+    <ul>
+      <li>개인정보를 서버로 수집·저장·전송하지 않습니다.</li>
+      <li><strong>카메라(CAMERA)</strong>: 실시간 AR 측정을 위해 카메라 영상을 기기 내에서 처리합니다.</li>
+      <li><strong>사진/미디어 접근(선택)</strong>: 사용자가 갤러리 이미지를 불러올 때에만 사용합니다.</li>
+      <li><strong>사진 저장(선택)</strong>: 사용자가 캡처 저장을 선택한 경우에만 기기 갤러리에 저장합니다.</li>
+    </ul>
 
-  <h3>2. 처리 및 저장</h3>
-  <ul>
-    <li>카메라 영상은 <strong>기기 내에서만 처리</strong>되며, 서버로 <strong>전송하지 않습니다</strong>.</li>
-    <li>저장을 선택한 캡처 이미지만 기기 갤러리에 저장되며, 사용자가 갤러리에서 직접 삭제할 수 있습니다.</li>
-  </ul>
+    <h3>2. 처리 및 저장</h3>
+    <ul>
+      <li>카메라 영상은 <strong>기기 내에서만 처리</strong>되며, 서버로 <strong>전송하지 않습니다</strong>.</li>
+      <li>저장을 선택한 캡처 이미지만 기기 갤러리에 저장되며, 사용자가 갤러리에서 직접 삭제할 수 있습니다.</li>
+    </ul>
 
-  <h3>3. 제3자 제공</h3>
-  <ul>
-    <li>개인정보를 제3자에게 제공하거나 공유하지 않습니다.</li>
-    <li>Google ARCore를 사용할 수 있으나, 이는 기기 내 AR 추적을 위한 라이브러리이며 개인 데이터 수집·전송을 수행하지 않습니다.</li>
-  </ul>
+    <h3>3. 제3자 제공</h3>
+    <ul>
+      <li>개인정보를 제3자에게 제공하거나 공유하지 않습니다.</li>
+      <li>Google ARCore를 사용할 수 있으나, 이는 기기 내 AR 추적을 위한 라이브러리이며 개인 데이터 수집·전송을 수행하지 않습니다.</li>
+    </ul>
 
-  <h3>4. 보안</h3>
-  <ul>
-    <li>앱은 개인 데이터를 네트워크로 전송하지 않습니다.</li>
-    <li>저장된 이미지는 운영체제의 보안 메커니즘(Scoped Storage/MediaStore)에 의해 보호됩니다.</li>
-  </ul>
+    <h3>4. 보안</h3>
+    <ul>
+      <li>앱은 개인 데이터를 네트워크로 전송하지 않습니다.</li>
+      <li>저장된 이미지는 운영체제의 보안 메커니즘(Scoped Storage/MediaStore)에 의해 보호됩니다.</li>
+    </ul>
 
-  <h3>5. 아동의 개인정보</h3>
-  <ul>
-    <li>아동으로부터 개인정보를 수집하지 않습니다.</li>
-  </ul>
+    <h3>5. 아동의 개인정보</h3>
+    <ul>
+      <li>아동으로부터 개인정보를 수집하지 않습니다.</li>
+    </ul>
 
-  <h3>6. 사용자 권리 및 문의</h3>
-  <ul>
-    <li>캡처 이미지는 사용자가 갤러리에서 언제든지 삭제할 수 있습니다.</li>
-    <li>문의: <a href="mailto:pnk506@gmail.com">pnk506@gmail.com</a></li>
-  </ul>
+    <h3>6. 사용자 권리 및 문의</h3>
+    <ul>
+      <li>캡처 이미지는 사용자가 갤러리에서 언제든지 삭제할 수 있습니다.</li>
+      <li>문의: <a href="mailto:pnk506@gmail.com">pnk506@gmail.com</a></li>
+    </ul>
 
-  <h3>7. 정책 변경</h3>
-  <ul>
-    <li>기능 변경 또는 법령 개정 시 본 섹션을 업데이트하며, 페이지 상단의 최종 업데이트 일자를 갱신합니다.</li>
-  </ul>
-</section>
-
+    <h3>7. 정책 변경</h3>
+    <ul>
+      <li>기능 변경 또는 법령 개정 시 본 섹션을 업데이트하며, 페이지 상단의 최종 업데이트 일자를 갱신합니다.</li>
+    </ul>
+  </section>
 </main>
 
 <footer>

@@ -35,58 +35,59 @@
       padding:16px;
     }
 
-    /* Header */
-    header{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:12px;
-    }
-    .brand{
-      display:flex;
-      align-items:center;
-      gap:10px;
-    }
-    .logo-img{
-      width:28px;
-      height:28px;
-      border-radius:6px;
-      object-fit:contain;
-      background:#0e1422;
-      box-shadow:0 0 0 1px rgba(148,163,184,.4), 0 8px 24px rgba(15,23,42,.9);
-    }
-    .brand strong{
-      font-size:18px;
-      letter-spacing:-0.02em;
-    }
+/* ===== Header layout (index/privacy style) ===== */
+header{display:flex;flex-direction:column;gap:10px}
+.header-top{
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+}
+.header-bottom{
+  display:flex;align-items:center;justify-content:center;
+}
 
-    nav{
-      display:flex;
-      align-items:center;
-      gap:14px;
-      font-size:13px;
-      flex-wrap:wrap;
-      justify-content:flex-end;
-    }
-    nav a{
-      color:#cfd6e4;
-      padding:6px 10px;
-      border-radius:999px;
-      border:1px solid transparent;
-      white-space:nowrap;
-    }
-    nav a:hover{
-      border-color:rgba(148,163,184,.5);
-      background:rgba(15,23,42,.9);
-      text-decoration:none;
-    }
-    nav a[aria-current="page"]{
-      border-color:rgba(94,234,212,.7);
-      background:rgba(15,23,42,.96);
-      color:var(--accent);
-      font-weight:600;
-    }
+.right{display:flex;align-items:center;gap:12px}
 
+nav{
+  display:flex;gap:14px;align-items:center;flex-wrap:wrap;
+  justify-content:center;
+}
+nav a{color:#cfd6e4}
+
+.lang{display:flex;gap:6px;align-items:center}
+.lang button{
+  border:1px solid var(--border);
+  background:#0f1320;
+  color:#e7edf5;
+  border-radius:999px;
+  padding:6px 10px;
+  cursor:pointer;
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  font-size:12px;
+}
+.lang button.active{outline:2px solid #2dd; font-weight:600}
+.lang .flag{line-height:1}
+.lang .label{letter-spacing:.04em}
+
+/* ===== Desktop: single-row feel (brand left, nav+lang right) ===== */
+@media (min-width: 721px){
+  header{flex-direction:row;align-items:center;justify-content:space-between;gap:12px}
+  .header-top{flex:0 0 auto}
+  .header-bottom{flex:1 1 auto;justify-content:flex-end}
+  .right{justify-content:flex-end}
+  nav{justify-content:flex-end}
+}
+
+/* ===== Mobile: 2 rows (brand left + lang right), nav centered ===== */
+@media (max-width: 720px){
+  .header-top{width:100%}
+  .header-bottom{width:100%}
+  nav{justify-content:center}
+
+  /* 모바일에서는 깃발 숨기고 텍스트만 */
+  .lang .flag{display:none}
+  .lang button{padding:6px 10px}
+}
     /* Card */
     .card{
       background:var(--card);
@@ -179,21 +180,40 @@
 </head>
 <body>
 <header>
-  <div class="brand">
-    <img src="/images/mm_logo.png"
-         alt="Measure Master logo"
-         class="logo-img"
-         width="28" height="28"
-         loading="eager" fetchpriority="high" />
-    <strong>Measure Master</strong>
+  <!-- Row 1 (mobile): brand left, language right -->
+  <div class="header-top">
+    <div class="brand">
+      <!-- 기존 로고/브랜드 마크업이 있으면 여기 안에 그대로 두셔도 됨 -->
+      <div class="logo" aria-hidden="true"></div>
+      <strong>Measure Master</strong>
+    </div>
+
+    <div class="right">
+      <div class="lang">
+        <button type="button" data-lang-btn="ko">
+          <span class="flag" aria-hidden="true">🇰🇷</span>
+          <span class="label">KO</span>
+        </button>
+        <button type="button" data-lang-btn="en">
+          <span class="flag" aria-hidden="true">🇺🇸</span>
+          <span class="label">EN</span>
+        </button>
+      </div>
+    </div>
   </div>
-  <nav>
-    <a href="/">Home</a>
-    <a href="/howtouse.html" aria-current="page">How to Use</a>
-    <a href="/reviews.html">Reviews</a>
-    <a href="/privacy.html">Privacy</a>
-  </nav>
+
+  <!-- Row 2 (mobile): nav centered / Desktop: nav on right -->
+  <div class="header-bottom">
+    <nav>
+      <!-- 메뉴는 항상 영어 (i18n 적용 X) -->
+      <a href="/index.html">Home</a>
+      <a href="/howtouse.html">How to use</a>
+      <a href="/reviews.html">Reviews</a>
+      <a href="/privacy.html">Privacy</a>
+    </nav>
+  </div>
 </header>
+
 
 <main>
   <section class="card howtouse">
