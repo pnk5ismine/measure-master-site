@@ -1,6 +1,4 @@
 // /js/reviews-ui.js
-// Reviews page UI: list + read + write + image upload + comments + edit/delete
-// Supabase client는 index.html / mm-auth.js에서 만든 것을 재사용합니다.
 
 (function (global) {
   const MMReviews = {
@@ -11,7 +9,9 @@
     bucketName: 'review_images',
     editingReviewId: null,
 
-    // ========= init =========
+    // ✅ 여기서 admin 이메일을 고정 (원하면 변경)
+    ADMIN_EMAIL: 'pnk506@gmail.com',
+
     async init(supabaseClient, currentUser) {
       console.log('[MMReviews] init called. client:', !!supabaseClient, 'user:', !!currentUser);
 
@@ -36,7 +36,6 @@
       await this.loadList();
       await this.handleInitialViewFromQuery();
 
-      // back/forward handling
       window.addEventListener('popstate', async () => {
         await this.handleInitialViewFromQuery();
       });
@@ -59,8 +58,6 @@
       this.$btnCancelWrite = document.getElementById('btn-cancel-write');
 
       if (!this.$listBody) console.error('[MMReviews] #listBody not found.');
-      if (!this.$readView) console.error('[MMReviews] #readView not found.');
-      if (!this.$writeForm) console.error('[MMReviews] #writeForm not found.');
     },
 
     async fetchMemberAndFlags() {
@@ -82,7 +79,11 @@
 
       if (data) {
         this.member = data;
-        this.isAdmin = !!data.is_admin;
+        // ✅ members.is_admin OR email match
+        this.isAdmin = !!data.is_admin || ((this.user.email || '').toLowerCase() === this.ADMIN_EMAIL.toLowerCase());
+      } else {
+        // ✅ fallback: email match
+        this.isAdmin = ((this.user.email || '').toLowerCase() === this.ADMIN_EMAIL.toLowerCase());
       }
     },
 
@@ -91,24 +92,17 @@
         if (this.user) {
           const email = this.user.email || '';
           const adminLabel = this.isAdmin ? ' (admin)' : '';
-          this.$listLoginHint.textContent =
-            'Logged in as ' + email + adminLabel + '. You can write a review.';
+          this.$listLoginHint.textContent = 'Logged in as ' + email + adminLabel + '. You can write a review.';
         } else {
-          this.$listLoginHint.textContent =
-            'To write a review, please sign up / log in on the home page.';
+          this.$listLoginHint.textContent = 'To write a review, please sign up / log in on the home page.';
         }
       }
 
-      // Notice checkbox only for admin
-      if (this.$noticeField) {
-        this.$noticeField.style.display = this.isAdmin ? 'block' : 'none';
-      }
-      if (this.$isNotice) {
-        this.$isNotice.checked = false;
-      }
+      if (this.$noticeField) this.$noticeField.style.display = this.isAdmin ? 'block' : 'none';
+      if (this.$isNotice) this.$isNotice.checked = false;
     },
 
-    // ========= URL view handling =========
+    // ========= URL handling =========
     async handleInitialViewFromQuery() {
       const params  = new URLSearchParams(window.location.search);
       const id      = params.get('id');
@@ -118,29 +112,25 @@
         await this.showReadView(id);
         return;
       }
-
       if (compose === '1' || compose === 'true') {
         if (this.user) this.showWriteView();
         else this.showListView();
         return;
       }
-
       this.showListView();
     },
 
-    // ========= permissions =========
     canEditReview(review) {
       if (!this.user || !review) return false;
       if (this.isAdmin) return true;
       return review.author_id === this.user.id;
     },
 
-    // ========= view switching =========
     showListView() {
       if (this.$listView)  this.$listView.hidden  = false;
       if (this.$readView)  this.$readView.hidden  = true;
       if (this.$writeForm) this.$writeForm.hidden = true;
-      if (this.$readView) this.$readView.classList.remove('notice-read');
+      if (this.$readView)  this.$readView.classList.remove('notice-read');
     },
 
     async showReadView(reviewId) {
@@ -159,7 +149,6 @@
       window.scrollTo({ top: 0, behavior: 'smooth' });
     },
 
-    // ========= list click delegation =========
     setupListClickDelegation() {
       if (!this.$listBody || this._listClickBound) return;
       this._listClickBound = true;
@@ -168,22 +157,17 @@
         const tr = e.target.closest('tr[data-id]');
         if (!tr) return;
 
-        // If clicked on link, prevent full reload and render inside page
         const a = e.target.closest('a.row-link');
         if (a) e.preventDefault();
 
         const id = tr.dataset.id;
         if (!id) return;
 
-        try {
-          history.pushState({}, '', `/reviews.html?id=${encodeURIComponent(id)}`);
-        } catch (err) {}
-
+        try { history.pushState({}, '', `/reviews.html?id=${encodeURIComponent(id)}`); } catch (err) {}
         await this.showReadView(id);
       });
     },
 
-    // ========= compose button =========
     setupComposeButton() {
       if (!this.$btnCompose || this._composeBound) return;
       this._composeBound = true;
@@ -204,10 +188,7 @@
         if (this.$selectPreviews) this.$selectPreviews.innerHTML = '';
         if (this.$isNotice) this.$isNotice.checked = false;
 
-        try {
-          history.pushState({}, '', '/reviews.html?compose=1');
-        } catch (err) {}
-
+        try { history.pushState({}, '', '/reviews.html?compose=1'); } catch (err) {}
         this.showWriteView();
       });
 
@@ -222,7 +203,6 @@
       }
     },
 
-    // ========= file previews =========
     setupFilePreview() {
       if (!this.$fileInput || !this.$selectPreviews || this._filePreviewBound) return;
       this._filePreviewBound = true;
@@ -238,23 +218,23 @@
         for (let i = 0; i < n; i++) {
           const f = files[i];
           const url = URL.createObjectURL(f);
+
           const wrap = document.createElement('div');
           wrap.className = 'thumb-card';
+
           const img = document.createElement('img');
           img.className = 'thumb-img';
           img.src = url;
           img.alt = f.name;
+
           wrap.appendChild(img);
           this.$selectPreviews.appendChild(wrap);
         }
 
-        if (files.length > maxFiles) {
-          alert('You can attach up to ' + maxFiles + ' images.');
-        }
+        if (files.length > maxFiles) alert('You can attach up to ' + maxFiles + ' images.');
       });
     },
 
-    // ========= write form =========
     setupWriteForm() {
       if (!this.$writeForm || this._writeBound) return;
       this._writeBound = true;
@@ -278,7 +258,7 @@
 
         if (this.$formStatus) this.$formStatus.textContent = 'Saving...';
 
-        // ✅ admin nickname fixed
+        // ✅ admin 닉네임 완전 고정
         const nickname = this.isAdmin ? 'admin'
           : ((this.user.email && this.user.email.split('@')[0]) || 'tester');
 
@@ -290,56 +270,35 @@
         if (isEdit) {
           const { data, error } = await this.supabase
             .from('reviews')
-            .update({
-              title,
-              content,
-              nickname,
-              author_email,
-              is_notice
-            })
+            .update({ title, content, nickname, author_email, is_notice })
             .eq('id', reviewId)
             .select()
             .single();
 
           if (error || !data) {
             console.error('[MMReviews] update review error:', error);
-            if (this.$formStatus) {
-              this.$formStatus.textContent =
-                'Failed to update the review: ' + (error?.message || 'Unknown error');
-            }
+            if (this.$formStatus) this.$formStatus.textContent =
+              'Failed to update the review: ' + (error?.message || 'Unknown error');
             return;
           }
           reviewId = data.id;
         } else {
           const { data, error } = await this.supabase
             .from('reviews')
-            .insert({
-              title,
-              content,
-              nickname,
-              author_email,
-              author_id: this.user.id,
-              is_notice
-            })
+            .insert({ title, content, nickname, author_email, author_id: this.user.id, is_notice })
             .select()
             .single();
 
           if (error || !data) {
             console.error('[MMReviews] insert review error:', error);
-            if (this.$formStatus) {
-              this.$formStatus.textContent =
-                'Failed to save the review: ' + (error?.message || 'Unknown error');
-            }
+            if (this.$formStatus) this.$formStatus.textContent =
+              'Failed to save the review: ' + (error?.message || 'Unknown error');
             return;
           }
           reviewId = data.id;
         }
 
-        try {
-          await this.uploadAttachments(reviewId);
-        } catch (err) {
-          console.error('[MMReviews] uploadAttachments exception:', err);
-        }
+        try { await this.uploadAttachments(reviewId); } catch (err) { console.error(err); }
 
         if (this.$formStatus) this.$formStatus.textContent = isEdit ? 'Review updated.' : 'Review saved.';
 
@@ -351,7 +310,6 @@
         if (this.$isNotice) this.$isNotice.checked = false;
 
         try { history.pushState({}, '', '/reviews.html'); } catch (err) {}
-
         this.showListView();
         await this.loadList();
       });
@@ -389,18 +347,12 @@
 
         const { error: imgErr } = await this.supabase
           .from('review_imginfo')
-          .insert({
-            review_id: reviewId,
-            storage_path: path,
-            public_url: publicUrl,
-            original_name: f.name
-          });
+          .insert({ review_id: reviewId, storage_path: path, public_url: publicUrl, original_name: f.name });
 
         if (imgErr) console.error('[MMReviews] insert review_imginfo error:', imgErr);
       }
     },
 
-    // ========= list load =========
     async loadList() {
       if (!this.$listBody) return;
 
@@ -412,13 +364,12 @@
       tr0.appendChild(td0);
       this.$listBody.appendChild(tr0);
 
+      // ✅ author_email까지 가져와서 "admin" 표기 안정화
       const { data, error } = await this.supabase
         .from('reviews')
-        .select('id, title, content, nickname, view_count, created_at, is_notice')
+        .select('id, title, content, nickname, author_email, view_count, created_at, is_notice')
         .order('is_notice', { ascending: false })
         .order('created_at', { ascending: false });
-
-      console.log('[MMReviews] loadList result:', { data, error });
 
       if (error) {
         console.error('[MMReviews] Failed to load list:', error);
@@ -438,22 +389,21 @@
         tr.dataset.id = row.id;
         tr.style.cursor = 'pointer';
 
-        if (row.is_notice) tr.classList.add('notice');
+        const isAdminAuthor = ((row.author_email || '').toLowerCase() === this.ADMIN_EMAIL.toLowerCase());
+        const isNotice = !!row.is_notice;
 
-        // No
+        if (isNotice) tr.classList.add('notice');
+
         const tdNo = document.createElement('td');
         tdNo.className = 'cell-no';
         tdNo.textContent = String(idx + 1);
         tr.appendChild(tdNo);
 
-        // Nickname
         const tdNick = document.createElement('td');
         tdNick.className = 'cell-nick';
-        // ✅ notice/ admin display fixed
-        tdNick.textContent = row.is_notice ? 'admin' : (row.nickname || '-');
+        tdNick.textContent = isAdminAuthor ? 'admin' : (row.nickname || '-');
         tr.appendChild(tdNick);
 
-        // Title & Preview
         const tdBody = document.createElement('td');
         tdBody.className = 'cell-body';
 
@@ -464,10 +414,14 @@
         const titleRow = document.createElement('div');
         titleRow.className = 'title-row';
 
-        if (row.is_notice) {
+        if (isNotice) {
           const badge = document.createElement('span');
           badge.className = 'notice-badge';
           badge.textContent = 'Notice';
+          // ✅ 혹시 CSS가 밀려도 보이게 인라인 강제
+          badge.style.background = '#dbeafe';
+          badge.style.border = '1px solid #93c5fd';
+          badge.style.color = '#1d4ed8';
           titleRow.appendChild(badge);
         }
 
@@ -485,6 +439,13 @@
         metaDiv.className = 'list-meta';
         metaDiv.innerHTML = `<span>Views ${row.view_count ?? 0}</span><span>${this.formatDate(row.created_at)}</span>`;
 
+        // ✅ 공지: 제목/프리뷰/메타(날짜 포함) 모두 파랑 (CSS+인라인 이중)
+        if (isNotice) {
+          titleDiv.style.color = '#1d4ed8';
+          previewDiv.style.color = '#1d4ed8';
+          metaDiv.style.color = '#1d4ed8';
+        }
+
         link.appendChild(titleRow);
         link.appendChild(previewDiv);
         link.appendChild(metaDiv);
@@ -492,23 +453,22 @@
         tdBody.appendChild(link);
         tr.appendChild(tdBody);
 
-        // Views column
         const tdViews = document.createElement('td');
         tdViews.className = 'cell-stats';
         tdViews.textContent = String(row.view_count ?? 0);
+        if (isNotice) tdViews.style.color = '#1d4ed8';
         tr.appendChild(tdViews);
 
-        // Date column
         const tdTime = document.createElement('td');
         tdTime.className = 'cell-time';
         tdTime.textContent = this.formatDateTime(row.created_at);
+        if (isNotice) tdTime.style.color = '#1d4ed8';
         tr.appendChild(tdTime);
 
         this.$listBody.appendChild(tr);
       });
     },
 
-    // ========= single review =========
     async loadReview(reviewId) {
       if (!this.$readView) return;
 
@@ -527,13 +487,6 @@
         return;
       }
 
-      // best-effort view count bump (ignore errors)
-      try {
-        const current = Number(review.view_count || 0);
-        await this.supabase.from('reviews').update({ view_count: current + 1 }).eq('id', reviewId);
-        review.view_count = current + 1;
-      } catch (e) {}
-
       const { data: images, error: imgErr } = await this.supabase
         .from('review_imginfo')
         .select('id, public_url, original_name, storage_path')
@@ -551,10 +504,15 @@
       if (!container) return;
 
       container.innerHTML = '';
-      container.classList.toggle('notice-read', !!review.is_notice);
+      const isNotice = !!review.is_notice;
+      container.classList.toggle('notice-read', isNotice);
 
       const canEdit = this.canEditReview(review);
       const created = review.created_at || null;
+
+      const isAdminAuthor = ((review.author_email || '').toLowerCase() === this.ADMIN_EMAIL.toLowerCase());
+      const nick = isAdminAuthor ? 'admin'
+        : (review.nickname || (review.author_email || '').split('@')[0] || 'anonymous');
 
       const topActions = document.createElement('div');
       topActions.className = 'top-actions';
@@ -578,6 +536,7 @@
       const timeSpan = document.createElement('span');
       timeSpan.className = 'muted';
       timeSpan.textContent = created ? this.formatDateTime(created) : '';
+      if (isNotice) timeSpan.style.color = '#1d4ed8';
       leftBox.appendChild(timeSpan);
 
       topActions.appendChild(leftBox);
@@ -606,27 +565,31 @@
 
       container.appendChild(topActions);
 
-      if (review.is_notice) {
+      if (isNotice) {
         const badge = document.createElement('span');
         badge.className = 'notice-badge';
         badge.textContent = 'Notice';
+        badge.style.background = '#dbeafe';
+        badge.style.border = '1px solid #93c5fd';
+        badge.style.color = '#1d4ed8';
         container.appendChild(badge);
       }
 
       const h2 = document.createElement('h2');
       h2.textContent = review.title || '(No title)';
+      if (isNotice) h2.style.color = '#1d4ed8';
       container.appendChild(h2);
 
       const meta = document.createElement('div');
       meta.className = 'read-meta';
-      const nick = review.is_notice ? 'admin'
-        : (review.nickname || (review.author_email || '').split('@')[0] || 'anonymous');
       meta.textContent = `${nick} · ${created ? this.formatDateTime(created) : ''} · Views ${review.view_count ?? 0}`;
+      if (isNotice) meta.style.color = '#1d4ed8';
       container.appendChild(meta);
 
       const body = document.createElement('div');
       body.className = 'read-content';
       body.textContent = review.content || '';
+      if (isNotice) body.style.color = '#1d4ed8'; // ✅ 본문 파랑 강제
       container.appendChild(body);
 
       if (images && images.length > 0) {
@@ -639,7 +602,6 @@
 
         images.forEach((imgRow) => {
           if (!imgRow.public_url) return;
-
           const card = document.createElement('div');
           card.className = 'thumb-card';
 
@@ -660,7 +622,6 @@
         container.appendChild(thumbs);
       }
 
-      // comments container
       const commentsSection = document.createElement('section');
       commentsSection.style.marginTop = '18px';
 
@@ -712,10 +673,7 @@
 
     async startEditReview(review) {
       if (!this.$writeForm) return;
-      if (!this.canEditReview(review)) {
-        alert('You are not allowed to edit this review.');
-        return;
-      }
+      if (!this.canEditReview(review)) return alert('You are not allowed to edit this review.');
 
       this.editingReviewId = review.id;
 
@@ -723,14 +681,9 @@
       if (this.$inputContent) this.$inputContent.value = review.content || '';
       if (this.$fileInput) this.$fileInput.value = '';
       if (this.$selectPreviews) this.$selectPreviews.innerHTML = '';
+      if (this.$isNotice) this.$isNotice.checked = !!(this.isAdmin && review.is_notice);
 
-      if (this.$isNotice) {
-        this.$isNotice.checked = !!(this.isAdmin && review.is_notice);
-      }
-
-      if (this.$formStatus) {
-        this.$formStatus.textContent = 'Editing existing review. Saving will update this post.';
-      }
+      if (this.$formStatus) this.$formStatus.textContent = 'Editing existing review. Saving will update this post.';
 
       try { history.pushState({}, '', '/reviews.html?compose=1'); } catch (e) {}
       this.showWriteView();
@@ -738,10 +691,7 @@
 
     async deleteReview(review) {
       if (!this.supabase || !review) return;
-      if (!this.canEditReview(review)) {
-        alert('You are not allowed to delete this review.');
-        return;
-      }
+      if (!this.canEditReview(review)) return alert('You are not allowed to delete this review.');
 
       const ok = window.confirm('Delete this review? This cannot be undone.');
       if (!ok) return;
@@ -762,7 +712,6 @@
       await this.loadList();
     },
 
-    // ========= comments =========
     async loadComments(reviewId) {
       const listEl = document.getElementById('commentsList');
       if (!listEl) return;
@@ -815,10 +764,7 @@
     },
 
     async submitComment(reviewId, text) {
-      if (!this.user) {
-        alert('Please log in on the home page before writing a comment.');
-        return;
-      }
+      if (!this.user) return alert('Please log in on the home page before writing a comment.');
 
       const nickname = this.isAdmin ? 'admin'
         : ((this.user.email && this.user.email.split('@')[0]) || 'tester');
@@ -827,13 +773,7 @@
 
       const { error } = await this.supabase
         .from('review_comments')
-        .insert({
-          review_id: reviewId,
-          content: text,
-          author_id: this.user.id,
-          author_email,
-          nickname
-        });
+        .insert({ review_id: reviewId, content: text, author_id: this.user.id, author_email, nickname });
 
       if (error) {
         console.error('[MMReviews] submitComment error:', error);
@@ -841,7 +781,6 @@
       }
     },
 
-    // ========= date format =========
     formatDate(iso) {
       if (!iso) return '';
       const d = new Date(iso);

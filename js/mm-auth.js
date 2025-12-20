@@ -10,111 +10,61 @@
     return;
   }
 
-  // 단일 Supabase 클라이언트 (모든 페이지에서 공유)
-  const client = global.supabase.createClient(SUPABASE_URL, SUPABASE_KEY, {
-    auth: {
-      persistSession: true,
-      autoRefreshToken: true,
-      detectSessionInUrl: true
-    }
-  });
+  const client = global.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-  function normEmail(email) {
-    return String(email || '').trim().toLowerCase();
-  }
+  // ✅ members 레코드 "있으면 그대로", "없으면 생성만"
+  async function ensureMemberForUser(user) {
+    try {
+      if (!user) return;
 
-// members 테이블에 (user_id, email, nickname) 보장
-// ⚠️ is_admin은 절대 덮어쓰지 않음(관리자 플래그 유지)
-async function ensureMemberForUser(user) {
-  try {
-    if (!user) return;
+      const email = user.email || '';
+      const nickname = (email && email.split('@')[0]) || 'tester';
 
-    const email = user.email || '';
-    const nickname = (email && email.split('@')[0]) || 'tester';
-
-    // 1) 이미 있는지 확인
-    const { data: existing, error: selErr } = await client
-      .from('members')
-      .select('user_id, is_admin')
-      .eq('user_id', user.id)
-      .maybeSingle();
-
-    // 2) 있으면 email/nickname만 업데이트 (is_admin 유지)
-    if (!selErr && existing) {
-      const { error: upErr } = await client
+      // 1) 먼저 존재 여부 확인
+      const { data: existing, error: selErr } = await client
         .from('members')
-        .update({ email, nickname })
-        .eq('user_id', user.id);
+        .select('user_id')
+        .eq('user_id', user.id)
+        .maybeSingle();
 
-      if (upErr) console.error('[mmAuth] members update error:', upErr);
-      return;
+      if (selErr) {
+        console.error('[mmAuth] members select error:', selErr);
+        return;
+      }
+
+      // 2) 이미 있으면 "절대 덮어쓰지 않음" (admin / nickname 유지)
+      if (existing && existing.user_id) return;
+
+      // 3) 없으면 insert (is_admin은 절대 여기서 건드리지 않음)
+      const { error: insErr } = await client
+        .from('members')
+        .insert({
+          user_id: user.id,
+          email: email,
+          nickname: nickname
+        });
+
+      if (insErr) {
+        console.error('[mmAuth] members insert error:', insErr);
+      }
+    } catch (e) {
+      console.error('[mmAuth] ensureMemberForUser exception:', e);
     }
-
-    // 3) 없으면 새로 insert (새 유저는 기본 false)
-    const { error: insErr } = await client
-      .from('members')
-      .insert({
-        user_id: user.id,
-        email,
-        nickname,
-        is_admin: false
-      });
-
-    if (insErr) console.error('[mmAuth] members insert error:', insErr);
-  } catch (e) {
-    console.error('[mmAuth] ensureMemberForUser exception:', e);
   }
-}
 
   const mmAuth = {
     supabase: client,
-    sb: client, // legacy alias
+    sb: client,
 
     async signUp(email, password) {
-      const e = normEmail(email);
-
-      const { data, error } = await client.auth.signUp({
-        email: e,
-        password
-      });
-
-      console.log('[mmAuth] signUp:', { data, error });
-      if (error) {
-        alert(error.message); // ✅ 원인 즉시 확인
-        return { data, error };
-      }
-
-      if (data && data.user) {
-        await ensureMemberForUser(data.user);
-      }
+      const { data, error } = await client.auth.signUp({ email, password });
+      if (!error && data && data.user) await ensureMemberForUser(data.user);
       return { data, error };
     },
 
     async signIn(email, password) {
-      const e = normEmail(email);
-
-      // ✅ 입력값 자체 점검 (공백/undefined로 400 나는 경우 방지)
-      if (!e || !password) {
-        const msg = 'Email or password is empty.';
-        console.warn('[mmAuth] signIn blocked:', { email, passwordLen: (password || '').length });
-        alert(msg);
-        return { data: null, error: { message: msg } };
-      }
-
-      const { data, error } = await client.auth.signInWithPassword({
-        email: e,
-        password
-      });
-
-      console.log('[mmAuth] signInWithPassword:', { data, error });
-      if (error) {
-        alert(error.message); // ✅ 400의 진짜 메시지 확인 (핵심)
-        return { data, error };
-      }
-
-      if (data && data.user) {
-        await ensureMemberForUser(data.user);
-      }
+      const { data, error } = await client.auth.signInWithPassword({ email, password });
+      if (!error && data && data.user) await ensureMemberForUser(data.user);
       return { data, error };
     },
 
@@ -143,16 +93,13 @@ async function ensureMemberForUser(user) {
 
       this.getSession()
         .then((session) => {
-          try { callback(session); }
-          catch (e) { console.error('[mmAuth] onChange initial callback error:', e); }
+          try { callback(session); } catch (e) { console.error('[mmAuth] onChange initial callback error:', e); }
         })
         .catch((e) => console.error(e));
 
       client.auth.onAuthStateChange(async (_event, session) => {
         try {
-          if (session && session.user) {
-            await ensureMemberForUser(session.user);
-          }
+          if (session && session.user) await ensureMemberForUser(session.user);
           callback(session);
         } catch (e) {
           console.error('[mmAuth] onChange callback error:', e);

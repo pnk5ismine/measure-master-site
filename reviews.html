@@ -4,21 +4,13 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Measure Master — Reviews</title>
-  <meta name="description" content="User reviews for Measure Master." />
-
-  <link rel="icon" type="image/png" href="/images/mm_logo.png" />
-  <link rel="preload" as="image" href="/images/mm_logo.png" />
 
   <style>
     :root{
-      /* Dark outer (match index) */
       --bg:#050816;
-      --bg-soft:#060b1b;
       --text:#e7edf5;
       --muted:#9aa4b2;
-      --accent:#5eead4;
 
-      /* Light inner panels */
       --panel-bg:#ffffff;
       --panel-text:#111827;
       --panel-muted:#6b7280;
@@ -26,11 +18,12 @@
 
       --danger:#dc2626;
 
-      /* Notice blue */
+      /* Notice */
       --notice:#1d4ed8;
       --notice-bg:#eff6ff;
       --notice-bg-hover:#dbeafe;
       --notice-border:#93c5fd;
+      --notice-badge-bg:#dbeafe;
     }
 
     *{box-sizing:border-box}
@@ -45,78 +38,31 @@
       min-height:100vh;
     }
 
-    a{color:inherit}
-    .page{
-      max-width:1180px;
-      margin:0 auto;
-      padding:16px 16px 40px;
-    }
+    .page{max-width:1180px;margin:0 auto;padding:16px 16px 40px;}
 
-    /* Header (match index style) */
     header{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:12px;
+      display:flex;align-items:center;justify-content:space-between;gap:12px;
       padding:6px 0 10px;
     }
-    .brand{
-      display:flex;
-      align-items:center;
-      gap:10px;
-    }
+    .brand{display:flex;align-items:center;gap:10px;}
     .logo-img{
-      width:32px;
-      height:32px;
-      border-radius:10px;
-      object-fit:contain;
+      width:32px;height:32px;border-radius:10px;object-fit:contain;
       background:#0e1422;
       box-shadow:0 0 0 1px rgba(148,163,184,.4), 0 10px 35px rgba(15,23,42,.9);
     }
-    .brand-title{
-      display:flex;
-      flex-direction:column;
-      gap:2px;
-    }
-    .brand-title strong{
-      font-size:17px;
-      letter-spacing:-0.02em;
-    }
-    .brand-sub{
-      font-size:11px;
-      color:var(--muted);
-    }
-    nav{
-      display:flex;
-      align-items:center;
-      gap:12px;
-      font-size:13px;
-      flex-wrap:wrap;
-      justify-content:flex-end;
-    }
+    nav{display:flex;align-items:center;gap:12px;font-size:13px;flex-wrap:wrap;justify-content:flex-end;}
     nav a{
-      color:#cdd5f0;
-      padding:6px 10px;
-      border-radius:999px;
-      border:1px solid transparent;
-      white-space:nowrap;
-      text-decoration:none;
+      color:#cdd5f0;padding:6px 10px;border-radius:999px;border:1px solid transparent;
+      white-space:nowrap;text-decoration:none;
     }
-    nav a:hover{
-      border-color:rgba(148,163,184,.5);
-      background:rgba(15,23,42,.86);
-      text-decoration:none;
-    }
+    nav a:hover{border-color:rgba(148,163,184,.5);background:rgba(15,23,42,.86);}
     nav a[aria-current="page"]{
       border-color:rgba(94,234,212,.7);
       background:rgba(15,23,42,.96);
-      color:var(--accent);
+      color:#5eead4;
       font-weight:700;
     }
 
-    main{margin-top:14px;}
-
-    /* Light panel card */
     .card{
       background:var(--panel-bg);
       color:var(--panel-text);
@@ -134,10 +80,7 @@
 
     .field{display:flex;flex-direction:column;gap:6px;margin:10px 0;}
     label{font-size:13px;color:var(--panel-text);}
-    input[type="text"],
-    input[type="email"],
-    input[type="password"],
-    textarea{
+    input[type="text"], textarea{
       width:100%;
       padding:10px 12px;
       border-radius:12px;
@@ -150,246 +93,115 @@
     input[type="file"]{display:block;font-size:13px;}
 
     .btn{
-      padding:8px 13px;
-      border-radius:10px;
-      border:1px solid #2563eb;
-      background:#2563eb;
-      color:#fff;
-      cursor:pointer;
-      font-size:13px;
-      display:inline-flex;
-      align-items:center;
-      gap:6px;
+      padding:8px 13px;border-radius:10px;
+      border:1px solid #2563eb;background:#2563eb;color:#fff;
+      cursor:pointer;font-size:13px;display:inline-flex;align-items:center;gap:6px;
     }
-    .btn.secondary{
-      background:#f9fafb;
-      color:#111827;
-      border:1px solid #d1d5db;
-    }
-    .btn.danger{
-      border-color:var(--danger);
-      background:var(--danger);
-      color:#fff;
-    }
+    .btn.secondary{background:#f9fafb;color:#111827;border:1px solid #d1d5db;}
+    .btn.danger{border-color:var(--danger);background:var(--danger);color:#fff;}
     .btn:hover{filter:brightness(1.03);}
 
-    /* Table fixed layout */
-    .table{
-      width:100%;
-      border-collapse:collapse;
-      table-layout:fixed; /* 핵심: 내용량에 따라 폭이 흔들리지 않게 */
-      background:#fff;
-    }
-    .table th,.table td{
-      border-bottom:1px solid #e5e7eb;
-      padding:10px 8px;
-      vertical-align:top;
-    }
-    .table th{
-      font-weight:700;
-      color:#111827;
-      text-align:left;
-      background:#f9fafb;
-    }
+    /* Table fixed width (내용량에 따라 흔들리지 않음) */
+    .table{width:100%;border-collapse:collapse;table-layout:fixed;background:#fff;}
+    .table th,.table td{border-bottom:1px solid #e5e7eb;padding:10px 8px;vertical-align:top;}
+    .table th{font-weight:700;color:#111827;text-align:left;background:#f9fafb;}
     .table tr:hover td{background:#f3f4f6;}
 
-    /* Column widths */
     .cell-no{width:56px;color:#6b7280;}
     .cell-nick{width:110px;}
     .cell-stats{width:90px;text-align:center;color:#6b7280;}
     .cell-time{width:170px;color:#6b7280;text-align:right;}
     .cell-body{width:auto;}
 
-    /* List cell: title + preview (2 lines) */
-    .row-link{
-      display:block;
-      text-decoration:none;
-      color:inherit;
-    }
-    .row-link:hover{ text-decoration:none; }
+    .row-link{display:block;text-decoration:none;color:inherit;}
+    .row-link:hover{text-decoration:none;}
 
-    .title-row{
-      display:flex;
-      align-items:center;
-      gap:8px;
-      min-width:0;
-      margin-bottom:4px;
-    }
+    .title-row{display:flex;align-items:center;gap:8px;min-width:0;margin-bottom:4px;}
     .list-title{
-      font-weight:700;
-      color:#111827;
-      overflow:hidden;
-      text-overflow:ellipsis;
-      white-space:nowrap;
-      min-width:0;
+      font-weight:800;color:#111827;
+      overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;
     }
-
     .list-preview{
-      color:#374151;
-      word-break:break-word;
-      display:-webkit-box;
-      -webkit-line-clamp:2;          /* ✅ 2줄 노출 */
-      -webkit-box-orient:vertical;
-      overflow:hidden;
-      line-height:1.35;
-      margin-bottom:6px;
+      color:#374151;word-break:break-word;
+      display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;
+      overflow:hidden;line-height:1.35;margin-bottom:6px;
     }
-
     .list-meta{
-      display:flex;
-      justify-content:space-between;
-      gap:10px;
-      font-size:12px;
-      color:#6b7280;
+      display:flex;justify-content:space-between;gap:10px;
+      font-size:12px;color:#6b7280;
     }
 
-    .list-footer{
-      border-top:1px solid #e5e7eb;
-      padding-top:10px;
-      display:flex;
-      justify-content:space-between;
-      gap:10px;
-      align-items:center;
-      margin-top:10px;
-      flex-wrap:wrap;
-    }
-
-    /* Notice */
+    /* ✅ Notice badge: 다른 CSS가 있어도 절대 안 밀리게 !important */
     .notice-badge{
-      display:inline-flex;
-      align-items:center;
-      flex:0 0 auto;
-      font-size:11px;
-      font-weight:800;
-      letter-spacing:.02em;
-      padding:2px 8px;
-      border-radius:999px;
-      color:var(--notice);
-      background:#dbeafe;           /* ✅ 배경색 */
-      border:1px solid var(--notice-border);
-      box-shadow:0 2px 8px rgba(29,78,216,.12);
+      display:inline-flex;align-items:center;flex:0 0 auto;
+      font-size:11px;font-weight:900;letter-spacing:.02em;
+      padding:2px 8px;border-radius:999px;
+      color:var(--notice) !important;
+      background:var(--notice-badge-bg) !important;
+      border:1px solid var(--notice-border) !important;
+      box-shadow:0 2px 10px rgba(29,78,216,.18) !important;
     }
-    .table tr.notice td{ background:var(--notice-bg); }
-    .table tr.notice:hover td{ background:var(--notice-bg-hover); }
 
+    /* ✅ Notice row highlight */
+    .table tr.notice td{ background:var(--notice-bg) !important; }
+    .table tr.notice:hover td{ background:var(--notice-bg-hover) !important; }
+
+    /* ✅ Notice: 제목/프리뷰/메타(날짜 포함)/우측 날짜칸까지 모두 파랑 */
     .table tr.notice .list-title,
-    .table tr.notice .list-preview{ color:var(--notice); }
+    .table tr.notice .list-preview,
+    .table tr.notice .list-meta,
+    .table tr.notice .cell-time,
+    .table tr.notice .cell-stats,
+    .table tr.notice .cell-nick{
+      color:var(--notice) !important;
+    }
 
-    /* Read view notice: title + body blue */
+    /* Read view: notice면 본문까지 파랑 */
     #readView.notice-read h2,
+    #readView.notice-read .read-meta,
     #readView.notice-read .read-content{
-      color:var(--notice);
+      color:var(--notice) !important;
     }
 
     /* Thumbnails */
     .thumbs{
       display:grid;
       grid-template-columns:repeat(6,minmax(0,1fr));
-      gap:8px;
-      margin-top:8px;
+      gap:8px;margin-top:8px;
     }
     @media (max-width:768px){
-      .thumbs{ grid-template-columns:repeat(3,minmax(0,1fr)); }
+      .thumbs{grid-template-columns:repeat(3,minmax(0,1fr));}
     }
     .thumb-card{
-      width:100%;
-      aspect-ratio:9 / 16;
-      border-radius:10px;
-      overflow:hidden;
-      background:#f9fafb;
-      border:1px solid #e5e7eb;
+      width:100%;aspect-ratio:9/16;border-radius:10px;overflow:hidden;
+      background:#f9fafb;border:1px solid #e5e7eb;
     }
-    .thumb-img{
-      width:100%;
-      height:100%;
-      object-fit:cover;
-      display:block;
-    }
+    .thumb-img{width:100%;height:100%;object-fit:cover;display:block;}
 
-    /* Read view sections */
     .top-actions{
       border-bottom:1px solid #e5e7eb;
-      padding-bottom:10px;
-      margin-bottom:12px;
-      display:flex;
-      justify-content:space-between;
-      align-items:center;
-      gap:8px;
-      flex-wrap:wrap;
+      padding-bottom:10px;margin-bottom:12px;
+      display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap;
     }
-    .read-meta{
-      margin:6px 0 12px;
-      font-size:13px;
-      color:#6b7280;
-    }
-    .read-content{
-      white-space:pre-wrap;
-      word-break:break-word;
-      color:#111827;
-      line-height:1.55;
-    }
+    .read-meta{margin:6px 0 12px;font-size:13px;color:#6b7280;}
+    .read-content{white-space:pre-wrap;word-break:break-word;color:#111827;line-height:1.55;}
 
-    /* Comments */
-    .comment-item{
-      border-top:1px solid #e5e7eb;
-      padding:10px 0;
-    }
-    .comment-head{
-      font-size:13px;
-      color:#6b7280;
-      display:flex;
-      justify-content:space-between;
-      gap:8px;
-    }
-    .comment-body{
-      white-space:pre-wrap;
-      word-break:break-word;
-      margin-top:6px;
-      color:#111827;
-      line-height:1.45;
-    }
-    .comment-form{
-      display:flex;
-      gap:8px;
-      margin-top:10px;
-      align-items:flex-start;
-    }
-    .comment-form textarea{
-      flex:1;
-      min-height:70px;
-    }
+    .comment-item{border-top:1px solid #e5e7eb;padding:10px 0;}
+    .comment-head{font-size:13px;color:#6b7280;display:flex;justify-content:space-between;gap:8px;}
+    .comment-body{white-space:pre-wrap;word-break:break-word;margin-top:6px;color:#111827;line-height:1.45;}
+    .comment-form{display:flex;gap:8px;margin-top:10px;align-items:flex-start;}
+    .comment-form textarea{flex:1;min-height:70px;}
 
-    /* Footer (match index vibe) */
-    footer{
-      margin-top:22px;
-      padding-top:10px;
-      border-top:1px solid rgba(30,64,175,.6);
-      font-size:12px;
-      color:var(--muted);
-      text-align:center;
-    }
-
-    /* Mobile tweaks */
-    @media (max-width:720px){
-      header{flex-wrap:wrap;align-items:flex-start;}
-      nav{order:3;width:100%;justify-content:flex-start;}
-      nav a{
-        padding:6px 8px;
-        font-size:12px;
-        border-radius:999px;
-        border:1px solid rgba(51,65,85,.9);
-        background:rgba(15,23,42,.96);
-      }
+    .list-footer{
+      border-top:1px solid #e5e7eb;padding-top:10px;
+      display:flex;justify-content:space-between;gap:10px;align-items:center;
+      margin-top:10px;flex-wrap:wrap;
     }
 
     @media (max-width:700px){
-      /* Mobile: hide table header, show as cards */
       .table thead{display:none;}
       .table,.table tbody,.table tr,.table td{display:block;width:100%;}
-      .table tr{
-        border-bottom:1px solid #e5e7eb;
-        padding:6px 0;
-      }
+      .table tr{border-bottom:1px solid #e5e7eb;padding:6px 0;}
       .table td{border:none;padding:6px 8px;}
       .cell-no,.cell-nick,.cell-stats,.cell-time{display:none;}
     }
@@ -401,12 +213,11 @@
     <header>
       <div class="brand">
         <img src="/images/mm_logo.png" alt="Measure Master" class="logo-img" />
-        <div class="brand-title">
-          <strong>Measure Master</strong>
-          <div class="brand-sub">3-in-1 measuring tool</div>
+        <div>
+          <div style="font-weight:800;letter-spacing:-0.02em;">Measure Master</div>
+          <div style="font-size:11px;color:var(--muted);">3-in-1 measuring tool</div>
         </div>
       </div>
-
       <nav>
         <a href="/">Home</a>
         <a href="/howtouse.html">How to use</a>
@@ -420,7 +231,6 @@
         <h1>User reviews</h1>
         <p id="authInfo" class="muted">Checking login status…</p>
 
-        <!-- List view -->
         <div id="listView">
           <table class="table">
             <thead>
@@ -443,14 +253,11 @@
           </div>
         </div>
 
-        <!-- Read view -->
         <article id="readView" hidden></article>
 
-        <!-- Write view -->
         <form id="writeForm" hidden>
-          <h2 id="writeTitleHeading">Write a new review</h2>
+          <h2>Write a new review</h2>
 
-          <!-- Admin only: Notice checkbox -->
           <div id="noticeField" class="field" style="display:none;">
             <label style="display:flex;align-items:center;gap:8px;cursor:pointer;">
               <input id="isNotice" type="checkbox" />
@@ -461,21 +268,18 @@
 
           <div class="field">
             <label for="title">Title</label>
-            <input id="title" type="text" placeholder="Short summary of your experience" required />
+            <input id="title" type="text" required />
           </div>
 
           <div class="field">
             <label for="content">Content</label>
-            <textarea id="content" placeholder="Please write your experience with Measure Master." required></textarea>
+            <textarea id="content" required></textarea>
           </div>
 
           <div class="field">
             <label for="image">Attach images (optional, up to 6)</label>
             <input id="image" type="file" accept="image/*" multiple data-max="6" />
             <div id="selectPreviews" class="thumbs"></div>
-            <div class="status">
-              Images are uploaded to Supabase Storage. Large images may be resized by the browser or your device.
-            </div>
           </div>
 
           <div style="border-top:1px solid #e5e7eb;margin-top:12px;padding-top:10px;display:flex;align-items:center;gap:8px;justify-content:flex-end;">
@@ -486,22 +290,14 @@
         </form>
       </section>
     </main>
-
-    <footer>
-      © <span id="year"></span> Measure Master. All rights reserved.
-    </footer>
   </div>
 
-  <!-- Supabase & JS -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="/js/mm-auth.js?v=auth_r2"></script>
-  <script src="/js/reviews-ui.js?v=rev22"></script>
+  <script src="/js/mm-auth.js?v=auth_r3"></script>
+  <script src="/js/reviews-ui.js?v=rev23"></script>
 
   <script>
     document.addEventListener('DOMContentLoaded', async () => {
-      const y = document.getElementById('year');
-      if (y) y.textContent = new Date().getFullYear();
-
       const client = window.mmAuth?.supabase || null;
       let currentUser = null;
 
@@ -513,6 +309,13 @@
         } catch (e) {
           console.warn('[reviews] getUser error:', e);
         }
+      }
+
+      const authInfo = document.getElementById('authInfo');
+      if (authInfo) {
+        authInfo.textContent = currentUser
+          ? `Logged in as ${currentUser.email}`
+          : 'Not logged in. Please sign up / log in on the home page to write.';
       }
 
       if (window.MMReviews) {
