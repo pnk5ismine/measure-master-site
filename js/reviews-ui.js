@@ -658,7 +658,8 @@ link.href = `/reviews.html?id=${encodeURIComponent(row.id)}`;
 
       const infoSpan = document.createElement('span');
       infoSpan.className = 'muted';
-      infoSpan.textContent = this.formatDateTime(review.created_at);
+      const created = review.created_at || review.createdAt || review.created || null;
+      infoSpan.textContent = created ? this.formatDateTime(created) : '';
       leftBox.appendChild(infoSpan);
 
       topActions.appendChild(leftBox);
@@ -696,7 +697,7 @@ link.href = `/reviews.html?id=${encodeURIComponent(row.id)}`;
       const nick = review.nickname ||
         (review.author_email || '').split('@')[0] || 'anonymous';
       meta.textContent =
-        `${nick} · ${this.formatDateTime(review.created_at)} · Views ${review.view_count ?? 0}`;
+        `${nick} · ${created ? this.formatDateTime(created) : ''} · Views ${review.view_count ?? 0}`;
       container.appendChild(meta);
 
       const body = document.createElement('div');
