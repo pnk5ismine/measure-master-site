@@ -7,14 +7,14 @@
 
   <style>
     :root{
-      --bg:#050816;
-      --text:#e7edf5;
-      --muted:#9aa4b2;
+      --bg:#f6f8fc;
+      --text:#0f172a;
+      --muted:#475569;
 
       --panel-bg:#ffffff;
-      --panel-text:#111827;
-      --panel-muted:#6b7280;
-      --panel-border:#d1d5db;
+      --panel-text:#0f172a;
+      --panel-muted:#475569;
+      --panel-border:#d6dbe7;
 
       --danger:#dc2626;
 
@@ -31,8 +31,8 @@
     body{
       font-family:system-ui,-apple-system,Segoe UI,Roboto,'Noto Sans',sans-serif;
       background:
-        radial-gradient(circle at 0 0, rgba(94,234,212,.23), transparent 55%),
-        radial-gradient(circle at 100% 100%, rgba(59,130,246,.18), transparent 55%),
+        radial-gradient(circle at 0 0, rgba(14,165,233,.10), transparent 55%),
+        radial-gradient(circle at 100% 100%, rgba(99,102,241,.10), transparent 55%),
         var(--bg);
       color:var(--text);
       min-height:100vh;
@@ -55,12 +55,12 @@ nav{
   display:flex;gap:14px;align-items:center;flex-wrap:wrap;
   justify-content:center;
 }
-nav a{color:#cfd6e4}
+nav a{color:var(--muted)}
 
 .lang{display:flex;gap:6px;align-items:center}
 .lang button{
   border:1px solid var(--border);
-  background:#0f1320;
+  background:#ffffff;
   color:#e7edf5;
   border-radius:999px;
   padding:6px 10px;
@@ -70,7 +70,7 @@ nav a{color:#cfd6e4}
   gap:6px;
   font-size:12px;
 }
-.lang button.active{outline:2px solid #2dd; font-weight:600}
+.lang button.active{outline:2px solid rgba(14,165,233,.5); font-weight:600}
 .lang .flag{line-height:1}
 .lang .label{letter-spacing:.04em}
 
