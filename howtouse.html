@@ -1,4 +1,4 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
@@ -177,46 +177,45 @@ nav a{color:#cfd6e4}
       }
     }
   
-    /* ===== Phase 2: Step text list (vertical) ===== */
+    /* ===== HowToUse Phase 2: step blocks (text only) ===== */
     .htu-steps{
+      margin: 14px 0 18px;
       display:flex;
       flex-direction:column;
       gap:12px;
-      margin:14px 0 18px;
     }
     .htu-step{
-      border:1px solid var(--border);
       background:#0f1320;
-      border-radius:10px;
-      padding:14px 14px 12px;
+      border:1px solid var(--border);
+      border-radius:14px;
+      padding:16px 16px 14px;
     }
-    .htu-step .meta{
-      display:flex;
-      gap:10px;
-      align-items:baseline;
-      margin-bottom:6px;
-    }
-    .htu-step .meta .id{
-      font-size:12px;
-      color:var(--muted);
-      letter-spacing:.3px;
-      white-space:nowrap;
-    }
-    .htu-step .meta .title{
+    .htu-step-title{
+      margin:0 0 10px;
       font-size:16px;
-      font-weight:650;
-      margin:0;
-      line-height:1.2;
+      line-height:1.25;
+      letter-spacing:-0.01em;
     }
-    .htu-step .body{
-      margin:8px 0 0;
-      color:var(--text);
-      white-space:pre-line; /* keep numbering + line breaks */
+    .htu-step ol{
+      margin: 8px 0 10px 20px;
+      padding:0;
     }
-    .htu-step .missing{
-      margin-top:10px;
-      font-size:12px;
-      color:var(--muted);
+    .htu-step li{
+      margin: 6px 0;
+    }
+    .htu-note{
+      margin: 8px 0;
+      color: var(--muted);
+      font-size: 13px;
+    }
+    .htu-id{
+      display:inline-block;
+      margin-right:8px;
+      font-size:11px;
+      color: var(--muted);
+      opacity:.85;
+      letter-spacing:.04em;
+      vertical-align: baseline;
     }
 
   </style>
@@ -265,9 +264,7 @@ nav a{color:#cfd6e4}
       Tap or click an image to open the full-size version in a new tab.
     </p>
 
-
-  <!-- Phase 2: Step text list (from /assets/data/htu_000_en.json) -->
-  <div id="htuSteps" class="htu-steps" aria-label="How-to steps (text only)"></div>
+<div id="htuSteps" class="htu-steps"></div>
 
 <div class="howtouse-grid">
 
@@ -366,60 +363,121 @@ nav a{color:#cfd6e4}
   document.addEventListener('DOMContentLoaded', function () {
     var y = document.getElementById('year');
     if (y) y.textContent = new Date().getFullYear();
-    // Phase 2: prepend text-only steps above the image grid (no images yet)
+  });
+</script>
+
+<script>
+  // ===== HowToUse Phase 2: prepend Step blocks from separate JSON file (text only for now) =====
+  (function(){
     const JSON_URL = "/assets/data/htu_000_en.json"; // <-- your new file
 
-    const stepsRoot = document.getElementById("htuSteps");
-    if (stepsRoot) {
-      fetch(JSON_URL, { cache: "no-store" })
-        .then(r => {
-          if (!r.ok) throw new Error("Failed to load JSON: " + r.status);
-          return r.json();
-        })
-        .then(list => {
-          if (!Array.isArray(list)) throw new Error("JSON root must be an array");
-          // render each RECORD as ONE vertical card (do not split lines into grid items)
-          stepsRoot.innerHTML = "";
-          list.forEach((it, idx) => {
-            const id = (it && it.id) ? String(it.id) : ("htu_unknown_" + (idx+1));
-            const title = (it && it.title) ? String(it.title) : "";
-            // support both 'text' and 'body' just in case
-            const body = (it && (it.text ?? it.body ?? it.desc)) ? String(it.text ?? it.body ?? it.desc) : "";
-
-            const card = document.createElement("section");
-            card.className = "htu-step";
-            card.innerHTML = `
-              <div class="meta">
-                <span class="id">${escapeHtml(id)}</span>
-                <h2 class="title">${escapeHtml(title)}</h2>
-              </div>
-              <div class="body">${escapeHtml(body)}</div>
-              <div class="missing">Image: (not added yet)</div>
-            `;
-            stepsRoot.appendChild(card);
-          });
-        })
-        .catch(err => {
-          // keep page usable even if JSON missing
-          stepsRoot.innerHTML = `<div class="htu-step">
-              <div class="meta"><span class="id">htu_000</span><h2 class="title">How-to text</h2></div>
-              <div class="body">Could not load: ${escapeHtml(JSON_URL)}\n${escapeHtml(String(err))}</div>
-            </div>`;
-          console.warn(err);
-        });
-    }
-
-    function escapeHtml(str){
-      return String(str)
+    function escapeText(s){
+      return String(s ?? "")
         .replaceAll("&","&amp;")
         .replaceAll("<","&lt;")
         .replaceAll(">","&gt;")
         .replaceAll('"',"&quot;")
-        .replaceAll("'","&#039;")
-        .replaceAll("\n","<br/>");
+        .replaceAll("'","&#039;");
     }
 
-  });
+    function groupIntoSteps(rows){
+      const steps = [];
+      let cur = null;
+
+      for (const r of rows){
+        if (!r || typeof r !== "object") continue;
+
+        if (r.kind === "step_title"){
+          cur = { title: r.text ?? "", id: r.id ?? "", seq: [] };
+          steps.push(cur);
+          continue;
+        }
+        if (!cur){
+          // if file starts without title, put everything into a default bucket
+          cur = { title: "How to use", id: "htu_000", seq: [] };
+          steps.push(cur);
+        }
+
+        cur.seq.push({
+          kind: r.kind ?? "step_note",
+          id: r.id ?? "",
+          num: r.num,
+          text: r.text ?? ""
+        });
+      }
+      return steps;
+    }
+
+    function renderSteps(steps){
+      const host = document.getElementById("htuSteps");
+      if (!host) return;
+
+      host.innerHTML = "";
+      if (!steps.length) return;
+
+      for (const st of steps){
+        const box = document.createElement("section");
+        box.className = "htu-step";
+
+        const title = document.createElement("h2");
+        title.className = "htu-step-title";
+        title.innerHTML = (st.id ? `<span class="htu-id">${escapeText(st.id)}</span>` : "") + escapeText(st.title);
+        box.appendChild(title);
+
+        // render sequence preserving order: notes as paragraphs, bodies inside <ol>
+        let ol = null;
+
+        function flushOl(){
+          if (ol){
+            box.appendChild(ol);
+            ol = null;
+          }
+        }
+
+        for (const item of st.seq){
+          if (item.kind === "step_body"){
+            if (!ol){
+              ol = document.createElement("ol");
+            }
+            const li = document.createElement("li");
+            // keep numbering inside JSON (num); do NOT auto-generate based on index
+            if (typeof item.num === "number"){
+              li.value = item.num;
+            }
+            li.textContent = item.text ?? "";
+            ol.appendChild(li);
+          } else {
+            flushOl();
+            const p = document.createElement("p");
+            p.className = "htu-note";
+            p.textContent = item.text ?? "";
+            box.appendChild(p);
+          }
+        }
+        flushOl();
+
+        host.appendChild(box);
+      }
+    }
+
+    document.addEventListener("DOMContentLoaded", async () => {
+      try{
+        const res = await fetch(JSON_URL, { cache: "no-store" });
+        if (!res.ok) throw new Error("HTTP " + res.status);
+        const data = await res.json();
+
+        if (!Array.isArray(data)){
+          console.warn("htu json is not an array:", data);
+          return;
+        }
+
+        const steps = groupIntoSteps(data);
+        renderSteps(steps);
+      }catch(err){
+        console.warn("Failed to load HowToUse steps:", err);
+      }
+    });
+  })();
 </script>
 
 </body>
