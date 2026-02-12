@@ -26,5 +26,5 @@
 { "id": "htu_025", "num": 3, "kind": "step_body", "text": "After drawing the object on the Blue Eye page, return to the Red Eye page." },
 { "id": "htu_022", "num": 4, "kind": "step_body", "text": "Enter the actual width and height of the rectangle in the input fields." },
 { "id": "htu_026", "num": 5, "kind": "step_body", "text": "Tap the convert arrow (→) button." },
-{ "id": "htu_027", "num": null, "kind": "step_note", "text": "Screen values (mm) are converted into real-world measurements (cm, mm, etc.). This is the core purpose of the app." },
+{ "id": "htu_027", "num": null, "kind": "step_note", "text": "Screen values (mm) are converted into real-world measurements (cm, mm, etc.). This is the core purpose of the app." }
 ]
