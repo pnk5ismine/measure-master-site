@@ -214,6 +214,26 @@ nav a{color:var(--muted)}
     .htu-step li{
       margin: 6px 0;
     }
+    /* Step image (2:1) : text 아래에 붙는 이미지 */
+    .htu-step-image{
+      width: 100%;
+      aspect-ratio: 2 / 1;          /* ✅ 2:1 */
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      background: #ffffff;
+    }
+    .htu-step-image a{
+      display:block;
+      width:100%;
+      height:100%;
+    }
+    .htu-step-image img{
+      width:100%;
+      height:100%;
+      object-fit: contain;          /* 잘림 방지 (원하면 cover로) */
+      display:block;
+    }
 
 </style>
 </head>
@@ -457,7 +477,35 @@ nav a{color:var(--muted)}
           }
         }
         flushOl();
+
+        // ✅ (추가) 제목에서 Step 번호를 뽑아 이미지 붙이기: 텍스트 다음 줄
+        const m = String(st.title || "").match(/Step\s*(\d+)\s*\./i);
+        const stepNo = m ? Number(m[1]) : null;
+
+        if (stepNo != null) {
+          const imgBox = document.createElement("div");
+          imgBox.className = "htu-step-image";
+
+          // 파일명 규칙: /images/howtouse/howtouse_step{N}.jpg
+          const imgUrl = `/images/howtouse/howtouse_step${stepNo}.jpg`;
+
+          const a = document.createElement("a");
+          a.href = imgUrl;
+          a.target = "_blank";
+          a.rel = "noopener";
+
+          const img = document.createElement("img");
+          img.src = imgUrl;
+          img.alt = `HowToUse Step ${stepNo}`;
+          img.loading = "lazy";
+
+          a.appendChild(img);
+          imgBox.appendChild(a);
+          box.appendChild(imgBox);
+        }
+
         host.appendChild(box);
+
       }
     }
 
