@@ -177,48 +177,45 @@ nav a{color:#cfd6e4}
       }
     }
   
-    /* ===== HowToUse Phase 2: step blocks (text only) ===== */
+    /* ===== Phase 2: Step blocks (text-first) ===== */
     .htu-steps{
-      margin: 14px 0 18px;
       display:flex;
       flex-direction:column;
-      gap:12px;
+      gap:14px;
+      margin: 14px 0 18px;
     }
     .htu-step{
-      background:#0f1320;
-      border:1px solid var(--border);
-      border-radius:14px;
-      padding:16px 16px 14px;
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.03);
+      border-radius: 14px;
+      padding: 14px 14px 12px;
     }
     .htu-step-title{
       margin:0 0 10px;
-      font-size:16px;
-      line-height:1.25;
-      letter-spacing:-0.01em;
+      font-size: 18px;
+      line-height: 1.25;
+    }
+    .htu-step-title .htu-id{
+      display:inline-block;
+      font-size:12px;
+      color: rgba(255,255,255,.60);
+      margin-right:10px;
+      letter-spacing:.3px;
+      vertical-align: baseline;
+    }
+    .htu-note{
+      margin: 8px 0 0;
+      color: rgba(255,255,255,.72);
     }
     .htu-step ol{
-      margin: 8px 0 10px 20px;
-      padding:0;
+      margin: 0 0 0 18px;
+      padding: 0;
     }
     .htu-step li{
       margin: 6px 0;
     }
-    .htu-note{
-      margin: 8px 0;
-      color: var(--muted);
-      font-size: 13px;
-    }
-    .htu-id{
-      display:inline-block;
-      margin-right:8px;
-      font-size:11px;
-      color: var(--muted);
-      opacity:.85;
-      letter-spacing:.04em;
-      vertical-align: baseline;
-    }
 
-  </style>
+</style>
 </head>
 <body>
 <header>
@@ -264,7 +261,8 @@ nav a{color:#cfd6e4}
       Tap or click an image to open the full-size version in a new tab.
     </p>
 
-<div id="htuSteps" class="htu-steps"></div>
+  <!-- Phase 2 (text-first): grouped Step blocks inserted here -->
+  <div id="htuSteps" class="htu-steps"></div>
 
 <div class="howtouse-grid">
 
@@ -366,19 +364,11 @@ nav a{color:#cfd6e4}
   });
 </script>
 
+
 <script>
-  // ===== HowToUse Phase 2: prepend Step blocks from separate JSON file (text only for now) =====
+  // ===== Phase 2: load separate HowToUse JSON (htu_000_en.json) and render grouped Step boxes =====
   (function(){
     const JSON_URL = "/assets/data/htu_000_en.json"; // <-- your new file
-
-    function escapeText(s){
-      return String(s ?? "")
-        .replaceAll("&","&amp;")
-        .replaceAll("<","&lt;")
-        .replaceAll(">","&gt;")
-        .replaceAll('"',"&quot;")
-        .replaceAll("'","&#039;");
-    }
 
     function groupIntoSteps(rows){
       const steps = [];
@@ -387,19 +377,22 @@ nav a{color:#cfd6e4}
       for (const r of rows){
         if (!r || typeof r !== "object") continue;
 
-        if (r.kind === "step_title"){
-          cur = { title: r.text ?? "", id: r.id ?? "", seq: [] };
+        const kind = String(r.kind ?? "").trim();
+
+        if (kind === "step_title"){
+          cur = { title: r.text ?? "", id: r.id ?? "", items: [] };
           steps.push(cur);
           continue;
         }
+
         if (!cur){
-          // if file starts without title, put everything into a default bucket
-          cur = { title: "How to use", id: "htu_000", seq: [] };
+          // If file starts without a title, create one bucket.
+          cur = { title: "How to use", id: "htu_000", items: [] };
           steps.push(cur);
         }
 
-        cur.seq.push({
-          kind: r.kind ?? "step_note",
+        cur.items.push({
+          kind,
           id: r.id ?? "",
           num: r.num,
           text: r.text ?? ""
@@ -413,49 +406,57 @@ nav a{color:#cfd6e4}
       if (!host) return;
 
       host.innerHTML = "";
-      if (!steps.length) return;
 
       for (const st of steps){
         const box = document.createElement("section");
         box.className = "htu-step";
 
-        const title = document.createElement("h2");
-        title.className = "htu-step-title";
-        title.innerHTML = (st.id ? `<span class="htu-id">${escapeText(st.id)}</span>` : "") + escapeText(st.title);
-        box.appendChild(title);
+        const h2 = document.createElement("h2");
+        h2.className = "htu-step-title";
 
-        // render sequence preserving order: notes as paragraphs, bodies inside <ol>
+        // id badge + title text
+        if (st.id){
+          const idSpan = document.createElement("span");
+          idSpan.className = "htu-id";
+          idSpan.textContent = st.id;
+          h2.appendChild(idSpan);
+        }
+        h2.appendChild(document.createTextNode(st.title || ""));
+        box.appendChild(h2);
+
         let ol = null;
-
-        function flushOl(){
+        const flushOl = () => {
           if (ol){
             box.appendChild(ol);
             ol = null;
           }
-        }
+        };
 
-        for (const item of st.seq){
-          if (item.kind === "step_body"){
-            if (!ol){
-              ol = document.createElement("ol");
-            }
+        for (const it of st.items){
+          if (it.kind === "step_body"){
+            if (!ol) ol = document.createElement("ol");
+
             const li = document.createElement("li");
-            // keep numbering inside JSON (num); do NOT auto-generate based on index
-            if (typeof item.num === "number"){
-              li.value = item.num;
-            }
-            li.textContent = item.text ?? "";
+            // numbering inside JSON (do not auto-generate)
+            if (typeof it.num === "number") li.value = it.num;
+            li.textContent = it.text || "";
             ol.appendChild(li);
-          } else {
+          } else if (it.kind === "step_note"){
             flushOl();
             const p = document.createElement("p");
             p.className = "htu-note";
-            p.textContent = item.text ?? "";
+            p.textContent = it.text || "";
+            box.appendChild(p);
+          } else {
+            // unknown kinds: treat as note
+            flushOl();
+            const p = document.createElement("p");
+            p.className = "htu-note";
+            p.textContent = it.text || "";
             box.appendChild(p);
           }
         }
         flushOl();
-
         host.appendChild(box);
       }
     }
@@ -465,16 +466,12 @@ nav a{color:#cfd6e4}
         const res = await fetch(JSON_URL, { cache: "no-store" });
         if (!res.ok) throw new Error("HTTP " + res.status);
         const data = await res.json();
-
-        if (!Array.isArray(data)){
-          console.warn("htu json is not an array:", data);
-          return;
-        }
+        if (!Array.isArray(data)) throw new Error("JSON root is not an array");
 
         const steps = groupIntoSteps(data);
         renderSteps(steps);
-      }catch(err){
-        console.warn("Failed to load HowToUse steps:", err);
+      }catch(e){
+        console.warn("[HowToUse Phase2] Failed to load:", JSON_URL, e);
       }
     });
   })();
