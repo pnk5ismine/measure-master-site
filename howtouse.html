@@ -177,31 +177,46 @@ nav a{color:#cfd6e4}
       }
     }
   
-    /* ===== HTU text-only items (Phase 2 prep) ===== */
-    .howtouse-item.howtouse-text{
-      padding:14px 14px 12px;
+    /* ===== Phase 2: Step text list (vertical) ===== */
+    .htu-steps{
       display:flex;
       flex-direction:column;
-      gap:8px;
-      aspect-ratio:auto; /* text cards can be natural height */
-      cursor:default;
+      gap:12px;
+      margin:14px 0 18px;
     }
-    .howtouse-text .htu-id{
+    .htu-step{
+      border:1px solid var(--border);
+      background:#0f1320;
+      border-radius:10px;
+      padding:14px 14px 12px;
+    }
+    .htu-step .meta{
+      display:flex;
+      gap:10px;
+      align-items:baseline;
+      margin-bottom:6px;
+    }
+    .htu-step .meta .id{
       font-size:12px;
       color:var(--muted);
-      letter-spacing:.04em;
+      letter-spacing:.3px;
+      white-space:nowrap;
     }
-    .howtouse-text .htu-title{
-      font-size:15px;
+    .htu-step .meta .title{
+      font-size:16px;
       font-weight:650;
       margin:0;
+      line-height:1.2;
     }
-    .howtouse-text .htu-body{
-      font-size:13px;
+    .htu-step .body{
+      margin:8px 0 0;
       color:var(--text);
-      white-space:pre-line; /* keep numbering inside text */
-      margin:0;
-      line-height:1.55;
+      white-space:pre-line; /* keep numbering + line breaks */
+    }
+    .htu-step .missing{
+      margin-top:10px;
+      font-size:12px;
+      color:var(--muted);
     }
 
   </style>
@@ -250,9 +265,11 @@ nav a{color:#cfd6e4}
       Tap or click an image to open the full-size version in a new tab.
     </p>
 
-<div class="howtouse-grid" id="howtouseGrid">
 
-  <!-- Phase 2: text-only HTU items (from /images/howtouse/htu_000_en.json) will be injected here -->
+  <!-- Phase 2: Step text list (from /assets/data/htu_000_en.json) -->
+  <div id="htuSteps" class="htu-steps" aria-label="How-to steps (text only)"></div>
+
+<div class="howtouse-grid">
 
   <a class="howtouse-item" href="/images/howtouse/1_htu_home.jpg" target="_blank" rel="noopener">
     <img src="/images/howtouse/1_htu_home.jpg" alt="Step 01 - Home" loading="lazy">
@@ -344,75 +361,65 @@ nav a{color:#cfd6e4}
   © <span id="year"></span> Measure Master. All rights reserved.
 </footer>
 
-
 <script>
   // footer year
   document.addEventListener('DOMContentLoaded', function () {
     var y = document.getElementById('year');
     if (y) y.textContent = new Date().getFullYear();
-  });
-</script>
-
-<script>
-  // Phase 2 (prep): prepend text-only items from a *separate* JSON file.
-  // - Images may not exist yet, so we render text cards only.
-  // - This file is independent from any previously-linked JSON.
-  (function () {
+    // Phase 2: prepend text-only steps above the image grid (no images yet)
     const JSON_URL = "/assets/data/htu_000_en.json"; // <-- your new file
-    const grid = document.getElementById("howtouseGrid");
-    if (!grid) return;
+
+    const stepsRoot = document.getElementById("htuSteps");
+    if (stepsRoot) {
+      fetch(JSON_URL, { cache: "no-store" })
+        .then(r => {
+          if (!r.ok) throw new Error("Failed to load JSON: " + r.status);
+          return r.json();
+        })
+        .then(list => {
+          if (!Array.isArray(list)) throw new Error("JSON root must be an array");
+          // render each RECORD as ONE vertical card (do not split lines into grid items)
+          stepsRoot.innerHTML = "";
+          list.forEach((it, idx) => {
+            const id = (it && it.id) ? String(it.id) : ("htu_unknown_" + (idx+1));
+            const title = (it && it.title) ? String(it.title) : "";
+            // support both 'text' and 'body' just in case
+            const body = (it && (it.text ?? it.body ?? it.desc)) ? String(it.text ?? it.body ?? it.desc) : "";
+
+            const card = document.createElement("section");
+            card.className = "htu-step";
+            card.innerHTML = `
+              <div class="meta">
+                <span class="id">${escapeHtml(id)}</span>
+                <h2 class="title">${escapeHtml(title)}</h2>
+              </div>
+              <div class="body">${escapeHtml(body)}</div>
+              <div class="missing">Image: (not added yet)</div>
+            `;
+            stepsRoot.appendChild(card);
+          });
+        })
+        .catch(err => {
+          // keep page usable even if JSON missing
+          stepsRoot.innerHTML = `<div class="htu-step">
+              <div class="meta"><span class="id">htu_000</span><h2 class="title">How-to text</h2></div>
+              <div class="body">Could not load: ${escapeHtml(JSON_URL)}\n${escapeHtml(String(err))}</div>
+            </div>`;
+          console.warn(err);
+        });
+    }
 
     function escapeHtml(str){
-      return String(str ?? "")
+      return String(str)
         .replaceAll("&","&amp;")
         .replaceAll("<","&lt;")
         .replaceAll(">","&gt;")
         .replaceAll('"',"&quot;")
-        .replaceAll("'","&#039;");
+        .replaceAll("'","&#039;")
+        .replaceAll("\n","<br/>");
     }
 
-    function makeTextCard(item){
-      const wrap = document.createElement("div");
-      wrap.className = "howtouse-item howtouse-text";
-
-      const id = document.createElement("div");
-      id.className = "htu-id";
-      id.textContent = item.id ?? "";
-
-      const title = document.createElement("p");
-      title.className = "htu-title";
-      title.textContent = item.title ?? "";
-
-      const body = document.createElement("p");
-      body.className = "htu-body";
-      // keep numbering/line breaks as-is
-      body.innerHTML = escapeHtml(item.text ?? "").replaceAll("\n","<br/>");
-
-      wrap.appendChild(id);
-      if ((item.title ?? "").trim()) wrap.appendChild(title);
-      if ((item.text ?? "").trim()) wrap.appendChild(body);
-
-      return wrap;
-    }
-
-    fetch(JSON_URL, { cache: "no-cache" })
-      .then(r => {
-        if (!r.ok) throw new Error("HTTP " + r.status);
-        return r.json();
-      })
-      .then(list => {
-        if (!Array.isArray(list) || list.length === 0) return;
-
-        // prepend in reverse so the first item ends up first in the DOM
-        for (let i = list.length - 1; i >= 0; i--) {
-          grid.insertBefore(makeTextCard(list[i]), grid.firstChild);
-        }
-      })
-      .catch(err => {
-        // silent fail is OK (e.g., json not deployed yet)
-        console.warn("[howtouse] HTU JSON not loaded:", JSON_URL, err);
-      });
-  })();
+  });
 </script>
 
 </body>
