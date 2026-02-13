@@ -662,6 +662,9 @@ if (DEBUG){
       p2Res.json(), p3Res.json(), strRes.json()
     ]);
 
+  __p3Layout = p3Layout;   // ✅ 추가: Phase3 layout 저장
+  __strings  = strings;    // ✅ (선택) strings 저장
+
     if (Array.isArray(p2Layout)){
       const steps = groupIntoSteps(p2Layout);
       renderPhase2(steps, strings);
