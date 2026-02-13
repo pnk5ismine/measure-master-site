@@ -20,22 +20,22 @@
       {
         "sid": "htu_111",
         "role": "label",
-        "x": 85,
-        "y": 30,
+        "x": 64.64,
+        "y": 34.06,
         "anchor": "top-left"
       },
       {
         "sid": "htu_112",
         "role": "label",
-        "x": 85,
-        "y": 60,
+        "x": 78.98,
+        "y": 64.14,
         "anchor": "top-center"
       },
       {
         "sid": "htu_113",
         "role": "label",
-        "x": 85,
-        "y": 90,
+        "x": 94.92,
+        "y": 92.63,
         "anchor": "top-right"
       }
     ]
@@ -56,162 +56,162 @@
       {
         "sid": "htu_121",
         "role": "label",
-        "x": 15,
-        "y": 30,
+        "x": 12.45,
+        "y": 28.69,
         "anchor": "top-left"
       },
       {
         "sid": "htu_122",
         "role": "label",
-        "x": 20,
-        "y": 35,
+        "x": 17.23,
+        "y": 32.07,
         "anchor": "top-left"
       },
       {
         "sid": "htu_123",
         "role": "label",
-        "x": 25,
-        "y": 40,
+        "x": 37.55,
+        "y": 35.06,
         "anchor": "top-center"
       },
       {
         "sid": "htu_124",
         "role": "label",
-        "x": 30,
-        "y": 45,
+        "x": 36.95,
+        "y": 39.44,
         "anchor": "top-center"
       },
       {
         "sid": "htu_125",
         "role": "label",
-        "x": 35,
-        "y": 50,
+        "x": 54.28,
+        "y": 43.23,
         "anchor": "top-right"
       },
       {
         "sid": "htu_126",
         "role": "label",
-        "x": 40,
-        "y": 55,
+        "x": 55.28,
+        "y": 28.29,
         "anchor": "top-right"
       },
       {
         "sid": "htu_127",
         "role": "label",
-        "x": 45,
-        "y": 60,
+        "x": 54.28,
+        "y": 31.67,
         "anchor": "top-right"
       },
       {
         "sid": "htu_128",
         "role": "label",
-        "x": 50,
-        "y": 60,
+        "x": 100.9,
+        "y": 71.91,
         "anchor": "center-right"
       },
       {
         "sid": "htu_129",
         "role": "label",
-        "x": 55,
-        "y": 65,
+        "x": 14.64,
+        "y": 49.8,
         "anchor": "top-left"
       },
       {
         "sid": "htu_130",
         "role": "label",
-        "x": 60,
-        "y": 70,
+        "x": 19.42,
+        "y": 53.78,
         "anchor": "top-left"
       },
       {
         "sid": "htu_131",
         "role": "label",
-        "x": 65,
-        "y": 75,
+        "x": 33.37,
+        "y": 57.17,
         "anchor": "top-center"
       },
       {
         "sid": "htu_132",
         "role": "label",
-        "x": 15,
-        "y": 80,
+        "x": 33.96,
+        "y": 60.76,
         "anchor": "top-center"
       },
       {
         "sid": "htu_133",
         "role": "label",
-        "x": 70,
-        "y": 40,
+        "x": 36.35,
+        "y": 64.94,
         "anchor": "top-center"
       },
       {
         "sid": "htu_134",
         "role": "label",
-        "x": 70,
-        "y": 45,
+        "x": 44.92,
+        "y": 68.13,
         "anchor": "top-right"
       },
       {
         "sid": "htu_135",
         "role": "label",
-        "x": 70,
-        "y": 50,
+        "x": 48.71,
+        "y": 72.31,
         "anchor": "top-right"
       },
       {
         "sid": "htu_136",
         "role": "label",
-        "x": 70,
-        "y": 55,
+        "x": 84.96,
+        "y": 30.08,
         "anchor": "top-right"
       },
       {
         "sid": "htu_137",
         "role": "label",
-        "x": 70,
-        "y": 60,
+        "x": 85.16,
+        "y": 34.86,
         "anchor": "top-right"
       },
       {
         "sid": "htu_138",
         "role": "label",
-        "x": 70,
-        "y": 70,
+        "x": 84.76,
+        "y": 39.44,
         "anchor": "top-right"
       },
       {
         "sid": "htu_139",
         "role": "label",
-        "x": 70,
-        "y": 75,
+        "x": 84.96,
+        "y": 44.42,
         "anchor": "top-right"
       },
       {
         "sid": "htu_140",
         "role": "label",
-        "x": 70,
-        "y": 80,
+        "x": 84.96,
+        "y": 49,
         "anchor": "top-right"
       },
       {
         "sid": "htu_141",
         "role": "label",
-        "x": 70,
-        "y": 85,
+        "x": 84.96,
+        "y": 53.98,
         "anchor": "top-right"
       },
       {
         "sid": "htu_142",
         "role": "label",
-        "x": 70,
-        "y": 90,
+        "x": 85.76,
+        "y": 59.56,
         "anchor": "top-right"
       },
       {
         "sid": "htu_143",
         "role": "label",
-        "x": 70,
-        "y": 95,
+        "x": 84.76,
+        "y": 64.94,
         "anchor": "top-right"
       }
     ]
@@ -232,22 +232,22 @@
       {
         "sid": "htu_151",
         "role": "label",
-        "x": 20,
-        "y": 70,
+        "x": 17.83,
+        "y": 64.74,
         "anchor": "top-left"
       },
       {
         "sid": "htu_152",
         "role": "label",
-        "x": 70,
-        "y": 70,
+        "x": 80.78,
+        "y": 65.54,
         "anchor": "top-right"
       },
       {
         "sid": "htu_153",
         "role": "label",
-        "x": 50,
-        "y": 90,
+        "x": 52.09,
+        "y": 77.69,
         "anchor": "bottom-center"
       }
     ]
@@ -293,15 +293,15 @@
       {
         "sid": "htu_211",
         "role": "label",
-        "x": 20,
-        "y": 85,
+        "x": 10.46,
+        "y": 83.07,
         "anchor": "bottom-start"
       },
       {
         "sid": "htu_212",
         "role": "label",
-        "x": 60,
-        "y": 80,
+        "x": 15.04,
+        "y": 88.25,
         "anchor": "bottom-end"
       }
     ]
@@ -322,8 +322,8 @@
       {
         "sid": "htu_221",
         "role": "label",
-        "x": 60,
-        "y": 60,
+        "x": 4.68,
+        "y": 68.33,
         "anchor": "bottom-end"
       }
     ]
@@ -344,8 +344,8 @@
       {
         "sid": "htu_231",
         "role": "label",
-        "x": 50,
-        "y": 90,
+        "x": 48.31,
+        "y": 84.66,
         "anchor": "bottom-center"
       }
     ]
