@@ -192,7 +192,7 @@ nav a{color:var(--muted)}
     }
     .htu-step-title{
       margin:0 0 10px;
-      font-size: 18px;
+      font-size: 36px;
       line-height: 1.25;
     }
     .htu-step-title .htu-id{
@@ -247,7 +247,7 @@ nav a{color:var(--muted)}
 .htu-subject{
   width:100%;
   text-align:center;         /* 중앙정렬 */
-  font-size:26px;            /* large */
+  font-size:70px;            /*  xx large */
   font-weight:700;
   padding:24px 0 18px;
   margin-top:40px;
@@ -301,7 +301,7 @@ nav a{color:var(--muted)}
 
 /* Title (image 상단 중앙) */
 .htu-ov.title{
-  font-size:16px;                 /* medium */
+  font-size:48px;                 /* x large */
   font-weight:600;
 }
 </style>
@@ -354,6 +354,15 @@ nav a{color:var(--muted)}
   <div id="htuSteps" class="htu-steps"></div>
 
   <!-- Phase 3 (layout+strings): themed blocks rendered here -->
+
+<!-- DEBUG tools (only for editing) -->
+<div id="htuDebugBar" style="display:none; gap:8px; margin:10px 0;">
+  <button id="htuExportBtn" type="button">Export Layout JSON</button>
+  <button id="htuCopyBtn" type="button">Copy to Clipboard</button>
+</div>
+
+<textarea id="htuExportBox" style="display:none; width:100%; height:220px;"></textarea>
+
   <div id="htuGallery" class="htu-groups"></div>
 
   </section>
@@ -401,7 +410,12 @@ nav a{color:var(--muted)}
       btn.classList.toggle("active", btn.getAttribute("data-lang-btn") === lang);
     });
   }
+
 const DEBUG = true;
+
+let __p3Layout = null;   // 현재 로딩된 Phase3 layout 원본(수정 대상)
+let __strings = null;    // strings (참고용)
+
 
   // ---------- Phase 2 (Steps) ----------
   function groupIntoSteps(rows){
@@ -604,6 +618,10 @@ if (DEBUG){
     div.style.left = x + "%";
     div.style.top  = y + "%";
 
+    ov.x = Number(x.toFixed(2));   // ✅ layout에도 기록
+    ov.y = Number(y.toFixed(2));   // ✅ layout에도 기록
+
+
     console.log(ov.sid, "x:", x.toFixed(2), "y:", y.toFixed(2));
   });
 
@@ -664,6 +682,33 @@ if (DEBUG){
     });
 
     loadAllAndRender().catch(e => console.warn("[HTU] render failed:", e));
+    // DEBUG export tools
+    const bar = document.getElementById("htuDebugBar");
+    const box = document.getElementById("htuExportBox");
+    const exportBtn = document.getElementById("htuExportBtn");
+    const copyBtn = document.getElementById("htuCopyBtn");
+
+    if (DEBUG && bar && box && exportBtn && copyBtn){
+      bar.style.display = "flex";
+      box.style.display = "block";
+
+      exportBtn.addEventListener("click", () => {
+        if (!__p3Layout) {
+          alert("Phase3 layout not loaded yet.");
+          return;
+        }
+        box.value = JSON.stringify(__p3Layout, null, 2);
+      });
+
+      copyBtn.addEventListener("click", async () => {
+        try{
+          await navigator.clipboard.writeText(box.value || "");
+          alert("Copied!");
+        }catch(e){
+          alert("Copy failed. Select all and copy manually.");
+        }
+      });
+    }
   });
 })();
 </script>
