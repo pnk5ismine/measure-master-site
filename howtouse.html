@@ -235,6 +235,74 @@ nav a{color:var(--muted)}
       display:block;
     }
 
+/* ===== Phase 3: Layout + Strings (themed blocks) ===== */
+.htu-groups{
+  display:flex;
+  flex-direction:column;
+  gap:18px;
+  margin: 18px 0 10px;
+}
+
+/* subject: 전폭 텍스트 밴드 */
+.htu-subject{
+  width:100%;
+  padding:10px 12px;
+  border:1px solid var(--border);
+  border-radius:12px;
+  background: var(--card);
+  font-weight:700;
+  text-align:center;
+}
+
+/* spacer */
+.htu-spacer{height:18px;}
+.htu-spacer.lg{height:32px;}
+.htu-spacer.md{height:18px;}
+.htu-spacer.sm{height:10px;}
+
+/* grid: PC/Tablet 2열, Mobile 1열 */
+.htu-grid{
+  display:grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap:12px;
+}
+@media (max-width:640px){
+  .htu-grid{ grid-template-columns: 1fr; }
+}
+
+/* thumbnail 1:1 */
+.htu-thumb{
+  position:relative;
+  display:block;
+  border-radius:12px;
+  overflow:hidden;
+  border:1px solid var(--border);
+  background:#fff;
+  aspect-ratio: 1 / 1;
+}
+.htu-thumb img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  display:block;
+}
+
+/* overlay text */
+.htu-ov{
+  position:absolute;
+  padding:6px 8px;
+  border-radius:10px;
+  background: rgba(15,23,42,.62);
+  color:#fff;
+  font-size:12px;
+  line-height:1.25;
+  white-space:pre-line;
+  backdrop-filter: blur(4px);
+}
+.htu-ov.title{
+  font-weight:700;
+  background: rgba(15,23,42,.70);
+}
 </style>
 </head>
 <body>
@@ -284,90 +352,8 @@ nav a{color:var(--muted)}
   <!-- Phase 2 (text-first): grouped Step blocks inserted here -->
   <div id="htuSteps" class="htu-steps"></div>
 
-<div class="howtouse-grid">
-
-  <a class="howtouse-item" href="/images/howtouse/1_htu_home.jpg" target="_blank" rel="noopener">
-    <img src="/images/howtouse/1_htu_home.jpg" alt="Step 01 - Home" loading="lazy">
-  </a>
-
-  <a class="howtouse-item" href="/images/howtouse/2_htu_full.jpg" target="_blank" rel="noopener">
-    <img src="/images/howtouse/2_htu_full.jpg" alt="Step 02 - Full Screen" loading="lazy">
-  </a>
-
-  <a class="howtouse-item" href="/images/howtouse/3_htu_side.jpg" target="_blank" rel="noopener">
-    <img src="/images/howtouse/3_htu_side.jpg" alt="Step 03 - Side Panel" loading="lazy">
-  </a>
-
-  <a class="howtouse-item" href="/images/howtouse/4_htu_config.jpg" target="_blank" rel="noopener">
-    <img src="/images/howtouse/4_htu_config.jpg" alt="Step 04 - Configuration" loading="lazy">
-  </a>
-
-  <a class="howtouse-item" href="/images/howtouse/5_htu_ar_guide.jpg" target="_blank" rel="noopener">
-    <img src="/images/howtouse/5_htu_ar_guide.jpg" alt="Step 05 - AR Guide" loading="lazy">
-  </a>
-
-  <a class="howtouse-item" href="/images/howtouse/6_htu_scre1.jpg" target="_blank" rel="noopener">
-    <img src="/images/howtouse/6_htu_scre1.jpg" alt="Step 06 - Screen Mode 1" loading="lazy">
-  </a>
-
-  <a class="howtouse-item" href="/images/howtouse/7_htu_scre2.jpg" target="_blank" rel="noopener">
-    <img src="/images/howtouse/7_htu_scre2.jpg" alt="Step 07 - Screen Mode 2" loading="lazy">
-  </a>
-
-  <a class="howtouse-item" href="/images/howtouse/8_htu_stra.jpg" target="_blank" rel="noopener">
-    <img src="/images/howtouse/8_htu_stra.jpg" alt="Step 08 - Straight Mode" loading="lazy">
-  </a>
-
-  <a class="howtouse-item" href="/images/howtouse/9_htu_scre3.jpg" target="_blank" rel="noopener">
-    <img src="/images/howtouse/9_htu_scre3.jpg" alt="Step 09 - Screen Mode 3" loading="lazy">
-  </a>
-
-  <a class="howtouse-item" href="/images/howtouse/10_htu_pm_00.jpg" target="_blank" rel="noopener">
-    <img src="/images/howtouse/10_htu_pm_00.jpg" alt="Step 10 - Perspective Mode (Intro)" loading="lazy">
-  </a>
-
-  <a class="howtouse-item" href="/images/howtouse/11_htu_pers2.jpg" target="_blank" rel="noopener">
-    <img src="/images/howtouse/11_htu_pers2.jpg" alt="Step 11 - Perspective Mode 2" loading="lazy">
-  </a>
-
-  <a class="howtouse-item" href="/images/howtouse/12_htu_pers1.jpg" target="_blank" rel="noopener">
-    <img src="/images/howtouse/12_htu_pers1.jpg" alt="Step 12 - Perspective Mode 1" loading="lazy">
-  </a>
-
-  <a class="howtouse-item" href="/images/howtouse/13_htu_rect.jpg" target="_blank" rel="noopener">
-    <img src="/images/howtouse/13_htu_rect.jpg" alt="Step 13 - Rect Mode" loading="lazy">
-  </a>
-
-  <a class="howtouse-item" href="/images/howtouse/14_htu_rect2.jpg" target="_blank" rel="noopener">
-    <img src="/images/howtouse/14_htu_rect2.jpg" alt="Step 14 - Rect Mode 2" loading="lazy">
-  </a>
-
-  <a class="howtouse-item" href="/images/howtouse/15_htu_move.jpg" target="_blank" rel="noopener">
-    <img src="/images/howtouse/15_htu_move.jpg" alt="Step 15 - Move Points" loading="lazy">
-  </a>
-
-  <a class="howtouse-item" href="/images/howtouse/16_htu_move2.jpg" target="_blank" rel="noopener">
-    <img src="/images/howtouse/16_htu_move2.jpg" alt="Step 16 - Move Points 2" loading="lazy">
-  </a>
-
-  <a class="howtouse-item" href="/images/howtouse/17_htu_ar_ex1_en.jpg" target="_blank" rel="noopener">
-    <img src="/images/howtouse/17_htu_ar_ex1_en.jpg" alt="Step 17 - AR Example" loading="lazy">
-  </a>
-
-  <a class="howtouse-item" href="/images/howtouse/18_premier.jpg" target="_blank" rel="noopener">
-    <img src="/images/howtouse/18_premier.jpg" alt="Step 18 - Premier" loading="lazy">
-  </a>
-  <a class="howtouse-item" href="/images/howtouse/19_htu_exm1_1.jpg" target="_blank" rel="noopener">
-    <img src="/images/howtouse/19_htu_exm1_1.jpg" alt="Step 19 - Example1-1" loading="lazy">
-  </a>
-  <a class="howtouse-item" href="/images/howtouse/20_htu_exm1_2.jpg" target="_blank" rel="noopener">
-    <img src="/images/howtouse/20_htu_exm1_2.jpg" alt="Step 20 - Example1-2" loading="lazy">
-  </a>
-  <a class="howtouse-item" href="/images/howtouse/21_htu_exm1_3.jpg" target="_blank" rel="noopener">
-    <img src="/images/howtouse/21_htu_exm1_3.jpg" alt="Step 21 - Example1-2" loading="lazy">
-  </a>
-
-</div>
+  <!-- Phase 3 (layout+strings): themed blocks rendered here -->
+  <div id="htuGallery" class="htu-groups"></div>
 
   </section>
 </main>
@@ -386,143 +372,267 @@ nav a{color:var(--muted)}
 
 
 <script>
-  // ===== Phase 2: load separate HowToUse JSON (htu_000_en.json) and render grouped Step boxes =====
-  (function(){
-    const JSON_URL = "/assets/data/htu_000_en.json"; // <-- your new file
+/**
+ * HTU Unified Renderer
+ * - Phase2: /assets/data/htu_000_layout.json  + htu_strings_{lang}.json
+ * - Phase3: /assets/data/htu_layout.json      + htu_strings_{lang}.json
+ * - Lang buttons refresh both at once
+ */
+(function(){
+  const URLS = {
+    phase2Layout: "/assets/data/htu_000_layout.json",
+    phase3Layout: "/assets/data/htu_layout.json",
+    strings: (lang) => `/assets/data/htu_strings_${lang}.json`
+  };
 
-    function groupIntoSteps(rows){
-      const steps = [];
-      let cur = null;
+  function getLang(){
+    return localStorage.getItem("htu_lang") || "en";
+  }
+  function setLang(lang){
+    localStorage.setItem("htu_lang", lang);
+  }
+  function t(strings, sid){
+    return (strings && sid && strings[sid]) ? strings[sid] : (sid || "");
+  }
 
-      for (const r of rows){
-        if (!r || typeof r !== "object") continue;
-
-        const kind = String(r.kind ?? "").trim();
-
-        if (kind === "step_title"){
-          cur = { title: r.text ?? "", id: r.id ?? "", items: [] };
-          steps.push(cur);
-          continue;
-        }
-
-        if (!cur){
-          // If file starts without a title, create one bucket.
-          cur = { title: "How to use", id: "htu_000", items: [] };
-          steps.push(cur);
-        }
-
-        cur.items.push({
-          kind,
-          id: r.id ?? "",
-          num: r.num,
-          text: r.text ?? ""
-        });
-      }
-      return steps;
-    }
-
-    function renderSteps(steps){
-      const host = document.getElementById("htuSteps");
-      if (!host) return;
-
-      host.innerHTML = "";
-
-      for (const st of steps){
-        const box = document.createElement("section");
-        box.className = "htu-step";
-
-        const h2 = document.createElement("h2");
-        h2.className = "htu-step-title";
-
-        // id badge + title text
-        if (st.id){
-          const idSpan = document.createElement("span");
-          idSpan.className = "htu-id";
-          idSpan.textContent = st.id;
-          h2.appendChild(idSpan);
-        }
-        h2.appendChild(document.createTextNode(st.title || ""));
-        box.appendChild(h2);
-
-        let ol = null;
-        const flushOl = () => {
-          if (ol){
-            box.appendChild(ol);
-            ol = null;
-          }
-        };
-
-        for (const it of st.items){
-          if (it.kind === "step_body"){
-            if (!ol) ol = document.createElement("ol");
-
-            const li = document.createElement("li");
-            // numbering inside JSON (do not auto-generate)
-            if (typeof it.num === "number") li.value = it.num;
-            li.textContent = it.text || "";
-            ol.appendChild(li);
-          } else if (it.kind === "step_note"){
-            flushOl();
-            const p = document.createElement("p");
-            p.className = "htu-note";
-            p.textContent = it.text || "";
-            box.appendChild(p);
-          } else {
-            // unknown kinds: treat as note
-            flushOl();
-            const p = document.createElement("p");
-            p.className = "htu-note";
-            p.textContent = it.text || "";
-            box.appendChild(p);
-          }
-        }
-        flushOl();
-
-        // ✅ (추가) 제목에서 Step 번호를 뽑아 이미지 붙이기: 텍스트 다음 줄
-        const m = String(st.title || "").match(/Step\s*(\d+)\s*\./i);
-        const stepNo = m ? Number(m[1]) : null;
-
-        if (stepNo != null) {
-          const imgBox = document.createElement("div");
-          imgBox.className = "htu-step-image";
-
-          // 파일명 규칙: /images/howtouse/howtouse_step{N}.jpg
-          const imgUrl = `/images/howtouse/howtouse_step${stepNo}.jpg`;
-
-          const a = document.createElement("a");
-          a.href = imgUrl;
-          a.target = "_blank";
-          a.rel = "noopener";
-
-          const img = document.createElement("img");
-          img.src = imgUrl;
-          img.alt = `HowToUse Step ${stepNo}`;
-          img.loading = "lazy";
-
-          a.appendChild(img);
-          imgBox.appendChild(a);
-          box.appendChild(imgBox);
-        }
-
-        host.appendChild(box);
-
-      }
-    }
-
-    document.addEventListener("DOMContentLoaded", async () => {
-      try{
-        const res = await fetch(JSON_URL, { cache: "no-store" });
-        if (!res.ok) throw new Error("HTTP " + res.status);
-        const data = await res.json();
-        if (!Array.isArray(data)) throw new Error("JSON root is not an array");
-
-        const steps = groupIntoSteps(data);
-        renderSteps(steps);
-      }catch(e){
-        console.warn("[HowToUse Phase2] Failed to load:", JSON_URL, e);
-      }
+  function setLangButtonsActive(lang){
+    document.querySelectorAll("[data-lang-btn]").forEach(btn => {
+      btn.classList.toggle("active", btn.getAttribute("data-lang-btn") === lang);
     });
-  })();
+  }
+
+  // ---------- Phase 2 (Steps) ----------
+  function groupIntoSteps(rows){
+    const steps = [];
+    let cur = null;
+
+    for (const r of rows){
+      if (!r || typeof r !== "object") continue;
+      const kind = String(r.kind ?? "").trim();
+
+      if (kind === "step_title"){
+        cur = { sid: r.sid ?? r.id ?? "", id: r.id ?? "", items: [] };
+        steps.push(cur);
+        continue;
+      }
+
+      if (!cur){
+        cur = { sid: "htu_000", id: "htu_000", items: [] };
+        steps.push(cur);
+      }
+
+      cur.items.push({
+        kind,
+        sid: r.sid ?? r.id ?? "",
+        num: r.num
+      });
+    }
+    return steps;
+  }
+
+  function renderPhase2(steps, strings){
+    const host = document.getElementById("htuSteps");
+    if (!host) return;
+
+    host.innerHTML = "";
+
+    for (const st of steps){
+      const box = document.createElement("section");
+      box.className = "htu-step";
+
+      const h2 = document.createElement("h2");
+      h2.className = "htu-step-title";
+      h2.appendChild(document.createTextNode(t(strings, st.sid)));
+      box.appendChild(h2);
+
+      let ol = null;
+      const flushOl = () => {
+        if (ol){
+          box.appendChild(ol);
+          ol = null;
+        }
+      };
+
+      for (const it of st.items){
+        if (it.kind === "step_body"){
+          if (!ol) ol = document.createElement("ol");
+
+          const li = document.createElement("li");
+          if (typeof it.num === "number") li.value = it.num;
+          li.textContent = t(strings, it.sid);
+          ol.appendChild(li);
+
+        } else {
+          flushOl();
+          const p = document.createElement("p");
+          p.className = "htu-note";
+          p.textContent = t(strings, it.sid);
+          box.appendChild(p);
+        }
+      }
+      flushOl();
+
+      // Step 1~4 image (2:1) auto-attach based on translated title text
+      const titleText = t(strings, st.sid);
+      const m = String(titleText || "").match(/Step\s*(\d+)\s*\./i);
+      const stepNo = m ? Number(m[1]) : null;
+
+      if (stepNo != null) {
+        const imgBox = document.createElement("div");
+        imgBox.className = "htu-step-image";
+
+        const imgUrl = `/images/howtouse/howtouse_step${stepNo}.jpg`;
+
+        const a = document.createElement("a");
+        a.href = imgUrl;
+        a.target = "_blank";
+        a.rel = "noopener";
+
+        const img = document.createElement("img");
+        img.src = imgUrl;
+        img.alt = `HowToUse Step ${stepNo}`;
+        img.loading = "lazy";
+
+        a.appendChild(img);
+        imgBox.appendChild(a);
+        box.appendChild(imgBox);
+      }
+
+      host.appendChild(box);
+    }
+  }
+
+  // ---------- Phase 3 (Overlay Gallery) ----------
+  function applyAnchorStyle(el, x, y, anchor){
+    el.style.left = (x ?? 50) + "%";
+    el.style.top  = (y ?? 50) + "%";
+
+    const a = anchor || "top-left";
+    let tx = "0%";
+    let ty = "0%";
+
+    if (a.includes("center")) tx = "-50%";
+    if (a.includes("right"))  tx = "-100%";
+    if (a.includes("bottom")) ty = "-100%";
+    if (a === "center") { tx = "-50%"; ty = "-50%"; }
+    if (a === "top-center") { tx = "-50%"; ty = "0%"; }
+    if (a === "bottom-center") { tx = "-50%"; ty = "-100%"; }
+    if (a === "center-right") { tx = "-100%"; ty = "-50%"; }
+    if (a === "center-left") { tx = "0%"; ty = "-50%"; }
+
+    el.style.transform = `translate(${tx}, ${ty})`;
+  }
+
+  function renderPhase3(layout, strings){
+    const host = document.getElementById("htuGallery");
+    if (!host) return;
+
+    host.innerHTML = "";
+
+    let grid = null;
+    const flushGrid = () => {
+      if (grid){
+        host.appendChild(grid);
+        grid = null;
+      }
+    };
+
+    for (const node of layout){
+      if (!node || typeof node !== "object") continue;
+
+      if (node.kind === "subject"){
+        flushGrid();
+        const band = document.createElement("div");
+        band.className = "htu-subject";
+        band.textContent = t(strings, node.sid);
+        host.appendChild(band);
+        continue;
+      }
+
+      if (node.kind === "spacer"){
+        flushGrid();
+        const sp = document.createElement("div");
+        sp.className = `htu-spacer ${(node.size || "md")}`;
+        host.appendChild(sp);
+        continue;
+      }
+
+      if (node.kind === "image"){
+        if (!grid){
+          grid = document.createElement("div");
+          grid.className = "htu-grid";
+        }
+
+        const a = document.createElement("a");
+        a.className = "htu-thumb";
+        a.href = node.src;
+        a.target = "_blank";
+        a.rel = "noopener";
+
+        const img = document.createElement("img");
+        img.src = node.src;
+        img.alt = t(strings, node.altSid);
+        img.loading = "lazy";
+        a.appendChild(img);
+
+        const ovs = Array.isArray(node.overlays) ? node.overlays : [];
+        for (const ov of ovs){
+          const div = document.createElement("div");
+          div.className = "htu-ov " + (ov.role === "title" ? "title" : "");
+          div.textContent = t(strings, ov.sid);
+          applyAnchorStyle(div, ov.x, ov.y, ov.anchor);
+          a.appendChild(div);
+        }
+
+        grid.appendChild(a);
+        continue;
+      }
+    }
+
+    flushGrid();
+  }
+
+  // ---------- Unified load + render ----------
+  async function loadAllAndRender(){
+    const lang = getLang();
+    setLangButtonsActive(lang);
+
+    const [p2Res, p3Res, strRes] = await Promise.all([
+      fetch(URLS.phase2Layout, { cache: "no-store" }),
+      fetch(URLS.phase3Layout, { cache: "no-store" }),
+      fetch(URLS.strings(lang), { cache: "no-store" })
+    ]);
+
+    if (!p2Res.ok) throw new Error("Phase2 layout HTTP " + p2Res.status);
+    if (!p3Res.ok) throw new Error("Phase3 layout HTTP " + p3Res.status);
+    if (!strRes.ok) throw new Error("Strings HTTP " + strRes.status);
+
+    const [p2Layout, p3Layout, strings] = await Promise.all([
+      p2Res.json(), p3Res.json(), strRes.json()
+    ]);
+
+    if (Array.isArray(p2Layout)){
+      const steps = groupIntoSteps(p2Layout);
+      renderPhase2(steps, strings);
+    }
+    if (Array.isArray(p3Layout)){
+      renderPhase3(p3Layout, strings);
+    }
+  }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    // language buttons
+    document.querySelectorAll("[data-lang-btn]").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const lang = btn.getAttribute("data-lang-btn");
+        setLang(lang);
+        loadAllAndRender().catch(e => console.warn("[HTU] render failed:", e));
+      });
+    });
+
+    loadAllAndRender().catch(e => console.warn("[HTU] render failed:", e));
+  });
+})();
 </script>
 
 </body>
