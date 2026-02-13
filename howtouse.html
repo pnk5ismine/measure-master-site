@@ -296,6 +296,12 @@ nav a{color:var(--muted)}
   background:rgba(192,192,192,0.1); /* silver 0.1 */
   border-radius:6px;
   white-space:nowrap;
+
+  if (typeof ov.w === "number") {
+    div.style.width = ov.w + "%";
+    div.style.whiteSpace = "normal";
+  }
+
   pointer-events:none;
 }
 
@@ -597,6 +603,7 @@ let __strings = null;    // strings (참고용)
           div.className = "htu-ov " + (ov.role === "title" ? "title" : "");
           div.textContent = t(strings, ov.sid);
           applyAnchorStyle(div, ov.x, ov.y, ov.anchor);
+if (typeof ov.w === "number") div.style.width = ov.w + "%";  // ✅ 개별 폭
 a.appendChild(div);
 
 if (DEBUG){
