@@ -243,15 +243,14 @@ nav a{color:var(--muted)}
   margin: 18px 0 10px;
 }
 
-/* subject: 전폭 텍스트 밴드 */
+/* ===== Subject Band ===== */
 .htu-subject{
   width:100%;
-  padding:10px 12px;
-  border:1px solid var(--border);
-  border-radius:12px;
-  background: var(--card);
+  text-align:center;         /* 중앙정렬 */
+  font-size:26px;            /* large */
   font-weight:700;
-  text-align:center;
+  padding:24px 0 18px;
+  margin-top:40px;
 }
 
 /* spacer */
@@ -260,48 +259,50 @@ nav a{color:var(--muted)}
 .htu-spacer.md{height:18px;}
 .htu-spacer.sm{height:10px;}
 
-/* grid: PC/Tablet 2열, Mobile 1열 */
+/* ===== Grid ===== */
 .htu-grid{
   display:grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap:12px;
-}
-@media (max-width:640px){
-  .htu-grid{ grid-template-columns: 1fr; }
+  grid-template-columns:repeat(2,1fr);  /* PC / Tablet */
+  gap:18px;
 }
 
-/* thumbnail 1:1 */
+@media (max-width:768px){
+  .htu-grid{
+    grid-template-columns:1fr;          /* Mobile */
+  }
+}
+
+/* ===== Image container ===== */
 .htu-thumb{
   position:relative;
   display:block;
   border-radius:12px;
   overflow:hidden;
-  border:1px solid var(--border);
-  background:#fff;
-  aspect-ratio: 1 / 1;
 }
+
 .htu-thumb img{
   width:100%;
-  height:100%;
+  aspect-ratio:1/1;   /* 1:1 */
   object-fit:cover;
   display:block;
 }
 
-/* overlay text */
+/* ===== Overlay Labels (Unified Style) ===== */
 .htu-ov{
   position:absolute;
-  padding:6px 8px;
-  border-radius:10px;
-  background: rgba(15,23,42,.62);
-  color:#fff;
-  font-size:12px;
-  line-height:1.25;
-  white-space:pre-line;
-  backdrop-filter: blur(4px);
+  padding:6px 10px;
+  font-size:12px;                 /* 기본 small */
+  color:#000;                     /* black */
+  background:rgba(192,192,192,0.1); /* silver 0.1 */
+  border-radius:6px;
+  white-space:nowrap;
+  pointer-events:none;
 }
+
+/* Title (image 상단 중앙) */
 .htu-ov.title{
-  font-weight:700;
-  background: rgba(15,23,42,.70);
+  font-size:16px;                 /* medium */
+  font-weight:600;
 }
 </style>
 </head>
@@ -400,6 +401,7 @@ nav a{color:var(--muted)}
       btn.classList.toggle("active", btn.getAttribute("data-lang-btn") === lang);
     });
   }
+const DEBUG = true;
 
   // ---------- Phase 2 (Steps) ----------
   function groupIntoSteps(rows){
@@ -581,7 +583,38 @@ nav a{color:var(--muted)}
           div.className = "htu-ov " + (ov.role === "title" ? "title" : "");
           div.textContent = t(strings, ov.sid);
           applyAnchorStyle(div, ov.x, ov.y, ov.anchor);
-          a.appendChild(div);
+a.appendChild(div);
+
+if (DEBUG){
+  div.style.pointerEvents = "auto";
+  div.style.cursor = "move";
+
+  let dragging = false;
+
+  div.addEventListener("mousedown", () => { dragging = true; });
+  document.addEventListener("mouseup", () => { dragging = false; });
+
+  document.addEventListener("mousemove", (e) => {
+    if (!dragging) return;
+
+    const rect = a.getBoundingClientRect();
+    const x = ((e.clientX - rect.left) / rect.width) * 100;
+    const y = ((e.clientY - rect.top) / rect.height) * 100;
+
+    div.style.left = x + "%";
+    div.style.top  = y + "%";
+
+    console.log(ov.sid, "x:", x.toFixed(2), "y:", y.toFixed(2));
+  });
+
+  div.addEventListener("wheel", (e) => {
+    e.preventDefault();
+    let size = parseFloat(getComputedStyle(div).fontSize);
+    size += (e.deltaY < 0 ? 1 : -1);
+    div.style.fontSize = size + "px";
+  }, { passive:false });
+}
+
         }
 
         grid.appendChild(a);
