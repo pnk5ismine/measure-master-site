@@ -70,15 +70,15 @@
       {
         "sid": "htu_123",
         "role": "label",
-        "x": 37.55,
+        "x": 33.57,
         "y": 35.06,
         "anchor": "top-center"
       },
       {
         "sid": "htu_124",
         "role": "label",
-        "x": 36.95,
-        "y": 39.44,
+        "x": 34.76,
+        "y": 39.24,
         "anchor": "top-center"
       },
       {
@@ -91,7 +91,7 @@
       {
         "sid": "htu_126",
         "role": "label",
-        "x": 55.28,
+        "x": 52.89,
         "y": 28.29,
         "anchor": "top-right"
       },
@@ -301,8 +301,8 @@
       {
         "sid": "htu_212",
         "role": "label",
-        "x": 60,
-        "y": 83,
+        "x": 15.24,
+        "y": 89.84,
         "anchor": "bottom-end",
         "w": 45
       }
@@ -324,8 +324,8 @@
       {
         "sid": "htu_221",
         "role": "label",
-        "x": 60,
-        "y": 65,
+        "x": 3.69,
+        "y": 66.14,
         "anchor": "bottom-end",
         "w": 45
       }
