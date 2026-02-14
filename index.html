@@ -3,10 +3,9 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title data-i18n="idx.meta.title">Measure Master — 3-in-1 measuring tool</title>
-  <meta name="description"
-        content="Measure Master is a 3-in-1 measuring tool that combines AR measuring, photo perspective correction, and on-screen measurement in a single app."
-        data-i18n-attr="content=idx.meta.description" />
+
+  <title data-i18n="idx.meta.title">idx.meta.title</title>
+  <meta name="description" data-i18n-attr="content=idx.meta.description" content="idx.meta.description" />
 
   <!-- No cache -->
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
@@ -123,7 +122,6 @@
       text-decoration:none;
     }
 
-    /* ✅ language: right aligned (after nav) */
     .lang {
       display:flex;
       gap:6px;
@@ -158,7 +156,6 @@
       margin-top:16px;
     }
 
-    /* ========== NEW TOP HERO LAYOUT: image left + auth right ========== */
     .hero-top {
       display:grid;
       grid-template-columns:2fr 1fr;
@@ -397,7 +394,12 @@
       border:1px solid rgba(51,65,85,.9);
       background:#ffffff;
     }
-    .shot img { width:100%; height:210px; object-fit:cover; display:block; }
+    .shot img {
+      width:100%;
+      height:210px;
+      object-fit:cover;
+      display:block;
+    }
     .shot-caption { padding:8px 10px 9px; font-size:11px; color:var(--muted); }
 
     .note-list {
@@ -425,7 +427,6 @@
     }
     .cta-sub { font-size:11px; color:var(--muted); }
 
-    /* Auth (공통 스타일) */
     #auth { max-width:480px; margin:0 auto; }
     .auth-headline { font-size:14px; font-weight:600; margin-bottom:4px; }
     .auth-caption { font-size:12px; color:var(--muted); margin-bottom:10px; }
@@ -452,7 +453,13 @@
       color:var(--text);
       box-shadow:0 0 0 1px rgba(94,234,212,.55);
     }
-    .field { display:flex; flex-direction:column; gap:4px; margin:8px 0 4px; font-size:12px; }
+    .field {
+      display:flex;
+      flex-direction:column;
+      gap:4px;
+      margin:8px 0 4px;
+      font-size:12px;
+    }
     .field label { color:var(--text); }
     input {
       width:100%;
@@ -510,11 +517,7 @@
     footer a { color:var(--muted); }
 
     @media (max-width:720px){
-      header {
-        flex-wrap:wrap;
-        align-items:flex-start;
-        row-gap:10px;
-      }
+      header { flex-wrap:wrap; align-items:flex-start; row-gap:10px; }
       .brand { order:1; }
       .lang  { order:2; margin-left:auto; }
       nav {
@@ -536,33 +539,33 @@
     }
   </style>
 </head>
+
 <body>
 <div class="page">
   <header>
     <div class="brand">
       <img
         src="/images/mm_logo.png"
-        alt="Measure Master logo"
+        data-i18n-attr="alt=idx.brand.logo_alt"
+        alt="idx.brand.logo_alt"
         class="logo-img"
         width="32" height="32"
         loading="eager" fetchpriority="high"
       />
       <div class="brand-title">
-        <strong>Measure Master</strong>
-        <div class="brand-sub" data-i18n="idx.brand.sub">3-in-1 measuring tool</div>
+        <strong data-i18n="idx.brand.name">idx.brand.name</strong>
+        <div class="brand-sub" data-i18n="idx.brand.sub">idx.brand.sub</div>
       </div>
-      <span class="pill" data-i18n="idx.brand.pill">v1 · field testing</span>
+      <span class="pill" data-i18n="idx.brand.pill">idx.brand.pill</span>
     </div>
 
-    <!-- ✅ menu -->
     <nav>
-      <a href="/" data-i18n="idx.nav.home">Home</a>
-      <a href="/howtouse.html" data-i18n="idx.nav.howtouse">How to use</a>
-      <a href="/reviews.html" data-i18n="idx.nav.reviews">Reviews</a>
-      <a href="/privacy.html" data-i18n="idx.nav.privacy">Privacy</a>
+      <a href="/" data-i18n="idx.nav.home">idx.nav.home</a>
+      <a href="/howtouse.html" data-i18n="idx.nav.howtouse">idx.nav.howtouse</a>
+      <a href="/reviews.html" data-i18n="idx.nav.reviews">idx.nav.reviews</a>
+      <a href="/privacy.html" data-i18n="idx.nav.privacy">idx.nav.privacy</a>
     </nav>
 
-    <!-- ✅ language -->
     <div class="lang">
       <button type="button" data-lang-btn="ko">
         <span class="flag" aria-hidden="true">🇰🇷</span>KO
@@ -578,78 +581,76 @@
       <div class="hero-main-image">
         <img
           src="/images/index/mm_main1_en.jpg"
-          alt="Measure Master main 3-in-1 illustration"
-          data-i18n-attr="src=idx.hero.main_image_src,alt=idx.hero.main_image_alt"
+          data-i18n-attr="alt=idx.hero.main_image_alt"
+          alt="idx.hero.main_image_alt"
           loading="eager"
         />
       </div>
 
-      <!-- AUTH (번역 제외: 현 상태 유지) -->
       <section id="auth" class="hero-auth">
-        <div class="auth-headline">Account for testers and reviewers</div>
-        <div class="auth-caption">
-          Create an account below, then go to the <a href="/reviews.html">Reviews</a> page to leave feedback.
-        </div>
+        <div class="auth-headline" data-i18n="idx.auth.headline">idx.auth.headline</div>
+        <div class="auth-caption" data-i18n="idx.auth.caption">idx.auth.caption</div>
 
         <div id="auth-tabs" class="tabbar" aria-hidden="false">
-          <button type="button" id="tab-signup" class="active">Sign up</button>
-          <button type="button" id="tab-login">Log in</button>
+          <button type="button" id="tab-signup" class="active" data-i18n="idx.auth.tab_signup">idx.auth.tab_signup</button>
+          <button type="button" id="tab-login" data-i18n="idx.auth.tab_login">idx.auth.tab_login</button>
         </div>
 
         <form id="signup-form" autocomplete="on">
           <div class="field">
-            <label for="signup-email">Email</label>
-            <input id="signup-email" name="email" type="email" required placeholder="you@example.com">
+            <label for="signup-email" data-i18n="idx.auth.email_label">idx.auth.email_label</label>
+            <input id="signup-email" name="email" type="email" required
+                   data-i18n-attr="placeholder=idx.auth.email_ph"
+                   placeholder="idx.auth.email_ph">
           </div>
           <div class="field">
-            <label for="signup-password">Password</label>
-            <input id="signup-password" name="password" type="password"
-                   required minlength="6" placeholder="At least 6 characters">
+            <label for="signup-password" data-i18n="idx.auth.password_label">idx.auth.password_label</label>
+            <input id="signup-password" name="password" type="password" required minlength="6"
+                   data-i18n-attr="placeholder=idx.auth.password_ph"
+                   placeholder="idx.auth.password_ph">
           </div>
           <div class="field">
-            <label for="signup-password2">Confirm password</label>
-            <input id="signup-password2" name="password2" type="password"
-                   required minlength="6" placeholder="Type it again">
+            <label for="signup-password2" data-i18n="idx.auth.password2_label">idx.auth.password2_label</label>
+            <input id="signup-password2" name="password2" type="password" required minlength="6"
+                   data-i18n-attr="placeholder=idx.auth.password2_ph"
+                   placeholder="idx.auth.password2_ph">
           </div>
-          <button type="submit" class="primary">Create account</button>
+          <button type="submit" class="primary" data-i18n="idx.auth.signup_btn">idx.auth.signup_btn</button>
           <p style="margin:6px 0 0; font-size:12px; color:var(--muted);">
-            Already have an account?
-            <a href="#" id="go-login">Go to log in</a>
+            <span data-i18n="idx.auth.have_account">idx.auth.have_account</span>
+            <a href="#" id="go-login" data-i18n="idx.auth.go_login">idx.auth.go_login</a>
           </p>
         </form>
 
         <form id="login-form" autocomplete="on" hidden>
           <div class="field">
-            <label for="login-email">Email</label>
-            <input id="login-email" name="email" type="email" required placeholder="you@example.com">
+            <label for="login-email" data-i18n="idx.auth.email_label">idx.auth.email_label</label>
+            <input id="login-email" name="email" type="email" required
+                   data-i18n-attr="placeholder=idx.auth.email_ph"
+                   placeholder="idx.auth.email_ph">
           </div>
           <div class="field">
-            <label for="login-password">Password</label>
-            <input id="login-password" name="password" type="password"
-                   required minlength="6" placeholder="At least 6 characters">
+            <label for="login-password" data-i18n="idx.auth.password_label">idx.auth.password_label</label>
+            <input id="login-password" name="password" type="password" required minlength="6"
+                   data-i18n-attr="placeholder=idx.auth.password_ph"
+                   placeholder="idx.auth.password_ph">
           </div>
-          <button type="submit" class="primary">Log in</button>
-          <button type="button" id="logout-btn" style="display:none">Log out</button>
+          <button type="submit" class="primary" data-i18n="idx.auth.login_btn">idx.auth.login_btn</button>
+          <button type="button" id="logout-btn" style="display:none" data-i18n="idx.auth.logout_btn">idx.auth.logout_btn</button>
         </form>
       </section>
     </section>
 
     <section class="hero">
       <div class="hero-header">
-        <div class="hero-kicker" data-i18n="idx.hero.kicker">All-in-one measuring app</div>
-        <h1 class="hero-title" data-i18n="idx.hero.title">3-in-1 measuring tool</h1>
-        <p class="hero-subtitle" data-i18n="idx.hero.subtitle">AR, photo perspective, and on-screen.</p>
-        <p class="hero-tagline" data-i18n="idx.hero.tagline">
-          Measure real-world distances, correct perspective in photos, and draw shapes directly on your screen — all in one place.
-        </p>
+        <div class="hero-kicker" data-i18n="idx.hero.kicker">idx.hero.kicker</div>
+        <h1 class="hero-title" data-i18n="idx.hero.title">idx.hero.title</h1>
+        <p class="hero-subtitle" data-i18n="idx.hero.subtitle">idx.hero.subtitle</p>
+        <p class="hero-tagline" data-i18n="idx.hero.tagline">idx.hero.tagline</p>
 
         <div class="hero-actions">
-          <a class="btn" href="#" target="_blank" rel="noopener" data-i18n="idx.hero.cta.play">
-            Get it on Google Play (soon)
-          </a>
-          <a class="btn btn-ghost" href="/howtouse.html" data-i18n="idx.hero.cta.how">
-            See how it works
-          </a>
+          <a class="btn" href="#" target="_blank" rel="noopener" data-i18n="idx.hero.cta_play">idx.hero.cta_play</a>
+          <a class="btn btn-ghost" href="/howtouse.html" data-i18n="idx.hero.cta_howtouse">idx.hero.cta_howtouse</a>
         </div>
       </div>
 
@@ -657,184 +658,141 @@
         <article class="mode-card">
           <div class="mode-image-wrap">
             <img src="/images/index/ar_00.png"
-                 alt="AR mode measuring a table in a living room"
-                 data-i18n-attr="alt=idx.mode.ar.alt"
+                 data-i18n-attr="alt=idx.modes.ar.alt"
+                 alt="idx.modes.ar.alt"
                  loading="lazy" />
           </div>
-          <div class="mode-title" data-i18n="idx.mode.ar.title">AR mode</div>
-          <div class="mode-body" data-i18n="idx.mode.ar.body">
-            Measure real-time distance between two points indoors using the AR camera.
-          </div>
+          <div class="mode-title" data-i18n="idx.modes.ar.title">idx.modes.ar.title</div>
+          <div class="mode-body" data-i18n="idx.modes.ar.body">idx.modes.ar.body</div>
         </article>
 
         <article class="mode-card">
           <div class="mode-image-wrap">
             <img src="/images/index/pm_00.jpg"
-                 alt="Photo perspective mode measuring a building facade"
-                 data-i18n-attr="alt=idx.mode.pm.alt"
+                 data-i18n-attr="alt=idx.modes.pm.alt"
+                 alt="idx.modes.pm.alt"
                  loading="lazy" />
           </div>
-          <div class="mode-title" data-i18n="idx.mode.pm.title">Photo perspective mode</div>
-          <div class="mode-body" data-i18n="idx.mode.pm.body">
-            Estimate the actual perimeter or area in a photo using a basic reference rectangle and perspective correction.
-          </div>
+          <div class="mode-title" data-i18n="idx.modes.pm.title">idx.modes.pm.title</div>
+          <div class="mode-body" data-i18n="idx.modes.pm.body">idx.modes.pm.body</div>
         </article>
 
         <article class="mode-card">
           <div class="mode-image-wrap">
             <img src="/images/index/sm_01.jpg"
-                 alt="On-screen mode with free-drawn shapes and area labels"
-                 data-i18n-attr="alt=idx.mode.sm.alt"
+                 data-i18n-attr="alt=idx.modes.sm.alt"
+                 alt="idx.modes.sm.alt"
                  loading="lazy" />
           </div>
-          <div class="mode-title" data-i18n="idx.mode.sm.title">On-screen mode</div>
-          <div class="mode-body" data-i18n="idx.mode.sm.body">
-            Draw shapes directly on your screen and get approximate length and area immediately.
-          </div>
+          <div class="mode-title" data-i18n="idx.modes.sm.title">idx.modes.sm.title</div>
+          <div class="mode-body" data-i18n="idx.modes.sm.body">idx.modes.sm.body</div>
         </article>
       </div>
     </section>
 
     <section id="who">
-      <h2 data-i18n="idx.who.title">Who is Measure Master for?</h2>
-      <p class="section-lead" data-i18n="idx.who.lead">
-        It’s optimized not for ultra-precise engineering work, but for <strong>fast decisions on site</strong>.
-      </p>
+      <h2 data-i18n="idx.who.title">idx.who.title</h2>
+      <p class="section-lead" data-i18n="idx.who.lead">idx.who.lead</p>
+
       <div class="who-grid">
         <div class="who-card">
-          <div class="who-tag" data-i18n="idx.who.c1.tag">Job-site estimates</div>
-          <div class="who-title" data-i18n="idx.who.c1.title">Contractors and remodelers</div>
-          <div class="who-body" data-i18n="idx.who.c1.body">
-            Take one photo on site instead of drawing a quick sketch.
-            As long as you include a known rectangle (like A4 paper), you can revisit the photo later and estimate lengths and areas.
-          </div>
+          <div class="who-tag" data-i18n="idx.who.c1.tag">idx.who.c1.tag</div>
+          <div class="who-title" data-i18n="idx.who.c1.title">idx.who.c1.title</div>
+          <div class="who-body" data-i18n="idx.who.c1.body">idx.who.c1.body</div>
         </div>
         <div class="who-card">
-          <div class="who-tag" data-i18n="idx.who.c2.tag">Area checks</div>
-          <div class="who-title" data-i18n="idx.who.c2.title">Doors, windows, flooring, and more</div>
-          <div class="who-body" data-i18n="idx.who.c2.body">
-            When you just need to know “about how many square meters this is,”
-            trace the outline and see the approximate area on the spot.
-          </div>
+          <div class="who-tag" data-i18n="idx.who.c2.tag">idx.who.c2.tag</div>
+          <div class="who-title" data-i18n="idx.who.c2.title">idx.who.c2.title</div>
+          <div class="who-body" data-i18n="idx.who.c2.body">idx.who.c2.body</div>
         </div>
         <div class="who-card">
-          <div class="who-tag" data-i18n="idx.who.c3.tag">Visual reports</div>
-          <div class="who-title" data-i18n="idx.who.c3.title">Photos with dimensions on top</div>
-          <div class="who-body" data-i18n="idx.who.c3.body">
-            Overlay measurements directly on the photo, capture the screen,
-            and share it as a simple report with clients or colleagues.
-          </div>
+          <div class="who-tag" data-i18n="idx.who.c3.tag">idx.who.c3.tag</div>
+          <div class="who-title" data-i18n="idx.who.c3.title">idx.who.c3.title</div>
+          <div class="who-body" data-i18n="idx.who.c3.body">idx.who.c3.body</div>
         </div>
       </div>
     </section>
 
     <section id="features" class="section-soft">
-      <h2 data-i18n="idx.features.title">Key features</h2>
-      <p class="section-lead" data-i18n="idx.features.lead">
-        From photo perspective correction to curved line length, Measure Master focuses on the tools you actually use in the field.
-      </p>
+      <h2 data-i18n="idx.features.title">idx.features.title</h2>
+      <p class="section-lead" data-i18n="idx.features.lead">idx.features.lead</p>
+
       <div class="feat-grid">
         <div class="feat-card">
-          <div class="feat-pill" data-i18n="idx.features.f1.pill">Perspective correction</div>
-          <div class="feat-title" data-i18n="idx.features.f1.title">Fix distortion with a reference rectangle</div>
-          <div class="feat-body" data-i18n="idx.features.f1.body">
-            Place a reference rectangle with known dimensions (for example, A4 paper).
-            Using that, the app corrects perspective and estimates length and area on the photo.
-          </div>
+          <div class="feat-pill" data-i18n="idx.features.f1.pill">idx.features.f1.pill</div>
+          <div class="feat-title" data-i18n="idx.features.f1.title">idx.features.f1.title</div>
+          <div class="feat-body" data-i18n="idx.features.f1.body">idx.features.f1.body</div>
         </div>
         <div class="feat-card">
-          <div class="feat-pill" data-i18n="idx.features.f2.pill">Free-form shapes</div>
-          <div class="feat-title" data-i18n="idx.features.f2.title">Measure complex outlines</div>
-          <div class="feat-body" data-i18n="idx.features.f2.body">
-            Trace straight or curved boundaries with your finger.
-            The app adds up total length and area for each shape and for the overall selection.
-          </div>
+          <div class="feat-pill" data-i18n="idx.features.f2.pill">idx.features.f2.pill</div>
+          <div class="feat-title" data-i18n="idx.features.f2.title">idx.features.f2.title</div>
+          <div class="feat-body" data-i18n="idx.features.f2.body">idx.features.f2.body</div>
         </div>
         <div class="feat-card">
-          <div class="feat-pill" data-i18n="idx.features.f3.pill">Field-friendly UI</div>
-          <div class="feat-title" data-i18n="idx.features.f3.title">Designed for small screens and quick use</div>
-          <div class="feat-body" data-i18n="idx.features.f3.body">
-            The interface minimizes steps and button count so you can operate it quickly
-            even when you are on site, wearing gloves, or in a hurry.
-          </div>
+          <div class="feat-pill" data-i18n="idx.features.f3.pill">idx.features.f3.pill</div>
+          <div class="feat-title" data-i18n="idx.features.f3.title">idx.features.f3.title</div>
+          <div class="feat-body" data-i18n="idx.features.f3.body">idx.features.f3.body</div>
         </div>
       </div>
     </section>
 
     <section id="screens">
-      <h2 data-i18n="idx.screens.title">Screenshots</h2>
-      <p class="section-lead" data-i18n="idx.screens.lead">
-        These screenshots are the same ones used on the Google Play listing.
-      </p>
+      <h2 data-i18n="idx.screens.title">idx.screens.title</h2>
+      <p class="section-lead" data-i18n="idx.screens.lead">idx.screens.lead</p>
+
       <div class="shots">
         <figure class="shot">
           <img src="/images/index/pm_01.jpg"
-               alt="Perspective-corrected measuring screen"
                data-i18n-attr="alt=idx.screens.s1.alt"
+               alt="idx.screens.s1.alt"
                loading="lazy" />
-          <figcaption class="shot-caption" data-i18n="idx.screens.s1.cap">
-            Set up a reference rectangle, then measure lengths and areas in the corrected view.
-          </figcaption>
+          <figcaption class="shot-caption" data-i18n="idx.screens.s1.cap">idx.screens.s1.cap</figcaption>
         </figure>
         <figure class="shot">
           <img src="/images/index/AR_02.jpg"
-               alt="AR measuring screen"
                data-i18n-attr="alt=idx.screens.s2.alt"
+               alt="idx.screens.s2.alt"
                loading="lazy" />
-          <figcaption class="shot-caption" data-i18n="idx.screens.s2.cap">
-            Use AR mode to measure a segment directly in 3D space.
-          </figcaption>
+          <figcaption class="shot-caption" data-i18n="idx.screens.s2.cap">idx.screens.s2.cap</figcaption>
         </figure>
         <figure class="shot">
           <img src="/images/index/config_01_en.jpg"
-               alt="Configuration and mode settings"
-               data-i18n-attr="src=idx.screens.s3.src,alt=idx.screens.s3.alt"
+               data-i18n-attr="alt=idx.screens.s3.alt"
+               alt="idx.screens.s3.alt"
                loading="lazy" />
-          <figcaption class="shot-caption" data-i18n="idx.screens.s3.cap">
-            Configure units, reference rectangle values, and other options before you measure.
-          </figcaption>
+          <figcaption class="shot-caption" data-i18n="idx.screens.s3.cap">idx.screens.s3.cap</figcaption>
         </figure>
       </div>
     </section>
 
     <section class="section-soft">
-      <h2 data-i18n="idx.limits.title">About accuracy and limitations</h2>
-      <p class="section-lead" data-i18n="idx.limits.lead">
-        Measure Master aims to bring the feel of “tape measure + field sense” into your phone.
-        Please keep the following in mind.
-      </p>
+      <h2 data-i18n="idx.limits.title">idx.limits.title</h2>
+      <p class="section-lead" data-i18n="idx.limits.lead">idx.limits.lead</p>
       <ul class="note-list">
-        <li data-i18n="idx.limits.li1">It targets <strong>approximate values for decision-making</strong>, not certified engineering-grade measurements.</li>
-        <li data-i18n="idx.limits.li2">The more accurate your reference rectangle dimensions are, the more reliable the results will be.</li>
-        <li data-i18n="idx.limits.li3">Camera angle, photo quality, and lens distortion can all introduce error.</li>
-        <li data-i18n="idx.limits.li4">For legal or contractual measurements, you must still use proper professional tools and procedures.</li>
+        <li data-i18n="idx.limits.li1">idx.limits.li1</li>
+        <li data-i18n="idx.limits.li2">idx.limits.li2</li>
+        <li data-i18n="idx.limits.li3">idx.limits.li3</li>
+        <li data-i18n="idx.limits.li4">idx.limits.li4</li>
       </ul>
     </section>
 
     <section class="cta" id="download">
-      <h2 data-i18n="idx.cta.title">Try measuring with just a photo.</h2>
-      <p data-i18n="idx.cta.body">
-        The app is currently in tester-only mode, but it is already usable for real-world jobs.<br/>
-        We are iterating based on feedback from people who actually work on site.
-      </p>
+      <h2 data-i18n="idx.cta.title">idx.cta.title</h2>
+      <p data-i18n="idx.cta.body">idx.cta.body</p>
+
       <div class="cta-actions">
-        <a class="btn" href="#" target="_blank" rel="noopener" data-i18n="idx.cta.play">
-          Get it on Google Play (soon)
-        </a>
-        <a class="btn btn-ghost" href="/reviews.html" data-i18n="idx.cta.review">
-          Leave a review
-        </a>
+        <a class="btn" href="#" target="_blank" rel="noopener" data-i18n="idx.cta.play">idx.cta.play</a>
+        <a class="btn btn-ghost" href="/reviews.html" data-i18n="idx.cta.review">idx.cta.review</a>
       </div>
-      <div class="cta-sub" data-i18n="idx.cta.sub">
-        If you have trouble installing, please check the <a href="/howtouse.html">How to use</a> page first.
-      </div>
-      <div id="visitCounterHome" data-i18n="idx.visit.loading">Loading visit count…</div>
+      <div class="cta-sub" data-i18n="idx.cta.sub">idx.cta.sub</div>
+
+      <div id="visitCounterHome" data-i18n="idx.visit.loading">idx.visit.loading</div>
     </section>
   </main>
 
   <footer>
-    © <span id="year"></span> Measure Master. <span data-i18n="idx.footer.all">All rights reserved.</span>
-    · <a href="/privacy.html" data-i18n="idx.footer.privacy">Privacy policy</a>
+    © <span id="year"></span> <span data-i18n="idx.footer.rights">idx.footer.rights</span>
+    · <a href="/privacy.html" data-i18n="idx.footer.privacy">idx.footer.privacy</a>
   </footer>
 </div>
 
@@ -842,112 +800,16 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="/js/mm-auth.js?v=auth_r2"></script>
 
-<!-- ✅ i18n loader (index 전용: JSON fetch + data-i18n 적용) -->
-<script>
-;(() => {
-  const URLS = {
-    strings: (lang) => `/assets/data/idx_strings_${lang}.json`
-  };
+<!-- ✅ i18n must load BEFORE index.js so index.js can call mmI18n.t -->
+<script src="/js/i18n.js?v=mm_i18n_r1"></script>
 
-  function getLang(){
-    const urlLang = new URLSearchParams(location.search).get('lang');
-    const saved = localStorage.getItem('mm_lang');
-    const htmlLang = document.documentElement.getAttribute('lang');
-    return (urlLang || saved || htmlLang || 'en').toLowerCase();
-  }
-
-  function setLang(lang){
-    localStorage.setItem('mm_lang', lang);
-    document.documentElement.setAttribute('lang', lang);
-    document.documentElement.setAttribute('data-lang', lang);
-    markActiveLang(lang);
-  }
-
-  function markActiveLang(lang){
-    document.querySelectorAll("[data-lang-btn]").forEach(btn => {
-      btn.classList.toggle("active", btn.getAttribute("data-lang-btn") === lang);
-    });
-  }
-
-  function applyStrings(dict){
-    // data-i18n: innerHTML 교체 (br/strong 등 허용하려고 innerHTML)
-    document.querySelectorAll("[data-i18n]").forEach(el => {
-      const key = el.getAttribute("data-i18n");
-      if (!key) return;
-      if (dict && Object.prototype.hasOwnProperty.call(dict, key)) {
-        el.innerHTML = dict[key];
-      }
-    });
-
-    // data-i18n-attr: attr=key,attr=key
-    document.querySelectorAll("[data-i18n-attr]").forEach(el => {
-      const spec = el.getAttribute("data-i18n-attr") || "";
-      spec.split(",").map(s=>s.trim()).filter(Boolean).forEach(pair => {
-        const [attr, key] = pair.split("=").map(s=>s.trim());
-        if (!attr || !key) return;
-        if (dict && Object.prototype.hasOwnProperty.call(dict, key)) {
-          el.setAttribute(attr, dict[key]);
-        }
-      });
-    });
-
-    // <title data-i18n="..."> 지원
-    const titleEl = document.querySelector("title[data-i18n]");
-    if (titleEl) {
-      const key = titleEl.getAttribute("data-i18n");
-      if (key && dict && Object.prototype.hasOwnProperty.call(dict, key)) {
-        titleEl.textContent = dict[key];
-      }
-    }
-  }
-
-  async function loadAndApply(lang){
-    const res = await fetch(URLS.strings(lang), { cache: "no-store" });
-    if (!res.ok) throw new Error("idx strings HTTP " + res.status);
-    const dict = await res.json();
-    applyStrings(dict);
-
-    // 다른 JS(index.js)에서 쓰도록 전역으로 노출
-    window.mmI18n = {
-      lang,
-      dict,
-      t: (key, fallback="") => (dict && dict[key] != null) ? String(dict[key]) : fallback
-    };
-  }
-
-  document.addEventListener("DOMContentLoaded", () => {
-    const lang = getLang();
-    setLang(lang);
-
-    document.querySelectorAll("[data-lang-btn]").forEach(btn => {
-      btn.addEventListener("click", async () => {
-        const v = btn.getAttribute("data-lang-btn");
-        if (!v) return;
-        setLang(v);
-        try {
-          await loadAndApply(v);
-        } catch (e) {
-          console.warn("[idx i18n] load failed:", e);
-        }
-      });
-    });
-
-    loadAndApply(lang).catch(e => console.warn("[idx i18n] init failed:", e));
-  });
-})();
-</script>
-
-<!-- index page logic -->
 <script src="/js/index.js?v=rev3"></script>
-
 <script>
   document.addEventListener('DOMContentLoaded', function(){
-    // 홈 회원가입/로그인 UI 초기화
     if (window.mmAuth && typeof window.mmAuth.initHomeAuth === 'function') {
       window.mmAuth.initHomeAuth();
     }
 
-    // Logout 버튼
     const btn = document.getElementById('logout-btn');
     if (btn) {
       btn.addEventListener('click', async function(e){
@@ -956,10 +818,6 @@
         finally { location.reload(); }
       });
     }
-
-    // Year
-    const y = document.getElementById('year');
-    if (y) y.textContent = new Date().getFullYear();
   });
 </script>
 </body>
