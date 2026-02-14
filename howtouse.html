@@ -297,11 +297,6 @@ nav a{color:var(--muted)}
   border-radius:6px;
   white-space:nowrap;
 
-  if (typeof ov.w === "number") {
-    div.style.width = ov.w + "%";
-    div.style.whiteSpace = "normal";
-  }
-
   pointer-events:none;
 }
 
@@ -421,6 +416,12 @@ const DEBUG = true;
 
 let __p3Layout = null;   // 현재 로딩된 Phase3 layout 원본(수정 대상)
 let __strings = null;    // strings (참고용)
+
+  if (typeof ov.w === "number") {
+    div.style.width = ov.w + "%";
+    div.style.whiteSpace = "normal";
+  }
+
 
 
   // ---------- Phase 2 (Steps) ----------
