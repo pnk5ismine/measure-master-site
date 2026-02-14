@@ -1,4 +1,4 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
@@ -11,12 +11,12 @@
 
   <style>
     :root {
-      --bg:#050816;
-      --card:#121622;
-      --border:#1e2230;
-      --muted:#9aa4b2;
-      --text:#e7edf5;
-      --accent:#5eead4;
+      --bg:#f6f8fc;
+      --card:#ffffff;
+      --border:#d6dbe7;
+      --muted:#475569;
+      --text:#0f172a;
+      --accent:#0ea5e9;
     }
 
     *{box-sizing:border-box}
@@ -50,13 +50,13 @@ nav{
   display:flex;gap:14px;align-items:center;flex-wrap:wrap;
   justify-content:center;
 }
-nav a{color:#cfd6e4}
+nav a{color:var(--muted)}
 
 .lang{display:flex;gap:6px;align-items:center}
 .lang button{
   border:1px solid var(--border);
-  background:#0f1320;
-  color:#e7edf5;
+  background:#ffffff;
+  color:var(--text);
   border-radius:999px;
   padding:6px 10px;
   cursor:pointer;
@@ -94,7 +94,7 @@ nav a{color:#cfd6e4}
       border:1px solid var(--border);
       border-radius:16px;
       padding:22px;
-      box-shadow:0 18px 45px rgba(15,23,42,.85);
+      box-shadow:0 12px 28px rgba(15,23,42,.12);
     }
     h1{
       margin:4px 0 4px;
@@ -132,10 +132,10 @@ nav a{color:#cfd6e4}
       display:block;
       border-radius:10px;
       overflow:hidden;
-      background:#0f1320;
+      background:#ffffff;
       border:1px solid var(--border);
       aspect-ratio:1/2;          /* PC/태블릿에서 높이 균일 */
-      transition:transform .18s ease-out, box-shadow .18s ease-out;
+      transition:transform .18s ease-out, box-shadow .18s ease-out, border-color .18s ease-out;
     }
     .howtouse-item img{
       width:100%;
@@ -145,7 +145,7 @@ nav a{color:#cfd6e4}
     }
     .howtouse-item:hover{
       transform:translateY(-2px);
-      box-shadow:0 14px 32px rgba(15,23,42,.9);
+      box-shadow:0 12px 26px rgba(15,23,42,.14);
     }
 
     /* 모바일에서는 원본 비율 유지해도 됨 */
@@ -176,7 +176,137 @@ nav a{color:#cfd6e4}
         margin-top:4px;
       }
     }
-  </style>
+  
+    /* ===== Phase 2: Step blocks (text-first) ===== */
+    .htu-steps{
+      display:flex;
+      flex-direction:column;
+      gap:14px;
+      margin: 14px 0 18px;
+    }
+    .htu-step{
+      border:1px solid var(--border);
+      background: var(--card);
+      border-radius: 14px;
+      padding: 14px 14px 12px;
+    }
+    .htu-step-title{
+      margin:0 0 10px;
+      font-size: 36px;
+      line-height: 1.25;
+    }
+    .htu-step-title .htu-id{
+      display:none;
+      font-size:12px;
+      color: var(--muted);
+      margin-right:10px;
+      letter-spacing:.3px;
+      vertical-align: baseline;
+    }
+    .htu-note{
+      margin: 8px 0 0;
+      color: var(--muted);
+    }
+    .htu-step ol{
+      margin: 0 0 0 18px;
+      padding: 0;
+    }
+    .htu-step li{
+      margin: 6px 0;
+    }
+    /* Step image (2:1) : text 아래에 붙는 이미지 */
+    .htu-step-image{
+      width: 100%;
+      aspect-ratio: 2 / 1;          /* ✅ 2:1 */
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      overflow: hidden;
+      background: #ffffff;
+    }
+    .htu-step-image a{
+      display:block;
+      width:100%;
+      height:100%;
+    }
+    .htu-step-image img{
+      width:100%;
+      height:100%;
+      object-fit: contain;          /* 잘림 방지 (원하면 cover로) */
+      display:block;
+    }
+
+/* ===== Phase 3: Layout + Strings (themed blocks) ===== */
+.htu-groups{
+  display:flex;
+  flex-direction:column;
+  gap:18px;
+  margin: 18px 0 10px;
+}
+
+/* ===== Subject Band ===== */
+.htu-subject{
+  width:100%;
+  text-align:center;         /* 중앙정렬 */
+  font-size:36px;            /*  x large */
+  font-weight:700;
+  padding:24px 0 18px;
+  margin-top:40px;
+}
+
+/* spacer */
+.htu-spacer{height:18px;}
+.htu-spacer.lg{height:32px;}
+.htu-spacer.md{height:18px;}
+.htu-spacer.sm{height:10px;}
+
+/* ===== Grid ===== */
+.htu-grid{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);  /* PC / Tablet */
+  gap:18px;
+}
+
+@media (max-width:768px){
+  .htu-grid{
+    grid-template-columns:1fr;          /* Mobile */
+  }
+}
+
+/* ===== Image container ===== */
+.htu-thumb{
+  position:relative;
+  display:block;
+  border-radius:12px;
+  overflow:hidden;
+}
+
+.htu-thumb img{
+  width:100%;
+  aspect-ratio:1/1;   /* 1:1 */
+  object-fit:cover;
+  display:block;
+}
+
+/* ===== Overlay Labels (Unified Style) ===== */
+.htu-ov{
+  position:absolute;
+  padding:6px 10px;
+  font-size:12px;                 /* 기본 small */
+  color:#000;                     /* black */
+  background:rgba(192,192,192,0.1); /* silver 0.1 */
+  border-radius:6px;
+  white-space:nowrap;
+  max-width: 90%; /* 너무 길면 이미지 밖으로 튀는 것 방지용(선택) */
+
+  pointer-events:none;
+}
+
+/* Title (image 상단 중앙) */
+.htu-ov.title{
+  font-size:26px;                 /* x large */
+  font-weight:600;
+}
+</style>
 </head>
 <body>
 <header>
@@ -222,90 +352,20 @@ nav a{color:#cfd6e4}
       Tap or click an image to open the full-size version in a new tab.
     </p>
 
-<div class="howtouse-grid">
+  <!-- Phase 2 (text-first): grouped Step blocks inserted here -->
+  <div id="htuSteps" class="htu-steps"></div>
 
-  <a class="howtouse-item" href="/images/howtouse/1_htu_home.jpg" target="_blank" rel="noopener">
-    <img src="/images/howtouse/1_htu_home.jpg" alt="Step 01 - Home" loading="lazy">
-  </a>
+  <!-- Phase 3 (layout+strings): themed blocks rendered here -->
 
-  <a class="howtouse-item" href="/images/howtouse/2_htu_full.jpg" target="_blank" rel="noopener">
-    <img src="/images/howtouse/2_htu_full.jpg" alt="Step 02 - Full Screen" loading="lazy">
-  </a>
-
-  <a class="howtouse-item" href="/images/howtouse/3_htu_side.jpg" target="_blank" rel="noopener">
-    <img src="/images/howtouse/3_htu_side.jpg" alt="Step 03 - Side Panel" loading="lazy">
-  </a>
-
-  <a class="howtouse-item" href="/images/howtouse/4_htu_config.jpg" target="_blank" rel="noopener">
-    <img src="/images/howtouse/4_htu_config.jpg" alt="Step 04 - Configuration" loading="lazy">
-  </a>
-
-  <a class="howtouse-item" href="/images/howtouse/5_htu_ar_guide.jpg" target="_blank" rel="noopener">
-    <img src="/images/howtouse/5_htu_ar_guide.jpg" alt="Step 05 - AR Guide" loading="lazy">
-  </a>
-
-  <a class="howtouse-item" href="/images/howtouse/6_htu_scre1.jpg" target="_blank" rel="noopener">
-    <img src="/images/howtouse/6_htu_scre1.jpg" alt="Step 06 - Screen Mode 1" loading="lazy">
-  </a>
-
-  <a class="howtouse-item" href="/images/howtouse/7_htu_scre2.jpg" target="_blank" rel="noopener">
-    <img src="/images/howtouse/7_htu_scre2.jpg" alt="Step 07 - Screen Mode 2" loading="lazy">
-  </a>
-
-  <a class="howtouse-item" href="/images/howtouse/8_htu_stra.jpg" target="_blank" rel="noopener">
-    <img src="/images/howtouse/8_htu_stra.jpg" alt="Step 08 - Straight Mode" loading="lazy">
-  </a>
-
-  <a class="howtouse-item" href="/images/howtouse/9_htu_scre3.jpg" target="_blank" rel="noopener">
-    <img src="/images/howtouse/9_htu_scre3.jpg" alt="Step 09 - Screen Mode 3" loading="lazy">
-  </a>
-
-  <a class="howtouse-item" href="/images/howtouse/10_htu_pm_00.jpg" target="_blank" rel="noopener">
-    <img src="/images/howtouse/10_htu_pm_00.jpg" alt="Step 10 - Perspective Mode (Intro)" loading="lazy">
-  </a>
-
-  <a class="howtouse-item" href="/images/howtouse/11_htu_pers2.jpg" target="_blank" rel="noopener">
-    <img src="/images/howtouse/11_htu_pers2.jpg" alt="Step 11 - Perspective Mode 2" loading="lazy">
-  </a>
-
-  <a class="howtouse-item" href="/images/howtouse/12_htu_pers1.jpg" target="_blank" rel="noopener">
-    <img src="/images/howtouse/12_htu_pers1.jpg" alt="Step 12 - Perspective Mode 1" loading="lazy">
-  </a>
-
-  <a class="howtouse-item" href="/images/howtouse/13_htu_rect.jpg" target="_blank" rel="noopener">
-    <img src="/images/howtouse/13_htu_rect.jpg" alt="Step 13 - Rect Mode" loading="lazy">
-  </a>
-
-  <a class="howtouse-item" href="/images/howtouse/14_htu_rect2.jpg" target="_blank" rel="noopener">
-    <img src="/images/howtouse/14_htu_rect2.jpg" alt="Step 14 - Rect Mode 2" loading="lazy">
-  </a>
-
-  <a class="howtouse-item" href="/images/howtouse/15_htu_move.jpg" target="_blank" rel="noopener">
-    <img src="/images/howtouse/15_htu_move.jpg" alt="Step 15 - Move Points" loading="lazy">
-  </a>
-
-  <a class="howtouse-item" href="/images/howtouse/16_htu_move2.jpg" target="_blank" rel="noopener">
-    <img src="/images/howtouse/16_htu_move2.jpg" alt="Step 16 - Move Points 2" loading="lazy">
-  </a>
-
-  <a class="howtouse-item" href="/images/howtouse/17_htu_ar_ex1_en.jpg" target="_blank" rel="noopener">
-    <img src="/images/howtouse/17_htu_ar_ex1_en.jpg" alt="Step 17 - AR Example" loading="lazy">
-  </a>
-
-  <a class="howtouse-item" href="/images/howtouse/18_premier.jpg" target="_blank" rel="noopener">
-    <img src="/images/howtouse/18_premier.jpg" alt="Step 18 - Premier" loading="lazy">
-  </a>
-  <a class="howtouse-item" href="/images/howtouse/19_htu_exm1_1.jpg" target="_blank" rel="noopener">
-    <img src="/images/howtouse/19_htu_exm1_1.jpg" alt="Step 19 - Example1-1" loading="lazy">
-  </a>
-  <a class="howtouse-item" href="/images/howtouse/20_htu_exm1_2.jpg" target="_blank" rel="noopener">
-    <img src="/images/howtouse/20_htu_exm1_2.jpg" alt="Step 20 - Example1-2" loading="lazy">
-  </a>
-  <a class="howtouse-item" href="/images/howtouse/21_htu_exm1_3.jpg" target="_blank" rel="noopener">
-    <img src="/images/howtouse/21_htu_exm1_3.jpg" alt="Step 21 - Example1-2" loading="lazy">
-  </a>
-
+<!-- DEBUG tools (only for editing) -->
+<div id="htuDebugBar" style="display:none; gap:8px; margin:10px 0;">
+  <button id="htuExportBtn" type="button">Export Layout JSON</button>
+  <button id="htuCopyBtn" type="button">Copy to Clipboard</button>
 </div>
+
+<textarea id="htuExportBox" style="display:none; width:100%; height:220px;"></textarea>
+
+  <div id="htuGallery" class="htu-groups"></div>
 
   </section>
 </main>
@@ -320,6 +380,351 @@ nav a{color:#cfd6e4}
     var y = document.getElementById('year');
     if (y) y.textContent = new Date().getFullYear();
   });
+</script>
+
+
+<script>
+/**
+ * HTU Unified Renderer
+ * - Phase2: /assets/data/htu_000_layout.json  + htu_strings_{lang}.json
+ * - Phase3: /assets/data/htu_layout.json      + htu_strings_{lang}.json
+ * - Lang buttons refresh both at once
+ */
+(function(){
+  const URLS = {
+    phase2Layout: "/assets/data/htu_000_layout.json",
+    phase3Layout: "/assets/data/htu_100_layout.json",
+    strings: (lang) => `/assets/data/htu_strings_${lang}.json`
+  };
+
+  function getLang(){
+    return localStorage.getItem("htu_lang") || "en";
+  }
+  function setLang(lang){
+    localStorage.setItem("htu_lang", lang);
+  }
+  function t(strings, sid){
+    return (strings && sid && strings[sid]) ? strings[sid] : (sid || "");
+  }
+
+  function setLangButtonsActive(lang){
+    document.querySelectorAll("[data-lang-btn]").forEach(btn => {
+      btn.classList.toggle("active", btn.getAttribute("data-lang-btn") === lang);
+    });
+  }
+
+const DEBUG = true;
+
+let __p3Layout = null;   // 현재 로딩된 Phase3 layout 원본(수정 대상)
+let __strings = null;    // strings (참고용)
+
+
+  // ---------- Phase 2 (Steps) ----------
+  function groupIntoSteps(rows){
+    const steps = [];
+    let cur = null;
+
+    for (const r of rows){
+      if (!r || typeof r !== "object") continue;
+      const kind = String(r.kind ?? "").trim();
+
+      if (kind === "step_title"){
+        cur = { sid: r.sid ?? r.id ?? "", id: r.id ?? "", items: [] };
+        steps.push(cur);
+        continue;
+      }
+
+      if (!cur){
+        cur = { sid: "htu_000", id: "htu_000", items: [] };
+        steps.push(cur);
+      }
+
+      cur.items.push({
+        kind,
+        sid: r.sid ?? r.id ?? "",
+        num: r.num
+      });
+    }
+    return steps;
+  }
+
+  function renderPhase2(steps, strings){
+    const host = document.getElementById("htuSteps");
+    if (!host) return;
+
+    host.innerHTML = "";
+
+    for (const st of steps){
+      const box = document.createElement("section");
+      box.className = "htu-step";
+
+      const h2 = document.createElement("h2");
+      h2.className = "htu-step-title";
+      h2.appendChild(document.createTextNode(t(strings, st.sid)));
+      box.appendChild(h2);
+
+      let ol = null;
+      const flushOl = () => {
+        if (ol){
+          box.appendChild(ol);
+          ol = null;
+        }
+      };
+
+      for (const it of st.items){
+        if (it.kind === "step_body"){
+          if (!ol) ol = document.createElement("ol");
+
+          const li = document.createElement("li");
+          if (typeof it.num === "number") li.value = it.num;
+          li.textContent = t(strings, it.sid);
+          ol.appendChild(li);
+
+        } else {
+          flushOl();
+          const p = document.createElement("p");
+          p.className = "htu-note";
+          p.textContent = t(strings, it.sid);
+          box.appendChild(p);
+        }
+      }
+      flushOl();
+
+      // Step 1~4 image (2:1) auto-attach based on translated title text
+      const titleText = t(strings, st.sid);
+      const m = String(titleText || "").match(/Step\s*(\d+)\s*\./i);
+      const stepNo = m ? Number(m[1]) : null;
+
+      if (stepNo != null) {
+        const imgBox = document.createElement("div");
+        imgBox.className = "htu-step-image";
+
+        const imgUrl = `/images/howtouse/howtouse_step${stepNo}.jpg`;
+
+        const a = document.createElement("a");
+        a.href = imgUrl;
+        a.target = "_blank";
+        a.rel = "noopener";
+
+        const img = document.createElement("img");
+        img.src = imgUrl;
+        img.alt = `HowToUse Step ${stepNo}`;
+        img.loading = "lazy";
+
+        a.appendChild(img);
+        imgBox.appendChild(a);
+        box.appendChild(imgBox);
+      }
+
+      host.appendChild(box);
+    }
+  }
+
+  // ---------- Phase 3 (Overlay Gallery) ----------
+  function applyAnchorStyle(el, x, y, anchor){
+    el.style.left = (x ?? 50) + "%";
+    el.style.top  = (y ?? 50) + "%";
+
+    const a = anchor || "top-left";
+    let tx = "0%";
+    let ty = "0%";
+
+    if (a.includes("center")) tx = "-50%";
+    if (a.includes("right"))  tx = "-100%";
+    if (a.includes("bottom")) ty = "-100%";
+    if (a === "center") { tx = "-50%"; ty = "-50%"; }
+    if (a === "top-center") { tx = "-50%"; ty = "0%"; }
+    if (a === "bottom-center") { tx = "-50%"; ty = "-100%"; }
+    if (a === "center-right") { tx = "-100%"; ty = "-50%"; }
+    if (a === "center-left") { tx = "0%"; ty = "-50%"; }
+
+    el.style.transform = `translate(${tx}, ${ty})`;
+  }
+
+  function renderPhase3(layout, strings){
+    const host = document.getElementById("htuGallery");
+    if (!host) return;
+
+    host.innerHTML = "";
+
+    let grid = null;
+    const flushGrid = () => {
+      if (grid){
+        host.appendChild(grid);
+        grid = null;
+      }
+    };
+
+    for (const node of layout){
+      if (!node || typeof node !== "object") continue;
+
+      if (node.kind === "subject"){
+        flushGrid();
+        const band = document.createElement("div");
+        band.className = "htu-subject";
+        band.textContent = t(strings, node.sid);
+        host.appendChild(band);
+        continue;
+      }
+
+      if (node.kind === "spacer"){
+        flushGrid();
+        const sp = document.createElement("div");
+        sp.className = `htu-spacer ${(node.size || "md")}`;
+        host.appendChild(sp);
+        continue;
+      }
+
+      if (node.kind === "image"){
+        if (!grid){
+          grid = document.createElement("div");
+          grid.className = "htu-grid";
+        }
+
+        const a = document.createElement("a");
+        a.className = "htu-thumb";
+        a.href = node.src;
+        a.target = "_blank";
+        a.rel = "noopener";
+
+        const img = document.createElement("img");
+        img.src = node.src;
+        img.alt = t(strings, node.altSid);
+        img.loading = "lazy";
+        a.appendChild(img);
+
+        const ovs = Array.isArray(node.overlays) ? node.overlays : [];
+        for (const ov of ovs){
+          const div = document.createElement("div");
+          div.className = "htu-ov " + (ov.role === "title" ? "title" : "");
+          div.textContent = t(strings, ov.sid);
+          applyAnchorStyle(div, ov.x, ov.y, ov.anchor);
+
+  // ✅ [정확한 삽입 위치] applyAnchorStyle(...) 다음, a.appendChild(div) 직전
+          if (typeof ov.w === "number") {
+            div.style.width = ov.w + "%";
+            div.style.whiteSpace = "normal";     // 줄바꿈 허용
+            div.style.overflowWrap = "anywhere"; // 긴 단어도 줄바꿈
+           }
+
+  a.appendChild(div);
+
+
+        if (DEBUG){
+           div.style.pointerEvents = "auto";
+           div.style.cursor = "move";
+
+           let dragging = false;
+
+          div.addEventListener("mousedown", () => { dragging = true; });
+          document.addEventListener("mouseup", () => { dragging = false; });
+
+           document.addEventListener("mousemove", (e) => {
+          if (!dragging) return;
+
+    const rect = a.getBoundingClientRect();
+    const x = ((e.clientX - rect.left) / rect.width) * 100;
+    const y = ((e.clientY - rect.top) / rect.height) * 100;
+
+    div.style.left = x + "%";
+    div.style.top  = y + "%";
+
+    ov.x = Number(x.toFixed(2));   // ✅ layout에도 기록
+    ov.y = Number(y.toFixed(2));   // ✅ layout에도 기록
+
+
+    console.log(ov.sid, "x:", x.toFixed(2), "y:", y.toFixed(2));
+  });
+
+  div.addEventListener("wheel", (e) => {
+    e.preventDefault();
+    let size = parseFloat(getComputedStyle(div).fontSize);
+    size += (e.deltaY < 0 ? 1 : -1);
+    div.style.fontSize = size + "px";
+  }, { passive:false });
+}
+
+        }
+
+        grid.appendChild(a);
+        continue;
+      }
+    }
+
+    flushGrid();
+  }
+
+  // ---------- Unified load + render ----------
+  async function loadAllAndRender(){
+    const lang = getLang();
+    setLangButtonsActive(lang);
+
+    const [p2Res, p3Res, strRes] = await Promise.all([
+      fetch(URLS.phase2Layout, { cache: "no-store" }),
+      fetch(URLS.phase3Layout, { cache: "no-store" }),
+      fetch(URLS.strings(lang), { cache: "no-store" })
+    ]);
+
+    if (!p2Res.ok) throw new Error("Phase2 layout HTTP " + p2Res.status);
+    if (!p3Res.ok) throw new Error("Phase3 layout HTTP " + p3Res.status);
+    if (!strRes.ok) throw new Error("Strings HTTP " + strRes.status);
+
+    const [p2Layout, p3Layout, strings] = await Promise.all([
+      p2Res.json(), p3Res.json(), strRes.json()
+    ]);
+
+  __p3Layout = p3Layout;   // ✅ 추가: Phase3 layout 저장
+  __strings  = strings;    // ✅ (선택) strings 저장
+
+    if (Array.isArray(p2Layout)){
+      const steps = groupIntoSteps(p2Layout);
+      renderPhase2(steps, strings);
+    }
+    if (Array.isArray(p3Layout)){
+      renderPhase3(p3Layout, strings);
+    }
+  }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    // language buttons
+    document.querySelectorAll("[data-lang-btn]").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const lang = btn.getAttribute("data-lang-btn");
+        setLang(lang);
+        loadAllAndRender().catch(e => console.warn("[HTU] render failed:", e));
+      });
+    });
+
+    loadAllAndRender().catch(e => console.warn("[HTU] render failed:", e));
+    // DEBUG export tools
+    const bar = document.getElementById("htuDebugBar");
+    const box = document.getElementById("htuExportBox");
+    const exportBtn = document.getElementById("htuExportBtn");
+    const copyBtn = document.getElementById("htuCopyBtn");
+
+    if (DEBUG && bar && box && exportBtn && copyBtn){
+      bar.style.display = "flex";
+      box.style.display = "block";
+
+      exportBtn.addEventListener("click", () => {
+        if (!__p3Layout) {
+          alert("Phase3 layout not loaded yet.");
+          return;
+        }
+        box.value = JSON.stringify(__p3Layout, null, 2);
+      });
+
+      copyBtn.addEventListener("click", async () => {
+        try{
+          await navigator.clipboard.writeText(box.value || "");
+          alert("Copied!");
+        }catch(e){
+          alert("Copy failed. Select all and copy manually.");
+        }
+      });
+    }
+  });
+})();
 </script>
 
 </body>
