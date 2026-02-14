@@ -293,15 +293,15 @@
       {
         "sid": "htu_211",
         "role": "label",
-        "x": 10,
-        "y": 83,
+        "x": 9.26,
+        "y": 92.03,
         "anchor": "bottom-start",
         "w": 45
       },
       {
         "sid": "htu_212",
         "role": "label",
-        "x": 15.24,
+        "x": 56.27,
         "y": 89.84,
         "anchor": "bottom-end",
         "w": 45
@@ -324,8 +324,8 @@
       {
         "sid": "htu_221",
         "role": "label",
-        "x": 3.69,
-        "y": 66.14,
+        "x": 54.28,
+        "y": 72.31,
         "anchor": "bottom-end",
         "w": 45
       }
