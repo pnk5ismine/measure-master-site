@@ -324,7 +324,7 @@
       {
         "sid": "htu_221",
         "role": "label",
-        "x": 60
+        "x": 60,
         "y": 65,
         "anchor": "bottom-end",
         "w": 45
