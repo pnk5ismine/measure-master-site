@@ -293,16 +293,18 @@
       {
         "sid": "htu_211",
         "role": "label",
-        "x": 10.46,
-        "y": 83.07,
-        "anchor": "bottom-start"
+        "x": 10,
+        "y": 83,
+        "anchor": "bottom-start",
+        "w": 45
       },
       {
         "sid": "htu_212",
         "role": "label",
-        "x": 15.04,
-        "y": 88.25,
-        "anchor": "bottom-end"
+        "x": 60,
+        "y": 83,
+        "anchor": "bottom-end",
+        "w": 45
       }
     ]
   },
@@ -322,9 +324,10 @@
       {
         "sid": "htu_221",
         "role": "label",
-        "x": 4.68,
-        "y": 68.33,
-        "anchor": "bottom-end"
+        "x": 60
+        "y": 65,
+        "anchor": "bottom-end",
+        "w": 45
       }
     ]
   },
