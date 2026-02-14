@@ -417,12 +417,6 @@ const DEBUG = true;
 let __p3Layout = null;   // 현재 로딩된 Phase3 layout 원본(수정 대상)
 let __strings = null;    // strings (참고용)
 
-  if (typeof ov.w === "number") {
-    div.style.width = ov.w + "%";
-    div.style.whiteSpace = "normal";
-  }
-
-
 
   // ---------- Phase 2 (Steps) ----------
   function groupIntoSteps(rows){
@@ -604,8 +598,15 @@ let __strings = null;    // strings (참고용)
           div.className = "htu-ov " + (ov.role === "title" ? "title" : "");
           div.textContent = t(strings, ov.sid);
           applyAnchorStyle(div, ov.x, ov.y, ov.anchor);
-if (typeof ov.w === "number") div.style.width = ov.w + "%";  // ✅ 개별 폭
-a.appendChild(div);
+  // ✅ [정확한 삽입 위치] applyAnchorStyle(...) 다음, a.appendChild(div) 직전
+          if (typeof ov.w === "number") {
+            div.style.width = ov.w + "%";
+            div.style.whiteSpace = "normal";     // 줄바꿈 허용
+            div.style.wordBreak = "break-word";// ✅ 긴 단어 강제 줄바꿈
+           }
+
+          a.appendChild(div);
+
 
 if (DEBUG){
   div.style.pointerEvents = "auto";
