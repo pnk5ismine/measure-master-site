@@ -604,10 +604,10 @@ let __strings = null;    // strings (참고용)
           if (typeof ov.w === "number") {
             div.style.width = ov.w + "%";
             div.style.whiteSpace = "normal";     // 줄바꿈 허용
-            div.style.overflowWrap = "anywhere"; // 긴 단어도 줄바꿈
+            div.style.wordBreak = "break-word";// ✅ 긴 단어 강제 줄바꿈
            }
 
-  a.appendChild(div);
+          a.appendChild(div);
 
 
         if (DEBUG){
