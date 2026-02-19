@@ -395,13 +395,34 @@ nav a{color:var(--muted)}
     phase3Layout: "/assets/data/htu_100_layout.json",
     strings: (lang) => `/assets/data/htu_strings_${lang}.json`
   };
+function applyLangToLinks(){
+  const lang = getLang();
+  document.querySelectorAll('nav a[href^="/"]').forEach(a => {
+    const href = a.getAttribute("href");
+    if (!href) return;
+    const u = new URL(href, location.origin);
+    u.searchParams.set("lang", lang);
+    a.setAttribute("href", u.pathname + u.search);
+  });
+}
 
-  function getLang(){
-    return localStorage.getItem("htu_lang") || "en";
-  }
-  function setLang(lang){
-    localStorage.setItem("htu_lang", lang);
-  }
+function getLang(){
+  const u = new URL(location.href);
+  const q = (u.searchParams.get("lang") || "").toLowerCase();
+  const saved = (localStorage.getItem("mm_lang") || "").toLowerCase();
+  const lang = (q || saved || "en");
+  return (lang === "kr") ? "ko" : lang;
+}
+function setLang(lang){
+  lang = (String(lang || "").toLowerCase() === "kr") ? "ko" : String(lang || "").toLowerCase();
+  localStorage.setItem("mm_lang", lang);
+
+  // URL에도 반영 (다른 페이지로 이동해도 유지)
+  const u = new URL(location.href);
+  u.searchParams.set("lang", lang);
+  history.replaceState(null, "", u.toString());
+}
+
   function t(strings, sid){
     return (strings && sid && strings[sid]) ? strings[sid] : (sid || "");
   }
@@ -655,6 +676,8 @@ if (DEBUG){
   // ---------- Unified load + render ----------
   async function loadAllAndRender(){
     const lang = getLang();
+    setLang(lang);              // ✅ URL/localStorage 동기화
+    applyLangToLinks();         // ✅ 링크에 lang 붙이기
     setLangButtonsActive(lang);
 
     const [p2Res, p3Res, strRes] = await Promise.all([
