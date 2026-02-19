@@ -510,20 +510,8 @@ let __strings = null;    // strings (참고용)
       }
       flushOl();
 
-      const titleText = t(strings, st.sid);
-      let stepNo = null;
-
-      // 영어: Step 1.
-      let m = String(titleText || "").match(/Step\s*(\d+)\s*\./i);
-
-      // 한국어: 1 단계
-      if (!m) {
-        m = String(titleText || "").match(/(\d+)\s*단계/);
-      }
-
-      if (m) {
-        stepNo = Number(m[1]);
-      }
+// step_title이 등장한 순서대로 번호 부여
+      const stepNo = steps.indexOf(st) + 1;
 
       if (stepNo != null) {
         const imgBox = document.createElement("div");
