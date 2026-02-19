@@ -1,4 +1,4 @@
-﻿// /js/i18n.js
+﻿// /assets/js/i18n.js
 // Measure Master i18n (mm_lang unified)
 // - Replaces elements with [data-i18n] using innerHTML
 // - Replaces attributes via [data-i18n-attr], format: "attr=key, attr2=key2"
@@ -84,7 +84,7 @@
     if (GLOBAL()) return;
 
     const lang = getLang();
-    const url = `/assets/data/${page}_strings_${lang}.json`;
+    const url = `/assets/data/strings_${lang}.json`;
 
     try {
       const res = await fetch(url, { cache: "no-store" });
@@ -93,8 +93,8 @@
       const data = await res.json();
       if (!window.I18N) window.I18N = {};
       window.I18N[lang] = data;
-    } catch {
-      // 조용히 무시 (키 그대로 보이게 됨)
+    } catch (e) {
+    console.warn("[i18n] failed to load strings:", url, e);
     }
   }
 
