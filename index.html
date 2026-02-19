@@ -801,7 +801,37 @@
 <script src="/js/mm-auth.js?v=auth_r2"></script>
 
 <!-- ✅ i18n must load BEFORE index.js so index.js can call mmI18n.t -->
-<script src="/js/i18n.js?v=mm_i18n_r1"></script>
+<script>
+/* i18n loader: try /js/i18n.js then /assets/js/i18n.js */
+(function(){
+  const candidates = [
+    "/js/i18n.js?v=mm_i18n_r1",
+    "/assets/js/i18n.js?v=mm_i18n_r1",
+    "js/i18n.js?v=mm_i18n_r1",
+    "assets/js/i18n.js?v=mm_i18n_r1"
+  ];
+  function load(src){
+    return new Promise((resolve,reject)=>{
+      const s=document.createElement('script');
+      s.src=src;
+      s.async=false;
+      s.onload=()=>resolve(src);
+      s.onerror=()=>reject(src);
+      document.head.appendChild(s);
+    });
+  }
+  (async ()=>{
+    for (const c of candidates){
+      try{
+        const ok = await load(c);
+        console.log("[i18n] loaded:", ok);
+        return;
+      }catch(e){}
+    }
+    console.error("[i18n] failed to load from any path:", candidates);
+  })();
+})();
+</script>
 
 <script src="/js/index.js?v=rev3"></script>
 <script>
