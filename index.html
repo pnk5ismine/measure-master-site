@@ -886,17 +886,34 @@
     if (GLOBAL()) return;
 
     const lang = getLang();
-    const url = `/assets/data/strings_${lang}.json`;
 
-    try {
-      const res = await fetch(url, { cache: "no-store" });
-      if (!res.ok) return;
-      const data = await res.json();
-      if (!window.I18N) window.I18N = {};
-      window.I18N[lang] = data;
-    } catch {
-      // silent fail
+    // Try multiple candidate paths because hosting/build may change the web root
+    const candidates = [
+      `/assets/data/strings_${lang}.json`,
+      `/assets/data/idx_strings_${lang}.json`,
+      `/data/strings_${lang}.json`,
+      `/data/idx_strings_${lang}.json`,
+      `assets/data/strings_${lang}.json`,
+      `assets/data/idx_strings_${lang}.json`,
+      `./assets/data/strings_${lang}.json`,
+      `./assets/data/idx_strings_${lang}.json`,
+    ];
+
+    for (const url of candidates) {
+      try {
+        const res = await fetch(url, { cache: "no-store" });
+        if (!res.ok) continue;
+        const data = await res.json();
+        if (!window.I18N) window.I18N = {};
+        window.I18N[lang] = data;
+        console.log("[i18n] loaded:", url);
+        return;
+      } catch {
+        // continue
+      }
     }
+
+    console.warn("[i18n] strings json not found. tried:", candidates);
   }
 
   function applyI18n() {
