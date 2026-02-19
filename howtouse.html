@@ -510,10 +510,20 @@ let __strings = null;    // strings (참고용)
       }
       flushOl();
 
-      // Step 1~4 image (2:1) auto-attach based on translated title text
       const titleText = t(strings, st.sid);
-      const m = String(titleText || "").match(/Step\s*(\d+)\s*\./i);
-      const stepNo = m ? Number(m[1]) : null;
+      let stepNo = null;
+
+      // 영어: Step 1.
+      let m = String(titleText || "").match(/Step\s*(\d+)\s*\./i);
+
+      // 한국어: 1 단계
+      if (!m) {
+        m = String(titleText || "").match(/(\d+)\s*단계/);
+      }
+
+      if (m) {
+        stepNo = Number(m[1]);
+      }
 
       if (stepNo != null) {
         const imgBox = document.createElement("div");
