@@ -169,7 +169,25 @@
       border:1px solid rgba(30,64,175,.7);
       box-shadow:0 18px 55px rgba(255,255,255,.95);
       background:#ffffff;
+      position:relative;
     }
+
+/* Hero main image overlay title */
+    .hero-main-title{
+      position:absolute;
+      left:50%;
+      top:18%;
+      transform:translateX(-50%);
+      width:min(92%, 980px);
+      text-align:center;
+      line-height:1.05;
+      letter-spacing:-0.02em;
+      color:#0f172a;
+      text-shadow:0 2px 18px rgba(255,255,255,.85);
+      pointer-events:none;
+      z-index:2;
+    }
+
     .hero-main-image img {
       display:block;
       width:100%;
@@ -579,8 +597,9 @@
   <main>
     <section class="hero-top">
       <div class="hero-main-image">
+        <div class="hero-main-title" data-i18n="idx.hero.main_title">idx.hero.main_title</div>
         <img
-          src="/images/index/mm_main1_en.jpg"
+          src="/images/index/mm_main_bl.jpg"
           data-i18n-attr="alt=idx.hero.main_image_alt"
           alt="idx.hero.main_image_alt"
           loading="eager"
