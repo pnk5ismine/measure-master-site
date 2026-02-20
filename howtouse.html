@@ -185,14 +185,14 @@ nav a{color:var(--muted)}
       margin: 14px 0 18px;
     }
     .htu-step{
-      border:1px solid var(--border);
-      background: var(--card);
+      border:1px solid #b7d8c9;
+      background:#dff3ea;   /* ← greenish tone */
       border-radius: 14px;
       padding: 14px 14px 12px;
     }
     .htu-step-title{
       margin:0 0 10px;
-      font-size: 36px;
+      font-size: 28px;
       line-height: 1.25;
     }
     .htu-step-title .htu-id{
@@ -221,8 +221,10 @@ nav a{color:var(--muted)}
       border: 1px solid var(--border);
       border-radius: 12px;
       overflow: hidden;
-      background: #ffffff;
+      background:#dff3ea;
+      border:1px solid #b7d8c9;
     }
+
     .htu-step-image a{
       display:block;
       width:100%;
@@ -241,6 +243,9 @@ nav a{color:var(--muted)}
   flex-direction:column;
   gap:18px;
   margin: 18px 0 10px;
+  background:#eaf7f1;
+  padding:20px;
+  border-radius:18px;
 }
 
 /* ===== Subject Band ===== */
@@ -432,7 +437,7 @@ function setLang(lang){
     });
   }
 
-const DEBUG = true;
+const DEBUG = false;
 
 let __p3Layout = null;   // 현재 로딩된 Phase3 layout 원본(수정 대상)
 let __strings = null;    // strings (참고용)
