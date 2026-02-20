@@ -182,7 +182,7 @@
       transform:translateX(-50%);
       width:min(92%, 980px);
       text-align:center;
-      font-size: clamp(17px, 2.4vw, 32px);
+      font-size: clamp(24px, 3.2vw, 48px);
       font-weight: 900;
       text-shadow: 0 10px 40px rgba(255,255,255,.92);
       line-height:1.05;
@@ -330,18 +330,21 @@
       line-height:1.5;
     }
 
-    section {
-      border-radius:24px;
-      padding:20px 18px 18px;
-      background:rgba(15,23,42,.92);
-      border:1px solid rgba(30,64,175,.55);
-      box-shadow:0 18px 55px rgba(255,255,255,.95);
-    }
-    section.section-soft {
-      background: var(--section-tint);
-      border-color: var(--section-border);
-      box-shadow: 0 14px 36px rgba(15,23,42,.10);  
-    }
+section{
+  border-radius:24px;
+  padding:20px 18px 18px;
+
+  /* 🔁 여기서 통일: 모든 섹션은 기본적으로 같은 배경을 공유 */
+  background: linear-gradient(0deg, var(--section-accent), var(--section-accent)),
+              var(--section-bg);
+
+  border:1px solid rgba(30,64,175,.18);
+  box-shadow:0 18px 55px rgba(255,255,255,.95);
+}
+section.section-soft{
+  background: linear-gradient(0deg, var(--section-accent), var(--section-accent)),
+              var(--section-bg);
+}
     section h2 {
       margin:0 0 10px;
       font-size:18px;
