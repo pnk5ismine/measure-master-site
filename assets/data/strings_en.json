@@ -62,8 +62,9 @@
   "idx.modes.sm.title": "On-screen Mode",
   "idx.nav.home": "home",
   "idx.nav.howtouse": "how to use",
-  "idx.nav.privacy": "privacy",
   "idx.nav.reviews": "reviews",
+  "idx.nav.privacy": "privacy",
+  "idx.nav.arcamera": "AR Camera",
   "idx.screens.lead": "These screenshots are the same ones used on the Google Play listing.",
   "idx.screens.s1.alt": "Set up a reference rectangle, then measure lengths and areas in the corrected view.",
   "idx.screens.s1.cap": "Set up a reference rectangle, then measure lengths and areas in the corrected view.",
@@ -178,6 +179,70 @@
   "rvw_lst2": "Nickname",
   "rvw_lst3": "Title",
   "rvw_lst4": "Views",
-  "rvw_lst5": "Date"
+  "rvw_lst5": "Date",
+
+  "privacy.title": "Privacy Policy",
+  "privacy.updated": "Last updated",
+  "privacy.intro": "Measure Master (\"we\", \"us\", or \"our\") values your privacy and complies with applicable privacy laws and regulations.",
+
+  "privacy.section1": "1. Information we collect",
+  "privacy.section1.body": "When you sign up or log in, we collect your email address and password.",
+
+  "privacy.section2": "2. Purpose of collection and use",
+  "privacy.section2.body": "To identify users and manage accounts, and to provide the service (login and posting reviews).",
+
+  "privacy.section3": "3. Retention and deletion",
+  "privacy.section3.body": "We retain personal information only for as long as necessary to provide the service, and delete it without delay once the purpose is fulfilled, unless retention is required by law.",
+
+  "privacy.section4": "4. Third-party sharing and processing",
+  "privacy.section4.body": "We use cloud services such as Supabase (authentication/database) and Vercel (hosting).",
+
+  "privacy.section5": "5. Your rights",
+  "privacy.section5.body": "You may request access to, correction of, or deletion of your personal information, and withdraw consent (account deletion).",
+
+  "privacy.section6": "6. Cookies and logging",
+  "privacy.section6.body": "To keep you signed in, we may use local/session storage or cookies.",
+
+  "privacy.section7": "7. Security measures",
+  "privacy.section7.body": "We use HTTPS for data in transit, restrict access, and follow the principle of minimal collection.",
+
+  "privacy.section8": "8. Contact",
+  "privacy.section8.body": "Email: pnk506@gmail.com",
+
+  "privacy.section9": "9. Notice of changes",
+  "privacy.section9.body": "If this policy changes, we will post the update on this page with the updated date.",
+
+  "privacy.nav.ar": "AR camera",
+
+  "privacy.ar.title": "Privacy handling for AR Measuring (Camera) features",
+  "privacy.ar.target": "Applies to: MMProject (AR Measuring)",
+
+  "privacy.ar.section1": "1. Information we collect",
+  "privacy.ar.section1.li1": "We do not collect, store, or transmit personal data to our servers.",
+  "privacy.ar.section1.li2": "<strong>Camera (CAMERA)</strong>: Camera frames are processed on-device for real-time AR measuring.",
+  "privacy.ar.section1.li3": "<strong>Photos/Media access (optional)</strong>: Used only when you choose to load an image from your gallery.",
+  "privacy.ar.section1.li4": "<strong>Photo saving (optional)</strong>: Saved to your device gallery only when you choose to save a capture.",
+
+  "privacy.ar.section2": "2. Processing and storage",
+  "privacy.ar.section2.li1": "Camera frames are processed <strong>on-device only</strong> and are <strong>not transmitted</strong> to any server.",
+  "privacy.ar.section2.li2": "Only captures you choose to save are stored in your device gallery, and you can delete them anytime from your gallery.",
+
+  "privacy.ar.section3": "3. Sharing with third parties",
+  "privacy.ar.section3.li1": "We do not share personal data with third parties.",
+  "privacy.ar.section3.li2": "We may use Google ARCore, which is an on-device AR tracking library and does not collect or transmit personal data for this feature.",
+
+  "privacy.ar.section4": "4. Security",
+  "privacy.ar.section4.li1": "The app does not transmit personal data over the network.",
+  "privacy.ar.section4.li2": "Saved images are protected by the operating system security mechanisms (Scoped Storage/MediaStore).",
+
+  "privacy.ar.section5": "5. Children’s privacy",
+  "privacy.ar.section5.li1": "We do not collect personal data from children.",
+
+  "privacy.ar.section6": "6. Your rights and contact",
+  "privacy.ar.section6.li1": "You can delete saved captures at any time from your gallery.",
+  "privacy.ar.section6.li2": "Contact: <a href=\"mailto:pnk506@gmail.com\">pnk506@gmail.com</a>",
+
+  "privacy.ar.section7": "7. Policy changes",
+  "privacy.ar.section7.li1": "If features change or laws are updated, we will update this section and revise the \"Last updated\" date at the top of this page."
 
 }

@@ -62,8 +62,9 @@
   "idx.modes.sm.title": "화면 모드",
   "idx.nav.home": "홈",
   "idx.nav.howtouse": "사용법",
-  "idx.nav.privacy": "개인정보보호규정",
   "idx.nav.reviews": "사용 후기",
+  "idx.nav.privacy": "개인정보보호규정",
+  "idx.nav.arcamera": "AR 카메라",
   "idx.screens.lead": "이 사진들은 구글 Play Store에서의 전시 목록과 동일한 것 들입니다.",
   "idx.screens.s1.alt": "먼저 사각형 하나를 설정하고 투시 장면 속의 실제 용적을 추정해 냅니다.",
   "idx.screens.s1.cap": "먼저 사각형 하나를 설정하고 투시 장면 속의 실제 용적을 추정해 냅니다.",
@@ -178,9 +179,70 @@
   "rvw_lst2": "별명",
   "rvw_lst3": "제목",
   "rvw_lst4": "조회",
-  "rvw_lst5": "일시"
+  "rvw_lst5": "일시",
 
+  "privacy.title": "개인정보처리방침",
+  "privacy.updated": "최종 업데이트",
+  "privacy.intro": "Measure Master(이하 \"당사\")는 이용자의 개인정보를 소중히 여기며 관련 법령을 준수합니다.",
 
+  "privacy.section1": "1. 수집하는 정보",
+  "privacy.section1.body": "회원가입 또는 로그인 시 이메일 주소와 비밀번호를 수집합니다.",
 
+  "privacy.section2": "2. 수집 및 이용 목적",
+  "privacy.section2.body": "사용자 식별 및 계정 관리, 그리고 서비스 제공(로그인 및 사용후기 작성)을 위해 사용합니다.",
+
+  "privacy.section3": "3. 보관 및 삭제",
+  "privacy.section3.body": "개인정보는 서비스 제공에 필요한 기간 동안만 보관하며, 목적 달성 시 지체 없이 삭제합니다. 단, 관련 법령에 따라 보관이 필요한 경우에는 해당 기간 동안 보관할 수 있습니다.",
+
+  "privacy.section4": "4. 제3자 제공 및 처리위탁",
+  "privacy.section4.body": "당사는 Supabase(인증/DB), Vercel(호스팅) 등 클라우드 서비스를 이용합니다.",
+
+  "privacy.section5": "5. 이용자의 권리",
+  "privacy.section5.body": "이용자는 개인정보 열람, 정정, 삭제를 요청할 수 있으며, 동의 철회(계정 삭제)를 요청할 수 있습니다.",
+
+  "privacy.section6": "6. 쿠키 및 로그",
+  "privacy.section6.body": "로그인 상태 유지를 위해 로컬/세션 스토리지 또는 쿠키를 사용할 수 있습니다.",
+
+  "privacy.section7": "7. 보안 조치",
+  "privacy.section7.body": "전송 구간 암호화(HTTPS), 접근 제한, 최소 수집 원칙 등을 통해 개인정보를 보호합니다.",
+
+  "privacy.section8": "8. 문의",
+  "privacy.section8.body": "이메일: pnk506@gmail.com",
+
+  "privacy.section9": "9. 변경 고지",
+  "privacy.section9.body": "본 방침이 변경되는 경우, 이 페이지에 업데이트 내용과 최종 업데이트 날짜를 게시합니다.",
+
+  "privacy.nav.ar": "AR 카메라",
+
+  "privacy.ar.title": "AR 측정(카메라) 기능 개인정보 처리",
+  "privacy.ar.target": "적용 대상: MMProject(AR 측정)",
+
+  "privacy.ar.section1": "1. 수집하는 정보",
+  "privacy.ar.section1.li1": "당사는 개인정보를 서버로 수집, 저장, 전송하지 않습니다.",
+  "privacy.ar.section1.li2": "<strong>카메라(CAMERA)</strong>: 실시간 AR 측정을 위해 카메라 화면은 기기 내에서 처리됩니다.",
+  "privacy.ar.section1.li3": "<strong>사진/미디어 접근(선택)</strong>: 사용자가 갤러리에서 이미지를 불러오는 경우에만 사용됩니다.",
+  "privacy.ar.section1.li4": "<strong>사진 저장(선택)</strong>: 사용자가 저장을 선택한 경우에만 기기 갤러리에 저장됩니다.",
+
+  "privacy.ar.section2": "2. 처리 및 저장",
+  "privacy.ar.section2.li1": "카메라 화면은 <strong>기기 내에서만</strong> 처리되며, 어떤 서버로도 <strong>전송되지 않습니다</strong>.",
+  "privacy.ar.section2.li2": "사용자가 저장을 선택한 캡처만 기기 갤러리에 저장되며, 갤러리에서 언제든 삭제할 수 있습니다.",
+
+  "privacy.ar.section3": "3. 제3자 제공",
+  "privacy.ar.section3.li1": "당사는 개인정보를 제3자와 공유하지 않습니다.",
+  "privacy.ar.section3.li2": "AR 기능 구현을 위해 Google ARCore를 사용할 수 있으며, 본 기능 범위 내에서 개인정보를 수집하거나 서버로 전송하지 않습니다.",
+
+  "privacy.ar.section4": "4. 보안",
+  "privacy.ar.section4.li1": "앱은 개인정보를 네트워크로 전송하지 않습니다.",
+  "privacy.ar.section4.li2": "저장된 이미지는 운영체제 보안 체계(Scoped Storage/MediaStore 등)에 의해 보호됩니다.",
+
+  "privacy.ar.section5": "5. 아동의 개인정보",
+  "privacy.ar.section5.li1": "당사는 아동의 개인정보를 수집하지 않습니다.",
+
+  "privacy.ar.section6": "6. 권리 및 문의",
+  "privacy.ar.section6.li1": "저장된 캡처는 갤러리에서 언제든 삭제할 수 있습니다.",
+  "privacy.ar.section6.li2": "문의: <a href=\"mailto:pnk506@gmail.com\">pnk506@gmail.com</a>",
+
+  "privacy.ar.section7": "7. 방침 변경",
+  "privacy.ar.section7.li1": "기능 변경 또는 법령 개정 등에 따라 본 내용은 업데이트될 수 있으며, 변경 시 본 페이지 상단의 \"최종 업데이트\" 날짜를 갱신합니다."
 
 }
