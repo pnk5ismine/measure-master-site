@@ -60,7 +60,7 @@
   "idx.modes.sm.alt": "화면 모드",
   "idx.modes.sm.body": " 화면 위에 직접 도형을 그려 넣고 그것의 테두리/면적을 바로 계산해 냅니다.",
   "idx.modes.sm.title": "화면 모드",
-  "idx.nav.home": "홈 링크",
+  "idx.nav.home": "홈",
   "idx.nav.howtouse": "사용법",
   "idx.nav.privacy": "개인정보보호규정",
   "idx.nav.reviews": "사용 후기",
@@ -172,6 +172,15 @@
   "htu_img_311_alt": "AR로 탁자의 길이 측정하기",
   "htu_311": "AR 측정 거리내의 현장에서 탁자의 길이 측정하기.",
   "htu_img_312_alt": "Measure a TV Monitor with AR",
-  "htu_312": "AR 측정 거리내의 TV 모니터 측정하기"
+  "htu_312": "AR 측정 거리내의 TV 모니터 측정하기",
+
+  "rvw_lst1": "번호.",
+  "rvw_lst2": "별명",
+  "rvw_lst3": "제목",
+  "rvw_lst4": "조회",
+  "rvw_lst5": "일시"
+
+
+
 
 }

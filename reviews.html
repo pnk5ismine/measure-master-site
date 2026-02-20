@@ -268,11 +268,11 @@ nav a{color:var(--muted)}
 
   <!-- Row 2 (mobile): nav centered / Desktop: nav on right -->
   <div class="header-bottom">
-<nav class="nav-fixed" data-no-i18n="1">
-  <a href="/index.html" data-no-i18n="1">Home</a>
-  <a href="/howtouse.html" data-no-i18n="1">How to use</a>
-  <a href="/reviews.html" data-no-i18n="1">Reviews</a>
-  <a href="/privacy.html" data-no-i18n="1">Privacy</a>
+<nav class="nav-fixed">
+  <a href="/index.html"   data-i18n="idx.nav.home">idx.nav.home</a>
+  <a href="/howtouse.html" data-i18n="idx.nav.howtouse">idx.nav.howtouse</a>
+  <a href="/reviews.html" data-i18n="idx.nav.reviews">idx.nav.reviews</a>
+  <a href="/privacy.html" data-i18n="idx.nav.privacy">idx.nav.privacy</a>
 </nav>
 
   </div>
@@ -287,11 +287,11 @@ nav a{color:var(--muted)}
           <table class="table">
             <thead>
               <tr>
-                <th class="cell-no">No.</th>
-                <th class="cell-nick">Nickname</th>
-                <th>Title & preview</th>
-                <th class="cell-stats">Views</th>
-                <th class="cell-time">Date</th>
+               <th class="cell-no"   data-i18n="rvw_lst1">rvw_lst1</th>
+               <th class="cell-nick" data-i18n="rvw_lst2">rvw_lst2</th>
+               <th class="cell-title"  data-i18n="rvw_lst3">rvw_lst3</th>
+               <th class="cell-stats" data-i18n="rvw_lst4">rvw_lst4</th>
+               <th class="cell-time"  data-i18n="rvw_lst5">rvw_lst5</th>
               </tr>
             </thead>
             <tbody id="listBody"></tbody>
@@ -343,6 +343,13 @@ nav a{color:var(--muted)}
       </section>
     </main>
   </div>
+
+  <script src="/assets/js/i18n.js?v=mm_i18n_r1"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      if (typeof window.initI18n === 'function') window.initI18n();
+    });
+  </script>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="/js/mm-auth.js?v=auth_r3"></script>

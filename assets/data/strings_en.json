@@ -172,6 +172,12 @@
   "htu_img_311_alt": "Measure a table with AR",
   "htu_311": "Measure a table’s width on site (within AR range).",
   "htu_img_312_alt": "Measure a TV Monitor with AR",
-  "htu_312": "Measure a TV’s screen width (within AR range)."
+  "htu_312": "Measure a TV’s screen width (within AR range).",
+
+  "rvw_lst1": "No.",
+  "rvw_lst2": "Nickname",
+  "rvw_lst3": "Title",
+  "rvw_lst4": "Views",
+  "rvw_lst5": "Date"
 
 }
