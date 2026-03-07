@@ -573,117 +573,35 @@ section.section-soft{
 
     /* Google Play Banner */
     .playstore-banner {
-      display: flex;
-      align-items: stretch;
-      gap: 14px;
-      width: min(920px, 100%);
-      margin: 24px auto;
-      padding: 14px;
-      background: linear-gradient(135deg, #0f172a, #1e293b);
-      border: 1px solid rgba(255,255,255,0.14);
-      border-radius: 18px;
-      box-shadow: 0 10px 28px rgba(0,0,0,0.22);
-      text-decoration: none;
-      overflow: hidden;
-      transition: transform 0.18s ease, box-shadow 0.18s ease;
+      display:flex;
+      align-items:center;
+      gap:12px;
+      width:min(920px,100%);
+      margin:24px auto;
+      padding:12px;
+      background:#0f172a;
+      border-radius:18px;
+      text-decoration:none;
     }
 
-    .playstore-banner:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 14px 34px rgba(0,0,0,0.28);
+    .playstore-banner__graphic{
+      flex:1;
+      border-radius:12px;
+      overflow:hidden;
     }
 
-    .playstore-banner__logo {
-      flex: 0 0 120px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: rgba(255,255,255,0.06);
-      border-radius: 14px;
-      padding: 12px;
-   }
+    .playstore-banner__graphic img{
+      width:100%;
+      display:block;
+    }
 
-   .playstore-banner__logo img {
-     width: 100%;
-     max-width: 92px;
-     height: auto;
-     display: block;
-     object-fit: contain;
-   }
-
-   .playstore-banner__graphic {
-     position: relative;
-     flex: 1 1 auto;
-     min-width: 0;
-     border-radius: 14px;
-     overflow: hidden;
-   }
-
-   .playstore-banner__graphic img {
-     width: 100%;
-     height: 100%;
-     min-height: 140px;
-     display: block;
-     object-fit: cover;
-     object-position: center;
-     filter: brightness(0.78);
-   }
-
-   .playstore-banner__overlay {
-     position: absolute;
-     inset: 0;
-     display: flex;
-     align-items: flex-start;
-     justify-content: center;
-     padding: 18px 20px;
-     background: linear-gradient(
-       to bottom,
-       rgba(0,0,0,0.28) 0%,
-       rgba(0,0,0,0.08) 45%,
-       rgba(0,0,0,0.16) 100%
-     );
-     text-align: center;
-   }
-
-   .playstore-banner__overlay span {
-     color: #ffffff;
-     font-size: clamp(20px, 2.6vw, 34px);
-     font-weight: 800;
-     line-height: 1.15;
-     letter-spacing: -0.02em;
-     text-shadow: 0 2px 8px rgba(0,0,0,0.35);
-   }
-
-   @media (max-width: 640px) {
-     .playstore-banner {
-       gap: 10px;
-       padding: 10px;
-       border-radius: 14px;
-  }
-
-  .playstore-banner__logo {
-    flex: 0 0 82px;
-    padding: 8px;
-    border-radius: 10px;
-  }
-
-  .playstore-banner__logo img {
-    max-width: 62px;
-  }
-
-  .playstore-banner__graphic {
-    border-radius: 10px;
-  }
-
-  .playstore-banner__graphic img {
-    min-height: 96px;
-  }
-
-  .playstore-banner__overlay {
-    padding: 10px 12px;
-  }
-}
-
+    .playstore-banner__caption{
+      flex-basis:100%;
+      text-align:center;
+      margin-top:6px;
+      font-size:12px;
+      color:#d1d5db;
+    }
   </style>
 </head>
 
@@ -808,16 +726,14 @@ section.section-soft{
           rel="noopener noreferrer"
           aria-label="Get it on Google Play Store"
         >
-         <div class="playstore-banner__graphic">
-           <img
-             src="/images/index/mm_banner1.jpg"
-             alt="Measure Master banner graphic"
-          />
-           <div class="playstore-banner__overlay">
-             <span data-i18n="idx.hero.play_banner">idx.hero.play_banner</span>
-           </div>
-         </div>
-       </a>
+          <div class="playstore-banner__graphic">
+            <img src="/images/index/banner_bl.png" alt="Measure Master banner graphic" />
+          </div>
+
+          <div class="playstore-banner__caption">
+            <span data-i18n="idx.hero.play_banner">idx.hero.play_banner</span>
+          </div>
+        </a>
      </div>
 
      <div class="hero-modes">
