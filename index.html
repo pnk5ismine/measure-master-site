@@ -570,6 +570,68 @@ section.section-soft{
       }
       .lang .flag { display:none; }
     }
+
+/* Play Store promo banner */
+.promo-banner{
+  margin-top:16px;
+  display:flex;
+  justify-content:center;
+}
+
+.promo-card{
+  display:flex;
+  align-items:center;
+  gap:14px;
+  padding:14px 18px;
+  border-radius:18px;
+  border:1px solid rgba(30,64,175,.35);
+  background:
+    linear-gradient(135deg, rgba(56,189,248,.10), rgba(34,211,238,.20)),
+    #ffffff;
+  box-shadow:0 16px 40px rgba(255,255,255,.92);
+  max-width:520px;
+  width:100%;
+}
+
+.promo-icon{
+  width:44px;
+  height:44px;
+  border-radius:10px;
+  object-fit:contain;
+}
+
+.promo-text{
+  flex:1;
+  font-size:14px;
+  line-height:1.35;
+}
+
+.promo-title{
+  font-weight:700;
+  margin-bottom:2px;
+}
+
+.promo-sub{
+  font-size:12px;
+  color:var(--muted);
+}
+
+.promo-btn{
+  white-space:nowrap;
+  padding:8px 12px;
+  border-radius:999px;
+  border:1px solid var(--accent);
+  background:linear-gradient(135deg, rgba(56,189,248,.10), rgba(34,211,238,.25));
+  font-size:12px;
+  font-weight:600;
+  color:var(--text);
+}
+
+.promo-btn:hover{
+  filter:brightness(1.08);
+  text-decoration:none;
+}
+
   </style>
 </head>
 
@@ -685,6 +747,28 @@ section.section-soft{
         <div class="hero-actions">
           <a class="btn" href="#" target="_blank" rel="noopener" data-i18n="idx.hero.cta_play">idx.hero.cta_play</a>
           <a class="btn btn-ghost" href="/howtouse.html" data-i18n="idx.hero.cta_howtouse">idx.hero.cta_howtouse</a>
+        </div>
+        <!-- Play Store Promo Banner -->
+        <div class="promo-banner">
+          <div class="promo-card">
+
+            <img src="/images/mm_logo.png"
+                 alt="Measure Master"
+                 class="promo-icon"
+                 loading="lazy">
+
+            <div class="promo-text">
+              <div class="promo-title">Measure Master</div>
+              <div class="promo-sub">Try the app on Google Play</div>
+            </div>
+
+            <a class="promo-btn"
+               href="https://play.google.com/store/apps/details?id=net.measure_master.mmproject"
+               target="_blank"
+               rel="noopener">
+               Get App
+            </a>
+          </div>
         </div>
       </div>
 
