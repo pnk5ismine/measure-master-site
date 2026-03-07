@@ -572,36 +572,38 @@ section.section-soft{
     }
 
     /* Google Play Banner */
-    .playstore-banner {
-      display:flex;
-      align-items:center;
-      gap:12px;
-      width:min(920px,100%);
-      margin:24px auto;
-      padding:12px;
-      background:#0f172a;
-      border-radius:18px;
-      text-decoration:none;
-    }
+.playstore-banner {
+  display:flex;
+  flex-direction:column;
+  align-items:stretch;
+  gap:8px;
+  width:min(920px,100%);
+  margin:24px auto;
+  padding:12px;
+  background:#0f172a;
+  border-radius:18px;
+  text-decoration:none;
+  overflow:hidden;
+}
 
-    .playstore-banner__graphic{
-      flex:1;
-      border-radius:12px;
-      overflow:hidden;
-    }
+.playstore-banner__graphic {
+  width:100%;
+  border-radius:12px;
+  overflow:hidden;
+}
 
-    .playstore-banner__graphic img{
-      width:100%;
-      display:block;
-    }
+.playstore-banner__graphic img {
+  width:100%;
+  height:auto;
+  display:block;
+}
 
-    .playstore-banner__caption{
-      flex-basis:100%;
-      text-align:center;
-      margin-top:6px;
-      font-size:12px;
-      color:#d1d5db;
-    }
+.playstore-banner__caption {
+  text-align:center;
+  font-size:12px;
+  color:#d1d5db;
+  padding:2px 4px 0;
+}
   </style>
 </head>
 
