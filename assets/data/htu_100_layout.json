@@ -439,7 +439,7 @@
       { "sid": "htu_410_bef", "role": "title", "x": 50, "y": 6, "anchor": "top-center" },
       { "sid": "htu_411_act", "x": 10, "y": 80, "anchor": "top-start", "w": 84 },
       { "sid": "htu_412_nea", "x": 10, "y": 82, "anchor": "top-start", "w": 84 },
-      { "sid": "htu_413_how", "x": 10, "y": 84, "anchor": "top-start", "w": 84 }
+      { "sid": "htu_413_how", "x": 10, "y": 86, "anchor": "top-start", "w": 84 }
     ]
   },
   {
