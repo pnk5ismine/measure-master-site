@@ -372,8 +372,8 @@
       {
         "sid": "htu_310",
         "role": "title",
-        "x": 56.08,
-        "y": 2.99,
+        "x": 50,
+        "y": 3,
         "anchor": "top-center"
       }
     ]
@@ -386,10 +386,10 @@
     "overlays": [
       {
         "sid": "htu_320",
-        "role": "label",
+        "role": "title",
         "x": 50,
-        "y": 92,
-        "anchor": "bottom-center"
+        "y": 3,
+        "anchor": "top-center"
       }
     ]
   },
@@ -423,7 +423,6 @@
       }
     ]
   },
-
 
   {
     "kind": "subject",
