@@ -379,13 +379,13 @@
     ]
   },
   {
-    "id": "htu_img_311",
+    "id": "htu_img_320",
     "kind": "image",
-    "src": "/images/howtouse/htu_311.jpg",
-    "altSid": "htu_img_311_alt",
+    "src": "/images/howtouse/htu_320.jpg",
+    "altSid": "htu_img_320_alt",
     "overlays": [
       {
-        "sid": "htu_311",
+        "sid": "htu_320",
         "role": "label",
         "x": 50,
         "y": 92,
@@ -394,13 +394,13 @@
     ]
   },
   {
-    "id": "htu_img_312",
+    "id": "htu_img_330",
     "kind": "image",
-    "src": "/images/howtouse/htu_312.jpg",
-    "altSid": "htu_img_312_alt",
+    "src": "/images/howtouse/htu_330.jpg",
+    "altSid": "htu_img_330_alt",
     "overlays": [
       {
-        "sid": "htu_312",
+        "sid": "htu_330",
         "role": "label",
         "x": 50,
         "y": 92,
@@ -408,6 +408,23 @@
       }
     ]
   },
+  {
+    "id": "htu_img_340",
+    "kind": "image",
+    "src": "/images/howtouse/htu_340.jpg",
+    "altSid": "htu_img_340_alt",
+    "overlays": [
+      {
+        "sid": "htu_340",
+        "role": "label",
+        "x": 50,
+        "y": 92,
+        "anchor": "bottom-center"
+      }
+    ]
+  },
+
+
   {
     "kind": "subject",
     "sid": "htu_400_imp"
@@ -420,9 +437,9 @@
     "fit": "contain",
     "overlays": [
       { "sid": "htu_410_bef", "role": "title", "x": 50, "y": 6, "anchor": "top-center" },
-      { "sid": "htu_411_act", "x": 50, "y": 14, "anchor": "top-center", "w": 84 },
-      { "sid": "htu_412_nea", "x": 50, "y": 24, "anchor": "top-center", "w": 84 },
-      { "sid": "htu_413_how", "x": 50, "y": 35, "anchor": "top-center", "w": 80 }
+      { "sid": "htu_411_act", "x": 10, "y": 85, "anchor": "top-start", "w": 84 },
+      { "sid": "htu_412_nea", "x": 10, "y": 90, "anchor": "top-start", "w": 84 },
+      { "sid": "htu_413_how", "x": 10, "y": 95, "anchor": "top-start", "w": 84 }
     ]
   },
   {
@@ -433,8 +450,8 @@
     "fit": "contain",
     "overlays": [
       { "sid": "htu_420_aft", "role": "title", "x": 50, "y": 6, "anchor": "top-center" },
-      { "sid": "htu_421_dra", "x": 50, "y": 14, "anchor": "top-center", "w": 84 },
-      { "sid": "htu_422_thn", "x": 50, "y": 24, "anchor": "top-center", "w": 84 }
+      { "sid": "htu_421_dra", "x": 10, "y": 85, "anchor": "top-start", "w": 84 },
+      { "sid": "htu_422_thn", "x": 10, "y": 90, "anchor": "top-start", "w": 84 }
     ]
   }
 ]
