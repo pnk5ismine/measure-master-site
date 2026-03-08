@@ -437,8 +437,8 @@
     "overlays": [
       { "sid": "htu_410_bef", "role": "title", "x": 50, "y": 5, "anchor": "top-center" },
       { "sid": "htu_411_act", "role": "label", "x": 10, "y": 80, "anchor": "top-left", "w": 84 },
-      { "sid": "htu_412_nea", "role": "label", "x": 10, "y": 82, "anchor": "top-left", "w": 84 },
-      { "sid": "htu_413_how", "role": "label", "x": 10, "y": 86, "anchor": "top-left", "w": 84 }
+      { "sid": "htu_412_nea", "role": "label", "x": 10, "y": 83, "anchor": "top-left", "w": 84 },
+      { "sid": "htu_413_how", "role": "label", "x": 10, "y": 89, "anchor": "top-left", "w": 84 }
     ]
   },
   {
@@ -450,8 +450,8 @@
     "overlays": [
       { "sid": "htu_420_aft", "role": "title", "x": 50, "y": 5, "anchor": "top-center" },
       { "sid": "htu_421_act", "role": "label", "x": 10, "y": 80, "anchor": "top-left", "w": 84 },
-      { "sid": "htu_422_dra", "role": "label", "x": 10, "y": 82, "anchor": "top-left", "w": 84 },
-      { "sid": "htu_423_thn", "role": "label", "x": 10, "y": 84, "anchor": "top-left", "w": 84 }
+      { "sid": "htu_422_dra", "role": "label", "x": 10, "y": 83, "anchor": "top-left", "w": 84 },
+      { "sid": "htu_423_thn", "role": "label", "x": 10, "y": 86, "anchor": "top-left", "w": 84 }
     ]
   }
 ]
