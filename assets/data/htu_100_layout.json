@@ -407,5 +407,34 @@
         "anchor": "bottom-center"
       }
     ]
+  },
+  {
+    "kind": "subject",
+    "sid": "htu_400_imp"
+  },
+  {
+    "kind": "image",
+    "src": "/images/howtouse/htu_410_before.jpg",
+    "altSid": "htu_img_410_alt",
+    "ratio": "1 / 2",
+    "fit": "contain",
+    "overlays": [
+      { "sid": "htu_410_bef", "role": "title", "x": 50, "y": 6, "anchor": "top-center" },
+      { "sid": "htu_411_act", "x": 50, "y": 14, "anchor": "top-center", "w": 84 },
+      { "sid": "htu_412_nea", "x": 50, "y": 24, "anchor": "top-center", "w": 84 },
+      { "sid": "htu_413_how", "x": 50, "y": 35, "anchor": "top-center", "w": 80 }
+    ]
+  },
+  {
+    "kind": "image",
+    "src": "/images/howtouse/htu_420_after.jpg",
+    "altSid": "htu_img_420_alt",
+    "ratio": "1 / 2",
+    "fit": "contain",
+    "overlays": [
+      { "sid": "htu_420_aft", "role": "title", "x": 50, "y": 6, "anchor": "top-center" },
+      { "sid": "htu_421_dra", "x": 50, "y": 14, "anchor": "top-center", "w": 84 },
+      { "sid": "htu_422_thn", "x": 50, "y": 24, "anchor": "top-center", "w": 84 }
+    ]
   }
 ]

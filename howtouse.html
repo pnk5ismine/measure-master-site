@@ -287,8 +287,8 @@ nav a{color:var(--muted)}
 
 .htu-thumb img{
   width:100%;
-  aspect-ratio:1/1;   /* 1:1 */
-  object-fit:cover;
+  aspect-ratio:var(--thumb-ratio);
+  object-fit:var(--thumb-fit);
   display:block;
 }
 
@@ -609,11 +609,19 @@ let __strings = null;    // strings (참고용)
         a.target = "_blank";
         a.rel = "noopener";
 
-        const img = document.createElement("img");
-        img.src = node.src;
-        img.alt = t(strings, node.altSid);
-        img.loading = "lazy";
-        a.appendChild(img);
+const img = document.createElement("img");
+img.src = node.src;
+img.alt = t(strings, node.altSid);
+img.loading = "lazy";
+
+if (node.ratio) {
+  a.style.setProperty("--thumb-ratio", node.ratio);
+}
+if (node.fit) {
+  a.style.setProperty("--thumb-fit", node.fit);
+}
+
+a.appendChild(img);
 
         const ovs = Array.isArray(node.overlays) ? node.overlays : [];
         for (const ov of ovs){

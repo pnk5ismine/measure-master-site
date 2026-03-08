@@ -176,6 +176,17 @@
   "htu_img_312_alt": "Measure a TV Monitor with AR",
   "htu_312": "Measure a TV’s screen width (within AR range).",
 
+"htu_400_imp": "How to improve accuracy",
+"htu_img_410_alt": "Before",
+"htu_410_bef": "Before",
+"htu_411_act": "Actual width = 85 cm. 161 cm > 109 cm > 85 cm = 85 cm",
+"htu_412_nea": "The nearest line shows 85 cm, but the far line shows 161 cm because the basic rectangle was drawn incorrectly.",
+"htu_413_how": "How can you reduce this difference?",
+"htu_img_420_alt": "After",
+"htu_420_aft": "After",
+"htu_421_dra": "Draw another rectangle as large as possible on the same plane.",
+"htu_422_thn": "Then the larger rectangle becomes the new base, and each length becomes almost equal.",
+
   "rvw_lst1": "No.",
   "rvw_lst2": "Nickname",
   "rvw_lst3": "Title",
