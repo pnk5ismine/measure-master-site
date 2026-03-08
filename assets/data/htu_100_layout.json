@@ -359,7 +359,7 @@
     "size": "lg"
   },
   {
-    "id": "htu_300",
+    "id": "htu_300_how",
     "kind": "subject",
     "sid": "htu_300"
   },
@@ -370,7 +370,7 @@
     "altSid": "htu_img_310_alt",
     "overlays": [
       {
-        "sid": "htu_310",
+        "sid": "htu_310_arm",
         "role": "title",
         "x": 50,
         "y": 3,
@@ -385,7 +385,7 @@
     "altSid": "htu_img_320_alt",
     "overlays": [
       {
-        "sid": "htu_320",
+        "sid": "htu_320_arm",
         "role": "title",
         "x": 50,
         "y": 3,
@@ -400,7 +400,7 @@
     "altSid": "htu_img_330_alt",
     "overlays": [
       {
-        "sid": "htu_330",
+        "sid": "htu_330_tab",
         "role": "label",
         "x": 50,
         "y": 92,
@@ -415,7 +415,7 @@
     "altSid": "htu_img_340_alt",
     "overlays": [
       {
-        "sid": "htu_340",
+        "sid": "htu_340_tvs",
         "role": "label",
         "x": 50,
         "y": 92,
@@ -436,9 +436,9 @@
     "fit": "contain",
     "overlays": [
       { "sid": "htu_410_bef", "role": "title", "x": 50, "y": 6, "anchor": "top-center" },
-      { "sid": "htu_411_act", "x": 10, "y": 80, "anchor": "top-start", "w": 84 },
-      { "sid": "htu_412_nea", "x": 10, "y": 82, "anchor": "top-start", "w": 84 },
-      { "sid": "htu_413_how", "x": 10, "y": 86, "anchor": "top-start", "w": 84 }
+      { "sid": "htu_411_act", "x": 10, "y": 80, "anchor": "top-left", "w": 84 },
+      { "sid": "htu_412_nea", "x": 10, "y": 82, "anchor": "top-left", "w": 84 },
+      { "sid": "htu_413_how", "x": 10, "y": 86, "anchor": "top-left", "w": 84 }
     ]
   },
   {
@@ -449,8 +449,8 @@
     "fit": "contain",
     "overlays": [
       { "sid": "htu_420_aft", "role": "title", "x": 50, "y": 6, "anchor": "top-center" },
-      { "sid": "htu_421_dra", "x": 10, "y": 80, "anchor": "top-start", "w": 84 },
-      { "sid": "htu_422_thn", "x": 10, "y": 82, "anchor": "top-start", "w": 84 }
+      { "sid": "htu_421_dra", "x": 10, "y": 80, "anchor": "top-left", "w": 84 },
+      { "sid": "htu_422_thn", "x": 10, "y": 82, "anchor": "top-left", "w": 84 }
     ]
   }
 ]
