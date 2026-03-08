@@ -432,25 +432,26 @@
     "kind": "image",
     "src": "/images/howtouse/htu_410_before.jpg",
     "altSid": "htu_img_410_alt",
-    "ratio": "1 / 2",
-    "fit": "contain",
+    "ratio": "1 / 1",
+    "fit": "cover",
     "overlays": [
-      { "sid": "htu_410_bef", "role": "title", "x": 50, "y": 6, "anchor": "top-center" },
-      { "sid": "htu_411_act", "x": 10, "y": 80, "anchor": "top-left", "w": 84 },
-      { "sid": "htu_412_nea", "x": 10, "y": 82, "anchor": "top-left", "w": 84 },
-      { "sid": "htu_413_how", "x": 10, "y": 86, "anchor": "top-left", "w": 84 }
+      { "sid": "htu_410_bef", "role": "title", "x": 50, "y": 5, "anchor": "top-center" },
+      { "sid": "htu_411_act", "role": "label", "x": 10, "y": 80, "anchor": "top-left", "w": 84 },
+      { "sid": "htu_412_nea", "role": "label", "x": 10, "y": 82, "anchor": "top-left", "w": 84 },
+      { "sid": "htu_413_how", "role": "label", "x": 10, "y": 86, "anchor": "top-left", "w": 84 }
     ]
   },
   {
     "kind": "image",
     "src": "/images/howtouse/htu_420_after.jpg",
     "altSid": "htu_img_420_alt",
-    "ratio": "1 / 2",
-    "fit": "contain",
+    "ratio": "1 / 1",
+    "fit": "cover",
     "overlays": [
-      { "sid": "htu_420_aft", "role": "title", "x": 50, "y": 6, "anchor": "top-center" },
-      { "sid": "htu_421_dra", "x": 10, "y": 80, "anchor": "top-left", "w": 84 },
-      { "sid": "htu_422_thn", "x": 10, "y": 82, "anchor": "top-left", "w": 84 }
+      { "sid": "htu_420_aft", "role": "title", "x": 50, "y": 5, "anchor": "top-center" },
+      { "sid": "htu_421_act", "role": "label", "x": 10, "y": 80, "anchor": "top-left", "w": 84 },
+      { "sid": "htu_422_dra", "role": "label", "x": 10, "y": 82, "anchor": "top-left", "w": 84 },
+      { "sid": "htu_423_thn", "role": "label", "x": 10, "y": 84, "anchor": "top-left", "w": 84 }
     ]
   }
 ]
