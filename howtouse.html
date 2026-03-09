@@ -579,7 +579,6 @@ function renderPhase3(layout, strings){
 
       card.appendChild(thumb);
 
-      // body / list
       const hasBody =
         (Array.isArray(node.bodySids) && node.bodySids.length) ||
         (Array.isArray(node.bodyRows) && node.bodyRows.length) ||
@@ -589,7 +588,7 @@ function renderPhase3(layout, strings){
         const copy = document.createElement("div");
         copy.className = "htu-copy";
 
-        // bodySids: simple stacked paragraphs
+        // bodySids
         if (Array.isArray(node.bodySids) && node.bodySids.length){
           for (const item of node.bodySids){
             const p = document.createElement("p");
@@ -600,23 +599,19 @@ function renderPhase3(layout, strings){
             } else if (item && typeof item === "object") {
               p.textContent = t(strings, item.sid);
 
-              if (item.align) {
-                p.style.textAlign = item.align;
-              }
+              if (item.align) p.style.textAlign = item.align;
               if (item.dx) {
                 p.style.position = "relative";
                 p.style.left = item.dx;
               }
-              if (item.className) {
-                p.classList.add(item.className);
-              }
+              if (item.className) p.classList.add(item.className);
             }
 
             copy.appendChild(p);
           }
         }
 
-        // bodyRows: row-based layout (left/right + next line center etc.)
+        // bodyRows
         if (Array.isArray(node.bodyRows) && node.bodyRows.length){
           const rowsWrap = document.createElement("div");
           rowsWrap.className = "htu-copy-rows";
@@ -634,16 +629,12 @@ function renderPhase3(layout, strings){
               } else if (item && typeof item === "object") {
                 p.textContent = t(strings, item.sid);
 
-                if (item.align) {
-                  p.style.textAlign = item.align;
-                }
+                if (item.align) p.style.textAlign = item.align;
                 if (item.dx) {
                   p.style.position = "relative";
                   p.style.left = item.dx;
                 }
-                if (item.className) {
-                  p.classList.add(item.className);
-                }
+                if (item.className) p.classList.add(item.className);
               }
 
               rowDiv.appendChild(p);
@@ -655,7 +646,7 @@ function renderPhase3(layout, strings){
           copy.appendChild(rowsWrap);
         }
 
-        // listSids: bullet list
+        // listSids
         if (Array.isArray(node.listSids) && node.listSids.length){
           const ul = document.createElement("ul");
           ul.className = "htu-copy-list";
