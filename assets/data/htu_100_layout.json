@@ -358,100 +358,82 @@
     "kind": "spacer",
     "size": "sm"
   },
-  {
-    "id": "htu_300_how",
-    "kind": "subject",
-    "sid": "htu_300"
-  },
-  {
-    "id": "htu_img_310",
-    "kind": "image",
-    "src": "/images/howtouse/htu_310.jpg",
-    "altSid": "htu_img_310_alt",
-    "overlays": [
-      {
-        "sid": "htu_310_arm",
-        "role": "title",
-        "x": 50,
-        "y": 3,
-        "anchor": "top-center"
-      }
-    ]
-  },
-  {
-    "id": "htu_img_320",
-    "kind": "image",
-    "src": "/images/howtouse/htu_320.jpg",
-    "altSid": "htu_img_320_alt",
-    "overlays": [
-      {
-        "sid": "htu_320_arm",
-        "role": "title",
-        "x": 50,
-        "y": 3,
-        "anchor": "top-center"
-      }
-    ]
-  },
-  {
-    "id": "htu_img_330",
-    "kind": "image",
-    "src": "/images/howtouse/htu_330.jpg",
-    "altSid": "htu_img_330_alt",
-    "overlays": [
-      {
-        "sid": "htu_330_tab",
-        "role": "label",
-        "x": 50,
-        "y": 92,
-        "anchor": "bottom-center"
-      }
-    ]
-  },
-  {
-    "id": "htu_img_340",
-    "kind": "image",
-    "src": "/images/howtouse/htu_340.jpg",
-    "altSid": "htu_img_340_alt",
-    "overlays": [
-      {
-        "sid": "htu_340_tvs",
-        "role": "label",
-        "x": 50,
-        "y": 92,
-        "anchor": "bottom-center"
-      }
-    ]
-  },
-
-  {
-    "kind": "subject",
-    "sid": "htu_400_imp"
-  },
-  {
-    "kind": "image",
-    "src": "/images/howtouse/htu_410_before.jpg",
-    "altSid": "htu_img_410_alt",
-    "ratio": "1 / 1",
-    "fit": "cover",
-    "overlays": [
-      { "sid": "htu_410_bef", "role": "title", "x": 50, "y": 5, "anchor": "top-center" },
-      { "sid": "htu_411_act", "role": "label", "x": 10, "y": 80, "anchor": "top-left", "w": 84 },
-      { "sid": "htu_412_nea", "role": "label", "x": 10, "y": 83, "anchor": "top-left", "w": 84 },
-      { "sid": "htu_413_how", "role": "label", "x": 10, "y": 89, "anchor": "top-left", "w": 84 }
-    ]
-  },
-  {
-    "kind": "image",
-    "src": "/images/howtouse/htu_420_after.jpg",
-    "altSid": "htu_img_420_alt",
-    "ratio": "1 / 1",
-    "fit": "cover",
-    "overlays": [
-      { "sid": "htu_420_aft", "role": "title", "x": 50, "y": 5, "anchor": "top-center" },
-      { "sid": "htu_421_act", "role": "label", "x": 10, "y": 80, "anchor": "top-left", "w": 84 },
-      { "sid": "htu_422_dra", "role": "label", "x": 10, "y": 83, "anchor": "top-left", "w": 84 },
-      { "sid": "htu_423_thn", "role": "label", "x": 10, "y": 86, "anchor": "top-left", "w": 84 }
-    ]
-  }
+{
+  "id": "htu_300_how",
+  "kind": "subject",
+  "sid": "htu_300_how"
+},
+{
+  "id": "htu_card_310",
+  "kind": "card",
+  "src": "/images/howtouse/htu_310.jpg",
+  "altSid": "htu_img_310_alt",
+  "titleSid": "htu_310_arm",
+  "bodySids": [],
+  "ratio": "1 / 1",
+  "fit": "cover"
+},
+{
+  "id": "htu_card_320",
+  "kind": "card",
+  "src": "/images/howtouse/htu_320.jpg",
+  "altSid": "htu_img_320_alt",
+  "titleSid": "htu_320_arm",
+  "bodySids": [],
+  "ratio": "1 / 1",
+  "fit": "cover"
+},
+{
+  "id": "htu_card_330",
+  "kind": "card",
+  "src": "/images/howtouse/htu_330.jpg",
+  "altSid": "htu_img_330_alt",
+  "titleSid": "htu_310_arm",
+  "bodySids": ["htu_330_tab"],
+  "ratio": "1 / 1",
+  "fit": "cover"
+},
+{
+  "id": "htu_card_340",
+  "kind": "card",
+  "src": "/images/howtouse/htu_340.jpg",
+  "altSid": "htu_img_340_alt",
+  "titleSid": "htu_310_arm",
+  "bodySids": ["htu_340_tvs"],
+  "ratio": "1 / 1",
+  "fit": "cover"
+},
+{
+  "id": "htu_400",
+  "kind": "subject",
+  "sid": "htu_400_imp"
+},
+{
+  "id": "htu_card_410",
+  "kind": "card",
+  "src": "/images/howtouse/htu_410_before.jpg",
+  "altSid": "htu_img_410_alt",
+  "titleSid": "htu_410_bef",
+  "bodySids": [
+    "htu_411_act",
+    "htu_412_nea",
+    "htu_413_how"
+  ],
+  "ratio": "1 / 1",
+  "fit": "cover"
+},
+{
+  "id": "htu_card_420",
+  "kind": "card",
+  "src": "/images/howtouse/htu_420_after.jpg",
+  "altSid": "htu_img_420_alt",
+  "titleSid": "htu_420_aft",
+  "bodySids": [
+    "htu_421_act",
+    "htu_422_dra",
+    "htu_423_thn"
+  ],
+  "ratio": "1 / 1",
+  "fit": "cover"
+}
 ]

@@ -237,78 +237,99 @@ nav a{color:var(--muted)}
       display:block;
     }
 
-/* ===== Phase 3: Layout + Strings (themed blocks) ===== */
+/* ===== Phase 3: Card Layout ===== */
 .htu-groups{
   display:flex;
   flex-direction:column;
-  gap:18px;
-  margin: 18px 0 10px;
+  gap:22px;
+  margin:18px 0 10px;
   background:#eaf7f1;
   padding:20px;
   border-radius:18px;
 }
 
-/* ===== Subject Band ===== */
 .htu-subject{
   width:100%;
-  text-align:center;         /* 중앙정렬 */
-  font-size:36px;            /*  x large */
+  text-align:center;
+  font-size:36px;
   font-weight:700;
-  padding:24px 0 18px;
-  margin-top:40px;
+  padding:18px 0 8px;
+  margin-top:20px;
 }
 
-/* spacer */
 .htu-spacer{height:18px;}
 .htu-spacer.lg{height:32px;}
 .htu-spacer.md{height:18px;}
 .htu-spacer.sm{height:10px;}
 
-/* ===== Grid ===== */
 .htu-grid{
   display:grid;
-  grid-template-columns:repeat(2,1fr);  /* PC / Tablet */
+  grid-template-columns:repeat(2,1fr);
   gap:18px;
 }
 
 @media (max-width:768px){
   .htu-grid{
-    grid-template-columns:1fr;          /* Mobile */
+    grid-template-columns:1fr;
   }
 }
 
-/* ===== Image container ===== */
-.htu-thumb{
-  position:relative;
-  display:block;
-  border-radius:12px;
+.htu-card{
+  display:flex;
+  flex-direction:column;
+  background:#ffffff;
+  border:1px solid var(--border);
+  border-radius:14px;
   overflow:hidden;
+  box-shadow:0 8px 20px rgba(15,23,42,.08);
+}
+
+.htu-thumb{
+  display:block;
+  width:100%;
+  background:#fff;
 }
 
 .htu-thumb img{
   width:100%;
-  aspect-ratio:var(--thumb-ratio);
-  object-fit:var(--thumb-fit);
+  aspect-ratio:var(--thumb-ratio, 1 / 1);
+  object-fit:var(--thumb-fit, cover);
   display:block;
 }
 
-/* ===== Overlay Labels (Unified Style) ===== */
-.htu-ov{
-  position:absolute;
-  padding:6px 10px;
-  font-size:12px;                 /* 기본 small */
-  color:#000;                     /* black */
-  background:rgba(192,192,192,0.1); /* silver 0.1 */
-  border-radius:6px;
-  white-space:nowrap;
-
-  pointer-events:none;
+.htu-copy{
+  padding:14px 14px 16px;
 }
 
-/* Title (image 상단 중앙) */
-.htu-ov.title{
-  font-size:26px;                 /* x large */
-  font-weight:600;
+.htu-copy-title{
+  margin:0 0 8px;
+  font-size:22px;
+  line-height:1.25;
+  font-weight:700;
+  color:var(--text);
+}
+
+.htu-copy-body{
+  margin:0;
+  color:var(--muted);
+  font-size:14px;
+  line-height:1.6;
+}
+
+.htu-copy-body + .htu-copy-body{
+  margin-top:8px;
+}
+
+.htu-copy-list{
+  margin:0;
+  padding-left:18px;
+  color:var(--muted);
+  font-size:14px;
+  line-height:1.6;
+}
+
+.htu-copy-list li + li{
+  margin-top:6px;
 }
 </style>
 </head>
@@ -563,126 +584,108 @@ let __strings = null;    // strings (참고용)
     el.style.transform = `translate(${tx}, ${ty})`;
   }
 
-  function renderPhase3(layout, strings){
-    const host = document.getElementById("htuGallery");
-    if (!host) return;
+function renderPhase3(layout, strings){
+  const host = document.getElementById("htuGallery");
+  if (!host) return;
 
-    host.innerHTML = "";
+  host.innerHTML = "";
 
-    let grid = null;
-    const flushGrid = () => {
-      if (grid){
-        host.appendChild(grid);
-        grid = null;
-      }
-    };
+  let grid = null;
+  const flushGrid = () => {
+    if (grid){
+      host.appendChild(grid);
+      grid = null;
+    }
+  };
 
-    for (const node of layout){
-      if (!node || typeof node !== "object") continue;
+  for (const node of layout){
+    if (!node || typeof node !== "object") continue;
 
-      if (node.kind === "subject"){
-        flushGrid();
-        const band = document.createElement("div");
-        band.className = "htu-subject";
-        band.textContent = t(strings, node.sid);
-        host.appendChild(band);
-        continue;
-      }
-
-      if (node.kind === "spacer"){
-        flushGrid();
-        const sp = document.createElement("div");
-        sp.className = `htu-spacer ${(node.size || "md")}`;
-        host.appendChild(sp);
-        continue;
-      }
-
-      if (node.kind === "image"){
-        if (!grid){
-          grid = document.createElement("div");
-          grid.className = "htu-grid";
-        }
-
-        const a = document.createElement("a");
-        a.className = "htu-thumb";
-        a.href = node.src;
-        a.target = "_blank";
-        a.rel = "noopener";
-
-const img = document.createElement("img");
-img.src = node.src;
-img.alt = t(strings, node.altSid);
-img.loading = "lazy";
-
-if (node.ratio) {
-  a.style.setProperty("--thumb-ratio", node.ratio);
-}
-if (node.fit) {
-  a.style.setProperty("--thumb-fit", node.fit);
-}
-
-a.appendChild(img);
-
-        const ovs = Array.isArray(node.overlays) ? node.overlays : [];
-        for (const ov of ovs){
-          const div = document.createElement("div");
-          div.className = "htu-ov " + (ov.role === "title" ? "title" : "");
-          div.textContent = t(strings, ov.sid);
-          applyAnchorStyle(div, ov.x, ov.y, ov.anchor);
- 
- // ✅ [정확한 삽입 위치] applyAnchorStyle(...) 다음, a.appendChild(div) 직전
-          if (typeof ov.w === "number") {
-            div.style.width = ov.w + "%";
-            div.style.whiteSpace = "normal";     // 줄바꿈 허용
-            div.style.wordBreak = "break-word";// ✅ 긴 단어 강제 줄바꿈
-           }
-
-          a.appendChild(div);
-
-
-if (DEBUG){
-  div.style.pointerEvents = "auto";
-  div.style.cursor = "move";
-
-  let dragging = false;
-
-  div.addEventListener("mousedown", () => { dragging = true; });
-  document.addEventListener("mouseup", () => { dragging = false; });
-
-  document.addEventListener("mousemove", (e) => {
-    if (!dragging) return;
-
-    const rect = a.getBoundingClientRect();
-    const x = ((e.clientX - rect.left) / rect.width) * 100;
-    const y = ((e.clientY - rect.top) / rect.height) * 100;
-
-    div.style.left = x + "%";
-    div.style.top  = y + "%";
-
-    ov.x = Number(x.toFixed(2));   // ✅ layout에도 기록
-    ov.y = Number(y.toFixed(2));   // ✅ layout에도 기록
-
-
-    console.log(ov.sid, "x:", x.toFixed(2), "y:", y.toFixed(2));
-  });
-
-  div.addEventListener("wheel", (e) => {
-    e.preventDefault();
-    let size = parseFloat(getComputedStyle(div).fontSize);
-    size += (e.deltaY < 0 ? 1 : -1);
-    div.style.fontSize = size + "px";
-  }, { passive:false });
-}
-
-        }
-
-        grid.appendChild(a);
-        continue;
-      }
+    if (node.kind === "subject"){
+      flushGrid();
+      const band = document.createElement("div");
+      band.className = "htu-subject";
+      band.textContent = t(strings, node.sid);
+      host.appendChild(band);
+      continue;
     }
 
-    flushGrid();
+    if (node.kind === "spacer"){
+      flushGrid();
+      const sp = document.createElement("div");
+      sp.className = `htu-spacer ${(node.size || "md")}`;
+      host.appendChild(sp);
+      continue;
+    }
+
+    if (node.kind === "card"){
+      if (!grid){
+        grid = document.createElement("div");
+        grid.className = "htu-grid";
+      }
+
+      const card = document.createElement("article");
+      card.className = "htu-card";
+
+      const thumbLink = document.createElement("a");
+      thumbLink.className = "htu-thumb";
+      thumbLink.href = node.src;
+      thumbLink.target = "_blank";
+      thumbLink.rel = "noopener";
+
+      if (node.ratio) {
+        thumbLink.style.setProperty("--thumb-ratio", node.ratio);
+      }
+      if (node.fit) {
+        thumbLink.style.setProperty("--thumb-fit", node.fit);
+      }
+
+      const img = document.createElement("img");
+      img.src = node.src;
+      img.alt = t(strings, node.altSid);
+      img.loading = "lazy";
+
+      thumbLink.appendChild(img);
+      card.appendChild(thumbLink);
+
+      const copy = document.createElement("div");
+      copy.className = "htu-copy";
+
+      if (node.titleSid){
+        const h3 = document.createElement("h3");
+        h3.className = "htu-copy-title";
+        h3.textContent = t(strings, node.titleSid);
+        copy.appendChild(h3);
+      }
+
+      if (Array.isArray(node.bodySids) && node.bodySids.length){
+        for (const sid of node.bodySids){
+          const p = document.createElement("p");
+          p.className = "htu-copy-body";
+          p.textContent = t(strings, sid);
+          copy.appendChild(p);
+        }
+      }
+
+      if (Array.isArray(node.listSids) && node.listSids.length){
+        const ul = document.createElement("ul");
+        ul.className = "htu-copy-list";
+        for (const sid of node.listSids){
+          const li = document.createElement("li");
+          li.textContent = t(strings, sid);
+          ul.appendChild(li);
+        }
+        copy.appendChild(ul);
+      }
+
+      card.appendChild(copy);
+      grid.appendChild(card);
+      continue;
+    }
   }
+
+  flushGrid();
+}
 
    // 🔵 NAV i18n 적용 함수 (여기 추가)
    function applyNavI18n(strings){
