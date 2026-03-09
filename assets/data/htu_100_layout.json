@@ -13,8 +13,8 @@
     "bodySids": [
       "htu_112"
     ],
-    "ratio": "1 / 1",
-    "fit": "cover"
+    "ratio": "4 / 3",
+    "fit": "contain"
   },
   {
     "id": "htu_card_120",
@@ -30,8 +30,8 @@
       "htu_132",
       "htu_133"
     ],
-    "ratio": "1 / 1",
-    "fit": "cover"
+    "ratio": "4 / 3",
+    "fit": "contain"
   },
   {
     "id": "htu_card_150",
@@ -40,11 +40,12 @@
     "altSid": "htu_img_150_alt",
     "titleSid": "htu_151",
     "bodySids": [
-      "htu_152",
-      "htu_153"
+      { "sid": "htu_152", "align": "left" },
+      { "sid": "htu_153", "align": "right" },
+      { "sid": "htu_154", "align": "center" }
     ],
-    "ratio": "1 / 1",
-    "fit": "cover"
+    "ratio": "4 / 3",
+    "fit": "contain"
   },
   {
     "id": "htu_card_160",
@@ -53,8 +54,8 @@
     "altSid": "htu_img_160_alt",
     "titleSid": "htu_160",
     "bodySids": [],
-    "ratio": "1 / 1",
-    "fit": "cover"
+    "ratio": "4 / 3",
+    "fit": "contain"
   },
   {
     "id": "htu_spacer_1",
@@ -76,8 +77,8 @@
       "htu_212",
       "htu_213"
     ],
-    "ratio": "1 / 1",
-    "fit": "cover"
+    "ratio": "4 / 3",
+    "fit": "contain"
   },
   {
     "id": "htu_card_220",
@@ -88,8 +89,8 @@
     "bodySids": [
       "htu_222"
     ],
-    "ratio": "1 / 1",
-    "fit": "cover"
+    "ratio": "4 / 3",
+    "fit": "contain"
   },
   {
     "id": "htu_card_230",
@@ -100,8 +101,8 @@
     "bodySids": [
       "htu_232"
     ],
-    "ratio": "1 / 1",
-    "fit": "cover"
+    "ratio": "4 / 3",
+    "fit": "contain"
   },
   {
     "id": "htu_spacer_2",
@@ -120,8 +121,8 @@
     "altSid": "htu_img_310_alt",
     "titleSid": "htu_311_arm",
     "bodySids": [],
-    "ratio": "1 / 1",
-    "fit": "cover"
+    "ratio": "4 / 3",
+    "fit": "contain"
   },
   {
     "id": "htu_card_320",
@@ -130,8 +131,8 @@
     "altSid": "htu_img_320_alt",
     "titleSid": "htu_321_arm",
     "bodySids": [],
-    "ratio": "1 / 1",
-    "fit": "cover"
+    "ratio": "4 / 3",
+    "fit": "contain"
   },
   {
     "id": "htu_card_330",
@@ -142,8 +143,8 @@
     "bodySids": [
       "htu_332_tab"
     ],
-    "ratio": "1 / 1",
-    "fit": "cover"
+    "ratio": "4 / 3",
+    "fit": "contain"
   },
   {
     "id": "htu_card_340",
@@ -154,8 +155,8 @@
     "bodySids": [
       "htu_342_tvs"
     ],
-    "ratio": "1 / 1",
-    "fit": "cover"
+    "ratio": "4 / 3",
+    "fit": "contain"
   },
   {
     "id": "htu_400",
@@ -173,8 +174,8 @@
       "htu_413_nea",
       "htu_414_how"
     ],
-    "ratio": "1 / 1",
-    "fit": "cover"
+    "ratio": "4 / 3",
+    "fit": "contain"
   },
   {
     "id": "htu_card_420",
@@ -187,7 +188,7 @@
       "htu_423_dra",
       "htu_424_thn"
     ],
-    "ratio": "1 / 1",
-    "fit": "cover"
+    "ratio": "4 / 3",
+    "fit": "contain"
   }
 ]
