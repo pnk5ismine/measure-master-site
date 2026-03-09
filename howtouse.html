@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Measure Master — How to Use</title>
 
-  <!-- Favicon -->
   <link rel="icon" type="image/png" href="/images/mm_logo.png" />
   <link rel="preload" as="image" href="/images/mm_logo.png" />
 
@@ -17,15 +16,19 @@
       --muted:#475569;
       --text:#0f172a;
       --accent:#0ea5e9;
+      --group:#eaf7f1;
+      --group-border:#b7d8c9;
     }
 
     *{box-sizing:border-box}
+
     body{
       margin:0;
       font-family:system-ui,-apple-system,Segoe UI,Roboto,'Noto Sans',sans-serif;
       background:var(--bg);
       color:var(--text);
     }
+
     a{color:var(--accent);text-decoration:none}
     a:hover{text-decoration:underline}
 
@@ -35,60 +38,63 @@
       padding:16px;
     }
 
-/* ===== Header layout (index/privacy style) ===== */
-header{display:flex;flex-direction:column;gap:10px}
-.header-top{
-  display:flex;align-items:center;justify-content:space-between;gap:12px;
-}
-.header-bottom{
-  display:flex;align-items:center;justify-content:center;
-}
+    /* ===== Header ===== */
+    header{display:flex;flex-direction:column;gap:10px}
+    .header-top{
+      display:flex;align-items:center;justify-content:space-between;gap:12px;
+    }
+    .header-bottom{
+      display:flex;align-items:center;justify-content:center;
+    }
 
-.right{display:flex;align-items:center;gap:12px}
+    .brand{
+      display:flex;
+      align-items:center;
+      gap:10px;
+    }
 
-nav{
-  display:flex;gap:14px;align-items:center;flex-wrap:wrap;
-  justify-content:center;
-}
-nav a{color:var(--muted)}
+    .right{display:flex;align-items:center;gap:12px}
 
-.lang{display:flex;gap:6px;align-items:center}
-.lang button{
-  border:1px solid var(--border);
-  background:#ffffff;
-  color:var(--text);
-  border-radius:999px;
-  padding:6px 10px;
-  cursor:pointer;
-  display:inline-flex;
-  align-items:center;
-  gap:6px;
-  font-size:12px;
-}
-.lang button.active{outline:2px solid #2dd; font-weight:600}
-.lang .flag{line-height:1}
-.lang .label{letter-spacing:.04em}
+    nav{
+      display:flex;gap:14px;align-items:center;flex-wrap:wrap;
+      justify-content:center;
+    }
+    nav a{color:var(--muted)}
 
-/* ===== Desktop: single-row feel (brand left, nav+lang right) ===== */
-@media (min-width: 721px){
-  header{flex-direction:row;align-items:center;justify-content:space-between;gap:12px}
-  .header-top{flex:0 0 auto}
-  .header-bottom{flex:1 1 auto;justify-content:flex-end}
-  .right{justify-content:flex-end}
-  nav{justify-content:flex-end}
-}
+    .lang{display:flex;gap:6px;align-items:center}
+    .lang button{
+      border:1px solid var(--border);
+      background:#ffffff;
+      color:var(--text);
+      border-radius:999px;
+      padding:6px 10px;
+      cursor:pointer;
+      display:inline-flex;
+      align-items:center;
+      gap:6px;
+      font-size:12px;
+    }
+    .lang button.active{outline:2px solid #2dd; font-weight:600}
+    .lang .flag{line-height:1}
+    .lang .label{letter-spacing:.04em}
 
-/* ===== Mobile: 2 rows (brand left + lang right), nav centered ===== */
-@media (max-width: 720px){
-  .header-top{width:100%}
-  .header-bottom{width:100%}
-  nav{justify-content:center}
+    @media (min-width:721px){
+      header{flex-direction:row;align-items:center;justify-content:space-between;gap:12px}
+      .header-top{flex:0 0 auto}
+      .header-bottom{flex:1 1 auto;justify-content:flex-end}
+      .right{justify-content:flex-end}
+      nav{justify-content:flex-end}
+    }
 
-  /* 모바일에서는 깃발 숨기고 텍스트만 */
-  .lang .flag{display:none}
-  .lang button{padding:6px 10px}
-}
-    /* Card */
+    @media (max-width:720px){
+      .header-top{width:100%}
+      .header-bottom{width:100%}
+      nav{justify-content:center}
+      .lang .flag{display:none}
+      .lang button{padding:6px 10px}
+    }
+
+    /* ===== Main card ===== */
     .card{
       background:var(--card);
       border:1px solid var(--border);
@@ -96,67 +102,17 @@ nav a{color:var(--muted)}
       padding:22px;
       box-shadow:0 12px 28px rgba(15,23,42,.12);
     }
+
     h1{
       margin:4px 0 4px;
       font-size:22px;
       letter-spacing:-0.02em;
     }
+
     p.muted{
       color:var(--muted);
       margin:0 0 10px;
       font-size:13px;
-    }
-
-    /* Grid */
-    .howtouse{
-      margin-top:10px;
-    }
-    .howtouse-grid{
-      display:grid;
-      grid-template-columns:repeat(3,1fr);
-      gap:12px;
-    }
-    @media (max-width:1024px){
-      .howtouse-grid{
-        grid-template-columns:repeat(2,1fr);
-      }
-    }
-    @media (max-width:640px){
-      .howtouse-grid{
-        grid-template-columns:1fr;
-      }
-    }
-
-    .howtouse-item{
-      position:relative;
-      display:block;
-      border-radius:10px;
-      overflow:hidden;
-      background:#ffffff;
-      border:1px solid var(--border);
-      aspect-ratio:1/2;          /* PC/태블릿에서 높이 균일 */
-      transition:transform .18s ease-out, box-shadow .18s ease-out, border-color .18s ease-out;
-    }
-    .howtouse-item img{
-      width:100%;
-      height:100%;
-      object-fit:cover;
-      display:block;
-    }
-    .howtouse-item:hover{
-      transform:translateY(-2px);
-      box-shadow:0 12px 26px rgba(15,23,42,.14);
-    }
-
-    /* 모바일에서는 원본 비율 유지해도 됨 */
-    @media (max-width:640px){
-      .howtouse-item{
-        aspect-ratio:auto;
-      }
-      .howtouse-item img{
-        height:auto;
-        object-fit:contain;
-      }
     }
 
     footer{
@@ -166,63 +122,49 @@ nav a{color:var(--muted)}
       font-size:14px;
     }
 
-    @media (max-width:720px){
-      header{
-        flex-wrap:wrap;
-        align-items:flex-start;
-      }
-      nav{
-        justify-content:flex-start;
-        margin-top:4px;
-      }
-    }
-  
-    /* ===== Phase 2: Step blocks (text-first) ===== */
+    /* ===== Phase 2 ===== */
     .htu-steps{
       display:flex;
       flex-direction:column;
       gap:14px;
-      margin: 14px 0 18px;
+      margin:14px 0 18px;
     }
+
     .htu-step{
-      border:1px solid #b7d8c9;
-      background:#eaf7f1;          /* ✅ htu-groups와 동일 */
-      border:1px solid #b7d8c9;     /* 테두리는 기존 톤 유지(원하면 더 연하게 가능) */
-      padding: 14px 14px 12px;
+      border:1px solid var(--group-border);
+      background:var(--group);
+      padding:14px 14px 12px;
+      border-radius:14px;
     }
+
     .htu-step-title{
       margin:0 0 10px;
-      font-size: 28px;
-      line-height: 1.25;
+      font-size:28px;
+      line-height:1.25;
     }
-    .htu-step-title .htu-id{
-      display:none;
-      font-size:12px;
-      color: var(--muted);
-      margin-right:10px;
-      letter-spacing:.3px;
-      vertical-align: baseline;
-    }
+
     .htu-note{
-      margin: 8px 0 0;
-      color: var(--muted);
+      margin:8px 0 0;
+      color:var(--muted);
     }
+
     .htu-step ol{
-      margin: 0 0 0 18px;
-      padding: 0;
+      margin:0 0 0 18px;
+      padding:0;
     }
+
     .htu-step li{
-      margin: 6px 0;
+      margin:6px 0;
     }
-    /* Step image (2:1) : text 아래에 붙는 이미지 */
+
     .htu-step-image{
-      width: 100%;
-      aspect-ratio: 2 / 1;          /* ✅ 2:1 */
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      overflow: hidden;
-      background:#eaf7f1;
-      border:1px solid #b7d8c9;
+      width:100%;
+      aspect-ratio:2 / 1;
+      border:1px solid var(--group-border);
+      border-radius:12px;
+      overflow:hidden;
+      background:var(--group);
+      margin-top:12px;
     }
 
     .htu-step-image a{
@@ -230,118 +172,118 @@ nav a{color:var(--muted)}
       width:100%;
       height:100%;
     }
+
     .htu-step-image img{
       width:100%;
       height:100%;
-      object-fit: contain;          /* 잘림 방지 (원하면 cover로) */
+      object-fit:contain;
       display:block;
     }
 
-/* ===== Phase 3: Card Layout ===== */
-.htu-groups{
-  display:flex;
-  flex-direction:column;
-  gap:22px;
-  margin:18px 0 10px;
-  background:#eaf7f1;
-  padding:20px;
-  border-radius:18px;
-}
+    /* ===== Phase 3 ===== */
+    .htu-groups{
+      display:flex;
+      flex-direction:column;
+      gap:22px;
+      margin:18px 0 10px;
+      background:var(--group);
+      padding:20px;
+      border-radius:18px;
+    }
 
-.htu-subject{
-  width:100%;
-  text-align:center;
-  font-size:36px;
-  font-weight:700;
-  padding:18px 0 8px;
-  margin-top:20px;
-}
+    .htu-subject{
+      width:100%;
+      text-align:center;
+      font-size:36px;
+      font-weight:700;
+      padding:18px 0 8px;
+      margin-top:20px;
+    }
 
-.htu-spacer{height:18px;}
-.htu-spacer.lg{height:32px;}
-.htu-spacer.md{height:18px;}
-.htu-spacer.sm{height:10px;}
+    .htu-spacer{height:18px;}
+    .htu-spacer.lg{height:32px;}
+    .htu-spacer.md{height:18px;}
+    .htu-spacer.sm{height:10px;}
 
-.htu-grid{
-  display:grid;
-  grid-template-columns:repeat(2,1fr);
-  gap:18px;
-}
+    .htu-grid{
+      display:grid;
+      grid-template-columns:repeat(2,1fr);
+      gap:18px;
+    }
 
-@media (max-width:768px){
-  .htu-grid{
-    grid-template-columns:1fr;
-  }
-}
+    @media (max-width:768px){
+      .htu-grid{
+        grid-template-columns:1fr;
+      }
+    }
 
+    .htu-card{
+      display:flex;
+      flex-direction:column;
+      background:#ffffff;
+      border:1px solid var(--border);
+      border-radius:14px;
+      overflow:hidden;
+      box-shadow:0 8px 20px rgba(15,23,42,.08);
+    }
 
-.htu-thumb{
-  display:block;
-  width:100%;
-  background:#fff;
-}
+    .htu-copy-top{
+      padding:14px 14px 10px;
+    }
 
-.htu-thumb img{
-  width:100%;
-  aspect-ratio:var(--thumb-ratio, 1 / 1);
-  object-fit:var(--thumb-fit, cover);
-  display:block;
-}
+    .htu-copy-title{
+      margin:0;
+      font-size:22px;
+      line-height:1.25;
+      font-weight:700;
+      color:var(--text);
+    }
 
+    .htu-thumb{
+      display:block;
+      width:100%;
+      background:#fff;
+    }
 
-.htu-copy-title{
-  margin:0 0 8px;
-  font-size:22px;
-  line-height:1.25;
-  font-weight:700;
-  color:var(--text);
-}
+    .htu-thumb img{
+      width:100%;
+      aspect-ratio:var(--thumb-ratio, 1 / 1);
+      object-fit:var(--thumb-fit, cover);
+      display:block;
+    }
 
+    .htu-copy{
+      padding:14px 14px 16px;
+    }
 
-.htu-copy-list{
-  margin:0;
-  padding-left:18px;
-  color:var(--muted);
-  font-size:14px;
-  line-height:1.6;
-}
+    .htu-copy-body{
+      margin:0;
+      color:var(--muted);
+      font-size:14px;
+      line-height:1.6;
+    }
 
-.htu-copy-list li + li{
-  margin-top:6px;
+    .htu-copy-body + .htu-copy-body{
+      margin-top:8px;
+    }
 
-.htu-card{
-  display:flex;
-  flex-direction:column;
-  background:#ffffff;
-  border:1px solid var(--border);
-  border-radius:14px;
-  overflow:hidden;
-  box-shadow:0 8px 20px rgba(15,23,42,.08);
-}
+    .htu-copy-list{
+      margin:0;
+      padding-left:18px;
+      color:var(--muted);
+      font-size:14px;
+      line-height:1.6;
+    }
 
-.htu-copy{
-  padding:14px 14px 16px;
-}
-
-.htu-copy-body{
-  margin:0;
-  color:var(--muted);
-  font-size:14px;
-  line-height:1.6;
-}
-
-.htu-copy-body + .htu-copy-body{
-  margin-top:8px;
-}
-}
-</style>
+    .htu-copy-list li + li{
+      margin-top:6px;
+    }
+  </style>
 </head>
 <body>
 <header>
-  <!-- Row 1 (mobile): brand left, language right -->
   <div class="header-top">
     <div class="brand">
-      <!-- 기존 로고/브랜드 마크업이 있으면 여기 안에 그대로 두셔도 됨 -->
       <div class="logo" aria-hidden="true"></div>
       <strong>Measure Master</strong>
     </div>
@@ -360,7 +302,6 @@ nav a{color:var(--muted)}
     </div>
   </div>
 
-  <!-- Row 2 (mobile): nav centered / Desktop: nav on right -->
   <div class="header-bottom">
     <nav>
       <a href="/index.html" data-i18n="idx.nav.home">Home</a>
@@ -371,7 +312,6 @@ nav a{color:var(--muted)}
   </div>
 </header>
 
-
 <main>
   <section class="card howtouse">
     <h1>How to use Measure Master</h1>
@@ -379,21 +319,8 @@ nav a{color:var(--muted)}
       Tap or click an image to open the full-size version in a new tab.
     </p>
 
-  <!-- Phase 2 (text-first): grouped Step blocks inserted here -->
-  <div id="htuSteps" class="htu-steps"></div>
-
-  <!-- Phase 3 (layout+strings): themed blocks rendered here -->
-
-<!-- DEBUG tools (only for editing) -->
-<div id="htuDebugBar" style="display:none; gap:8px; margin:10px 0;">
-  <button id="htuExportBtn" type="button">Export Layout JSON</button>
-  <button id="htuCopyBtn" type="button">Copy to Clipboard</button>
-</div>
-
-<textarea id="htuExportBox" style="display:none; width:100%; height:220px;"></textarea>
-
-  <div id="htuGallery" class="htu-groups"></div>
-
+    <div id="htuSteps" class="htu-steps"></div>
+    <div id="htuGallery" class="htu-groups"></div>
   </section>
 </main>
 
@@ -402,54 +329,47 @@ nav a{color:var(--muted)}
 </footer>
 
 <script>
-  // footer year
   document.addEventListener('DOMContentLoaded', function () {
     var y = document.getElementById('year');
     if (y) y.textContent = new Date().getFullYear();
   });
 </script>
 
-
 <script>
-/**
- * HTU Unified Renderer
- * - Phase2: /assets/data/htu_000_layout.json  + htu_strings_{lang}.json
- * - Phase3: /assets/data/htu_layout.json      + htu_strings_{lang}.json
- * - Lang buttons refresh both at once
- */
 (function(){
   const URLS = {
     phase2Layout: "/assets/data/htu_000_layout.json",
     phase3Layout: "/assets/data/htu_100_layout.json",
     strings: (lang) => `/assets/data/strings_${lang}.json`
   };
-function applyLangToLinks(){
-  const lang = getLang();
-  document.querySelectorAll('nav a[href^="/"]').forEach(a => {
-    const href = a.getAttribute("href");
-    if (!href) return;
-    const u = new URL(href, location.origin);
+
+  function applyLangToLinks(){
+    const lang = getLang();
+    document.querySelectorAll('nav a[href^="/"]').forEach(a => {
+      const href = a.getAttribute("href");
+      if (!href) return;
+      const u = new URL(href, location.origin);
+      u.searchParams.set("lang", lang);
+      a.setAttribute("href", u.pathname + u.search);
+    });
+  }
+
+  function getLang(){
+    const u = new URL(location.href);
+    const q = (u.searchParams.get("lang") || "").toLowerCase();
+    const saved = (localStorage.getItem("mm_lang") || "").toLowerCase();
+    const lang = (q || saved || "en");
+    return (lang === "kr") ? "ko" : lang;
+  }
+
+  function setLang(lang){
+    lang = (String(lang || "").toLowerCase() === "kr") ? "ko" : String(lang || "").toLowerCase();
+    localStorage.setItem("mm_lang", lang);
+
+    const u = new URL(location.href);
     u.searchParams.set("lang", lang);
-    a.setAttribute("href", u.pathname + u.search);
-  });
-}
-
-function getLang(){
-  const u = new URL(location.href);
-  const q = (u.searchParams.get("lang") || "").toLowerCase();
-  const saved = (localStorage.getItem("mm_lang") || "").toLowerCase();
-  const lang = (q || saved || "en");
-  return (lang === "kr") ? "ko" : lang;
-}
-function setLang(lang){
-  lang = (String(lang || "").toLowerCase() === "kr") ? "ko" : String(lang || "").toLowerCase();
-  localStorage.setItem("mm_lang", lang);
-
-  // URL에도 반영 (다른 페이지로 이동해도 유지)
-  const u = new URL(location.href);
-  u.searchParams.set("lang", lang);
-  history.replaceState(null, "", u.toString());
-}
+    history.replaceState(null, "", u.toString());
+  }
 
   function t(strings, sid){
     return (strings && sid && strings[sid]) ? strings[sid] : (sid || "");
@@ -461,13 +381,6 @@ function setLang(lang){
     });
   }
 
-const DEBUG = false;
-
-let __p3Layout = null;   // 현재 로딩된 Phase3 layout 원본(수정 대상)
-let __strings = null;    // strings (참고용)
-
-
-  // ---------- Phase 2 (Steps) ----------
   function groupIntoSteps(rows){
     const steps = [];
     let cur = null;
@@ -527,7 +440,6 @@ let __strings = null;    // strings (참고용)
           if (typeof it.num === "number") li.value = it.num;
           li.textContent = t(strings, it.sid);
           ol.appendChild(li);
-
         } else {
           flushOl();
           const p = document.createElement("p");
@@ -538,7 +450,6 @@ let __strings = null;    // strings (참고용)
       }
       flushOl();
 
-// step_title이 등장한 순서대로 번호 부여
       const stepNo = steps.indexOf(st) + 1;
 
       if (stepNo != null) {
@@ -566,179 +477,129 @@ let __strings = null;    // strings (참고용)
     }
   }
 
-  // ---------- Phase 3 (Overlay Gallery) ----------
-  function applyAnchorStyle(el, x, y, anchor){
-    el.style.left = (x ?? 50) + "%";
-    el.style.top  = (y ?? 50) + "%";
+  function renderPhase3(layout, strings){
+    const host = document.getElementById("htuGallery");
+    if (!host) return;
 
-    const a = anchor || "top-left";
-    let tx = "0%";
-    let ty = "0%";
+    host.innerHTML = "";
 
-    if (a.includes("center")) tx = "-50%";
-    if (a.includes("right"))  tx = "-100%";
-    if (a.includes("bottom")) ty = "-100%";
-    if (a === "center") { tx = "-50%"; ty = "-50%"; }
-    if (a === "top-center") { tx = "-50%"; ty = "0%"; }
-    if (a === "bottom-center") { tx = "-50%"; ty = "-100%"; }
-    if (a === "center-right") { tx = "-100%"; ty = "-50%"; }
-    if (a === "center-left") { tx = "0%"; ty = "-50%"; }
-
-    el.style.transform = `translate(${tx}, ${ty})`;
-  }
-
-function renderPhase3(layout, strings){
-  const host = document.getElementById("htuGallery");
-  if (!host) return;
-
-  host.innerHTML = "";
-
-  let grid = null;
-  const flushGrid = () => {
-    if (grid){
-      host.appendChild(grid);
-      grid = null;
-    }
-  };
-
-  for (const node of layout){
-    if (!node || typeof node !== "object") continue;
-
-    if (node.kind === "subject"){
-      flushGrid();
-      const band = document.createElement("div");
-      band.className = "htu-subject";
-      band.textContent = t(strings, node.sid);
-      host.appendChild(band);
-      continue;
-    }
-
-    if (node.kind === "spacer"){
-      flushGrid();
-      const sp = document.createElement("div");
-      sp.className = `htu-spacer ${(node.size || "md")}`;
-      host.appendChild(sp);
-      continue;
-    }
-
-    if (!grid){
-      grid = document.createElement("div");
-      grid.className = "htu-grid";
-    }
-
-    // 1) 기존 image 방식 유지
-    if (node.kind === "image"){
-      const a = document.createElement("a");
-      a.className = "htu-thumb";
-      a.href = node.src;
-      a.target = "_blank";
-      a.rel = "noopener";
-
-      if (node.ratio) {
-        a.style.setProperty("--thumb-ratio", node.ratio);
+    let grid = null;
+    const flushGrid = () => {
+      if (grid){
+        host.appendChild(grid);
+        grid = null;
       }
-      if (node.fit) {
-        a.style.setProperty("--thumb-fit", node.fit);
+    };
+
+    for (const node of layout){
+      if (!node || typeof node !== "object") continue;
+
+      if (node.kind === "subject"){
+        flushGrid();
+        const band = document.createElement("div");
+        band.className = "htu-subject";
+        band.textContent = t(strings, node.sid);
+        host.appendChild(band);
+        continue;
       }
 
-      const img = document.createElement("img");
-      img.src = node.src;
-      img.alt = t(strings, node.altSid);
-      img.loading = "lazy";
-      a.appendChild(img);
+      if (node.kind === "spacer"){
+        flushGrid();
+        const sp = document.createElement("div");
+        sp.className = `htu-spacer ${(node.size || "md")}`;
+        host.appendChild(sp);
+        continue;
+      }
 
-      const ovs = Array.isArray(node.overlays) ? node.overlays : [];
-      for (const ov of ovs){
-        const div = document.createElement("div");
-        div.className = "htu-ov " + (ov.role === "title" ? "title" : "");
-        div.textContent = t(strings, ov.sid);
-        applyAnchorStyle(div, ov.x, ov.y, ov.anchor);
-
-        if (typeof ov.w === "number") {
-          div.style.width = ov.w + "%";
-          div.style.whiteSpace = "normal";
-          div.style.wordBreak = "break-word";
+      if (node.kind === "card"){
+        if (!grid){
+          grid = document.createElement("div");
+          grid.className = "htu-grid";
         }
 
-        a.appendChild(div);
-      }
+        const card = document.createElement("article");
+        card.className = "htu-card";
 
-      grid.appendChild(a);
-      continue;
-    }
+        if (node.titleSid){
+          const copyTop = document.createElement("div");
+          copyTop.className = "htu-copy-top";
 
-    // 2) 새 card 방식: title은 이미지 위, body는 이미지 아래
-    if (node.kind === "card"){
-      const card = document.createElement("article");
-      card.className = "htu-card";
+          const h3 = document.createElement("h3");
+          h3.className = "htu-copy-title";
+          h3.textContent = t(strings, node.titleSid);
 
-      const thumb = document.createElement("a");
-      thumb.className = "htu-thumb";
-      thumb.href = node.src;
-      thumb.target = "_blank";
-      thumb.rel = "noopener";
-
-      if (node.ratio) {
-        thumb.style.setProperty("--thumb-ratio", node.ratio);
-      }
-      if (node.fit) {
-        thumb.style.setProperty("--thumb-fit", node.fit);
-      }
-
-      const img = document.createElement("img");
-      img.src = node.src;
-      img.alt = t(strings, node.altSid);
-      img.loading = "lazy";
-      thumb.appendChild(img);
-
-      // titleSid는 이미지 위 overlay
-      if (node.titleSid){
-        const title = document.createElement("div");
-        title.className = "htu-ov title";
-        title.textContent = t(strings, node.titleSid);
-        applyAnchorStyle(title, 50, 4, "top-center");
-        thumb.appendChild(title);
-      }
-
-      card.appendChild(thumb);
-
-      // bodySids는 이미지 아래
-      if (Array.isArray(node.bodySids) && node.bodySids.length){
-        const copy = document.createElement("div");
-        copy.className = "htu-copy";
-
-        for (const sid of node.bodySids){
-          const p = document.createElement("p");
-          p.className = "htu-copy-body";
-          p.textContent = t(strings, sid);
-          copy.appendChild(p);
+          copyTop.appendChild(h3);
+          card.appendChild(copyTop);
         }
 
-        card.appendChild(copy);
-      }
+        const thumb = document.createElement("a");
+        thumb.className = "htu-thumb";
+        thumb.href = node.src;
+        thumb.target = "_blank";
+        thumb.rel = "noopener";
 
-      grid.appendChild(card);
-      continue;
+        if (node.ratio) {
+          thumb.style.setProperty("--thumb-ratio", node.ratio);
+        }
+        if (node.fit) {
+          thumb.style.setProperty("--thumb-fit", node.fit);
+        }
+
+        const img = document.createElement("img");
+        img.src = node.src;
+        img.alt = t(strings, node.altSid);
+        img.loading = "lazy";
+        thumb.appendChild(img);
+
+        card.appendChild(thumb);
+
+        if ((Array.isArray(node.bodySids) && node.bodySids.length) || (Array.isArray(node.listSids) && node.listSids.length)){
+          const copy = document.createElement("div");
+          copy.className = "htu-copy";
+
+          if (Array.isArray(node.bodySids) && node.bodySids.length){
+            for (const sid of node.bodySids){
+              const p = document.createElement("p");
+              p.className = "htu-copy-body";
+              p.textContent = t(strings, sid);
+              copy.appendChild(p);
+            }
+          }
+
+          if (Array.isArray(node.listSids) && node.listSids.length){
+            const ul = document.createElement("ul");
+            ul.className = "htu-copy-list";
+            for (const sid of node.listSids){
+              const li = document.createElement("li");
+              li.textContent = t(strings, sid);
+              ul.appendChild(li);
+            }
+            copy.appendChild(ul);
+          }
+
+          card.appendChild(copy);
+        }
+
+        grid.appendChild(card);
+      }
     }
+
+    flushGrid();
   }
 
-  flushGrid();
-}
-   // 🔵 NAV i18n 적용 함수 (여기 추가)
-   function applyNavI18n(strings){
-     document.querySelectorAll("[data-i18n]").forEach(el=>{
-       const key = el.getAttribute("data-i18n");
-       if (key && strings[key]) {
-         el.textContent = strings[key];
-       }
-     });
-   }
+  function applyNavI18n(strings){
+    document.querySelectorAll("[data-i18n]").forEach(el=>{
+      const key = el.getAttribute("data-i18n");
+      if (key && strings[key]) {
+        el.textContent = strings[key];
+      }
+    });
+  }
 
-  // ---------- Unified load + render ----------
   async function loadAllAndRender(){
     const lang = getLang();
-    setLang(lang);              // ✅ URL/localStorage 동기화
-    applyLangToLinks();         // ✅ 링크에 lang 붙이기
+    setLang(lang);
+    applyLangToLinks();
     setLangButtonsActive(lang);
 
     const [p2Res, p3Res, strRes] = await Promise.all([
@@ -755,14 +616,7 @@ function renderPhase3(layout, strings){
       p2Res.json(), p3Res.json(), strRes.json()
     ]);
 
-    console.log("HTU strings loaded:", strings);
-
-    console.log("applyNavI18n called");
-
-    applyNavI18n(strings);   // 🔵 여기 추가
-
-  __p3Layout = p3Layout;   // ✅ 추가: Phase3 layout 저장
-  __strings  = strings;    // ✅ (선택) strings 저장
+    applyNavI18n(strings);
 
     if (Array.isArray(p2Layout)){
       const steps = groupIntoSteps(p2Layout);
@@ -774,7 +628,6 @@ function renderPhase3(layout, strings){
   }
 
   document.addEventListener("DOMContentLoaded", () => {
-    // language buttons
     document.querySelectorAll("[data-lang-btn]").forEach(btn => {
       btn.addEventListener("click", () => {
         const lang = btn.getAttribute("data-lang-btn");
@@ -784,36 +637,8 @@ function renderPhase3(layout, strings){
     });
 
     loadAllAndRender().catch(e => console.warn("[HTU] render failed:", e));
-    // DEBUG export tools
-    const bar = document.getElementById("htuDebugBar");
-    const box = document.getElementById("htuExportBox");
-    const exportBtn = document.getElementById("htuExportBtn");
-    const copyBtn = document.getElementById("htuCopyBtn");
-
-    if (DEBUG && bar && box && exportBtn && copyBtn){
-      bar.style.display = "flex";
-      box.style.display = "block";
-
-      exportBtn.addEventListener("click", () => {
-        if (!__p3Layout) {
-          alert("Phase3 layout not loaded yet.");
-          return;
-        }
-        box.value = JSON.stringify(__p3Layout, null, 2);
-      });
-
-      copyBtn.addEventListener("click", async () => {
-        try{
-          await navigator.clipboard.writeText(box.value || "");
-          alert("Copied!");
-        }catch(e){
-          alert("Copy failed. Select all and copy manually.");
-        }
-      });
-    }
   });
 })();
 </script>
-
 </body>
 </html>
