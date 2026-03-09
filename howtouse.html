@@ -267,6 +267,29 @@
     .htu-copy-body + .htu-copy-body{
       margin-top:8px;
     }
+.htu-copy-rows{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
+
+.htu-copy-row{
+  display:grid;
+  gap:12px;
+  align-items:start;
+}
+
+.htu-copy-row.cols-1{
+  grid-template-columns:1fr;
+}
+
+.htu-copy-row.cols-2{
+  grid-template-columns:repeat(2,1fr);
+}
+
+.htu-copy-row .htu-copy-body{
+  margin:0;
+}
 
     .htu-copy-list{
       margin:0;
@@ -478,115 +501,184 @@
     }
   }
 
-  function renderPhase3(layout, strings){
-    const host = document.getElementById("htuGallery");
-    if (!host) return;
+function renderPhase3(layout, strings){
+  const host = document.getElementById("htuGallery");
+  if (!host) return;
 
-    host.innerHTML = "";
+  host.innerHTML = "";
 
-    let grid = null;
-    const flushGrid = () => {
-      if (grid){
-        host.appendChild(grid);
-        grid = null;
-      }
-    };
+  let grid = null;
+  const flushGrid = () => {
+    if (grid){
+      host.appendChild(grid);
+      grid = null;
+    }
+  };
 
-    for (const node of layout){
-      if (!node || typeof node !== "object") continue;
+  for (const node of layout){
+    if (!node || typeof node !== "object") continue;
 
-      if (node.kind === "subject"){
-        flushGrid();
-        const band = document.createElement("div");
-        band.className = "htu-subject";
-        band.textContent = t(strings, node.sid);
-        host.appendChild(band);
-        continue;
-      }
-
-      if (node.kind === "spacer"){
-        flushGrid();
-        const sp = document.createElement("div");
-        sp.className = `htu-spacer ${(node.size || "md")}`;
-        host.appendChild(sp);
-        continue;
-      }
-
-      if (node.kind === "card"){
-        if (!grid){
-          grid = document.createElement("div");
-          grid.className = "htu-grid";
-        }
-
-        const card = document.createElement("article");
-        card.className = "htu-card";
-
-        if (node.titleSid){
-          const copyTop = document.createElement("div");
-          copyTop.className = "htu-copy-top";
-
-          const h3 = document.createElement("h3");
-          h3.className = "htu-copy-title";
-          h3.textContent = t(strings, node.titleSid);
-
-          copyTop.appendChild(h3);
-          card.appendChild(copyTop);
-        }
-
-        const thumb = document.createElement("a");
-        thumb.className = "htu-thumb";
-        thumb.href = node.src;
-        thumb.target = "_blank";
-        thumb.rel = "noopener";
-
-        if (node.ratio) {
-          thumb.style.setProperty("--thumb-ratio", node.ratio);
-        }
-        if (node.fit) {
-          thumb.style.setProperty("--thumb-fit", node.fit);
-        }
-
-        const img = document.createElement("img");
-        img.src = node.src;
-        img.alt = t(strings, node.altSid);
-        img.loading = "lazy";
-        thumb.appendChild(img);
-
-        card.appendChild(thumb);
-
-        if ((Array.isArray(node.bodySids) && node.bodySids.length) || (Array.isArray(node.listSids) && node.listSids.length)){
-          const copy = document.createElement("div");
-          copy.className = "htu-copy";
-
-          if (Array.isArray(node.bodySids) && node.bodySids.length){
-            for (const sid of node.bodySids){
-              const p = document.createElement("p");
-              p.className = "htu-copy-body";
-              p.textContent = t(strings, sid);
-              copy.appendChild(p);
-            }
-          }
-
-          if (Array.isArray(node.listSids) && node.listSids.length){
-            const ul = document.createElement("ul");
-            ul.className = "htu-copy-list";
-            for (const sid of node.listSids){
-              const li = document.createElement("li");
-              li.textContent = t(strings, sid);
-              ul.appendChild(li);
-            }
-            copy.appendChild(ul);
-          }
-
-          card.appendChild(copy);
-        }
-
-        grid.appendChild(card);
-      }
+    if (node.kind === "subject"){
+      flushGrid();
+      const band = document.createElement("div");
+      band.className = "htu-subject";
+      band.textContent = t(strings, node.sid);
+      host.appendChild(band);
+      continue;
     }
 
-    flushGrid();
+    if (node.kind === "spacer"){
+      flushGrid();
+      const sp = document.createElement("div");
+      sp.className = `htu-spacer ${(node.size || "md")}`;
+      host.appendChild(sp);
+      continue;
+    }
+
+    if (node.kind === "card"){
+      if (!grid){
+        grid = document.createElement("div");
+        grid.className = "htu-grid";
+      }
+
+      const card = document.createElement("article");
+      card.className = "htu-card";
+
+      // title
+      if (node.titleSid){
+        const copyTop = document.createElement("div");
+        copyTop.className = "htu-copy-top";
+
+        const h3 = document.createElement("h3");
+        h3.className = "htu-copy-title";
+        h3.textContent = t(strings, node.titleSid);
+
+        copyTop.appendChild(h3);
+        card.appendChild(copyTop);
+      }
+
+      // image
+      const thumb = document.createElement("a");
+      thumb.className = "htu-thumb";
+      thumb.href = node.src;
+      thumb.target = "_blank";
+      thumb.rel = "noopener";
+
+      if (node.ratio) {
+        thumb.style.setProperty("--thumb-ratio", node.ratio);
+      }
+      if (node.fit) {
+        thumb.style.setProperty("--thumb-fit", node.fit);
+      }
+
+      const img = document.createElement("img");
+      img.src = node.src;
+      img.alt = t(strings, node.altSid);
+      img.loading = "lazy";
+      thumb.appendChild(img);
+
+      card.appendChild(thumb);
+
+      // body / list
+      const hasBody =
+        (Array.isArray(node.bodySids) && node.bodySids.length) ||
+        (Array.isArray(node.bodyRows) && node.bodyRows.length) ||
+        (Array.isArray(node.listSids) && node.listSids.length);
+
+      if (hasBody){
+        const copy = document.createElement("div");
+        copy.className = "htu-copy";
+
+        // bodySids: simple stacked paragraphs
+        if (Array.isArray(node.bodySids) && node.bodySids.length){
+          for (const item of node.bodySids){
+            const p = document.createElement("p");
+            p.className = "htu-copy-body";
+
+            if (typeof item === "string") {
+              p.textContent = t(strings, item);
+            } else if (item && typeof item === "object") {
+              p.textContent = t(strings, item.sid);
+
+              if (item.align) {
+                p.style.textAlign = item.align;
+              }
+              if (item.dx) {
+                p.style.position = "relative";
+                p.style.left = item.dx;
+              }
+              if (item.className) {
+                p.classList.add(item.className);
+              }
+            }
+
+            copy.appendChild(p);
+          }
+        }
+
+        // bodyRows: row-based layout (left/right + next line center etc.)
+        if (Array.isArray(node.bodyRows) && node.bodyRows.length){
+          const rowsWrap = document.createElement("div");
+          rowsWrap.className = "htu-copy-rows";
+
+          for (const row of node.bodyRows){
+            const rowDiv = document.createElement("div");
+            rowDiv.className = "htu-copy-row " + (row.length === 1 ? "cols-1" : "cols-2");
+
+            for (const item of row){
+              const p = document.createElement("p");
+              p.className = "htu-copy-body";
+
+              if (typeof item === "string") {
+                p.textContent = t(strings, item);
+              } else if (item && typeof item === "object") {
+                p.textContent = t(strings, item.sid);
+
+                if (item.align) {
+                  p.style.textAlign = item.align;
+                }
+                if (item.dx) {
+                  p.style.position = "relative";
+                  p.style.left = item.dx;
+                }
+                if (item.className) {
+                  p.classList.add(item.className);
+                }
+              }
+
+              rowDiv.appendChild(p);
+            }
+
+            rowsWrap.appendChild(rowDiv);
+          }
+
+          copy.appendChild(rowsWrap);
+        }
+
+        // listSids: bullet list
+        if (Array.isArray(node.listSids) && node.listSids.length){
+          const ul = document.createElement("ul");
+          ul.className = "htu-copy-list";
+
+          for (const sid of node.listSids){
+            const li = document.createElement("li");
+            li.textContent = t(strings, sid);
+            ul.appendChild(li);
+          }
+
+          copy.appendChild(ul);
+        }
+
+        card.appendChild(copy);
+      }
+
+      grid.appendChild(card);
+    }
   }
+
+  flushGrid();
+}
+
 
   function applyNavI18n(strings){
     document.querySelectorAll("[data-i18n]").forEach(el=>{

@@ -33,20 +33,24 @@
     "ratio": "4 / 3",
     "fit": "contain"
   },
-  {
-    "id": "htu_card_150",
-    "kind": "card",
-    "src": "/images/howtouse/htu_150.jpg",
-    "altSid": "htu_img_150_alt",
-    "titleSid": "htu_151",
-    "bodySids": [
-      { "sid": "htu_152", "align": "left" },
-      { "sid": "htu_153", "align": "right" },
-      { "sid": "htu_154", "align": "center" }
+{
+  "id": "htu_card_150",
+  "kind": "card",
+  "src": "/images/howtouse/htu_150.jpg",
+  "altSid": "htu_img_150_alt",
+  "titleSid": "htu_151",
+  "bodyRows": [
+    [
+      { "sid": "htu_152", "align": "left",  "dx": "6px" },
+      { "sid": "htu_153", "align": "right", "dx": "-6px" }
     ],
-    "ratio": "4 / 3",
-    "fit": "contain"
-  },
+    [
+      { "sid": "htu_154", "align": "center" }
+    ]
+  ],
+  "ratio": "4 / 3",
+  "fit": "contain"
+}
   {
     "id": "htu_card_160",
     "kind": "card",
