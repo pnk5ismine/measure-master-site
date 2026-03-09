@@ -9,11 +9,9 @@
     "kind": "card",
     "src": "/images/howtouse/htu_110.jpg",
     "altSid": "htu_img_110_alt",
-    "titleSid": "htu_110",
-    "listSids": [
-      "htu_111",
-      "htu_112",
-      "htu_113"
+    "titleSid": "htu_111",
+    "bodySids": [
+      "htu_112"
     ],
     "ratio": "1 / 1",
     "fit": "cover"
@@ -23,31 +21,14 @@
     "kind": "card",
     "src": "/images/howtouse/htu_120.jpg",
     "altSid": "htu_img_120_alt",
-    "titleSid": "htu_120",
-    "listSids": [
-      "htu_121",
+    "titleSid": "htu_121",
+    "bodySids": [
       "htu_122",
       "htu_123",
       "htu_124",
       "htu_125",
-      "htu_126",
-      "htu_127",
-      "htu_128",
-      "htu_129",
-      "htu_130",
-      "htu_131",
       "htu_132",
-      "htu_133",
-      "htu_134",
-      "htu_135",
-      "htu_136",
-      "htu_137",
-      "htu_138",
-      "htu_139",
-      "htu_140",
-      "htu_141",
-      "htu_142",
-      "htu_143"
+      "htu_133"
     ],
     "ratio": "1 / 1",
     "fit": "cover"
@@ -57,9 +38,8 @@
     "kind": "card",
     "src": "/images/howtouse/htu_150.jpg",
     "altSid": "htu_img_150_alt",
-    "titleSid": "htu_150",
-    "listSids": [
-      "htu_151",
+    "titleSid": "htu_151",
+    "bodySids": [
       "htu_152",
       "htu_153"
     ],
