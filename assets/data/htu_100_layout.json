@@ -11,8 +11,8 @@
     "altSid": "htu_img_110_alt",
     "titleSid": "htu_111",
     "bodySids": [
-      "htu_112"
-    ],
+      { "sid": "htu_112", "align": "center" }
+     ],
     "ratio": "4 / 3",
     "fit": "contain"
   },
@@ -50,7 +50,7 @@
   ],
   "ratio": "4 / 3",
   "fit": "contain"
-}
+},
   {
     "id": "htu_card_160",
     "kind": "card",
