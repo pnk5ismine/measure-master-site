@@ -174,6 +174,18 @@
 "htu_423_dra": "Draw another rectangle as large as possible on the same plane.",
 "htu_424_thn": "Then the larger rectangle becomes the new base, and each length becomes almost equal.",
 
+"htu_500_exa": "Example of measuring by double rectangles",
+"htu_img_510_alt": "Horizontal",
+"htu_511_hor": "Horizontal Length of a window glass",
+"htu_512_1975": "Actual width of the window glass = 1975mm",
+"htu_513_1987": "Estimated 1987mm   + 12mm  0.6% plus  by measuring with double rectangle.",
+"htu_514_2033": "Estimated 2033mm   + 58mm  2.9% plus  by measuring with single rectangle.",
+"htu_img_520_alt": "Vertical",
+"htu_521_ver": "Vertical Length of a window glass",
+"htu_522_2150": "Actual height of the window glass = 2150mm.  ",
+"htu_523_2141": "Estimated 2141mm   -  9mm  0.4% minus  by measuring with double rectangle.",
+"htu_524_2137": "Estimated 2137mm   - 13mm  0.6% minus  by measuring with single rectangle.",
+
   "rvw_lst1": "No.",
   "rvw_lst2": "Nickname",
   "rvw_lst3": "Title",

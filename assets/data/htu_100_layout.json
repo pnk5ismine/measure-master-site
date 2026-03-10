@@ -196,5 +196,38 @@
     ],
     "ratio": "4 / 3",
     "fit": "contain"
+  },
+  {
+    "id": "htu_500",
+    "kind": "subject",
+    "sid": "htu_500_exa"
+  },
+  {
+    "id": "htu_card_510",
+    "kind": "card",
+    "src": "/images/howtouse/htu_510_horizontal.jpg",
+    "altSid": "htu_img_510_alt",
+    "titleSid": "htu_511_hor",
+    "bodySids": [
+      "htu_512_1975",
+      "htu_513_1987",
+      "htu_514_2033"
+    ],
+    "ratio": "4 / 3",
+    "fit": "contain"
+  },
+  {
+    "id": "htu_card_520",
+    "kind": "card",
+    "src": "/images/howtouse/htu_520_vertical.jpg",
+    "altSid": "htu_img_520_alt",
+    "titleSid": "htu_512_ver",
+    "bodySids": [
+      "htu_522_2150",
+      "htu_523_2141",
+      "htu_524_2137"
+    ],
+    "ratio": "4 / 3",
+    "fit": "contain"
   }
 ]
