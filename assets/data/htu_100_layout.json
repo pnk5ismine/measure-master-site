@@ -57,7 +57,9 @@
     "src": "/images/howtouse/htu_160.jpg",
     "altSid": "htu_img_160_alt",
     "titleSid": "htu_161_set",
-    "bodySids": [],
+    "bodySids": [
+      { "sid": "htu_162_tab", "align": "center" }
+     ],
     "ratio": "4 / 3",
     "fit": "contain"
   },
