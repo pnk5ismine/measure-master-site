@@ -41,8 +41,8 @@
   "titleSid": "htu_151_scr",
   "bodyRows": [
     [
-      { "sid": "htu_152_str", "align": "left",  "dx": "30px" },
-      { "sid": "htu_153_cur", "align": "right", "dx": "-30px" }
+      { "sid": "htu_152_str", "align": "left",  "dx": "0px" },
+      { "sid": "htu_153_cur", "align": "right", "dx": "-0px" }
     ],
     [
       { "sid": "htu_154_mix", "align": "center" }
