@@ -110,21 +110,21 @@
     "ratio": "4 / 3",
     "fit": "contain"
   },
-  {
-    "id": "htu_card_240",
-    "kind": "card",
-    "src": "/images/howtouse/htu_240.jpg",
-    "altSid": "htu_img_240_alt",
-    "titleSid": "htu_241_rea",
-    "bodySids": [
-      "htu_242_bal",
-      "htu_243_ano",
-      "htu_244_bas",
-      "htu_245_nex"
-    ],
-    "ratio": "4 / 3",
-    "fit": "contain"
-  },
+{
+  "id": "htu_card_240",
+  "kind": "card",
+  "src": "/images/howtouse/htu_240.jpg",
+  "altSid": "htu_img_240_alt",
+  "titleSid": "htu_241_rea",
+  "bodySids": [
+    "htu_242_bal",
+    "htu_243_ano",
+    "htu_244_bas",
+    "htu_245_nex"
+  ],
+  "ratio": "4 / 3",
+  "fit": "contain"
+},
   {
     "id": "htu_spacer_2",
     "kind": "spacer",
