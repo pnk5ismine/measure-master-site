@@ -156,7 +156,8 @@
   "htu_242_bal": "The size of a single balcony (325 × 275 cm) is used as a real-world reference.",
   "htu_243_ano": "A rectangle is drawn for the balcony and another for the full building façade.",
   "htu_244_bas": "Based on perspective estimation, the building’s total size is calculated as 3,124 cm (width) and 6,119 cm (height).",
-  "htu_245_bas": "Next, the verified building dimensions are used to calculate the exterior wall area for painting, with totals organized by color.",
+  "htu_245_nex": "Next, this building dimensions are used to calculate the exterior wall area for painting, with totals organized by color.",
+
   "htu_300_how": "How to Use AR Mode",
   "htu_img_310_alt": "AR Mode overview",
   "htu_311_arm": "AR Mode",
