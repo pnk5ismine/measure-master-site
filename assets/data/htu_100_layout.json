@@ -117,10 +117,10 @@
     "altSid": "htu_img_240_alt",
     "titleSid": "htu_241_rea",
     "bodySids": [
-      { "sid": "htu_242_bal", "align": "center" },
-      { "sid": "htu_243_ano", "align": "center" },
-      { "sid": "htu_244_bas", "align": "center" },
-      { "sid": "htu_245_nex", "align": "center" }
+      "sid": "htu_242_bal",
+      "sid": "htu_243_ano",
+      "sid": "htu_244_bas",
+      "sid": "htu_245_nex"
     ],
     "ratio": "4 / 3",
     "fit": "contain"
