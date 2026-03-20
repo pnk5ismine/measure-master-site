@@ -173,12 +173,12 @@
 "htu_400_imp": "How to improve accuracy",
 "htu_img_410_alt": "Before",
 "htu_411_bef": "Before",
-"htu_412_act": "Actual width is of 85 cm and estimated 161 cm > 103 cm > 85 cm" with big variation.
+"htu_412_act": "Actual width is of 85 cm and estimated 161 cm > 103 cm > 85 cm" with big variation.",
 "htu_413_nea": "The nearest line shows 85 cm, but the far line shows 161 cm because the basic rectangle was drawn incorrectly.",
 "htu_414_how": "How can you reduce this difference?",
 "htu_img_420_alt": "After",
 "htu_421_aft": "After",
-"htu_422_act": "Actual width is of 85 cm and estimated 87 cm > 85 cm, 85 cm" with little variation.,
+"htu_422_act": "Actual width is of 85 cm and estimated 87 cm > 85 cm, 85 cm" with little variation.",
 "htu_423_dra": "Draw another rectangle as large as possible on the same plane.<very important factor>",
 "htu_424_thn": "Then the larger rectangle becomes the new base, and each length becomes almost equal.",
 
