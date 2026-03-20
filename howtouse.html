@@ -199,19 +199,22 @@ body{
 .htu-step-title,
 .htu-title{
   display:block;
+  text-align:center;
   font-weight:800;
   font-size:1.45rem;
   line-height:1.36;
   color:var(--htu-text);
 
-  margin:8px 0 -6px;
+  margin:8px 0 0 0;
   padding:10px 14px 8px;
 
   border-top:1px solid var(--htu-border);
   border-left:1px solid var(--htu-border);
   border-right:1px solid var(--htu-border);
+  border-bottom:none;
   background:var(--htu-bg);
 }
+
   /* step-title can be slightly more left-oriented if wanted */
   .htu-step-title{
     text-align:left;
@@ -259,24 +262,27 @@ body{
   /* =========================
      Cards
      ========================= */
-  .htu-card{
-    display:flex;
-    flex-direction:column;
-    min-width:0;
-    width:100%;
-    background:var(--htu-bg);
-  }
+.htu-card{
+  display:flex;
+  flex-direction:column;
+  min-width:0;
+  width:100%;
+  margin-top:0;
+  background:var(--htu-bg);
+}
 
   .htu-card.htu-item--full{
     grid-column:1 / -1;
   }
 
-  .htu-card__media{
-    border-left:1px solid var(--htu-border);
-    border-right:1px solid var(--htu-border);
-    overflow:hidden;
-    background:#fff;
-  }
+.htu-card__media{
+  border-top:1px solid var(--htu-border);
+  border-right:1px solid var(--htu-border);
+  border-bottom:1px solid var(--htu-border);
+  border-left:1px solid var(--htu-border);
+  overflow:hidden;
+  background:#fff;
+}
 
   .htu-card__media img{
     display:block;
@@ -431,6 +437,10 @@ body{
   height: auto;
   object-fit: contain;
   background: #fff;
+}
+
+.htu-title + .htu-card{
+  margin-top:0 !important;
 }
 </style>
 
