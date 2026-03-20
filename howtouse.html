@@ -7,225 +7,188 @@
 
   <link rel="icon" type="image/png" href="/images/mm_logo.png" />
 
-  <style>
-    :root{
-      --htu-bg: #ffffff;
-      --htu-text: #111827;
-      --htu-muted: #4b5563;
-      --htu-border: rgba(31,41,55,.75);
-      --htu-border-soft: rgba(31,41,55,.25);
-      --htu-remark: #dc2626;
+<style>
+  :root{
+    --htu-bg: #ffffff;
+    --htu-page: #f8fafc;
+    --htu-text: #111827;
+    --htu-muted: #4b5563;
+    --htu-border: rgba(31,41,55,.75);
+    --htu-border-soft: rgba(31,41,55,.25);
+    --htu-note: #dc2626;
+  }
+
+  *{ box-sizing:border-box; }
+  html, body{ margin:0; padding:0; }
+
+  body{
+    font-family: system-ui, -apple-system, Segoe UI, Roboto, "Noto Sans", sans-serif;
+    background: var(--htu-page);
+    color: var(--htu-text);
+  }
+
+  /* =========================
+     Header / frame
+     ========================= */
+  header{
+    padding:14px 18px 10px;
+    border-bottom:1px solid rgba(31,41,55,.12);
+    background:#fff;
+  }
+
+  .header-top{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+  }
+
+  .brand{
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+
+  .logo{
+    width:28px;
+    height:28px;
+    border-radius:8px;
+    background:url("/images/mm_logo.png") center/contain no-repeat, #fff;
+    border:1px solid rgba(31,41,55,.18);
+  }
+
+  .right{
+    display:flex;
+    align-items:center;
+    gap:10px;
+  }
+
+  .lang{
+    display:flex;
+    gap:6px;
+  }
+
+  .lang button{
+    border:1px solid rgba(31,41,55,.18);
+    background:#fff;
+    border-radius:999px;
+    padding:6px 10px;
+    cursor:pointer;
+  }
+
+  .header-bottom{
+    margin-top:10px;
+  }
+
+  nav{
+    display:flex;
+    flex-wrap:wrap;
+    gap:10px;
+  }
+
+  nav a{
+    text-decoration:none;
+    color:#374151;
+    padding:6px 10px;
+    border-radius:999px;
+    border:1px solid rgba(31,41,55,.12);
+    background:#fff;
+  }
+
+  main{
+    width:min(1180px, 70%);
+    margin:0 auto;
+    padding:18px 0 28px;
+  }
+
+  @media (max-width:900px){
+    main{
+      width:calc(100% - 24px);
     }
+  }
 
-    * { box-sizing: border-box; }
-    html, body { margin: 0; padding: 0; }
-    body {
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, "Noto Sans", sans-serif;
-      background: #f8fafc;
-      color: #111827;
-    }
+  .card.howtouse{
+    background:#fff;
+    border:1px solid rgba(31,41,55,.12);
+    padding:18px 14px 24px;
+  }
 
-    header {
-      padding: 14px 18px 10px;
-      border-bottom: 1px solid rgba(31,41,55,.12);
-      background: #fff;
-    }
+  .card.howtouse h1{
+    margin:0 0 8px;
+    font-size:1.55rem;
+    text-align:center;
+  }
 
-    .header-top {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-    }
+  .muted{
+    margin:0 0 18px;
+    color:#6b7280;
+    text-align:center;
+    font-size:0.98rem;
+    line-height:1.45;
+  }
 
-    .brand {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
+  footer{
+    text-align:center;
+    color:#6b7280;
+    font-size:0.92rem;
+    padding:20px 12px 30px;
+  }
 
-    .logo {
-      width: 28px;
-      height: 28px;
-      border-radius: 8px;
-      background: url("/images/mm_logo.png") center/contain no-repeat, #fff;
-      border: 1px solid rgba(31,41,55,.18);
-    }
-
-    .right {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-
-    .lang {
-      display: flex;
-      gap: 6px;
-    }
-
-    .lang button {
-      border: 1px solid rgba(31,41,55,.18);
-      background: #fff;
-      border-radius: 999px;
-      padding: 6px 10px;
-      cursor: pointer;
-    }
-
-    .header-bottom {
-      margin-top: 10px;
-    }
-
-    nav {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-    }
-
-    nav a {
-      text-decoration: none;
-      color: #374151;
-      padding: 6px 10px;
-      border-radius: 999px;
-      border: 1px solid rgba(31,41,55,.12);
-      background: #fff;
-    }
-
-    main {
-      width: min(1180px, 70%);
-      margin: 0 auto;
-      padding: 18px 0 28px;
-    }
-
-    .card.howtouse {
-      background: #fff;
-      border: 1px solid rgba(31,41,55,.12);
-      padding: 18px 14px 24px;
-    }
-
-    .card.howtouse h1 {
-      margin: 0 0 8px;
-      font-size: 1.5rem;
-      text-align: center;
-    }
-
-    .muted {
-      margin: 0 0 18px;
-      color: #6b7280;
-      text-align: center;
-    }
-
-    footer {
-      text-align: center;
-      color: #6b7280;
-      font-size: 0.92rem;
-      padding: 20px 12px 30px;
-    }
-
-    /* =========================
-       HowToUse layout
-       ========================= */
-
-/* Phase 2 + Phase 3 containers */
-#htuSteps,
-#htuGallery,
-.htu-steps,
-.htu-groups{
-  display:grid;
-  grid-template-columns:repeat(2, minmax(0, 1fr));
-  gap:20px 18px;
-  align-items:start;
-  width:100%;
-}
-
-@media (max-width: 900px){
+  /* =========================
+     Phase containers
+     ========================= */
   #htuSteps,
   #htuGallery,
   .htu-steps,
   .htu-groups{
-    grid-template-columns:1fr;
-    gap:18px;
-  }
-}
-//phase 2
-.htu-subject,
-.htu-step-title{
-  grid-column:1 / -1;
-
-  font-weight:900;           /* 더 굵게 */
-  font-size:1.45rem;         /* 기존보다 확대 */
-  line-height:1.4;
-  color:var(--htu-text);
-
-  margin:14px 0 6px;
-  padding:14px 16px 10px;
-
-  border-top:2px solid rgba(31,41,55,.85);
-  border-bottom:1px solid var(--htu-border-soft);
-  background:transparent;
-}
-
-.htu-step-body{
-  grid-column:1 / -1;
-  display:flex;
-  align-items:flex-start;
-  gap:10px;
-  padding:1px 2px;
-  color:var(--htu-muted);
-  font-size:0.98rem;
-  line-height:1.15;
-}
-
-.htu-step-num{
-  flex:0 0 auto;
-  min-width:24px;
-  font-weight:700;
-  color:var(--htu-text);
-}
-
-.htu-step-text{
-  flex:1 1 auto;
-  min-width:0;
-}
-
-.htu-step-note{
-  grid-column:1 / -1;
-  margin:2px 0 10px;
-  padding:8px 12px;
-  text-align:left;
-  color:var(--htu-remark);
-  font-size:0.96rem;
-  line-height:1.55;
-  border:1px solid var(--htu-border);
-  background:#fff;
-}
-
-@media (max-width: 900px){
-  .htu-step-title{
-    font-size:1.04rem;
-    padding:10px 12px 7px;
+    display:grid;
+    grid-template-columns:repeat(2, minmax(0, 1fr));
+    gap:20px 18px;
+    align-items:start;
+    width:100%;
   }
 
-  .htu-step-body{
-    font-size:0.95rem;
-    line-height:1.58;
+  @media (max-width:900px){
+    #htuSteps,
+    #htuGallery,
+    .htu-steps,
+    .htu-groups{
+      grid-template-columns:1fr;
+      gap:18px;
+    }
   }
 
+  /* full width blocks */
+  .htu-item--full,
+  .htu-subject,
+  .htu-title,
+  .htu-remark,
+  .htu-step-title,
   .htu-step-note{
-    font-size:0.93rem;
-    padding:8px 10px;
+    grid-column:1 / -1;
+    width:100%;
   }
-}
 
-//phase 3
+  /* =========================
+     Hierarchy
+     subject = maximum
+     step-title/title = same medium
+     note/remark = same level
+     ========================= */
+
+  /* 1) subject : largest */
 .htu-subject{
-  grid-column:1 / -1;
+  display:block;
+  text-align:center;
+  justify-self:stretch;
+  align-self:start;
 
-  font-weight:900;           /* 더 굵게 */
-  font-size:1.45rem;         /* 기존보다 확대 */
-  line-height:1.4;
+  font-weight:900;
+  font-size:2.05rem;
+  line-height:1.34;
   color:var(--htu-text);
 
-  margin:14px 0 6px;
+  margin:16px 0 8px;
   padding:14px 16px 10px;
 
   border-top:2px solid rgba(31,41,55,.85);
@@ -233,153 +196,228 @@
   background:transparent;
 }
 
-    .htu-item--full,
-    .htu-subject,
-    .htu-title,
-    .htu-remark{
-      grid-column:1 / -1;
-    }
+  /* 2) step-title + title : same medium */
+.htu-step-title,
+.htu-title{
+  display:block;
+  font-weight:800;
+  font-size:1.45rem;
+  line-height:1.36;
+  color:var(--htu-text);
 
-    .htu-title{
-      text-align:center;
-      font-weight:700;
-      font-size:1.12rem;
-      line-height:1.35;
-      color:var(--htu-text);
-      margin:2px 0 -8px;
-      padding:10px 14px 8px;
-      border-top:1px solid var(--htu-border);
-      border-left:1px solid var(--htu-border);
-      border-right:1px solid var(--htu-border);
-      background:var(--htu-bg);
-    }
+  margin:8px 0 -6px;
+  padding:10px 14px 8px;
 
+  border-top:1px solid var(--htu-border);
+  border-left:1px solid var(--htu-border);
+  border-right:1px solid var(--htu-border);
+  background:var(--htu-bg);
+}
 
-    .htu-spacer{
-      grid-column:1 / -1;
-      width:100%;
-      height:14px;
-    }
+  /* step-title can be slightly more left-oriented if wanted */
+  .htu-step-title{
+    text-align:left;
+    margin:10px 0 2px;
+    padding:12px 14px 8px;
+    border-left:none;
+    border-right:none;
+    background:transparent;
+  }
 
-    .htu-spacer--sm{ height:10px; }
-    .htu-spacer--md{ height:18px; }
-    .htu-spacer--lg{ height:28px; }
+  /* 3) step-note + remark : same level */
+  .htu-step-note,
+  .htu-remark{
+    display:block;
+    text-align:left;
+    font-size:0.96rem;
+    line-height:1.42;
+    color:var(--htu-note);
 
-    .htu-card{
-      display:flex;
-      flex-direction:column;
-      min-width:0;
-      background:var(--htu-bg);
-    }
+    margin:4px 0 10px;
+    padding:8px 12px;
 
-    .htu-card.htu-item--full{
-      grid-column:1 / -1;
-    }
+    border:1px solid var(--htu-border);
+    background:#fff;
+  }
 
-    .htu-card__media{
-      border-left:1px solid var(--htu-border);
-      border-right:1px solid var(--htu-border);
-      overflow:hidden;
-      background:#fff;
-    }
+  .htu-remark{
+    text-align:center;
+    margin:-6px 0 8px;
+  }
 
-    .htu-card__media img{
-      display:block;
-      width:100%;
-      height:100%;
-      object-fit:contain;
-      background:#fff;
-    }
+  /* =========================
+     Spacer
+     ========================= */
+  .htu-spacer{
+    grid-column:1 / -1;
+    width:100%;
+    height:14px;
+  }
+
+  .htu-spacer--sm{ height:10px; }
+  .htu-spacer--md{ height:18px; }
+  .htu-spacer--lg{ height:28px; }
+
+  /* =========================
+     Cards
+     ========================= */
+  .htu-card{
+    display:flex;
+    flex-direction:column;
+    min-width:0;
+    width:100%;
+    background:var(--htu-bg);
+  }
+
+  .htu-card.htu-item--full{
+    grid-column:1 / -1;
+  }
+
+  .htu-card__media{
+    border-left:1px solid var(--htu-border);
+    border-right:1px solid var(--htu-border);
+    overflow:hidden;
+    background:#fff;
+  }
+
+  .htu-card__media img{
+    display:block;
+    width:100%;
+    height:100%;
+    object-fit:contain;
+    background:#fff;
+  }
+
+  .htu-card__body{
+    border-left:1px solid var(--htu-border);
+    border-right:1px solid var(--htu-border);
+    border-bottom:1px solid var(--htu-border);
+    padding:9px 12px 10px;
+    background:var(--htu-bg);
+  }
+
+  .htu-card__body:empty{
+    padding:0;
+    min-height:0;
+    border-bottom:1px solid var(--htu-border);
+  }
+
+  .htu-card__title{
+    text-align:center;
+    font-weight:800;
+    font-size:1.18rem;
+    line-height:1.4;
+    color:var(--htu-text);
+    margin:0 0 8px;
+  }
+
+  /* =========================
+     Body text
+     step-body + card body = same level, tighter spacing
+     ========================= */
+
+  .htu-body{
+    font-size:0.97rem;
+    line-height:1.18;
+    color:var(--htu-muted);
+    word-break:keep-all;
+    overflow-wrap:anywhere;
+  }
+
+  .htu-body + .htu-body{
+    margin-top:4px;
+  }
+
+  .htu-body--left{ text-align:left; }
+  .htu-body--center{ text-align:center; }
+  .htu-body--right{ text-align:right; }
+
+  .htu-body-row{
+    display:flex;
+    gap:12px;
+    align-items:flex-start;
+    justify-content:space-between;
+  }
+
+  .htu-body-row .htu-body{
+    flex:1 1 0;
+    margin-top:0;
+  }
+
+  /* step body */
+  .htu-step-body{
+    grid-column:1 / -1;
+    display:flex;
+    align-items:flex-start;
+    gap:10px;
+    padding:1px 2px;
+    color:var(--htu-muted);
+    font-size:0.97rem;
+    line-height:1.18;
+  }
+
+  .htu-step-num{
+    flex:0 0 auto;
+    min-width:24px;
+    font-weight:800;
+    color:var(--htu-text);
+  }
+
+  .htu-step-text{
+    flex:1 1 auto;
+    min-width:0;
+  }
+
+  /* =========================
+     Visual cleanup
+     ========================= */
+  .htu-card,
+  .htu-title,
+  .htu-remark,
+  .htu-step-note{
+    box-shadow:none;
+    border-radius:0;
+  }
+
+  /* =========================
+     Mobile tuning
+     ========================= */
+  @media (max-width:900px){
+.htu-subject{
+  font-size:1.62rem;
+  padding:12px 12px 8px;
+  margin:14px 0 6px;
+}
+
+.htu-step-title,
+.htu-title{
+  font-size:1.18rem;
+  padding:9px 12px 7px;
+}
 
     .htu-card__body{
-      border-left:1px solid var(--htu-border);
-      border-right:1px solid var(--htu-border);
-      border-bottom:1px solid var(--htu-border);
-      padding:10px 12px 12px;
-      background:var(--htu-bg);
-    }
-
-    .htu-card__body:empty{
-      padding:0;
-      min-height:0;
-      border-bottom:1px solid var(--htu-border);
-    }
-
-    .htu-card__title{
-      text-align:center;
-      font-weight:700;
-      font-size:1.02rem;
-      line-height:1.4;
-      color:var(--htu-text);
-      margin:0 0 8px;
+      padding:8px 10px 9px;
     }
 
     .htu-body{
-      font-size:0.98rem;
-      line-height:1.6;
-      color:var(--htu-muted);
-      word-break:keep-all;
-      overflow-wrap:anywhere;
+      font-size:0.94rem;
+      line-height:1.16;
     }
 
-    .htu-body + .htu-body{
-      margin-top:6px;
+    .htu-step-body{
+      font-size:0.94rem;
+      line-height:1.16;
     }
 
-    .htu-body--left{ text-align:left; }
-    .htu-body--center{ text-align:center; }
-    .htu-body--right{ text-align:right; }
-
-    .htu-body-row{
-      display:flex;
-      gap:12px;
-      align-items:flex-start;
-      justify-content:space-between;
-    }
-
-    .htu-body-row .htu-body{
-      flex:1 1 0;
-      margin-top:0;
-    }
-
+    .htu-step-note,
     .htu-remark{
-      text-align:center;
-      font-size:0.98rem;
-      line-height:1.55;
-      color:var(--htu-remark);
-      margin:-8px 0 6px;
-      padding:10px 14px;
-      border:1px solid var(--htu-border);
-      background:#fff;
+      font-size:0.92rem;
+      line-height:1.38;
+      padding:8px 10px;
     }
-
-@media (max-width: 900px){
-  .htu-subject,
-  .htu-step-title{
-    font-size:1.28rem;
-    padding:12px 12px 8px;
   }
-}
-      .htu-title{
-        font-size:1.04rem;
-        padding:9px 12px 7px;
-      }
+</style>
 
-      .htu-card__body{
-        padding:9px 10px 10px;
-      }
-
-      .htu-body{
-        font-size:0.95rem;
-        line-height:1.55;
-      }
-
-      .htu-remark{
-        font-size:0.95rem;
-        padding:9px 12px;
-      }
-    }
-  </style>
 </head>
 <body>
 <header>
