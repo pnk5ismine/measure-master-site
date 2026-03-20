@@ -348,7 +348,8 @@
 
 <script>
 (function () {
-  const DATA_URL = "/assets/data/howtouse_layout.json";
+  const STEP_DATA_URL = "/assets/data/htu_000_layout.json";
+  const GALLERY_DATA_URL = "/assets/data/htu_100_layout.json";
 
   function tBySid(sid) {
     if (!sid) return "";
@@ -485,22 +486,14 @@
     return card;
   }
 
-  function getGridEl() {
-    return document.getElementById("htuGallery");
-  }
-
-  function clearGrid(grid) {
-    while (grid.firstChild) grid.removeChild(grid.firstChild);
-  }
-
-  function renderItems(items) {
-    const grid = getGridEl();
+  function renderItemsTo(containerId, items) {
+    const grid = document.getElementById(containerId);
     if (!grid) {
-      console.error("HowToUse grid container not found: #htuGallery");
+      console.error("HowToUse container not found:", containerId);
       return;
     }
 
-    clearGrid(grid);
+    grid.innerHTML = "";
 
     items.forEach(item => {
       if (!item || !item.kind) return;
@@ -535,21 +528,39 @@
     });
   }
 
-  async function loadItems() {
-    const res = await fetch(DATA_URL, { cache: "no-store" });
+  async function loadItems(url) {
+    const res = await fetch(url, { cache: "no-store" });
     if (!res.ok) {
-      throw new Error("Failed to load howtouse layout: " + res.status);
+      throw new Error("Failed to load layout: " + url + " (" + res.status + ")");
     }
     return await res.json();
   }
 
   async function bootHowToUse() {
     try {
-      const items = await loadItems();
-      console.log("HTU items loaded:", items.map(x => x.id + ":" + x.kind));
-      renderItems(items);
+      const [stepItems, galleryItems] = await Promise.all([
+        loadItems(STEP_DATA_URL),
+        loadItems(GALLERY_DATA_URL)
+      ]);
+
+      console.log("HTU step items:", stepItems.map(x => x.id + ":" + x.kind));
+      console.log("HTU gallery items:", galleryItems.map(x => x.id + ":" + x.kind));
+
+      renderItemsTo("htuSteps", stepItems);
+      renderItemsTo("htuGallery", galleryItems);
+
     } catch (err) {
       console.error(err);
+
+      const steps = document.getElementById("htuSteps");
+      const gallery = document.getElementById("htuGallery");
+
+      if (steps) {
+        steps.innerHTML = '<div class="htu-remark htu-item--full">Failed to load Phase 2 layout.</div>';
+      }
+      if (gallery) {
+        gallery.innerHTML = '<div class="htu-remark htu-item--full">Failed to load Phase 3 layout.</div>';
+      }
     }
   }
 
