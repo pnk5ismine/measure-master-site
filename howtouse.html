@@ -6,221 +6,296 @@
   <title>Measure Master — How to Use</title>
 
   <link rel="icon" type="image/png" href="/images/mm_logo.png" />
-  <link rel="preload" as="image" href="/images/mm_logo.png" />
 
   <style>
-/* =========================
-   HowToUse layout - full CSS block
-   ========================= */
+    :root{
+      --htu-bg: #ffffff;
+      --htu-text: #111827;
+      --htu-muted: #4b5563;
+      --htu-border: rgba(31,41,55,.75);
+      --htu-border-soft: rgba(31,41,55,.25);
+      --htu-remark: #dc2626;
+    }
 
-:root{
-  --htu-bg: #ffffff;
-  --htu-text: #111827;
-  --htu-muted: #4b5563;
-  --htu-border: rgba(31,41,55,.75);
-  --htu-border-soft: rgba(31,41,55,.25);
-  --htu-remark: #dc2626;
-}
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; }
+    body {
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, "Noto Sans", sans-serif;
+      background: #f8fafc;
+      color: #111827;
+    }
 
-/* page wrapper */
-.htu-wrap{
-  width:min(1180px, calc(100% - 24px));
-  margin:0 auto;
-  padding:18px 0 28px;
-}
+    header {
+      padding: 14px 18px 10px;
+      border-bottom: 1px solid rgba(31,41,55,.12);
+      background: #fff;
+    }
 
-/* 2-column grid */
-.htu-grid{
-  display:grid;
-  grid-template-columns:repeat(2, minmax(0, 1fr));
-  gap:20px 18px;
-  align-items:start;
-}
+    .header-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
 
-/* mobile: single column */
-@media (max-width: 900px){
-  .htu-grid{
-    grid-template-columns:1fr;
-    gap:18px;
-  }
-}
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
 
-/* full-width items */
-.htu-item--full,
-.htu-subject,
-.htu-title,
-.htu-remark{
-  grid-column:1 / -1;
-}
+    .logo {
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      background: url("/images/mm_logo.png") center/contain no-repeat, #fff;
+      border: 1px solid rgba(31,41,55,.18);
+    }
 
-/* section subject */
-.htu-subject{
-  text-align:center;
-  font-weight:800;
-  font-size:1.3rem;
-  line-height:1.35;
-  color:var(--htu-text);
+    .right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
 
-  margin:12px 0 4px;
-  padding:14px 16px 10px;
+    .lang {
+      display: flex;
+      gap: 6px;
+    }
 
-  border-top:2px solid rgba(31,41,55,.85);
-  border-bottom:1px solid var(--htu-border-soft);
-  background:transparent;
-}
+    .lang button {
+      border: 1px solid rgba(31,41,55,.18);
+      background: #fff;
+      border-radius: 999px;
+      padding: 6px 10px;
+      cursor: pointer;
+    }
 
-/* title above paired cards */
-.htu-title{
-  text-align:center;
-  font-weight:700;
-  font-size:1.12rem;
-  line-height:1.35;
-  color:var(--htu-text);
+    .header-bottom {
+      margin-top: 10px;
+    }
 
-  margin:2px 0 -8px;
-  padding:10px 14px 8px;
+    nav {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
 
-  border-top:1px solid var(--htu-border);
-  border-left:1px solid var(--htu-border);
-  border-right:1px solid var(--htu-border);
-  background:var(--htu-bg);
-}
+    nav a {
+      text-decoration: none;
+      color: #374151;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(31,41,55,.12);
+      background: #fff;
+    }
 
-/* generic spacer */
-.htu-spacer{
-  grid-column:1 / -1;
-  width:100%;
-  height:14px;
-}
+    main {
+      width: min(1180px, calc(100% - 24px));
+      margin: 0 auto;
+      padding: 18px 0 28px;
+    }
 
-.htu-spacer--sm{ height:10px; }
-.htu-spacer--md{ height:18px; }
-.htu-spacer--lg{ height:28px; }
+    .card.howtouse {
+      background: #fff;
+      border: 1px solid rgba(31,41,55,.12);
+      padding: 18px 14px 24px;
+    }
 
-/* image card */
-.htu-card{
-  display:flex;
-  flex-direction:column;
-  min-width:0;
-  background:var(--htu-bg);
-}
+    .card.howtouse h1 {
+      margin: 0 0 8px;
+      font-size: 1.5rem;
+      text-align: center;
+    }
 
-/* media area */
-.htu-card__media{
-  border-left:1px solid var(--htu-border);
-  border-right:1px solid var(--htu-border);
-  overflow:hidden;
-  background:#fff;
-}
+    .muted {
+      margin: 0 0 18px;
+      color: #6b7280;
+      text-align: center;
+    }
 
-/* image itself */
-.htu-card__media img{
-  display:block;
-  width:100%;
-  height:100%;
-  object-fit:contain;
-  background:#fff;
-}
+    footer {
+      text-align: center;
+      color: #6b7280;
+      font-size: 0.92rem;
+      padding: 20px 12px 30px;
+    }
 
-/* body area */
-.htu-card__body{
-  border-left:1px solid var(--htu-border);
-  border-right:1px solid var(--htu-border);
-  border-bottom:1px solid var(--htu-border);
-  padding:10px 12px 12px;
-  background:var(--htu-bg);
-}
+    /* =========================
+       HowToUse layout
+       ========================= */
 
-/* empty body allowed */
-.htu-card__body:empty{
-  padding:0;
-  min-height:0;
-  border-bottom:1px solid var(--htu-border);
-}
+    .htu-groups{
+      display:grid;
+      grid-template-columns:repeat(2, minmax(0, 1fr));
+      gap:20px 18px;
+      align-items:start;
+    }
 
-/* paragraph text */
-.htu-body{
-  font-size:0.98rem;
-  line-height:1.6;
-  color:var(--htu-muted);
-  word-break:keep-all;
-  overflow-wrap:anywhere;
-}
+    @media (max-width: 900px){
+      .htu-groups{
+        grid-template-columns:1fr;
+        gap:18px;
+      }
+    }
 
-.htu-body + .htu-body{
-  margin-top:6px;
-}
+    .htu-item--full,
+    .htu-subject,
+    .htu-title,
+    .htu-remark{
+      grid-column:1 / -1;
+    }
 
-.htu-body--left{ text-align:left; }
-.htu-body--center{ text-align:center; }
-.htu-body--right{ text-align:right; }
+    .htu-subject{
+      text-align:center;
+      font-weight:800;
+      font-size:1.3rem;
+      line-height:1.35;
+      color:var(--htu-text);
+      margin:12px 0 4px;
+      padding:14px 16px 10px;
+      border-top:2px solid rgba(31,41,55,.85);
+      border-bottom:1px solid var(--htu-border-soft);
+      background:transparent;
+    }
 
-/* optional row grouping */
-.htu-body-row{
-  display:flex;
-  gap:12px;
-  align-items:flex-start;
-  justify-content:space-between;
-}
+    .htu-title{
+      text-align:center;
+      font-weight:700;
+      font-size:1.12rem;
+      line-height:1.35;
+      color:var(--htu-text);
+      margin:2px 0 -8px;
+      padding:10px 14px 8px;
+      border-top:1px solid var(--htu-border);
+      border-left:1px solid var(--htu-border);
+      border-right:1px solid var(--htu-border);
+      background:var(--htu-bg);
+    }
 
-.htu-body-row .htu-body{
-  flex:1 1 0;
-  margin-top:0;
-}
+    .htu-spacer{
+      grid-column:1 / -1;
+      width:100%;
+      height:14px;
+    }
 
-/* remark line */
-.htu-remark{
-  text-align:center;
-  font-size:0.98rem;
-  line-height:1.55;
-  color:var(--htu-remark);
+    .htu-spacer--sm{ height:10px; }
+    .htu-spacer--md{ height:18px; }
+    .htu-spacer--lg{ height:28px; }
 
-  margin:-8px 0 6px;
-  padding:10px 14px;
+    .htu-card{
+      display:flex;
+      flex-direction:column;
+      min-width:0;
+      background:var(--htu-bg);
+    }
 
-  border:1px solid var(--htu-border);
-  background:#fff;
-}
+    .htu-card.htu-item--full{
+      grid-column:1 / -1;
+    }
 
-/* full-width card (for 2:1 landscape items) */
-.htu-card.htu-item--full{
-  grid-column:1 / -1;
-}
+    .htu-card__media{
+      border-left:1px solid var(--htu-border);
+      border-right:1px solid var(--htu-border);
+      overflow:hidden;
+      background:#fff;
+    }
 
-/* optional subtle visual rhythm */
-.htu-card,
-.htu-title,
-.htu-remark{
-  box-shadow:none;
-  border-radius:0;
-}
+    .htu-card__media img{
+      display:block;
+      width:100%;
+      height:100%;
+      object-fit:contain;
+      background:#fff;
+    }
 
-/* if you want slightly tighter mobile spacing */
-@media (max-width: 900px){
-  .htu-subject{
-    font-size:1.18rem;
-    padding:12px 12px 8px;
-  }
+    .htu-card__body{
+      border-left:1px solid var(--htu-border);
+      border-right:1px solid var(--htu-border);
+      border-bottom:1px solid var(--htu-border);
+      padding:10px 12px 12px;
+      background:var(--htu-bg);
+    }
 
-  .htu-title{
-    font-size:1.04rem;
-    padding:9px 12px 7px;
-  }
+    .htu-card__body:empty{
+      padding:0;
+      min-height:0;
+      border-bottom:1px solid var(--htu-border);
+    }
 
-  .htu-card__body{
-    padding:9px 10px 10px;
-  }
+    .htu-card__title{
+      text-align:center;
+      font-weight:700;
+      font-size:1.02rem;
+      line-height:1.4;
+      color:var(--htu-text);
+      margin:0 0 8px;
+    }
 
-  .htu-body{
-    font-size:0.95rem;
-    line-height:1.55;
-  }
+    .htu-body{
+      font-size:0.98rem;
+      line-height:1.6;
+      color:var(--htu-muted);
+      word-break:keep-all;
+      overflow-wrap:anywhere;
+    }
 
-  .htu-remark{
-    font-size:0.95rem;
-    padding:9px 12px;
-  }
-}
+    .htu-body + .htu-body{
+      margin-top:6px;
+    }
+
+    .htu-body--left{ text-align:left; }
+    .htu-body--center{ text-align:center; }
+    .htu-body--right{ text-align:right; }
+
+    .htu-body-row{
+      display:flex;
+      gap:12px;
+      align-items:flex-start;
+      justify-content:space-between;
+    }
+
+    .htu-body-row .htu-body{
+      flex:1 1 0;
+      margin-top:0;
+    }
+
+    .htu-remark{
+      text-align:center;
+      font-size:0.98rem;
+      line-height:1.55;
+      color:var(--htu-remark);
+      margin:-8px 0 6px;
+      padding:10px 14px;
+      border:1px solid var(--htu-border);
+      background:#fff;
+    }
+
+    @media (max-width: 900px){
+      .htu-subject{
+        font-size:1.18rem;
+        padding:12px 12px 8px;
+      }
+
+      .htu-title{
+        font-size:1.04rem;
+        padding:9px 12px 7px;
+      }
+
+      .htu-card__body{
+        padding:9px 10px 10px;
+      }
+
+      .htu-body{
+        font-size:0.95rem;
+        line-height:1.55;
+      }
+
+      .htu-remark{
+        font-size:0.95rem;
+        padding:9px 12px;
+      }
+    }
   </style>
 </head>
 <body>
@@ -297,7 +372,7 @@
   function makeBodyLine(spec) {
     const s = resolveTextSpec(spec);
     const el = document.createElement("div");
-    el.className = `htu-body htu-body--${s.align || "left"}`;
+    el.className = "htu-body htu-body--" + (s.align || "left");
     el.textContent = tBySid(s.sid);
 
     if (s.dx && s.dx !== "0px") {
@@ -352,7 +427,7 @@
   function buildSpacer(item) {
     const el = document.createElement("div");
     el.className = "htu-spacer";
-    el.classList.add(`htu-spacer--${item.size || "md"}`);
+    el.classList.add("htu-spacer--" + (item.size || "md"));
     el.classList.add("htu-item--full");
     return el;
   }
@@ -411,11 +486,7 @@
   }
 
   function getGridEl() {
-    return (
-      document.getElementById("htu-grid") ||
-      document.querySelector("[data-htu-grid]") ||
-      document.querySelector(".htu-grid")
-    );
+    return document.getElementById("htuGallery");
   }
 
   function clearGrid(grid) {
@@ -425,7 +496,7 @@
   function renderItems(items) {
     const grid = getGridEl();
     if (!grid) {
-      console.error("HowToUse grid container not found. Use #htu-grid or .htu-grid or [data-htu-grid].");
+      console.error("HowToUse grid container not found: #htuGallery");
       return;
     }
 
@@ -440,23 +511,18 @@
         case "subject":
           node = buildSubject(item);
           break;
-
         case "title":
           node = buildTitle(item);
           break;
-
         case "remark":
           node = buildRemark(item);
           break;
-
         case "spacer":
           node = buildSpacer(item);
           break;
-
         case "card":
           node = buildCard(item);
           break;
-
         default:
           console.warn("Unknown howtouse item kind:", item.kind, item);
           break;
@@ -472,7 +538,7 @@
   async function loadItems() {
     const res = await fetch(DATA_URL, { cache: "no-store" });
     if (!res.ok) {
-      throw new Error(`Failed to load howtouse layout: ${res.status}`);
+      throw new Error("Failed to load howtouse layout: " + res.status);
     }
     return await res.json();
   }
@@ -480,7 +546,7 @@
   async function bootHowToUse() {
     try {
       const items = await loadItems();
-      console.log("HTU items loaded:", items.map(x => `${x.id}:${x.kind}`));
+      console.log("HTU items loaded:", items.map(x => x.id + ":" + x.kind));
       renderItems(items);
     } catch (err) {
       console.error(err);
@@ -488,6 +554,8 @@
   }
 
   document.addEventListener("DOMContentLoaded", function () {
+    const yearEl = document.getElementById("year");
+    if (yearEl) yearEl.textContent = String(new Date().getFullYear());
     bootHowToUse();
 
     document.addEventListener("mm:i18n-updated", function () {
