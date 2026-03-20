@@ -123,7 +123,9 @@
     "src": "/images/howtouse/htu_160a.jpg",
     "altSid": "htu_img_160_alt",
     "titleSid": "",
-    "bodySids": [],
+    "bodySids": [
+      { "sid": "htu_162_new", "align": "center" }
+    ],
     "ratio": "1 / 2",
     "fit": "contain"
   },
@@ -134,7 +136,7 @@
     "altSid": "htu_img_160_alt",
     "titleSid": "",
     "bodySids": [
-      { "sid": "htu_162_tab", "align": "center" }
+      { "sid": "htu_163_tab", "align": "center" }
     ],
     "ratio": "1 / 2",
     "fit": "contain"
