@@ -209,7 +209,9 @@
     "src": "/images/howtouse/htu_220b.jpg",
     "altSid": "htu_img_220_alt",
     "titleSid": "",
-    "bodySids": [],
+    "bodySids": [
+      "htu_223_lay"
+    ],
     "ratio": "1 / 2",
     "fit": "contain"
   },
