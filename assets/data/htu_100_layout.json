@@ -4,100 +4,172 @@
     "kind": "subject",
     "sid": "htu_100_und"
   },
+
   {
-    "id": "htu_card_110",
+    "id": "htu_card_110a",
     "kind": "card",
-    "src": "/images/howtouse/htu_110.jpg",
+    "src": "/images/howtouse/htu_110a.jpg",
     "altSid": "htu_img_110_alt",
     "titleSid": "htu_111_hpl",
-    "bodySids": [
-      { "sid": "htu_112_hom", "align": "center" }
-     ],
-    "ratio": "4 / 3",
+    "bodySids": [],
+    "ratio": "1 / 2",
     "fit": "contain"
   },
   {
-    "id": "htu_card_120",
+    "id": "htu_card_110b",
     "kind": "card",
-    "src": "/images/howtouse/htu_120.jpg",
+    "src": "/images/howtouse/htu_110b.jpg",
+    "altSid": "htu_img_110_alt",
+    "titleSid": "",
+    "bodySids": [
+      { "sid": "htu_112_hom", "align": "center" }
+    ],
+    "ratio": "1 / 2",
+    "fit": "contain"
+  },
+
+  {
+    "id": "htu_card_120a",
+    "kind": "card",
+    "src": "/images/howtouse/htu_120a.jpg",
     "altSid": "htu_img_120_alt",
     "titleSid": "htu_121_mai",
     "bodySids": [
       "htu_122_top",
       "htu_123_hom",
       "htu_124_sub",
-      "htu_125_str",
+      "htu_125_str"
+   ],
+    "ratio": "1 / 2",
+    "fit": "contain"
+  },
+  {
+    "id": "htu_card_120b",
+    "kind": "card",
+    "src": "/images/howtouse/htu_120b.jpg",
+    "altSid": "htu_img_120_alt",
+    "titleSid": "",
+    "bodySids": [
       "htu_132_sid",
       "htu_133_sho"
     ],
-    "ratio": "4 / 3",
+    "ratio": "1 / 2",
     "fit": "contain"
   },
+
 {
-  "id": "htu_card_150",
+  "id": "htu_card_150a",
   "kind": "card",
-  "src": "/images/howtouse/htu_150.jpg",
+  "src": "/images/howtouse/htu_150a.jpg",
   "altSid": "htu_img_150_alt",
   "titleSid": "htu_151_scr",
-  "bodyRows": [
-    [
-      { "sid": "htu_152_str", "align": "left",  "dx": "0px" },
-      { "sid": "htu_153_cur", "align": "right", "dx": "-0px" }
-    ],
-    [
-      { "sid": "htu_154_mix", "align": "center" }
-    ]
+  "bodySids": [
+    { "sid": "htu_152_str", "align": "center" }
   ],
-  "ratio": "4 / 3",
+  "ratio": "1 / 2",
   "fit": "contain"
 },
+{
+  "id": "htu_card_150b",
+  "kind": "card",
+  "src": "/images/howtouse/htu_150b.jpg",
+  "altSid": "htu_img_150_alt",
+  "titleSid": "",
+  "bodySids": [
+    { "sid": "htu_153_cur", "align": "center" }
+  ],
+  "ratio": "1 / 2",
+  "fit": "contain"
+},
+{
+  "id": "htu_remark_150",
+  "kind": "remark",
+  "sid": "htu_154_mix",
+  "align": "center"
+},
   {
-    "id": "htu_card_160",
+    "id": "htu_card_160a",
     "kind": "card",
-    "src": "/images/howtouse/htu_160.jpg",
+    "src": "/images/howtouse/htu_160a.jpg",
     "altSid": "htu_img_160_alt",
     "titleSid": "htu_161_set",
-    "bodySids": [
-      { "sid": "htu_162_tab", "align": "center" }
-     ],
-    "ratio": "4 / 3",
+    "bodySids": [ ],
+    "ratio": "1 / 2",
     "fit": "contain"
   },
+  {
+    "id": "htu_card_160b",
+    "kind": "card",
+    "src": "/images/howtouse/htu_160b.jpg",
+    "altSid": "htu_img_160_alt",
+    "titleSid": "",
+    "bodySids": [
+      { "sid": "htu_162_tab", "align": "center" }
+    ],
+    "ratio": "1 / 2",
+    "fit": "contain"
+  },
+
   {
     "id": "htu_spacer_1",
     "kind": "spacer",
     "size": "lg"
   },
+
   {
     "id": "htu_200",
     "kind": "subject",
     "sid": "htu_200_hpm"
   },
+
   {
-    "id": "htu_card_210",
+    "id": "htu_card_210a",
     "kind": "card",
-    "src": "/images/howtouse/htu_210.jpg",
+    "src": "/images/howtouse/htu_210a.jpg",
     "altSid": "htu_img_210_alt",
     "titleSid": "htu_211_per",
     "bodySids": [
-      "htu_212_aft",
-      "htu_213_you"
+      "htu_212_aft"
     ],
-    "ratio": "4 / 3",
+    "ratio": "1 / 2",
     "fit": "contain"
   },
   {
-    "id": "htu_card_220",
+    "id": "htu_card_210b",
     "kind": "card",
-    "src": "/images/howtouse/htu_220.jpg",
+    "src": "/images/howtouse/htu_210b.jpg",
+    "altSid": "htu_img_210_alt",
+    "titleSid": "",
+    "bodySids": [
+      "htu_213_you"
+    ],
+    "ratio": "1 / 2",
+    "fit": "contain"
+  },
+
+  {
+    "id": "htu_card_220a",
+    "kind": "card",
+    "src": "/images/howtouse/htu_220a.jpg",
     "altSid": "htu_img_220_alt",
     "titleSid": "htu_221_ind",
     "bodySids": [
       "htu_222_use"
     ],
-    "ratio": "4 / 3",
+    "ratio": "1 / 2",
     "fit": "contain"
   },
+  {
+    "id": "htu_card_220b",
+    "kind": "card",
+    "src": "/images/howtouse/htu_220b.jpg",
+    "altSid": "htu_img_220_alt",
+    "titleSid": "",
+    "bodySids": [],
+    "ratio": "1 / 2",
+    "fit": "contain"
+  },
+
   {
     "id": "htu_card_230",
     "kind": "card",
@@ -106,45 +178,70 @@
     "titleSid": "htu_231_out",
     "bodySids": [
       { "sid": "htu_232_wor", "align": "center" }
-   ],
-    "ratio": "4 / 3",
+    ],
+    "ratio": "2 / 1",
     "fit": "contain"
   },
-{
-  "id": "htu_card_240",
-  "kind": "card",
-  "src": "/images/howtouse/htu_240.jpg",
-  "altSid": "htu_img_240_alt",
-  "titleSid": "htu_241_rea",
-  "bodySids": [
-    "htu_242_bal",
-    "htu_243_ano",
-    "htu_244_bas",
-    "htu_245_nex"
-  ],
-  "ratio": "4 / 3",
-  "fit": "contain"
-},
+  {
+    "id": "htu_card_240a",
+    "kind": "card",
+    "src": "/images/howtouse/htu_240a.jpg",
+    "altSid": "htu_img_240_alt",
+    "titleSid": "htu_241_rea",
+    "bodySids": [
+      "htu_242_bal",
+      "htu_243_ano"
+    ],
+    "ratio": "1 / 2",
+    "fit": "contain"
+  },
+  {
+    "id": "htu_card_240b",
+    "kind": "card",
+    "src": "/images/howtouse/htu_240b.jpg",
+    "altSid": "htu_img_240_alt",
+    "titleSid": "",
+    "bodySids": [
+      "htu_244_bas",
+      "htu_245_nex"
+    ],
+    "ratio": "1 / 2",
+    "fit": "contain"
+  },
+
   {
     "id": "htu_spacer_2",
     "kind": "spacer",
     "size": "sm"
   },
+
   {
     "id": "htu_300_how",
     "kind": "subject",
     "sid": "htu_300_how"
   },
+
   {
-    "id": "htu_card_310",
+    "id": "htu_card_310a",
     "kind": "card",
-    "src": "/images/howtouse/htu_310.jpg",
+    "src": "/images/howtouse/htu_310a.jpg",
     "altSid": "htu_img_310_alt",
     "titleSid": "htu_311_arm",
     "bodySids": [],
-    "ratio": "4 / 3",
+    "ratio": "1 / 2",
     "fit": "contain"
   },
+  {
+    "id": "htu_card_310b",
+    "kind": "card",
+    "src": "/images/howtouse/htu_310b.jpg",
+    "altSid": "htu_img_310_alt",
+    "titleSid": "",
+    "bodySids": [],
+    "ratio": "1 / 2",
+    "fit": "contain"
+  },
+
   {
     "id": "htu_card_320",
     "kind": "card",
@@ -152,7 +249,7 @@
     "altSid": "htu_img_320_alt",
     "titleSid": "htu_321_arm",
     "bodySids": [],
-    "ratio": "4 / 3",
+    "ratio": "2 / 1",
     "fit": "contain"
   },
   {
@@ -162,87 +259,126 @@
     "altSid": "htu_img_330_alt",
     "titleSid": "",
     "bodySids": [
-      { "sid": "htu_332_tab", "align": "center" }
-    ],
-    "ratio": "4 / 3",
-    "fit": "contain"
-  },
-  {
-    "id": "htu_card_340",
-    "kind": "card",
-    "src": "/images/howtouse/htu_340.jpg",
-    "altSid": "htu_img_340_alt",
-    "titleSid": "",
-    "bodySids": [
+      { "sid": "htu_332_tab", "align": "center" },
       { "sid": "htu_342_tvs", "align": "center" }
     ],
-    "ratio": "4 / 3",
+    "ratio": "2 / 1",
     "fit": "contain"
   },
+
   {
     "id": "htu_400",
     "kind": "subject",
     "sid": "htu_400_imp"
   },
+
   {
-    "id": "htu_card_410",
+    "id": "htu_card_410a",
     "kind": "card",
-    "src": "/images/howtouse/htu_410_before.jpg",
+    "src": "/images/howtouse/htu_410_beforea.jpg",
     "altSid": "htu_img_410_alt",
     "titleSid": "htu_411_bef",
     "bodySids": [
-      "htu_412_act",
-      "htu_413_nea",
-      "htu_414_how"
+      "htu_412_act"
     ],
-    "ratio": "4 / 3",
+    "ratio": "1 / 2",
     "fit": "contain"
   },
   {
-    "id": "htu_card_420",
+    "id": "htu_card_410b",
     "kind": "card",
-    "src": "/images/howtouse/htu_420_after.jpg",
+    "src": "/images/howtouse/htu_410_beforeb.jpg",
+    "altSid": "htu_img_410_alt",
+    "titleSid": "",
+    "bodySids": [
+      "htu_413_nea",
+      "htu_414_how"
+    ],
+    "ratio": "1 / 2",
+    "fit": "contain"
+  },
+
+  {
+    "id": "htu_card_420a",
+    "kind": "card",
+    "src": "/images/howtouse/htu_420_aftera.jpg",
     "altSid": "htu_img_420_alt",
     "titleSid": "htu_421_aft",
     "bodySids": [
-      "htu_422_act",
+      "htu_422_act"
+    ],
+    "ratio": "1 / 2",
+    "fit": "contain"
+  },
+  {
+    "id": "htu_card_420b",
+    "kind": "card",
+    "src": "/images/howtouse/htu_420_afterb.jpg",
+    "altSid": "htu_img_420_alt",
+    "titleSid": "",
+    "bodySids": [
       "htu_423_dra",
       "htu_424_thn"
     ],
-    "ratio": "4 / 3",
+    "ratio": "1 / 2",
     "fit": "contain"
   },
+
   {
     "id": "htu_500",
     "kind": "subject",
     "sid": "htu_500_exa"
   },
+
   {
-    "id": "htu_card_510",
+    "id": "htu_card_510a",
     "kind": "card",
-    "src": "/images/howtouse/htu_510_horizontal.jpg",
+    "src": "/images/howtouse/htu_510_horizontala.jpg",
     "altSid": "htu_img_510_alt",
     "titleSid": "htu_511_hor",
     "bodySids": [
       "htu_512_1975",
-      "htu_513_1987",
-      "htu_514_2033"
-    ],
-    "ratio": "4 / 3",
+      "htu_513_1987"
+     ],
+    "ratio": "2 / 1",
     "fit": "contain"
   },
   {
-    "id": "htu_card_520",
+    "id": "htu_card_510b",
     "kind": "card",
-    "src": "/images/howtouse/htu_520_vertical.jpg",
+    "src": "/images/howtouse/htu_510_horizontalb.jpg",
+    "altSid": "htu_img_510_alt",
+    "titleSid": "",
+    "bodySids": [
+     "htu_514_2033"
+    ],
+    "ratio": "2 / 1",
+    "fit": "contain"
+  },
+
+  {
+    "id": "htu_card_520a",
+    "kind": "card",
+    "src": "/images/howtouse/htu_520_verticala.jpg",
     "altSid": "htu_img_520_alt",
     "titleSid": "htu_521_ver",
     "bodySids": [
       "htu_522_2150",
-      "htu_523_2141",
+      "htu_523_2141"
+    ],
+    "ratio": "1 / 2",
+    "fit": "contain"
+  },
+  {
+    "id": "htu_card_520b",
+    "kind": "card",
+    "src": "/images/howtouse/htu_520_verticalb.jpg",
+    "altSid": "htu_img_520_alt",
+    "titleSid": "",
+    "bodySids": [
       "htu_524_2137"
     ],
-    "ratio": "4 / 3",
+    "ratio": "1 / 2",
     "fit": "contain"
   }
 ]
