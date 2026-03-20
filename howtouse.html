@@ -125,19 +125,21 @@
        HowToUse layout
        ========================= */
 
-    .htu-groups{
-      display:grid;
-      grid-template-columns:repeat(2, minmax(0, 1fr));
-      gap:20px 18px;
-      align-items:start;
-    }
+.htu-steps,
+.htu-groups{
+  display:grid;
+  grid-template-columns:repeat(2, minmax(0, 1fr));
+  gap:20px 18px;
+  align-items:start;
+}
 
-    @media (max-width: 900px){
-      .htu-groups{
-        grid-template-columns:1fr;
-        gap:18px;
-      }
-    }
+@media (max-width: 900px){
+  .htu-steps,
+  .htu-groups{
+    grid-template-columns:1fr;
+    gap:18px;
+  }
+}
 
     .htu-item--full,
     .htu-subject,
@@ -346,6 +348,7 @@
   © <span id="year"></span> Measure Master. All rights reserved.
 </footer>
 
+<script src="/assets/js/i18n.js?v=mm_i18n_r9"></script>
 <script>
 (function () {
   const STEP_DATA_URL = "/assets/data/htu_000_layout.json";
