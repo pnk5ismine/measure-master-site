@@ -491,5 +491,85 @@
     ],
     "ratio": "1 / 2",
     "fit": "contain"
-  }
+  },
+
+{
+  "id": "htu_600",
+  "kind": "subject",
+  "sid": "htu_600_aut"
+},
+
+{
+  "id": "htu_title_610",
+  "kind": "title",
+  "sid": "htu_611_pla",
+  "align": "center",
+  "fullWidth": true
+},
+{
+  "id": "htu_card_610",
+  "kind": "card",
+  "src": "/images/howtouse/htu_610_autoplace.jpg",
+  "altSid": "htu_img_610_alt",
+  "titleSid": "",
+  "bodySids": [
+    "htu_612_non",
+    "htu_613_usi"
+  ],
+  "ratio": "2 / 1",
+  "fit": "contain",
+  "fullWidth": true
+},
+
+{
+  "id": "htu_title_620",
+  "kind": "title",
+  "sid": "htu_621_non",
+  "align": "center",
+  "fullWidth": true
+},
+{
+  "id": "htu_card_620",
+  "kind": "card",
+  "src": "/images/howtouse/htu_620_autodraw.jpg",
+  "altSid": "htu_img_620_alt",
+  "titleSid": "",
+  "bodySids": [
+    "htu_622_whn",
+    "htu_623_dim",
+    "htu_624_siz"
+  ],
+  "ratio": "2 / 1",
+  "fit": "contain",
+  "fullWidth": true
+},
+
+{
+  "id": "htu_remark_630",
+  "kind": "remark",
+  "sid": "htu_631_con",
+  "align": "center",
+  "fullWidth": true
+},
+{
+  "id": "htu_remark_632",
+  "kind": "remark",
+  "sid": "htu_632_wor",
+  "align": "center",
+  "fullWidth": true
+},
+{
+  "id": "htu_remark_633",
+  "kind": "remark",
+  "sid": "htu_633_ava",
+  "align": "center",
+  "fullWidth": true
+},
+{
+  "id": "htu_remark_634",
+  "kind": "remark",
+  "sid": "htu_634_req",
+  "align": "center",
+  "fullWidth": true
+}
 ]
