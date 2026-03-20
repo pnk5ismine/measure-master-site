@@ -489,37 +489,6 @@ body{
   const STEP_DATA_URL = "/assets/data/htu_000_layout.json";
   const GALLERY_DATA_URL = "/assets/data/htu_100_layout.json";
 
-function buildStepTitle(item) {
-  const el = document.createElement("div");
-  el.className = "htu-step-title";
-  el.textContent = tBySid(item.sid);
-  return el;
-}
-
-function buildStepBody(item) {
-  const row = document.createElement("div");
-  row.className = "htu-step-body";
-
-  const num = document.createElement("div");
-  num.className = "htu-step-num";
-  num.textContent = (item.num != null ? item.num + "." : "");
-
-  const text = document.createElement("div");
-  text.className = "htu-step-text";
-  text.textContent = tBySid(item.sid);
-
-  row.appendChild(num);
-  row.appendChild(text);
-  return row;
-}
-
-function buildStepNote(item) {
-  const el = document.createElement("div");
-  el.className = "htu-step-note";
-  el.textContent = tBySid(item.sid);
-  return el;
-}
-
   function tBySid(sid) {
     if (!sid) return "";
     if (window.mmI18n && typeof window.mmI18n.t === "function") {
@@ -655,6 +624,56 @@ function buildStepNote(item) {
     return card;
   }
 
+  function buildStepTitle(item) {
+    const el = document.createElement("div");
+    el.className = "htu-step-title";
+    el.textContent = tBySid(item.sid);
+    return el;
+  }
+
+  function buildStepBody(item) {
+    const row = document.createElement("div");
+    row.className = "htu-step-body";
+
+    const num = document.createElement("div");
+    num.className = "htu-step-num";
+    num.textContent = (item.num != null ? item.num + "." : "");
+
+    const text = document.createElement("div");
+    text.className = "htu-step-text";
+    text.textContent = tBySid(item.sid);
+
+    row.appendChild(num);
+    row.appendChild(text);
+    return row;
+  }
+
+  function buildStepNote(item) {
+    const el = document.createElement("div");
+    el.className = "htu-step-note";
+    el.textContent = tBySid(item.sid);
+    return el;
+  }
+
+  function buildStepImage(stepIndex) {
+    const wrap = document.createElement("div");
+    wrap.className = "htu-step-image htu-item--full";
+
+    const img = document.createElement("img");
+    img.src = "/images/howtouse/howtouse_step" + stepIndex + ".jpg";
+    img.alt = "How to use step " + stepIndex;
+    img.loading = "lazy";
+    img.decoding = "async";
+
+    img.addEventListener("error", function () {
+      console.warn("Step image not found:", img.src);
+      wrap.style.display = "none";
+    });
+
+    wrap.appendChild(img);
+    return wrap;
+  }
+
   function renderItemsTo(containerId, items) {
     const grid = document.getElementById(containerId);
     if (!grid) {
@@ -664,51 +683,61 @@ function buildStepNote(item) {
 
     grid.innerHTML = "";
 
+    let stepTitleIndex = 0;
+
     items.forEach(item => {
       if (!item || !item.kind) return;
 
       let node = null;
 
-switch (item.kind) {
-  case "subject":
-    node = buildSubject(item);
-    break;
+      switch (item.kind) {
+        case "subject":
+          node = buildSubject(item);
+          break;
 
-  case "title":
-    node = buildTitle(item);
-    break;
+        case "title":
+          node = buildTitle(item);
+          break;
 
-  case "remark":
-    node = buildRemark(item);
-    break;
+        case "remark":
+          node = buildRemark(item);
+          break;
 
-  case "spacer":
-    node = buildSpacer(item);
-    break;
+        case "spacer":
+          node = buildSpacer(item);
+          break;
 
-  case "card":
-    node = buildCard(item);
-    break;
+        case "card":
+          node = buildCard(item);
+          break;
 
-  case "step_title":
-    node = buildStepTitle(item);
-    break;
+        case "step_title":
+          node = buildStepTitle(item);
+          break;
 
-  case "step_body":
-    node = buildStepBody(item);
-    break;
+        case "step_body":
+          node = buildStepBody(item);
+          break;
 
-  case "step_note":
-    node = buildStepNote(item);
-    break;
+        case "step_note":
+          node = buildStepNote(item);
+          break;
 
-  default:
-    console.warn("Unknown howtouse item kind:", item.kind, item);
-    break;
-}
+        default:
+          console.warn("Unknown howtouse item kind:", item.kind, item);
+          break;
+      }
+
       if (node) {
         node.setAttribute("data-htu-id", item.id || "");
         grid.appendChild(node);
+
+        if (containerId === "htuSteps" && item.kind === "step_title") {
+          stepTitleIndex += 1;
+          const imgNode = buildStepImage(stepTitleIndex);
+          imgNode.setAttribute("data-step-image", String(stepTitleIndex));
+          grid.appendChild(imgNode);
+        }
       }
     });
   }
@@ -733,7 +762,6 @@ switch (item.kind) {
 
       renderItemsTo("htuSteps", stepItems);
       renderItemsTo("htuGallery", galleryItems);
-
     } catch (err) {
       console.error(err);
 
@@ -741,31 +769,18 @@ switch (item.kind) {
       const gallery = document.getElementById("htuGallery");
 
       if (steps) {
-        steps.innerHTML = '<div class="htu-remark htu-item--full">Failed to load Phase 2 layout.</div>';
+        steps.innerHTML = '<div class="htu-step-note">Failed to load Phase 2 layout.</div>';
       }
       if (gallery) {
-        gallery.innerHTML = '<div class="htu-remark htu-item--full">Failed to load Phase 3 layout.</div>';
+        gallery.innerHTML = '<div class="htu-remark">Failed to load Phase 3 layout.</div>';
       }
     }
   }
 
-function buildStepImage(stepIndex) {
-  const el = document.createElement("div");
-  el.className = "htu-step-image";
-
-  const img = document.createElement("img");
-  img.src = "/images/howtouse/howtouse_step" + stepIndex + ".jpg";
-  img.alt = "How to use step " + stepIndex;
-  img.loading = "lazy";
-  img.decoding = "async";
-
-  el.appendChild(img);
-  return el;
-}
-
   document.addEventListener("DOMContentLoaded", function () {
     const yearEl = document.getElementById("year");
     if (yearEl) yearEl.textContent = String(new Date().getFullYear());
+
     bootHowToUse();
 
     document.addEventListener("mm:i18n-updated", function () {
