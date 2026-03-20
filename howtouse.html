@@ -272,374 +272,227 @@
 </footer>
 
 <script>
-  document.addEventListener('DOMContentLoaded', function () {
-    var y = document.getElementById('year');
-    if (y) y.textContent = new Date().getFullYear();
-  });
-</script>
+(function () {
+  const DATA_URL = "/assets/data/howtouse_layout.json";
 
-<script>
-(function(){
-  const URLS = {
-    phase2Layout: "/assets/data/htu_000_layout.json",
-    phase3Layout: "/assets/data/htu_100_layout.json",
-    strings: (lang) => `/assets/data/strings_${lang}.json`
-  };
+  function tBySid(sid) {
+    if (!sid) return "";
+    if (window.mmI18n && typeof window.mmI18n.t === "function") {
+      return window.mmI18n.t(sid);
+    }
+    return sid;
+  }
 
-  function applyLangToLinks(){
-    const lang = getLang();
-    document.querySelectorAll('nav a[href^="/"]').forEach(a => {
-      const href = a.getAttribute("href");
-      if (!href) return;
-      const u = new URL(href, location.origin);
-      u.searchParams.set("lang", lang);
-      a.setAttribute("href", u.pathname + u.search);
+  function resolveTextSpec(spec) {
+    if (typeof spec === "string") {
+      return { sid: spec, align: "left", dx: "0px" };
+    }
+    return {
+      sid: spec?.sid || "",
+      align: spec?.align || "left",
+      dx: spec?.dx || "0px"
+    };
+  }
+
+  function makeBodyLine(spec) {
+    const s = resolveTextSpec(spec);
+    const el = document.createElement("div");
+    el.className = `htu-body htu-body--${s.align || "left"}`;
+    el.textContent = tBySid(s.sid);
+
+    if (s.dx && s.dx !== "0px") {
+      el.style.position = "relative";
+      el.style.left = s.dx;
+    }
+    return el;
+  }
+
+  function makeBodyRow(rowSpecs) {
+    const row = document.createElement("div");
+    row.className = "htu-body-row";
+    (rowSpecs || []).forEach(spec => {
+      row.appendChild(makeBodyLine(spec));
     });
+    return row;
   }
 
-  function getLang(){
-    const u = new URL(location.href);
-    const q = (u.searchParams.get("lang") || "").toLowerCase();
-    const saved = (localStorage.getItem("mm_lang") || "").toLowerCase();
-    const lang = (q || saved || "en");
-    return (lang === "kr") ? "ko" : lang;
+  function buildSubject(item) {
+    const el = document.createElement("div");
+    el.className = "htu-subject";
+    el.textContent = tBySid(item.sid);
+    return el;
   }
 
-  function setLang(lang){
-    lang = (String(lang || "").toLowerCase() === "kr") ? "ko" : String(lang || "").toLowerCase();
-    localStorage.setItem("mm_lang", lang);
+  function buildTitle(item) {
+    const el = document.createElement("div");
+    el.className = "htu-title";
+    if (item.fullWidth) el.classList.add("htu-item--full");
+    el.textContent = tBySid(item.sid);
 
-    const u = new URL(location.href);
-    u.searchParams.set("lang", lang);
-    history.replaceState(null, "", u.toString());
+    if (item.align === "left") el.style.textAlign = "left";
+    if (item.align === "right") el.style.textAlign = "right";
+    if (item.align === "center") el.style.textAlign = "center";
+
+    return el;
   }
 
-  function t(strings, sid){
-    return (strings && sid && strings[sid]) ? strings[sid] : (sid || "");
+  function buildRemark(item) {
+    const el = document.createElement("div");
+    el.className = "htu-remark";
+    if (item.fullWidth !== false) el.classList.add("htu-item--full");
+    el.textContent = tBySid(item.sid);
+
+    if (item.align === "left") el.style.textAlign = "left";
+    if (item.align === "right") el.style.textAlign = "right";
+    if (item.align === "center") el.style.textAlign = "center";
+
+    return el;
   }
 
-  function setLangButtonsActive(lang){
-    document.querySelectorAll("[data-lang-btn]").forEach(btn => {
-      btn.classList.toggle("active", btn.getAttribute("data-lang-btn") === lang);
-    });
+  function buildSpacer(item) {
+    const el = document.createElement("div");
+    el.className = "htu-spacer";
+    el.classList.add(`htu-spacer--${item.size || "md"}`);
+    el.classList.add("htu-item--full");
+    return el;
   }
 
-  function groupIntoSteps(rows){
-    const steps = [];
-    let cur = null;
+  function buildCard(item) {
+    const card = document.createElement("article");
+    card.className = "htu-card";
+    if (item.fullWidth) card.classList.add("htu-item--full");
 
-    for (const r of rows){
-      if (!r || typeof r !== "object") continue;
-      const kind = String(r.kind ?? "").trim();
+    const media = document.createElement("div");
+    media.className = "htu-card__media";
 
-      if (kind === "step_title"){
-        cur = { sid: r.sid ?? r.id ?? "", id: r.id ?? "", items: [] };
-        steps.push(cur);
-        continue;
-      }
-
-      if (!cur){
-        cur = { sid: "htu_000", id: "htu_000", items: [] };
-        steps.push(cur);
-      }
-
-      cur.items.push({
-        kind,
-        sid: r.sid ?? r.id ?? "",
-        num: r.num
-      });
-    }
-    return steps;
-  }
-
-  function renderPhase2(steps, strings){
-    const host = document.getElementById("htuSteps");
-    if (!host) return;
-
-    host.innerHTML = "";
-
-    for (const st of steps){
-      const box = document.createElement("section");
-      box.className = "htu-step";
-
-      const h2 = document.createElement("h2");
-      h2.className = "htu-step-title";
-      h2.appendChild(document.createTextNode(t(strings, st.sid)));
-      box.appendChild(h2);
-
-      let ol = null;
-      const flushOl = () => {
-        if (ol){
-          box.appendChild(ol);
-          ol = null;
-        }
-      };
-
-      for (const it of st.items){
-        if (it.kind === "step_body"){
-          if (!ol) ol = document.createElement("ol");
-
-          const li = document.createElement("li");
-          if (typeof it.num === "number") li.value = it.num;
-          li.textContent = t(strings, it.sid);
-          ol.appendChild(li);
-        } else {
-          flushOl();
-          const p = document.createElement("p");
-          p.className = "htu-note";
-          p.textContent = t(strings, it.sid);
-          box.appendChild(p);
-        }
-      }
-      flushOl();
-
-      const stepNo = steps.indexOf(st) + 1;
-
-      if (stepNo != null) {
-        const imgBox = document.createElement("div");
-        imgBox.className = "htu-step-image";
-
-        const imgUrl = `/images/howtouse/howtouse_step${stepNo}.jpg`;
-
-        const a = document.createElement("a");
-        a.href = imgUrl;
-        a.target = "_blank";
-        a.rel = "noopener";
-
-        const img = document.createElement("img");
-        img.src = imgUrl;
-        img.alt = `HowToUse Step ${stepNo}`;
-        img.loading = "lazy";
-
-        a.appendChild(img);
-        imgBox.appendChild(a);
-        box.appendChild(imgBox);
-      }
-
-      host.appendChild(box);
-    }
-  }
-
-function renderPhase3(layout, strings){
-  const host = document.getElementById("htuGallery");
-  if (!host) return;
-
-  host.innerHTML = "";
-
-  let grid = null;
-  const flushGrid = () => {
-    if (grid){
-      host.appendChild(grid);
-      grid = null;
-    }
-  };
-
-  for (const node of layout){
-    if (!node || typeof node !== "object") continue;
-
-    if (node.kind === "subject"){
-      flushGrid();
-      const band = document.createElement("div");
-      band.className = "htu-subject";
-      band.textContent = t(strings, node.sid);
-      host.appendChild(band);
-      continue;
+    if (item.ratio) {
+      media.style.aspectRatio = item.ratio;
     }
 
-    if (node.kind === "spacer"){
-      flushGrid();
-      const sp = document.createElement("div");
-      sp.className = `htu-spacer ${(node.size || "md")}`;
-      host.appendChild(sp);
-      continue;
+    const img = document.createElement("img");
+    img.src = item.src || "";
+    img.alt = tBySid(item.altSid || "");
+    img.loading = "lazy";
+    img.decoding = "async";
+    img.style.objectFit = item.fit || "contain";
+
+    media.appendChild(img);
+    card.appendChild(media);
+
+    const hasTitle = !!(item.titleSid && String(item.titleSid).trim());
+    const hasBodySids = Array.isArray(item.bodySids) && item.bodySids.length > 0;
+    const hasBodyRows = Array.isArray(item.bodyRows) && item.bodyRows.length > 0;
+
+    if (hasTitle || hasBodySids || hasBodyRows) {
+      const body = document.createElement("div");
+      body.className = "htu-card__body";
+
+      if (hasTitle) {
+        const title = document.createElement("div");
+        title.className = "htu-card__title";
+        title.textContent = tBySid(item.titleSid);
+        body.appendChild(title);
+      }
+
+      if (hasBodyRows) {
+        item.bodyRows.forEach(rowSpecs => {
+          body.appendChild(makeBodyRow(rowSpecs));
+        });
+      } else if (hasBodySids) {
+        item.bodySids.forEach(spec => {
+          body.appendChild(makeBodyLine(spec));
+        });
+      }
+
+      card.appendChild(body);
     }
 
-    if (node.kind === "card"){
-      if (!grid){
-        grid = document.createElement("div");
-        grid.className = "htu-grid";
-      }
-
-      const card = document.createElement("article");
-      card.className = "htu-card";
-
-      // title
-      if (node.titleSid){
-        const copyTop = document.createElement("div");
-        copyTop.className = "htu-copy-top";
-
-        const h3 = document.createElement("h3");
-        h3.className = "htu-copy-title";
-        h3.textContent = t(strings, node.titleSid);
-
-        copyTop.appendChild(h3);
-        card.appendChild(copyTop);
-      }
-
-      // image
-      const thumb = document.createElement("a");
-      thumb.className = "htu-thumb";
-      thumb.href = node.src;
-      thumb.target = "_blank";
-      thumb.rel = "noopener";
-
-      if (node.ratio) {
-        thumb.style.setProperty("--thumb-ratio", node.ratio);
-      }
-      if (node.fit) {
-        thumb.style.setProperty("--thumb-fit", node.fit);
-      }
-
-      const img = document.createElement("img");
-      img.src = node.src;
-      img.alt = t(strings, node.altSid);
-      img.loading = "lazy";
-      thumb.appendChild(img);
-
-      card.appendChild(thumb);
-
-      const hasBody =
-        (Array.isArray(node.bodySids) && node.bodySids.length) ||
-        (Array.isArray(node.bodyRows) && node.bodyRows.length) ||
-        (Array.isArray(node.listSids) && node.listSids.length);
-
-      if (hasBody){
-        const copy = document.createElement("div");
-        copy.className = "htu-copy";
-
-        // bodySids
-        if (Array.isArray(node.bodySids) && node.bodySids.length){
-          for (const item of node.bodySids){
-            const p = document.createElement("p");
-            p.className = "htu-copy-body";
-
-            if (typeof item === "string") {
-              p.textContent = t(strings, item);
-            } else if (item && typeof item === "object") {
-              p.textContent = t(strings, item.sid);
-
-              if (item.align) p.style.textAlign = item.align;
-              if (item.dx) {
-                p.style.position = "relative";
-                p.style.left = item.dx;
-              }
-              if (item.className) p.classList.add(item.className);
-            }
-
-            copy.appendChild(p);
-          }
-        }
-
-        // bodyRows
-        if (Array.isArray(node.bodyRows) && node.bodyRows.length){
-          const rowsWrap = document.createElement("div");
-          rowsWrap.className = "htu-copy-rows";
-
-          for (const row of node.bodyRows){
-            const rowDiv = document.createElement("div");
-            rowDiv.className = "htu-copy-row " + (row.length === 1 ? "cols-1" : "cols-2");
-
-            for (const item of row){
-              const p = document.createElement("p");
-              p.className = "htu-copy-body";
-
-              if (typeof item === "string") {
-                p.textContent = t(strings, item);
-              } else if (item && typeof item === "object") {
-                p.textContent = t(strings, item.sid);
-
-                if (item.align) p.style.textAlign = item.align;
-                if (item.dx) {
-                  p.style.position = "relative";
-                  p.style.left = item.dx;
-                }
-                if (item.className) p.classList.add(item.className);
-              }
-
-              rowDiv.appendChild(p);
-            }
-
-            rowsWrap.appendChild(rowDiv);
-          }
-
-          copy.appendChild(rowsWrap);
-        }
-
-        // listSids
-        if (Array.isArray(node.listSids) && node.listSids.length){
-          const ul = document.createElement("ul");
-          ul.className = "htu-copy-list";
-
-          for (const sid of node.listSids){
-            const li = document.createElement("li");
-            li.textContent = t(strings, sid);
-            ul.appendChild(li);
-          }
-
-          copy.appendChild(ul);
-        }
-
-        card.appendChild(copy);
-      }
-
-      grid.appendChild(card);
-    }
+    return card;
   }
 
-  flushGrid();
-}
+  function getGridEl() {
+    return (
+      document.getElementById("htu-grid") ||
+      document.querySelector("[data-htu-grid]") ||
+      document.querySelector(".htu-grid")
+    );
+  }
 
+  function clearGrid(grid) {
+    while (grid.firstChild) grid.removeChild(grid.firstChild);
+  }
 
-  function applyNavI18n(strings){
-    document.querySelectorAll("[data-i18n]").forEach(el=>{
-      const key = el.getAttribute("data-i18n");
-      if (key && strings[key]) {
-        el.textContent = strings[key];
+  function renderItems(items) {
+    const grid = getGridEl();
+    if (!grid) {
+      console.error("HowToUse grid container not found. Use #htu-grid or .htu-grid or [data-htu-grid].");
+      return;
+    }
+
+    clearGrid(grid);
+
+    items.forEach(item => {
+      if (!item || !item.kind) return;
+
+      let node = null;
+
+      switch (item.kind) {
+        case "subject":
+          node = buildSubject(item);
+          break;
+
+        case "title":
+          node = buildTitle(item);
+          break;
+
+        case "remark":
+          node = buildRemark(item);
+          break;
+
+        case "spacer":
+          node = buildSpacer(item);
+          break;
+
+        case "card":
+          node = buildCard(item);
+          break;
+
+        default:
+          console.warn("Unknown howtouse item kind:", item.kind, item);
+          break;
+      }
+
+      if (node) {
+        node.setAttribute("data-htu-id", item.id || "");
+        grid.appendChild(node);
       }
     });
   }
 
-  async function loadAllAndRender(){
-    const lang = getLang();
-    setLang(lang);
-    applyLangToLinks();
-    setLangButtonsActive(lang);
-
-    const [p2Res, p3Res, strRes] = await Promise.all([
-      fetch(URLS.phase2Layout, { cache: "no-store" }),
-      fetch(URLS.phase3Layout, { cache: "no-store" }),
-      fetch(URLS.strings(lang), { cache: "no-store" })
-    ]);
-
-    if (!p2Res.ok) throw new Error("Phase2 layout HTTP " + p2Res.status);
-    if (!p3Res.ok) throw new Error("Phase3 layout HTTP " + p3Res.status);
-    if (!strRes.ok) throw new Error("Strings HTTP " + strRes.status);
-
-    const [p2Layout, p3Layout, strings] = await Promise.all([
-      p2Res.json(), p3Res.json(), strRes.json()
-    ]);
-
-    applyNavI18n(strings);
-
-    if (Array.isArray(p2Layout)){
-      const steps = groupIntoSteps(p2Layout);
-      renderPhase2(steps, strings);
+  async function loadItems() {
+    const res = await fetch(DATA_URL, { cache: "no-store" });
+    if (!res.ok) {
+      throw new Error(`Failed to load howtouse layout: ${res.status}`);
     }
-    if (Array.isArray(p3Layout)){
-      renderPhase3(p3Layout, strings);
+    return await res.json();
+  }
+
+  async function bootHowToUse() {
+    try {
+      const items = await loadItems();
+      console.log("HTU items loaded:", items.map(x => `${x.id}:${x.kind}`));
+      renderItems(items);
+    } catch (err) {
+      console.error(err);
     }
   }
 
-  document.addEventListener("DOMContentLoaded", () => {
-    document.querySelectorAll("[data-lang-btn]").forEach(btn => {
-      btn.addEventListener("click", () => {
-        const lang = btn.getAttribute("data-lang-btn");
-        setLang(lang);
-        loadAllAndRender().catch(e => console.warn("[HTU] render failed:", e));
-      });
-    });
+  document.addEventListener("DOMContentLoaded", function () {
+    bootHowToUse();
 
-    loadAllAndRender().catch(e => console.warn("[HTU] render failed:", e));
+    document.addEventListener("mm:i18n-updated", function () {
+      bootHowToUse();
+    });
   });
 })();
 </script>
