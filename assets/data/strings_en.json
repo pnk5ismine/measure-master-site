@@ -194,11 +194,24 @@
 "htu_523_2141": "Estimated 2141mm   -  9mm  0.4% minus  by measuring with double rectangle.",
 "htu_524_2137": "Estimated 2137mm   - 13mm  0.6% minus  by measuring with single rectangle.",
 
-"htu_600_exa": "Auto Reference Square Generation",
-"htu_img_510_alt": "Horizontal",
-"htu_511_hor": "Horizontal Length of a window glass",
-"htu_512_1975": "Actual width of the window glass = 1975mm",
-"htu_513_1987": "Estimated 1987mm   + 12mm  0.6% plus  by measuring with double rectangle.",
+  "htu_600_aut": "Auto Reference Square Generation",
+
+  "htu_img_610_alt": "Auto Square",
+  "htu_611_pla": "Automatic Placement.",
+  "htu_612_non": "There is no need to manually place a reference square before taking a photo.",
+  "htu_613_usi": "Using Measure Master’s built-in AR camera, a perspective square is automatically generated and embedded into the image at the moment of capture.",
+
+  "htu_img_620_alt": "Auto Drawing",
+  "htu_621_non": "Automatic Drawing.",
+  "htu_622_whn": "When the image is loaded in the RightEye page, the reference square can be instantly applied by tapping the trapezoid icon,",
+  "htu_623_dim": "and its real-world dimensions (W, H) are automatically filled in.",
+  "htu_624_siz": "The size of the reference square can also be selected by the user in Settings.",
+
+  "htu_631_con": "Constraints.",
+  "htu_632_wor": "Works only with images captured using Measure Master’s built-in AR camera (images from other AR camera apps are not supported).",
+  "htu_633_ava": "Available only on the RightEye page.",
+  "htu_634_req": "Requires an ARCore-supported device.",
+
   "rvw_lst1": "No.",
   "rvw_lst2": "Nickname",
   "rvw_lst3": "Title",
