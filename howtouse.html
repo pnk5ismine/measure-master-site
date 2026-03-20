@@ -147,15 +147,18 @@
   }
 }
 //phase 2
+.htu-subject,
 .htu-step-title{
   grid-column:1 / -1;
-  margin:10px 0 2px;
-  padding:12px 14px 8px;
-  text-align:left;
-  font-weight:800;
-  font-size:1.12rem;
+
+  font-weight:900;           /* 더 굵게 */
+  font-size:1.45rem;         /* 기존보다 확대 */
   line-height:1.4;
   color:var(--htu-text);
+
+  margin:14px 0 6px;
+  padding:14px 16px 10px;
+
   border-top:2px solid rgba(31,41,55,.85);
   border-bottom:1px solid var(--htu-border-soft);
   background:transparent;
@@ -166,10 +169,10 @@
   display:flex;
   align-items:flex-start;
   gap:10px;
-  padding:2px 2px;
+  padding:1px 2px;
   color:var(--htu-muted);
   font-size:0.98rem;
-  line-height:1.65;
+  line-height:1.15;
 }
 
 .htu-step-num{
@@ -214,25 +217,27 @@
 }
 
 //phase 3
+.htu-subject{
+  grid-column:1 / -1;
+
+  font-weight:900;           /* 더 굵게 */
+  font-size:1.45rem;         /* 기존보다 확대 */
+  line-height:1.4;
+  color:var(--htu-text);
+
+  margin:14px 0 6px;
+  padding:14px 16px 10px;
+
+  border-top:2px solid rgba(31,41,55,.85);
+  border-bottom:1px solid var(--htu-border-soft);
+  background:transparent;
+}
 
     .htu-item--full,
     .htu-subject,
     .htu-title,
     .htu-remark{
       grid-column:1 / -1;
-    }
-
-    .htu-subject{
-      text-align:center;
-      font-weight:800;
-      font-size:1.3rem;
-      line-height:1.35;
-      color:var(--htu-text);
-      margin:12px 0 4px;
-      padding:14px 16px 10px;
-      border-top:2px solid rgba(31,41,55,.85);
-      border-bottom:1px solid var(--htu-border-soft);
-      background:transparent;
     }
 
     .htu-title{
@@ -248,6 +253,7 @@
       border-right:1px solid var(--htu-border);
       background:var(--htu-bg);
     }
+
 
     .htu-spacer{
       grid-column:1 / -1;
@@ -347,12 +353,13 @@
       background:#fff;
     }
 
-    @media (max-width: 900px){
-      .htu-subject{
-        font-size:1.18rem;
-        padding:12px 12px 8px;
-      }
-
+@media (max-width: 900px){
+  .htu-subject,
+  .htu-step-title{
+    font-size:1.28rem;
+    padding:12px 12px 8px;
+  }
+}
       .htu-title{
         font-size:1.04rem;
         padding:9px 12px 7px;
