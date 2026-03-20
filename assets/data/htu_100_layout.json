@@ -435,7 +435,7 @@
   {
     "id": "htu_card_510a",
     "kind": "card",
-    "src": "/images/howtouse/htu_510_horizontala.jpg",
+    "src": "/images/howtouse/htu_510d_horizontala.jpg",
     "altSid": "htu_img_510_alt",
     "titleSid": "",
     "bodySids": [
@@ -449,7 +449,7 @@
   {
     "id": "htu_card_510b",
     "kind": "card",
-    "src": "/images/howtouse/htu_510_horizontalb.jpg",
+    "src": "/images/howtouse/htu_510s_horizontalb.jpg",
     "altSid": "htu_img_510_alt",
     "titleSid": "",
     "bodySids": [
@@ -470,7 +470,7 @@
   {
     "id": "htu_card_520a",
     "kind": "card",
-    "src": "/images/howtouse/htu_520_verticala.jpg",
+    "src": "/images/howtouse/htu_520d_verticala.jpg",
     "altSid": "htu_img_520_alt",
     "titleSid": "",
     "bodySids": [
@@ -483,7 +483,7 @@
   {
     "id": "htu_card_520b",
     "kind": "card",
-    "src": "/images/howtouse/htu_520_verticalb.jpg",
+    "src": "/images/howtouse/htu_520s_verticalb.jpg",
     "altSid": "htu_img_520_alt",
     "titleSid": "",
     "bodySids": [
