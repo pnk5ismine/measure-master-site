@@ -552,23 +552,14 @@
   "fullWidth": true
 },
 {
-  "id": "htu_remark_632",
+  "id": "htu_remark_630",
   "kind": "remark",
-  "sid": "htu_632_wor",
-  "align": "center",
-  "fullWidth": true
-},
-{
-  "id": "htu_remark_633",
-  "kind": "remark",
-  "sid": "htu_633_ava",
-  "align": "center",
-  "fullWidth": true
-},
-{
-  "id": "htu_remark_634",
-  "kind": "remark",
-  "sid": "htu_634_req",
+  "titleSid": "htu_631_con",
+  "bodySids": [
+    { "sid": "htu_632_wor"},
+    { "sid": "htu_633_ava"},
+    { "sid": "htu_634_req"}
+  ],
   "align": "center",
   "fullWidth": true
 }
