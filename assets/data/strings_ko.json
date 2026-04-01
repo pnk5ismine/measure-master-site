@@ -211,9 +211,9 @@
   "htu_624_siz": "또한, 기준 정사각형의 크기는 설정에서 사용자가 선택할 수 있습니다.",
 
   "htu_631_con": "제약조건.",
-  "htu_632_wor": "반드시 Measure Master 내장 AR 카메라로 촬영된 이미지에서만 동작 (외부 AR 카메라 이미지 불가)",
-  "htu_633_ava": "RightEye 페이지에서만 사용 가능",
-  "htu_634_req": "ARCore 지원 기기에서만 유효",
+  "htu_632_wor": "1. 반드시 Measure Master 내장 AR 카메라로 촬영된 이미지에서만 동작 (외부 AR 카메라 이미지 불가)",
+  "htu_633_ava": "2. RightEye 페이지에서만 사용 가능",
+  "htu_634_req": "3. ARCore 지원 기기에서만 유효,  최소 Android 16 이상",
 
   "rvw_lst1": "번호.",
   "rvw_lst2": "별명",

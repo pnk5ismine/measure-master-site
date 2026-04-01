@@ -208,9 +208,9 @@
   "htu_624_siz": "The size of the reference square can also be selected by the user in Settings.",
 
   "htu_631_con": "Constraints.",
-  "htu_632_wor": "Works only with images captured using Measure Master’s built-in AR camera (images from other AR camera apps are not supported).",
-  "htu_633_ava": "Available only on the RightEye page.",
-  "htu_634_req": "Requires an ARCore-supported device.",
+  "htu_632_wor": "1. Works only with images captured using Measure Master’s built-in AR camera (images from other AR camera apps are not supported).",
+  "htu_633_ava": "2. Available only on the RightEye page.",
+  "htu_634_req": "3. Requires an ARCore-supported device. at least Android 16 or up. ",
 
   "rvw_lst1": "No.",
   "rvw_lst2": "Nickname",

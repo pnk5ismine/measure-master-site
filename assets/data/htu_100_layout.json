@@ -545,14 +545,7 @@
 },
 
 {
-  "id": "htu_remark_630",
-  "kind": "remark",
-  "sid": "htu_631_con",
-  "align": "center",
-  "fullWidth": true
-},
-{
-  "id": "htu_remark_630",
+  "id": "htu_remark_631",
   "kind": "remark",
   "titleSid": "htu_631_con",
   "bodySids": [
