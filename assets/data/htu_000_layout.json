@@ -1,27 +1,109 @@
 [
 {"id":"htu_001","kind":"step_title","sid":"htu_001"},
+
 {"id":"htu_002","kind":"step_body","sid":"htu_002","num":1},
-{"id":"htu_003","kind":"step_body","sid":"htu_003","num":2},
+
+{"id":"htu_003","kind":"step_body","num":2,
+  "parts":[
+    {"sid":"htu_003_a"},
+    {"icon":"/images/icons/a3_blue.png"},
+    {"sid":"htu_003_b"},
+    {"icon":"/images/icons/a4_ud_arrow.png"},
+    {"sid":"htu_003_c"}
+  ]
+},
+
 {"id":"htu_004","kind":"step_body","sid":"htu_004","num":3},
 {"id":"htu_005","kind":"step_body","sid":"htu_005","num":4},
-{"id":"htu_006","kind":"step_body","sid":"htu_006","num":5},
+
+{"id":"htu_006","kind":"step_body","num":5,
+  "parts":[
+    {"sid":"htu_006_a"},
+    {"icon":"/images/icons/a7_config.png"},
+    {"sid":"htu_006_b"}
+  ]
+},
+
 {"id":"htu_007","kind":"step_note","sid":"htu_007"},
+
 {"id":"htu_008","kind":"step_title","sid":"htu_008"},
-{"id":"htu_009","kind":"step_body","sid":"htu_009","num":1},
-{"id":"htu_010","kind":"step_body","sid":"htu_010","num":2},
+
+{"id":"htu_009","kind":"step_body","num":1,
+  "parts":[
+    {"sid":"htu_009_a"},
+    {"icon":"/images/icons/a3_blue.png"}
+  ]
+},
+
+{"id":"htu_010","kind":"step_body","num":2,
+  "parts":[
+    {"sid":"htu_010_a"},
+    {"icon":"/images/icons/b1_straight.png"},
+    {"text":" / "},
+    {"icon":"/images/icons/b1b_curve.png"}
+  ]
+},
+
 {"id":"htu_011","kind":"step_body","sid":"htu_011","num":3},
 {"id":"htu_012","kind":"step_note","sid":"htu_012"},
+
 {"id":"htu_013","kind":"step_title","sid":"htu_013"},
 {"id":"htu_014","kind":"step_note","sid":"htu_014"},
 {"id":"htu_015","kind":"step_body","sid":"htu_015","num":1},
 {"id":"htu_016","kind":"step_body","sid":"htu_016","num":2},
-{"id":"htu_017","kind":"step_body","sid":"htu_017","num":3},
-{"id":"htu_018","kind":"step_body","sid":"htu_018","num":4},
-{"id":"htu_019","kind":"step_title","sid":"htu_019"},
-{"id":"htu_020","kind":"step_body","sid":"htu_020","num":1},
+
+{"id":"htu_017","kind":"step_body","num":3,
+  "parts":[
+    {"sid":"htu_017_a"},
+    {"icon":"/images/icons/a5_red.png"},
+    {"sid":"htu_017_b"},
+    {"icon":"/images/icons/a8_lr_arrow.png"},
+    {"sid":"htu_017_c"}
+  ]
+},
+
+{"id":"htu_018","kind":"step_body","num":4,
+  "parts":[
+    {"icon":"/images/icons/a6_load.png"},
+    {"text":" "},
+    {"sid":"htu_018_a"}
+  ]
+},
+
+{"id":"htu_019","kind":"step_title",
+  "parts":[
+    {"sid":"htu_019_a"},
+    {"icon":"/images/icons/a5_red.png"}
+  ]
+},
+
+{"id":"htu_020","kind":"step_body","num":1,
+  "parts":[
+    {"sid":"htu_020_a"},
+    {"icon":"/images/icons/a3_blue.png"},
+    {"sid":"htu_020_b"},
+    {"icon":"/images/icons/a5_red.png"}
+  ]
+},
+
 {"id":"htu_021","kind":"step_body","sid":"htu_021","num":2},
-{"id":"htu_025","kind":"step_body","sid":"htu_025","num":3},
+
+{"id":"htu_025","kind":"step_body","num":3,
+  "parts":[
+    {"sid":"htu_025_a"},
+    {"icon":"/images/icons/b3_move.png"},
+    {"sid":"htu_025_b"}
+  ]
+},
+
 {"id":"htu_022","kind":"step_body","sid":"htu_022","num":4},
-{"id":"htu_026","kind":"step_body","sid":"htu_026","num":5},
+
+{"id":"htu_026","kind":"step_body","num":5,
+  "parts":[
+    {"sid":"htu_026_a"},
+    {"icon":"/images/icons/d4_convert.png"}
+  ]
+},
+
 {"id":"htu_027","kind":"step_note","sid":"htu_027"}
 ]

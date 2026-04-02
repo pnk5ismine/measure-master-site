@@ -469,6 +469,22 @@ body{
 .htu-title + .htu-card{
   margin-top:0 !important;
 }
+.htu-inline-icon{
+  display:inline-block;
+  width:1.2em;
+  height:1.2em;
+  object-fit:contain;
+  vertical-align:-0.18em;
+  margin:0 0.18em;
+}
+
+.htu-step-title .htu-inline-icon,
+.htu-step-text .htu-inline-icon,
+.htu-body .htu-inline-icon{
+  position:relative;
+  top:0.02em;
+}
+
 </style>
 
 </head>
@@ -549,7 +565,28 @@ body{
     const s = resolveTextSpec(spec);
     const el = document.createElement("div");
     el.className = "htu-body htu-body--" + (s.align || "left");
-    el.textContent = tBySid(s.sid);
+
+    if (Array.isArray(spec?.parts) && spec.parts.length > 0) {
+      spec.parts.forEach(part => {
+        if (part.sid) {
+          const span = document.createElement("span");
+          span.textContent = tBySid(part.sid);
+          el.appendChild(span);
+        } else if (part.text) {
+          const span = document.createElement("span");
+          span.textContent = part.text;
+          el.appendChild(span);
+        } else if (part.icon) {
+          const img = document.createElement("img");
+          img.src = part.icon;
+          img.alt = "";
+          img.className = "htu-inline-icon";
+          el.appendChild(img);
+        }
+      });
+    } else {
+      el.textContent = tBySid(s.sid);
+    }
 
     if (s.dx && s.dx !== "0px") {
       el.style.position = "relative";
@@ -558,6 +595,7 @@ body{
     return el;
   }
 
+
   function makeBodyRow(rowSpecs) {
     const row = document.createElement("div");
     row.className = "htu-body-row";
@@ -565,6 +603,25 @@ body{
       row.appendChild(makeBodyLine(spec));
     });
     return row;
+  }
+  function appendInlineParts(targetEl, parts) {
+    (parts || []).forEach(part => {
+      if (part.sid) {
+        const span = document.createElement("span");
+        span.textContent = tBySid(part.sid);
+        targetEl.appendChild(span);
+      } else if (part.text) {
+        const span = document.createElement("span");
+        span.textContent = part.text;
+        targetEl.appendChild(span);
+      } else if (part.icon) {
+        const img = document.createElement("img");
+        img.src = part.icon;
+        img.alt = "";
+        img.className = "htu-inline-icon";
+        targetEl.appendChild(img);
+      }
+    });
   }
 
   function buildSubject(item) {
@@ -694,7 +751,13 @@ body{
   function buildStepTitle(item) {
     const el = document.createElement("div");
     el.className = "htu-step-title";
-    el.textContent = tBySid(item.sid);
+
+    if (Array.isArray(item.parts) && item.parts.length > 0) {
+      appendInlineParts(el, item.parts);
+    } else {
+      el.textContent = tBySid(item.sid);
+    }
+
     return el;
   }
 
@@ -708,7 +771,12 @@ body{
 
     const text = document.createElement("div");
     text.className = "htu-step-text";
-    text.textContent = tBySid(item.sid);
+
+    if (Array.isArray(item.parts) && item.parts.length > 0) {
+      appendInlineParts(text, item.parts);
+    } else {
+      text.textContent = tBySid(item.sid);
+    }
 
     row.appendChild(num);
     row.appendChild(text);

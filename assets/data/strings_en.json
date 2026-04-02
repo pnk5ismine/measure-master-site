@@ -96,28 +96,35 @@
 
   "htu_001": "Step 1. : Set Up Your Device (One-Time Setup)",
   "htu_002": "Before measuring, you need to calibrate your device once.",
-  "htu_003": "Tap the Blue Eye icon, then tap the down arrow to open the Sub Menu Bar.",
+  "htu_003_a": "Tap ",                                        //a3_blue.png
+  "htu_003_b": ", then tap ",                                //a4_ud_arrow.png
+  "htu_003_c": "to open the Sub Menu Bar.",
   "htu_004": "Tap the screen twice to draw a straight line and measure it with a ruler.",
   "htu_005": "The displayed length will not match the real size yet — this is normal.",
-  "htu_006": "Open Settings and enter the actual width of your phone screen (measure from the left edge to the right edge using a ruler).",
+  "htu_006_a": "Open ",                                       //a7_config.png
+  "htu_006_b": " and enter the actual width of your phone screen (measure from the left edge to the right edge using a ruler).",
   "htu_007": "With this setting-up, the values will be equal between shown on the screen and actually measured. This setup only needs to be done once.",
   "htu_008": "Step 2. : Draw and Measure",
-  "htu_009": "Open the Blue Eye page.",
-  "htu_010": "Tap or drag to draw lines or shapes.",
+  "htu_009_a": "Starting draw by tapping ",                 //a3_blue.png
+  "htu_010_a": "Tap or drag to draw lines or shapes.",    //b1_straight.png  //b1b_curve.png
   "htu_011": "When a shape is completed, the perimeter and area are calculated automatically.",
   "htu_012": "Spending even one minute per day counts as active usage during testing.",
   "htu_013": "Step 3. : Prepare a Reference Photo (Optional, for Higher Accuracy)",
   "htu_014": "To measure real-world objects more accurately:",
   "htu_015": "Place a square rectangle like A4 paper on a table or wall.",
   "htu_016": "Take a photo showing the rectangle and save the photo to your gallery.",
-  "htu_017": "Open the Red Eye page and tap '<' to open the Side Toolbars.",
-  "htu_018": "Load the saved photo from your gallery.",
-  "htu_019": "Step 4. : Perspective Calibration (Red Eye)",
-  "htu_020": "Draw the objects on the Blue Eye page at first and return to the Red Eye page.",
+  "htu_017_a": "Open ",                                            //a5_red.png
+  "htu_017_b": " and tap ",                                        //a8_lr_arrow.png
+  "htu_017_c": " to open the Side Toolbars.",
+  "htu_018_a": "Load the saved photo from your gallery.",  //a6_load.png
+  "htu_019_a": "Step 4. : Perspective Calibration ",            //a5_red.png
+  "htu_020_a": "Draw the objects on ",                           //a3_blue.png
+  "htu_020_b": " page at first and return to ",                  //a5_red.png
   "htu_021": "Create 4 points by tapping near the four corners of the reference object (such as an A4 sheet).",
-  "htu_025": "Drag points to meet with four corners exactly.",
+  "htu_025-a": "Drag points after tapping ",                     //b3_move.png
+  "htu_025_b": "to meet with four corners exactly.",
   "htu_022": "Enter the actual width and height of the rectangle in the input fields.",
-  "htu_026": "Tap the convert arrow (→) button.",
+  "htu_026_a": "Tap the convert button ",                        //d4_convert.png
   "htu_027": "Screen values (mm) are converted into real-world measurements (cm, mm, etc.). This is the core purpose of the app.",
 
   "htu_100_und": "Understanding the Menu Icons",
