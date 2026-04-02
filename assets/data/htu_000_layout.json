@@ -39,7 +39,6 @@
   "parts":[
     {"sid":"htu_010_a"},
     {"icon":"/images/icons/b1_straight.png"},
-    {"text":" / "},
     {"icon":"/images/icons/b1b_curve.png"}
   ]
 },
