@@ -593,5 +593,57 @@
   ],
   "align": "center",
   "fullWidth": true
-}
+},
+
+  {
+    "id": "htu_800",
+    "kind": "subject",
+    "sid": "htu_800_sub"
+  },
+  {
+    "id": "htu_810",
+    "kind": "remark",
+    "titleSid": "htu_810_rtitle",
+    "bodySids": [
+      "htu_811_r1_this",
+      "htu_812_r2_prep",
+      "htu_813_r3_iden",
+      "htu_814_r4_set"
+    ],
+    "fullWidth": true
+  },
+  {
+    "id": "htu_820",
+    "kind": "title",
+    "sid": "htu_820_title",
+    "align": "center",
+    "fullWidth": true
+  },
+  {
+    "id": "htu_821",
+    "kind": "htu_card",
+    "titleSid": "htu_820_title",
+    "bodySids": [
+      "htu_821_b1_photo",
+      "htu_822_b2_red",
+      "htu_823_b3_three",
+      "htu_824_b4_move",
+      "htu_825_b5_align",
+      "htu_826_b6_enter",
+      "htu_827_b7_blue",
+      "htu_828_b8_come"
+    ],
+    "align": "left",
+    "fullWidth": true
+  },
+  {
+    "id": "htu_831",
+    "kind": "remark",
+    "titleSid": "",
+    "bodySids": [
+      "htu_831_rb1_prac"
+    ],
+    "align": "center",
+    "fullWidth": true
+  }
 ]
