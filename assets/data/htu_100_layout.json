@@ -621,21 +621,6 @@
     "fullWidth": true
   },
 
-{
-  "id": "htu_card_620",
-  "kind": "card",
-  "src": "/images/howtouse/htu_620_autodraw.jpg",
-  "altSid": "htu_img_620_alt",
-  "titleSid": "",
-  "bodySids": [
-    "htu_622_whn",
-    "htu_623_dim",
-    "htu_624_siz"
-  ],
-  "ratio": "2 / 1",
-  "fit": "contain",
-  "fullWidth": true
-},
   {
     "id": "htu_card_820",
     "kind": "card",
