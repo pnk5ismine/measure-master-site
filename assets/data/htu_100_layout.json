@@ -621,7 +621,7 @@
   },
   {
     "id": "htu_821",
-    "kind": "htu_card",
+    "kind": "card",
     "titleSid": "htu_820_title",
     "bodySids": [
       "htu_821_b1_photo",
