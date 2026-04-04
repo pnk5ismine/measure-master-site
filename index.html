@@ -19,7 +19,7 @@
   <link rel="preload" as="image" href="/images/index/mm_main1_en.jpg" />
   <link rel="preload" as="image" href="/images/index/ar_00.png" />
   <link rel="preload" as="image" href="/images/index/pm_00.jpg" />
-  <link rel="preload" as="image" href="/images/index/sm_01.jpg" />
+  <link rel="preload" as="image" href="/images/index/fd_0102.jpg" />
 
   <style>
     :root {
@@ -33,13 +33,15 @@
       --accent:#0ea5e9;
       --accent-soft:rgba(14,165,233,.10);
       --danger:#dc2626;
-      --section-tint: rgba(16,185,129,.08);     /* greenish */
+      --section-tint: rgba(16,185,129,.08);
       --section-border: rgba(16,185,129,.22);
       --section-accent: rgba(34,197,94,.22);
+      --section-bg: #ffffff;
     }
 
     * { box-sizing:border-box; }
     html, body { margin:0; padding:0; }
+
     body {
       font-family: system-ui,-apple-system,Segoe UI,Roboto,'Noto Sans',sans-serif;
       background:
@@ -48,8 +50,9 @@
         var(--bg);
       color:var(--text);
       min-height:100vh;
-      font-size: 130%;
+      font-size:130%;
     }
+
     a { color:var(--accent); text-decoration:none; }
     a:hover { text-decoration:underline; }
 
@@ -73,6 +76,7 @@
       align-items:center;
       gap:10px;
     }
+
     .logo-img {
       width:32px;
       height:32px;
@@ -81,19 +85,23 @@
       background:#ffffff;
       box-shadow:0 0 0 1px rgba(148,163,184,.4), 0 10px 35px rgba(255,255,255,.92);
     }
+
     .brand-title {
       display:flex;
       flex-direction:column;
       gap:2px;
     }
+
     .brand-title strong {
       font-size:17px;
       letter-spacing:-0.02em;
     }
+
     .brand-sub {
       font-size:11px;
       color:var(--muted);
     }
+
     .pill {
       font-size:11px;
       padding:3px 8px;
@@ -103,7 +111,6 @@
       color:var(--muted);
     }
 
-    /* ✅ Desktop nav: right aligned */
     nav {
       margin-left:auto;
       display:flex;
@@ -113,6 +120,7 @@
       justify-content:flex-end;
       flex-wrap:nowrap;
     }
+
     nav a {
       color:var(--muted);
       padding:6px 10px;
@@ -120,6 +128,7 @@
       border:1px solid transparent;
       white-space:nowrap;
     }
+
     nav a:hover {
       border-color:rgba(148,163,184,.5);
       background:rgba(255,255,255,.92);
@@ -131,6 +140,7 @@
       gap:6px;
       align-items:center;
     }
+
     .lang button {
       border:1px solid rgba(148,163,184,.5);
       background:rgba(255,255,255,.92);
@@ -143,11 +153,13 @@
       align-items:center;
       gap:6px;
     }
+
     .lang button.active {
       border-color:var(--accent);
       box-shadow:0 0 0 1px rgba(94,234,212,.6);
       font-weight:600;
     }
+
     .lang .flag {
       font-size:12px;
       line-height:1;
@@ -167,6 +179,7 @@
       margin-bottom:24px;
       align-items:stretch;
     }
+
     .hero-main-image {
       border-radius:24px;
       overflow:hidden;
@@ -176,17 +189,16 @@
       position:relative;
     }
 
-/* Hero main image overlay title */
-    .hero-main-title{
+    .hero-main-title {
       position:absolute;
       left:50%;
       top:18%;
       transform:translateX(-50%);
       width:min(92%, 980px);
       text-align:center;
-      font-size: clamp(20px, 3.0vw, 40px);
-      font-weight: 900;
-      text-shadow: 0 10px 40px rgba(255,255,255,.92);
+      font-size:clamp(20px, 3.0vw, 40px);
+      font-weight:900;
+      text-shadow:0 10px 40px rgba(255,255,255,.92);
       line-height:1.05;
       letter-spacing:-0.02em;
       color:#0f172a;
@@ -200,6 +212,7 @@
       height:100%;
       object-fit:cover;
     }
+
     .hero-auth {
       max-width:none;
       margin:0;
@@ -211,7 +224,7 @@
       box-shadow:0 18px 55px rgba(255,255,255,.95);
     }
 
-    @media (max-width:900px){
+    @media (max-width:900px) {
       .hero-top { grid-template-columns:1fr; }
       .hero-main-image { order:1; }
       .hero-auth { order:2; }
@@ -230,6 +243,7 @@
       margin:0 auto 24px auto;
       text-align:center;
     }
+
     .hero-kicker {
       font-size:11px;
       letter-spacing:0.16em;
@@ -237,21 +251,25 @@
       color:var(--accent);
       margin-bottom:8px;
     }
+
     .hero-title {
       margin:0 0 8px;
       font-size:clamp(28px,4vw,36px);
       letter-spacing:-0.03em;
     }
+
     .hero-subtitle {
       margin:0 0 6px;
       font-size:16px;
       color:var(--muted);
     }
+
     .hero-tagline {
       margin:0;
       font-size:13px;
       color:var(--muted);
     }
+
     .hero-actions {
       display:flex;
       flex-wrap:wrap;
@@ -277,13 +295,19 @@
       text-decoration:none;
       box-shadow:0 12px 35px rgba(255,255,255,.92);
     }
-    .btn:hover { filter:brightness(1.08); text-decoration:none; }
+
+    .btn:hover {
+      filter:brightness(1.08);
+      text-decoration:none;
+    }
+
     .btn-ghost {
       border-color:rgba(148,163,184,.4);
       background:rgba(255,255,255,.92);
       color:var(--muted);
       font-weight:500;
     }
+
     .btn-ghost:hover {
       border-color:rgba(148,163,184,.7);
       color:var(--text);
@@ -295,7 +319,8 @@
       gap:14px;
       margin-top:10px;
     }
-    @media (max-width:900px){
+
+    @media (max-width:900px) {
       .hero-modes { grid-template-columns:1fr; }
     }
 
@@ -309,54 +334,52 @@
       flex-direction:column;
       gap:8px;
     }
+
     .mode-image-wrap {
       border-radius:16px;
       overflow:hidden;
       background:#000;
       border:1px solid rgba(30,64,175,.6);
     }
+
     .mode-image-wrap img {
       width:100%;
       height:190px;
       object-fit:cover;
       display:block;
     }
+
     .mode-title {
       font-size:15px;
       font-weight:600;
       margin-top:4px;
     }
+
     .mode-body {
       font-size:13px;
       color:var(--muted);
       line-height:1.5;
     }
 
-section{
-  border-radius:24px;
-  padding:20px 18px 18px;
+    section {
+      border-radius:24px;
+      padding:20px 18px 18px;
+      background:linear-gradient(0deg, var(--section-accent), var(--section-accent)), var(--section-bg);
+      border:1px solid rgba(30,64,175,.18);
+      box-shadow:0 18px 55px rgba(255,255,255,.95);
+    }
 
-  /* 🔁 여기서 통일: 모든 섹션은 기본적으로 같은 배경을 공유 */
-  background: linear-gradient(0deg, var(--section-accent), var(--section-accent)),
-              var(--section-bg);
+    section.section-soft {
+      background:linear-gradient(180deg, var(--section-accent), var(--section-accent)), var(--section-bg);
+      border-color:rgba(34,197,94,.35);
+    }
 
-  border:1px solid rgba(30,64,175,.18);
-  box-shadow:0 18px 55px rgba(255,255,255,.95);
-}
-section.section-soft{
-  background: linear-gradient(
-    180deg, 
-    var(--section-accent), 
-    var(--section-accent)),
-    var(--section-bg
-  );
-  border-color: rgba(34,197,94,.35);
-}
     section h2 {
       margin:0 0 10px;
       font-size:24px;
       letter-spacing:-0.02em;
     }
+
     section p.section-lead {
       margin:0 0 12px;
       font-size:16px;
@@ -369,9 +392,11 @@ section.section-soft{
       gap:12px;
       margin-top:10px;
     }
-    @media (max-width:900px){
+
+    @media (max-width:900px) {
       .who-grid { grid-template-columns:1fr; }
     }
+
     .who-card {
       padding:12px 12px 11px;
       border-radius:16px;
@@ -379,7 +404,12 @@ section.section-soft{
       background:radial-gradient(circle at 0 0, rgba(94,234,212,.18), transparent 60%), #ffffff;
       font-size:15px;
     }
-    .who-title { font-weight:600; margin-bottom:4px; }
+
+    .who-title {
+      font-weight:600;
+      margin-bottom:4px;
+    }
+
     .who-tag {
       display:inline-flex;
       margin-bottom:6px;
@@ -390,7 +420,12 @@ section.section-soft{
       font-size:10px;
       color:var(--muted);
     }
-    .who-body { font-size:12px; color:var(--muted); line-height:1.6; }
+
+    .who-body {
+      font-size:12px;
+      color:var(--muted);
+      line-height:1.6;
+    }
 
     .feat-grid {
       display:grid;
@@ -398,9 +433,11 @@ section.section-soft{
       gap:12px;
       margin-top:10px;
     }
-    @media (max-width:900px){
+
+    @media (max-width:900px) {
       .feat-grid { grid-template-columns:1fr; }
     }
+
     .feat-card {
       padding:12px 12px 11px;
       border-radius:16px;
@@ -408,9 +445,23 @@ section.section-soft{
       background:#ffffff;
       font-size:15px;
     }
-    .feat-pill { font-size:10px; color:var(--accent); margin-bottom:4px; }
-    .feat-title { font-weight:600; margin-bottom:4px; }
-    .feat-body { font-size:12px; color:var(--muted); line-height:1.6; }
+
+    .feat-pill {
+      font-size:10px;
+      color:var(--accent);
+      margin-bottom:4px;
+    }
+
+    .feat-title {
+      font-weight:600;
+      margin-bottom:4px;
+    }
+
+    .feat-body {
+      font-size:12px;
+      color:var(--muted);
+      line-height:1.6;
+    }
 
     .shots {
       display:grid;
@@ -418,22 +469,30 @@ section.section-soft{
       gap:10px;
       margin-top:10px;
     }
-    @media (max-width:900px){
+
+    @media (max-width:900px) {
       .shots { grid-template-columns:1fr; }
     }
+
     .shot {
       border-radius:16px;
       overflow:hidden;
       border:1px solid rgba(51,65,85,.9);
       background:#ffffff;
     }
+
     .shot img {
       width:100%;
       height:210px;
       object-fit:cover;
       display:block;
     }
-    .shot-caption { padding:8px 10px 9px; font-size:13px; color:var(--muted); }
+
+    .shot-caption {
+      padding:8px 10px 9px;
+      font-size:13px;
+      color:var(--muted);
+    }
 
     .note-list {
       margin:6px 0 0;
@@ -441,6 +500,7 @@ section.section-soft{
       font-size:14px;
       color:var(--muted);
     }
+
     .note-list li { margin-bottom:4px; }
 
     .cta {
@@ -449,8 +509,15 @@ section.section-soft{
       background:radial-gradient(circle at 0 0, rgba(94,234,212,.22), transparent 55%), rgba(255,255,255,.95);
       border-color:rgba(94,234,212,.55);
     }
+
     .cta h2 { font-size:19px; }
-    .cta p { font-size:13px; color:#d5d9e8; margin:4px 0 14px; }
+
+    .cta p {
+      font-size:13px;
+      color:#d5d9e8;
+      margin:4px 0 14px;
+    }
+
     .cta-actions {
       display:flex;
       flex-wrap:wrap;
@@ -458,11 +525,29 @@ section.section-soft{
       justify-content:center;
       margin-bottom:8px;
     }
-    .cta-sub { font-size:11px; color:var(--muted); }
 
-    #auth { max-width:480px; margin:0 auto; }
-    .auth-headline { font-size:14px; font-weight:600; margin-bottom:4px; }
-    .auth-caption { font-size:12px; color:var(--muted); margin-bottom:10px; }
+    .cta-sub {
+      font-size:11px;
+      color:var(--muted);
+    }
+
+    #auth {
+      max-width:480px;
+      margin:0 auto;
+    }
+
+    .auth-headline {
+      font-size:14px;
+      font-weight:600;
+      margin-bottom:4px;
+    }
+
+    .auth-caption {
+      font-size:12px;
+      color:var(--muted);
+      margin-bottom:10px;
+    }
+
     .tabbar {
       display:inline-flex;
       gap:6px;
@@ -472,6 +557,7 @@ section.section-soft{
       border:1px solid rgba(51,65,85,.9);
       margin-bottom:10px;
     }
+
     .tabbar button {
       border:none;
       background:transparent;
@@ -481,11 +567,13 @@ section.section-soft{
       font-size:12px;
       cursor:pointer;
     }
+
     .tabbar button.active {
       background:rgba(15,23,42,1);
       color:var(--text);
       box-shadow:0 0 0 1px rgba(94,234,212,.55);
     }
+
     .field {
       display:flex;
       flex-direction:column;
@@ -493,7 +581,9 @@ section.section-soft{
       margin:8px 0 4px;
       font-size:12px;
     }
+
     .field label { color:var(--text); }
+
     input {
       width:100%;
       padding:8px 10px;
@@ -503,7 +593,9 @@ section.section-soft{
       color:var(--text);
       font-size:13px;
     }
+
     input::placeholder { color:var(--muted); }
+
     .primary {
       margin-top:10px;
       padding:9px 12px;
@@ -515,7 +607,9 @@ section.section-soft{
       font-weight:600;
       cursor:pointer;
     }
+
     .primary:hover { filter:brightness(1.07); }
+
     #logout-btn {
       margin-left:6px;
       margin-top:10px;
@@ -547,9 +641,10 @@ section.section-soft{
       color:var(--muted);
       text-align:center;
     }
+
     footer a { color:var(--muted); }
 
-    @media (max-width:720px){
+    @media (max-width:720px) {
       header { flex-wrap:wrap; align-items:flex-start; row-gap:10px; }
       .brand { order:1; }
       .lang  { order:2; margin-left:auto; }
@@ -571,39 +666,39 @@ section.section-soft{
       .lang .flag { display:none; }
     }
 
-/* Google Play Banner */
-.playstore-banner {
-  display:flex;
-  flex-direction:column;
-  align-items:stretch;
-  gap:8px;
-  width:min(920px,100%);
-  margin:24px auto;
-  padding:12px;
-  background:#0f172a;
-  border-radius:18px;
-  text-decoration:none;
-  overflow:hidden;
-}
+    /* Google Play Banner */
+    .playstore-banner {
+      display:flex;
+      flex-direction:column;
+      align-items:stretch;
+      gap:8px;
+      width:min(920px,100%);
+      margin:24px auto;
+      padding:12px;
+      background:#0f172a;
+      border-radius:18px;
+      text-decoration:none;
+      overflow:hidden;
+    }
 
-.playstore-banner__graphic {
-  width:100%;
-  border-radius:12px;
-  overflow:hidden;
-}
+    .playstore-banner__graphic {
+      width:100%;
+      border-radius:12px;
+      overflow:hidden;
+    }
 
-.playstore-banner__graphic img {
-  width:100%;
-  height:auto;
-  display:block;
-}
+    .playstore-banner__graphic img {
+      width:100%;
+      height:auto;
+      display:block;
+    }
 
-.playstore-banner__caption {
-  text-align:center;
-  font-size:12px;
-  color:#d1d5db;
-  padding:2px 4px 0;
-}
+    .playstore-banner__caption {
+      text-align:center;
+      font-size:12px;
+      color:#d1d5db;
+      padding:2px 4px 0;
+    }
   </style>
 </head>
 
@@ -617,7 +712,8 @@ section.section-soft{
         alt="idx.brand.logo_alt"
         class="logo-img"
         width="32" height="32"
-        loading="eager" fetchpriority="high"
+        loading="eager"
+        fetchpriority="high"
       />
       <div class="brand-title">
         <strong data-i18n="idx.brand.name">idx.brand.name</strong>
@@ -720,7 +816,6 @@ section.section-soft{
           <a class="btn btn-ghost" href="/howtouse.html" data-i18n="idx.hero.cta_howtouse">idx.hero.cta_howtouse</a>
         </div>
 
-        <!-- Google Play Banner -->
         <a
           href="https://play.google.com/store/apps/details?id=net.measure_master.mmproject"
           class="playstore-banner"
@@ -736,47 +831,43 @@ section.section-soft{
             <span data-i18n="idx.hero.play_banner">idx.hero.play_banner</span>
           </div>
         </a>
-     </div>
+      </div>
 
-     <div class="hero-modes">
-       <article class="mode-card">
-         <div class="mode-image-wrap">
-           <img src="/images/index/ar_00.png"
-                data-i18n-attr="alt=idx.modes.ar.alt"
-                alt="idx.modes.ar.alt"
-                loading="lazy" />
-        </div>
-         <div class="mode-title" data-i18n="idx.modes.ar.title">idx.modes.ar.title</div>
-         <div class="mode-body" data-i18n="idx.modes.ar.body">idx.modes.ar.body</div>
-       </article>
+      <div class="hero-modes">
+        <article class="mode-card">
+          <div class="mode-image-wrap">
+            <img src="/images/index/ar_00.png"
+                 data-i18n-attr="alt=idx.modes.ar.alt"
+                 alt="idx.modes.ar.alt"
+                 loading="lazy" />
+          </div>
+          <div class="mode-title" data-i18n="idx.modes.ar.title">idx.modes.ar.title</div>
+          <div class="mode-body" data-i18n="idx.modes.ar.body">idx.modes.ar.body</div>
+        </article>
 
-       <article class="mode-card">
-         <div class="mode-image-wrap">
-           <img src="/images/index/pm_00.jpg"
-                data-i18n-attr="alt=idx.modes.pm.alt"
-                alt="idx.modes.pm.alt"
-                loading="lazy" />
-         </div>
-         <div class="mode-title" data-i18n="idx.modes.pm.title">idx.modes.pm.title</div>
-         <div class="mode-body" data-i18n="idx.modes.pm.body">idx.modes.pm.body</div>
-       </article>
+        <article class="mode-card">
+          <div class="mode-image-wrap">
+            <img src="/images/index/pm_00.jpg"
+                 data-i18n-attr="alt=idx.modes.pm.alt"
+                 alt="idx.modes.pm.alt"
+                 loading="lazy" />
+          </div>
+          <div class="mode-title" data-i18n="idx.modes.pm.title">idx.modes.pm.title</div>
+          <div class="mode-body" data-i18n="idx.modes.pm.body">idx.modes.pm.body</div>
+        </article>
 
-<article class="mode-card">
-  <div class="mode-image-wrap dual">
-           <img src="/images/index/fd_0102.jpg"
-                data-i18n-attr="alt=idx.modes.pm.alt"
-                alt="idx.modes.pm.alt"
-                loading="lazy" />
-  </div>
-
-  <div class="mode-title" data-i18n="idx.modes.fd.title">
-    idx.modes.fd.title
-  </div>
-
-  <div class="mode-body" data-i18n="idx.modes.fd.body">
-    idx.modes.fd.body
-  </div>
-</article>
+        <article class="mode-card">
+          <div class="mode-image-wrap">
+            <img src="/images/index/fd_0102.jpg"
+                 data-i18n-attr="alt=idx.modes.fd.alt"
+                 alt="idx.modes.fd.alt"
+                 loading="lazy" />
+          </div>
+          <div class="mode-title" data-i18n="idx.modes.fd.title">idx.modes.fd.title</div>
+          <div class="mode-body" data-i18n="idx.modes.fd.body">idx.modes.fd.body</div>
+        </article>
+      </div>
+    </section>
 
     <section id="who" class="section-soft">
       <h2 data-i18n="idx.who.title">idx.who.title</h2>
@@ -884,23 +975,20 @@ section.section-soft{
   </footer>
 </div>
 
-<!-- Supabase & existing scripts -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="/js/mm-auth.js?v=auth_r2"></script>
-
-<!-- ✅ i18n must load BEFORE index.js so index.js can call mmI18n.t -->
 <script src="/assets/js/i18n.js?v=mm_i18n_r9"></script>
-
 <script src="/js/index.js?v=rev3"></script>
+
 <script>
-  document.addEventListener('DOMContentLoaded', function(){
+  document.addEventListener('DOMContentLoaded', function() {
     if (window.mmAuth && typeof window.mmAuth.initHomeAuth === 'function') {
       window.mmAuth.initHomeAuth();
     }
 
     const btn = document.getElementById('logout-btn');
     if (btn) {
-      btn.addEventListener('click', async function(e){
+      btn.addEventListener('click', async function(e) {
         e.preventDefault();
         try { await window.mmAuth?.signOut?.(); }
         finally { location.reload(); }
