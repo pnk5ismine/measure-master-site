@@ -629,14 +629,32 @@
     "titleSid": "htu_820_title",
     "bodySids": [
       "htu_821_b1_photo",
-      "htu_822_b2_red",
-      "htu_823_b3_three",
-      "htu_824_b4_move",
+      {
+        "parts":[
+          {"sid":"htu_822_b2_red"},
+          {"icon":"/images/icons/a5_red.png"},
+          {"icon":"/images/icons/a6_load.png"}
+        ]
+      },
+      {
+        "parts":[
+          {"sid":"htu_823_b3_three"},
+          {"icon":"/images/icons/d3_triangle.png"}
+        ]
+      },
+      {
+        "parts":[
+          {"sid":"htu_824_b4_move"},
+          {"icon":"/images/icons/b3_move.png"}
+        ]
+      },
       "htu_825_b5_align"
     ],
     "align": "left",
     "fullWidth": true
-  },  {
+  },
+
+  {
     "id": "htu_card_826",
     "kind": "card",
     "src": "/images/howtouse/htu_826_line.jpg",
@@ -644,8 +662,19 @@
     "titleSid": "",
     "bodySids": [
       "htu_826_b6_enter",
-      "htu_827_b7_blue",
-      "htu_828_b8_come"
+      {
+        "parts":[
+          {"sid":"htu_827_b7_blue"},
+          {"icon":"/images/icons/a3_blue.png"}
+        ]
+      },
+      {
+        "parts":[
+          {"sid":"htu_828_b8_come"},
+          {"icon":"/images/icons/a5_red.png"},
+          {"icon":"/images/icons/d4_convert.png"}
+        ]
+      }
     ],
     "align": "left",
     "fullWidth": true
