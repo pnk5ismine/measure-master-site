@@ -604,6 +604,28 @@ section.section-soft{
   color:#d1d5db;
   padding:2px 4px 0;
 }
+
+.mode-image-wrap.dual {
+  display: flex;
+  gap: 8px;
+  width: 100%;
+}
+
+.mode-image-wrap.dual img {
+  width: 50%;
+  height: auto;
+  object-fit: contain;
+}
+
+@media (max-width: 768px) {
+  .mode-image-wrap.dual {
+    flex-direction: column;
+  }
+
+  .mode-image-wrap.dual img {
+    width: 100%;
+  }
+}
   </style>
 </head>
 
@@ -761,18 +783,26 @@ section.section-soft{
          <div class="mode-body" data-i18n="idx.modes.pm.body">idx.modes.pm.body</div>
        </article>
 
-       <article class="mode-card">
-         <div class="mode-image-wrap">
-           <img src="/images/index/sm_01.jpg"
-                data-i18n-attr="alt=idx.modes.sm.alt"
-                alt="idx.modes.sm.alt"
-                loading="lazy" />
-         </div>
-         <div class="mode-title" data-i18n="idx.modes.sm.title">idx.modes.sm.title</div>
-         <div class="mode-body" data-i18n="idx.modes.sm.body">idx.modes.sm.body</div>
-       </article>
-     </div>
-   </section>
+<article class="mode-card">
+  <div class="mode-image-wrap dual">
+    <img src="/images/index/fd01.png"
+         data-i18n-attr="alt=idx.modes.fd.alt"
+         alt="idx.modes.fd.alt"
+         loading="lazy" />
+    <img src="/images/index/fd02.png"
+         data-i18n-attr="alt=idx.modes.fd.alt"
+         alt="idx.modes.fd.alt"
+         loading="lazy" />
+  </div>
+
+  <div class="mode-title" data-i18n="idx.modes.fd.title">
+    idx.modes.fd.title
+  </div>
+
+  <div class="mode-body" data-i18n="idx.modes.fd.body">
+    idx.modes.fd.body
+  </div>
+</article>
 
     <section id="who" class="section-soft">
       <h2 data-i18n="idx.who.title">idx.who.title</h2>
