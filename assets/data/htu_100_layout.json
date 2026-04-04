@@ -1,4 +1,47 @@
 [
+{
+  "id": "htu_700",
+  "kind": "subject",
+  "sid": "htu_700_add"
+},
+
+{
+  "id": "htu_700",
+  "kind": "subject",
+  "sid": "htu_700_add"
+},
+{
+  "id": "htu_title_710",
+  "kind": "title",
+  "sid": "htu_711_pa3",
+  "align": "center",
+  "fullWidth": true
+},
+{
+  "id": "htu_card_710",
+  "kind": "card",
+  "src": "/images/howtouse/htu_710_distance.jpg",
+  "altSid": "htu_img_710_alt",
+  "titleSid": "",
+  "bodySids": [
+    "htu_712_180",
+    "htu_713_dis"
+  ],
+  "ratio": "2 / 1",
+  "fit": "contain",
+  "fullWidth": true
+},
+{
+  "id": "htu_remark_721",
+  "kind": "remark",
+  "titleSid": "",
+  "bodySids": [
+    { "sid": "htu_722_rgf" },
+    { "sid": "htu_723_det" }
+  ],
+  "align": "center",
+  "fullWidth": true
+},
   {
     "id": "htu_100",
     "kind": "subject",
