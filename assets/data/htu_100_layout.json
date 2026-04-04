@@ -614,13 +614,6 @@
   },
   {
     "id": "htu_820",
-    "kind": "title",
-    "sid": "htu_820_title",
-    "align": "center",
-    "fullWidth": true
-  },
-  {
-    "id": "htu_821",
     "kind": "card",
     "titleSid": "htu_820_title",
     "bodySids": [
