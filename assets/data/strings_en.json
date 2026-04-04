@@ -222,6 +222,17 @@
   "htu_633_ava": "2. Available only on the RightEye page.",
   "htu_634_req": "3. Requires an ARCore-supported device. at least Android 16 or up. ",
 
+  "htu_700_add": "Forward Distance Measurement Mode Has Been Added",
+
+  "htu_img_710_alt": "alternative app of Laser RangeFinder",
+  "htu_711_pa3": "Example Use on a Par-3 Golf Hole.",
+  "htu_712_180": "It uses the known 180 m distance to the hole and the 2 m width of the tee-shot zone as reference values.",
+  "htu_713_dis": "It can also display the results of four players on a single hole at once.",
+
+  "htu_721": " ",
+  "htu_722_rgf": "This app can be available as a powerful alternative of laser rangefinder in green field.",
+  "htu_723_det": "Detailed instructions are explained in the following section.",
+
   "rvw_lst1": "No.",
   "rvw_lst2": "Nickname",
   "rvw_lst3": "Title",
