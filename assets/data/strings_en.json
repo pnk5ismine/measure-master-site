@@ -237,9 +237,10 @@
 
   "htu_810_rtitle": "Things to Know Before You Begin",
   "htu_811_r1_this": "This method estimates distances by using a known reference distance to a point ahead and calculating distances to other points that are not farther than that reference.",
-  "htu_812_r2_prep": "Preparation: Know a reference distance (e.g., 180 m from the tee to the hole) and a reference width (e.g., 2 m width of the tee-shot zone).",
-  "htu_813_r3_iden": "Identify the horizon point (vanishing point) in advance.",
-  "htu_814_r4_set": "Set your preferred distance unit (e.g., meters) before starting.",
+  "htu_812_rtitle": "Preparation: ",
+  "htu_812_r1_prep": "1. Know a reference distance (e.g., 180 m from the tee to the hole) and a reference width (e.g., 2 m width of the tee-shot zone).",
+  "htu_813_r2_iden": "2. Identify the horizon point (vanishing point) in advance.",
+  "htu_814_r3_set": "3. Set your preferred distance unit (e.g., meters) before starting.",
 
   "htu_820_title": "Example on a Par-3 Golf Hole",
 
