@@ -695,18 +695,18 @@
     "kind": "subject",
     "sid": "htu_840_sub_use"
   },
-{
-  "id": "htu_title_841",
-  "kind": "title",
-  "sid": "htu_841_title_AR",
-  "align": "center",
-  "fullWidth": true
-},
+  {
+    "id": "htu_title_841",
+    "kind": "title",
+    "sid": "htu_841_title_AR",
+    "align": "center",
+    "fullWidth": true
+   },
 
   {
     "id": "htu_card_842",
     "kind": "card",
-    "src": "/images/howtouse/htu_842_artri.jpg",
+    "src": "/images/howtouse/htu_842.jpg",
     "altSid": "htu_img_842_alt",
     "titleSid": "htu_842_ctitle_double",
     "bodySids": [
