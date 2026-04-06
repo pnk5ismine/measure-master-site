@@ -255,6 +255,22 @@
 
   "htu_831_rb1_prac": "To use this effectively on the field, practice the full process in advance until you are familiar with it.",
 
+  "htu_840_sub_use": "How to Use Forward Distance Mode Without a Known Long-Distance Reference",
+  "htu_841_title_AR" : "Using Photos Captured with AR Camera of this App.",
+  "htu_842_ctitle_double": "Double Rectangle Calibration",
+  "htu_851_b1_AR": "1. Capture a photo using the AR camera in this app, then load it.",
+  "htu_852_b2_inn": "2. Enter the RightEye page and tap the Single Trap icon to generate an initial(inner) trapezoid automatically.",
+  "htu_853_b3_out": "3. Tap any three points to create a triangle. Outer trapezoid is created automatically.",
+  "htu_854_b4_van": "4. The vanish point of outer trapezoid is shown as the same position of inner trapezoid.",
+  "htu_855_b5_bot": "5.  Adjust the bottom edge by dragging one point outward as far as possible. (no need to match the original bottom line.)",
+  "htu_856_b6_imp": "6.  Important: Drag the upper edge upward, placing it as close as possible to the vanishing point.",
+  "htu_857_b7_con": "7.  Tap the Convert icon and note the displayed real width and height of 2nd trapezoid. The real height of 2nd trapezoid would be maximum distance to measure via this app.",
+  "htu_858_b8_swit": "8.  Switch to LeftEye pagee and draw a line toward your target. The real-world distance will be calculated and displayed automatically Whenever one end moves via move tool, new length replaced.",
+  "htu_860_rt_whe": "Where You Can Use It:",
+  "htu_861_r1_golf": "1. Track every shot distance on a golf course",
+  "htu_862_r2_run": "2. Measure uphill sections on running or walking routes",
+  "htu_863_r3_train": "3. Estimate movement distances in outdoor military training yard.",
+
   "rvw_lst1": "No.",
   "rvw_lst2": "Nickname",
   "rvw_lst3": "Title",
