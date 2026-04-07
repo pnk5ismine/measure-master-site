@@ -59,7 +59,8 @@
     "bodySids": [
       { "sid": "htu_112_hom", "align": "center" }
     ],
-    "fit": "contain"
+    "fit": "contain",
+    "fullWidth": true
   },
 
   {
@@ -81,7 +82,8 @@
       "htu_124_sub",
       "htu_125_str"
     ],
-    "fit": "contain"
+    "fit": "contain",
+    "fullWidth": true
   },
   {
     "id": "htu_card_120b",
@@ -93,7 +95,8 @@
       "htu_132_sid",
       "htu_133_sho"
     ],
-    "fit": "contain"
+    "fit": "contain",
+    "fullWidth": true
   },
 
   {
@@ -112,7 +115,8 @@
     "bodySids": [
       { "sid": "htu_152_str", "align": "center" }
     ],
-    "fit": "contain"
+    "fit": "contain",
+    "fullWidth": true
   },
   {
     "id": "htu_card_150b",
@@ -123,7 +127,8 @@
     "bodySids": [
       { "sid": "htu_153_cur", "align": "center" }
     ],
-    "fit": "contain"
+    "fit": "contain",
+    "fullWidth": true
   },
   {
     "id": "htu_remark_150",
@@ -149,7 +154,8 @@
     "bodySids": [
       { "sid": "htu_162_new", "align": "center" }
     ],
-    "fit": "contain"
+    "fit": "contain",
+    "fullWidth": true
   },
   {
     "id": "htu_card_160b",
@@ -160,7 +166,8 @@
     "bodySids": [
       { "sid": "htu_163_tab", "align": "center" }
     ],
-    "fit": "contain"
+    "fit": "contain",
+    "fullWidth": true
   },
 
   {
@@ -191,7 +198,8 @@
     "bodySids": [
       "htu_212_aft"
     ],
-    "fit": "contain"
+    "fit": "contain",
+    "fullWidth": true
   },
   {
     "id": "htu_card_210b",
@@ -202,7 +210,8 @@
     "bodySids": [
       "htu_213_you"
     ],
-    "fit": "contain"
+    "fit": "contain",
+    "fullWidth": true
   },
 
   {
@@ -221,7 +230,8 @@
     "bodySids": [
       "htu_222_use"
     ],
-     "fit": "contain"
+     "fit": "contain",
+    "fullWidth": true
   },
   {
     "id": "htu_card_220b",
@@ -232,7 +242,8 @@
     "bodySids": [
       "htu_223_lay"
     ],
-     "fit": "contain"
+     "fit": "contain",
+    "fullWidth": true
   },
 
   {
@@ -273,7 +284,8 @@
       "htu_242_bal",
       "htu_243_ano"
     ],
-    "fit": "contain"
+    "fit": "contain",
+    "fullWidth": true
   },
   {
     "id": "htu_card_240b",
@@ -285,7 +297,8 @@
       "htu_244_bas",
       "htu_245_nex"
     ],
-    "fit": "contain"
+    "fit": "contain",
+    "fullWidth": true
   },
 
   {
@@ -314,7 +327,8 @@
     "altSid": "htu_img_310_alt",
     "titleSid": "",
     "bodySids": [],
-    "fit": "contain"
+    "fit": "contain",
+    "fullWidth": true
   },
   {
     "id": "htu_card_310b",
@@ -324,7 +338,8 @@
     "titleSid": "",
     "bodySids": [],
     "ratio": "1 / 2",
-    "fit": "contain"
+    "fit": "contain",
+    "fullWidth": true
   },
 
   {
@@ -382,7 +397,8 @@
     "bodySids": [
       "htu_412_act"
     ],
-    "fit": "contain"
+    "fit": "contain",
+    "fullWidth": true
   },
   {
     "id": "htu_card_410b",
@@ -394,7 +410,8 @@
       "htu_413_nea",
       "htu_414_how"
     ],
-    "fit": "contain"
+    "fit": "contain",
+    "fullWidth": true
   },
 
   {
@@ -411,7 +428,8 @@
     "altSid": "htu_img_420_alt",
     "titleSid": "",
     "bodySids": [
-      "htu_422_act"
+      "htu_422_act",
+    "fullWidth": true
     ],
     "ratio": "1 / 2",
     "fit": "contain"
@@ -426,7 +444,8 @@
       "htu_423_dra",
       "htu_424_thn"
     ],
-    "fit": "contain"
+    "fit": "contain",
+    "fullWidth": true
   },
 
   {
@@ -485,7 +504,8 @@
       "htu_522_2150",
       "htu_523_2141"
     ],
-    "fit": "contain"
+    "fit": "contain",
+    "fullWidth": true
   },
   {
     "id": "htu_card_520b",
@@ -496,7 +516,8 @@
     "bodySids": [
       "htu_524_2137"
     ],
-    "fit": "contain"
+    "fit": "contain",
+    "fullWidth": true
   },
 
 {
