@@ -428,11 +428,11 @@
     "altSid": "htu_img_420_alt",
     "titleSid": "",
     "bodySids": [
-      "htu_422_act",
-    "fullWidth": true
+      "htu_422_act"
     ],
     "ratio": "1 / 2",
-    "fit": "contain"
+    "fit": "contain",
+    "fullWidth": true
   },
   {
     "id": "htu_card_420b",
