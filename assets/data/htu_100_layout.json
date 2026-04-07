@@ -56,19 +56,10 @@
     "src": "/images/howtouse/htu_110.jpg",
     "altSid": "htu_img_110_alt",
     "titleSid": "",
-    "bodySids": [],
-    "fit": "contain"
-  },
-  {
-    "id": "htu_card_110b",
-    "kind": "card",
-    "src": "",
-    "altSid": "",
-    "titleSid": "",
     "bodySids": [
       { "sid": "htu_112_hom", "align": "center" }
     ],
-     "fit": "contain"
+    "fit": "contain"
   },
 
   {
