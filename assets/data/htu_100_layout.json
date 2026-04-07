@@ -102,9 +102,7 @@
     "altSid": "htu_img_150_alt",
     "titleSid": "",
     "bodySids": [
-      { "sid": "htu_152_str", "align": "center" },
-      { "sid": "htu_153_cur", "align": "center" }
-
+      { "sid": "htu_152_str", "align": "center" }
     ],
     "fit": "contain",
     "fullWidth": true
