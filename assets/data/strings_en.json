@@ -113,7 +113,7 @@
   "htu_011": "When a shape is completed, the perimeter and area are calculated automatically.",
   "htu_012": "Spending even one minute per day counts as active usage during testing.",
   "htu_013": "Step 3. : Prepare a Reference Photo (Optional, for Higher Accuracy)",
-  "htu_014": "To measure real-world objects more accurately:",
+  "htu_014": "For photos pictured by AR camera of this app, you may skip  steps of following 1. and 2:",
   "htu_015": "Place a square rectangle like A4 paper on a table or wall.",
   "htu_016": "Take a photo showing the rectangle and save the photo to your gallery.",
   "htu_017_a": "Open ",         
@@ -129,6 +129,7 @@
   "htu_022": "Enter the actual width and height of the rectangle in the input fields.",
   "htu_026_a": "Tap the convert button ",  
   "htu_027": "Screen values (mm) are converted into real-world measurements (cm, mm, etc.). This is the core purpose of the app.",
+  "htu_028": "For AR photos of this app, you can skip steps of above 1~4 and get the same effect by tapping the following icon only.",
 
   "htu_100_und": "Understanding the Menu Icons",
   "htu_img_110_alt": "Home page links",
