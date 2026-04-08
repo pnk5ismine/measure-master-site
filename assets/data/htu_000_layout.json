@@ -103,12 +103,19 @@
     {"icon":"/images/icons/d4_convert.png"}
   ]
 },
-
-{"id":"htu_027","kind":"step_note","sid":"htu_027"},
-{"id":"htu_028","kind":"step_note",
-  "parts":[
-    {"sid":"htu_028"},
-    {"icon":"/images/icons/d1_single.png"}
-  ]
+{
+  "id":"htu_027_028",
+  "kind":"remark",
+  "titleSid":"",
+  "bodySids":[
+    { "sid":"htu_027" },
+    {
+      "parts":[
+        { "sid":"htu_028" },
+        { "icon":"/images/icons/d1_single.png" }
+      ]
+    }
+  ],
+  "fullWidth":true
 }
 ]
