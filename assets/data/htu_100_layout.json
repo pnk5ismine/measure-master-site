@@ -546,31 +546,48 @@
   {
     "id": "htu_840",
     "kind": "subject",
-    "sid": "htu_840_sub_use"
+    "sid": "htu_840_sub"
   },
   {
-    "id": "htu_title_841",
-    "kind": "title",
-    "sid": "htu_841_title_AR",
+    "id": "htu_card_841",
+    "kind": "card",
+    "src": "/images/howtouse/htu_841.jpg",
+    "altSid": "htu_img_841_alt",
+    "titleSid": "htu_841_ctitle",
+    "bodySids": [
+      "htu_841_b1",
+      "htu_842_b2",
+      "htu_843_b3",
+      "htu_844_b4"
+    ],
+    "align": "left",
+    "fullWidth": true
+  },
+  {
+    "id": "htu_845",
+    "kind": "remark",
+    "titleSid": "",
+    "bodySids": [
+      "htu_845_r1"
+    ],
     "align": "center",
     "fullWidth": true
-   },
+  },
 
   {
-    "id": "htu_card_842",
+    "id": "htu_card_851",
     "kind": "card",
-    "src": "/images/howtouse/htu_842.jpg",
-    "altSid": "htu_img_842_alt",
-    "titleSid": "htu_842_ctitle_double",
+    "src": "/images/howtouse/htu_851.jpg",
+    "altSid": "htu_img_851_alt",
+    "titleSid": "htu_845_ctitle",
     "bodySids": [
-      "htu_851_b1_AR",
-      "htu_852_b2_inn",
-      "htu_853_b3_out",
-      "htu_854_b4_van",
-      "htu_855_b5_bot",
-      "htu_856_b6_imp",
-      "htu_857_b7_con",
-      "htu_858_b8_swit"
+      "htu_541_b1",
+      "htu_852_b2",
+      "htu_853_b3",
+      "htu_854_b4",
+      "htu_855_b5",
+      "htu_856_b6",
+      "htu_857_b7"
     ],
     "align": "left",
     "fullWidth": true
