@@ -579,9 +579,9 @@
     "kind": "card",
     "src": "/images/howtouse/htu_851.jpg",
     "altSid": "htu_img_851_alt",
-    "titleSid": "htu_845_ctitle",
+    "titleSid": "htu_851_ctitle",
     "bodySids": [
-      "htu_541_b1",
+      "htu_841_b1",
       "htu_852_b2",
       "htu_853_b3",
       "htu_854_b4",
@@ -595,11 +595,11 @@
   {
     "id": "htu_860",
     "kind": "remark",
-    "titleSid": "htu_860_rt_whe",
+    "titleSid": "htu_860_rt",
     "bodySids": [
-      "htu_861_r1_golf",
-      "htu_862_r2_run",
-      "htu_863_r3_train"
+      "htu_861_r1",
+      "htu_862_r2",
+      "htu_863_r3"
     ],
     "fullWidth": true
   }
