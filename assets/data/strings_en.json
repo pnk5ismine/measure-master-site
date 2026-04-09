@@ -265,7 +265,7 @@
   "htu_845_r1": "Incorrect alignment of the vanish point is often caused by uneven plane of square shadow.",
 
   "htu_851_ctitle": "For Photos Taken with a Regular Camera",
-  "htu_851_b1": "1. Use an object of known size to mark a square of a fixed dimension near the center foreground.",
+  "htu_851_b1": "1. Use an object of known size to mark a square of a fixed dimension near the center foreground. (30cm of floor tile was referred to in this photo) ",
   "htu_852_b2": "2. Take a photo with the vanishing point (horizon) positioned near the upper center and the marked square near the lower center of the image.",
   "htu_853_b3": "3. Load the photo and tap any three points to form a triangle. An isosceles trapezoid will be generated automatically.",
   "htu_854_b4": "4. Using the Move tool, align the vanishing point to its correct position in the photo, and match the bottom edge of the trapezoid to the width of the marked square.",
