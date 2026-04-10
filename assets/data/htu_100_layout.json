@@ -556,9 +556,25 @@
     "titleSid": "htu_841_ctitle",
     "bodySids": [
       "htu_841_b1",
-      "htu_842_b2",
-      "htu_843_b3",
-      "htu_844_b4"
+      {
+        "parts":[
+          {"sid":"htu_842_b2"},
+          {"icon":"/images/icons/a5_red.png"},
+          {"icon":"/images/icons/d1r_single.png"}
+        ]
+      },
+      {
+        "parts":[
+          {"sid":"htu_843_b3"},
+          {"icon":"/images/icons/b3_move.png"}
+        ]
+      },
+      {
+        "parts":[
+          {"sid":"htu_844_b4"},
+          {"icon":"/images/icons/a3_blue.png"}
+        ]
+      }
     ],
     "align": "left",
     "fullWidth": true
@@ -583,11 +599,26 @@
     "bodySids": [
       "htu_851_b1",
       "htu_852_b2",
-      "htu_853_b3",
-      "htu_854_b4",
+      {
+        "parts":[
+          {"sid":"htu_853_b3"},
+          {"icon":"/images/icons/a5_red.png"}
+        ]
+      },
+      {
+        "parts":[
+          {"sid":"htu_854_b4"},
+          {"icon":"/images/icons/b3_move.png"}
+        ]
+      },      "htu_854_b4",
       "htu_855_b5",
       "htu_856_b6",
-      "htu_857_b7"
+      {
+        "parts":[
+          {"sid":"htu_857_b7"},
+          {"icon":"/images/icons/a3_blue.png"}
+        ]
+      }
     ],
     "align": "left",
     "fullWidth": true
