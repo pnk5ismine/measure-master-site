@@ -678,5 +678,29 @@
       "htu_863_r3"
     ],
     "fullWidth": true
-  }
+  },
+
+  {
+    "id": "htu_900",
+    "kind": "subject",
+    "sid": "htu_900_sub"
+  },
+  {
+    "id": "htu_title_910",
+    "kind": "title",
+    "sid": "htu_910_title",
+    "align": "center",
+    "fullWidth": true
+  },
+  {
+    "id": "htu_911",
+    "kind": "card",
+    "src": "/images/howtouse/htu_911.jpg",
+    "altSid": "htu_img_911_alt",
+    "titleSid": "htu_911_ctitle",
+    "bodySids": [
+
+    ],
+    "fullWidth": true
+  },
 ]
