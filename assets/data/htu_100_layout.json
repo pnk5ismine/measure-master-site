@@ -339,6 +339,26 @@
     "fullWidth": true
   },
   {
+    "id": "htu_remark_425",
+    "kind": "remark",
+    "titleSid": "",
+    "bodySids": [
+      { "sid": "htu_425_r1_dbl"}
+      {
+        "parts":[
+          {"sid":"htu_425_r1_dbl"},
+          {"icon":"/images/icons/d2r_double.png"},
+          {"icon":"/images/icons/d1r_single.png"},
+          {"icon":"/images/icons/d2_double.png"}
+        ]
+      }
+    ],
+    "align": "center",
+    "fullWidth": true
+  },
+
+
+  {
     "id": "htu_500",
     "kind": "subject",
     "sid": "htu_500_exa"
@@ -426,9 +446,21 @@
   "altSid": "htu_img_620_alt",
   "titleSid": "",
   "bodySids": [
-    "htu_622_whn",
-    "htu_623_dim",
-    "htu_624_siz"
+      {
+        "parts":[
+          {"sid":"htu_622_whn"},
+          {"icon":"/images/icons/a5_red.png"},
+          {"icon":"/images/icons/a6_load.png"},
+          {"icon":"/images/icons/d1r_single.png"}
+        ]
+      },
+      "htu_623_dim",
+      {
+        "parts":[
+          {"sid":"htu_624_siz"},
+          {"icon":"/images/icons/a7_config.png"}
+        ]
+      }
   ],
   "ratio": "2 / 1",
   "fit": "contain",
@@ -442,7 +474,8 @@
   "bodySids": [
     { "sid": "htu_632_wor"},
     { "sid": "htu_633_ava"},
-    { "sid": "htu_634_req"}
+    { "sid":"htu_834_req"}
+
   ],
   "align": "center",
   "fullWidth": true
@@ -498,7 +531,7 @@
       {
         "parts":[
           {"sid":"htu_824_b4_move"},
-          {"icon":"/images/icons/b3_move.png"}
+          {"icon":"/images/icons/b3r_move.png"}
         ]
       },
       "htu_825_b5_align"
