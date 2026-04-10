@@ -130,7 +130,12 @@
     "titleSid": "",
     "bodySids": [
       { "sid": "htu_162_new", "align": "center" },
-      { "sid": "htu_163_tab", "align": "center" }
+      {
+        "parts":[
+          {"sid":"htu_163_tab"},
+          {"icon":"/images/icons/a7_config.png"}
+        ]
+      }
     ],
     "fit": "contain",
     "fullWidth": true
@@ -161,7 +166,13 @@
     "altSid": "htu_img_210_alt",
     "titleSid": "",
     "bodySids": [
-      "htu_212_aft",
+      {
+        "parts":[
+          {"sid":"htu_212_aft"},
+          {"icon":"/images/icons/a2_ar.png"},
+          {"icon":"/images/icons/a3_blue.png"}
+        ]
+      },
       "htu_213_you"
     ],
     "fit": "contain",
@@ -355,8 +366,6 @@
     "align": "center",
     "fullWidth": true
   },
-
-
   {
     "id": "htu_500",
     "kind": "subject",
