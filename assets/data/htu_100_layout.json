@@ -572,7 +572,8 @@
       {
         "parts":[
           {"sid":"htu_844_b4"},
-          {"icon":"/images/icons/a3_blue.png"}
+          {"icon":"/images/icons/a3_blue.png"},
+          {"icon":"/images/icons/b3r_move.png"}
         ]
       }
     ],
