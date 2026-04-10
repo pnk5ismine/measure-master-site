@@ -44,7 +44,7 @@
   "idx.hero.subtitle": "Photo Perspective, AR Camera and On-screen.",
   "idx.hero.tagline": "Correct perspective in photos, measure real-world distances and draw shapes directly on your screen — all in one place.",
   "idx.hero.title": "All-in-one measuring app",
-  "idx.limits.lead": "Measure Master aims to bring the feel of “tape measure + field sense” into your phone. Please keep the following in mind.",
+  "idx.limits.lead": "Measure Master APP needs minimum + - 1% tolerance under Double Rectangle Mode. Please keep the following in mind.",
   "idx.limits.li1": "It targets approximate values for decision-making, not certified engineering-grade measurements.",
   "idx.limits.li2": "The more accurate your reference rectangle dimensions are, the more reliable the results will be.",
   "idx.limits.li3": "Camera angle, photo quality, and lens distortion can all introduce error.",
