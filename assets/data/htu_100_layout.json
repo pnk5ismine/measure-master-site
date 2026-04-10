@@ -566,7 +566,7 @@
       {
         "parts":[
           {"sid":"htu_843_b3"},
-          {"icon":"/images/icons/b3_move.png"}
+          {"icon":"/images/icons/b3r_move.png"}
         ]
       },
       {
@@ -608,7 +608,7 @@
       {
         "parts":[
           {"sid":"htu_854_b4"},
-          {"icon":"/images/icons/b3_move.png"}
+          {"icon":"/images/icons/b3r_move.png"}
         ]
       },      "htu_854_b4",
       "htu_855_b5",

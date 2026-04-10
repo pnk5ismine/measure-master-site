@@ -90,7 +90,7 @@
 {"id":"htu_025","kind":"step_body","num":3,
   "parts":[
     {"sid":"htu_025_a"},
-    {"icon":"/images/icons/b3_move.png"},
+    {"icon":"/images/icons/b3r_move.png"},
     {"sid":"htu_025_b"}
   ]
 },
