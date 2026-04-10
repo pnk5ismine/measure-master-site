@@ -659,7 +659,9 @@
       {
         "parts":[
           {"sid":"htu_857_b7"},
-          {"icon":"/images/icons/a3_blue.png"}
+          {"icon":"/images/icons/a3_blue.png"},
+          {"icon":"/images/icons/b1_straight.png"},
+          {"icon":"/images/icons/b1b_curve.png"}
         ]
       }
     ],
