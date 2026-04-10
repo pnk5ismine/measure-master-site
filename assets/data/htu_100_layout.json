@@ -506,12 +506,12 @@
   },
   {
     "id": "htu_812",
-    "kind": "remark",
-    "titleSid": "htu_812_rtitle",
+    "kind": "card",
+    "titleSid": "htu_812_ctitle",
     "bodySids": [
-      "htu_812_r1_prep",
-      "htu_813_r2_iden",
-      "htu_814_r3_set"
+      "htu_812_b1_prep",
+      "htu_813_b2_iden",
+      "htu_814_b3_set"
     ],
     "fullWidth": true
   },
