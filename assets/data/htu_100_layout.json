@@ -358,6 +358,7 @@
         "parts":[
           {"sid":"htu_425_r1_dbl"},
           {"icon":"/images/icons/d2r_double.png"},
+          {"sid":"htu_426_r2_oth"},
           {"icon":"/images/icons/d1r_single.png"},
           {"icon":"/images/icons/d2_double.png"}
         ]
@@ -482,7 +483,7 @@
   "bodySids": [
     { "sid": "htu_632_wor"},
     { "sid": "htu_633_ava"},
-    { "sid":"htu_834_req"}
+    { "sid":"htu_634_req"}
 
   ],
   "align": "center",
