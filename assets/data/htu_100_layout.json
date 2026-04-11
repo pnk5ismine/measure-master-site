@@ -699,7 +699,13 @@
     "altSid": "htu_img_911_alt",
     "titleSid": "htu_911_ctitle",
     "bodySids": [
-
+       "htu_912_b1",
+       "htu_913_b2",
+       "htu_914_b3",
+       "htu_915_b4",
+       "htu_916_b5",
+       "htu_917_b6",
+       "htu_918_b7"
     ],
     "fullWidth": true
   }

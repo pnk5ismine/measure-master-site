@@ -283,7 +283,15 @@
   "htu_900_sub": "Practical Use Cases in the Business Field",
 
   "htu_910_title": "Estimating Paint Quantity by Color for an Apartment Exterior",
-  "htu_911_ctitle": "Work Scope: Forward Exterior Wall of one unit (Including small side & edges)    App Preset: unit M, decimal 1",
+  "htu_911_ctitle": "Work Scope: Forward Exterior Wall of one unit (Including side & edges)",
+
+  "htu_912_b1": "Dark Gray: Buildings 1–3, 12 units,  Gray: Staircase exterior walls, 32 units, Light Gray: Bedroom balconies, 64 units, Dark Blue: Living room balconies, 64 units.",
+  "htu_913_b2": "Dark Gray: Total area (291) - excluding balconies (14 × 12) - excluding staircase walls (22 × 2) = 291 - 168 - 44 = 79 m²",
+  "htu_914_b3": "Gray: Total area (233 × 2) - excluding windows (2 × 32) = 466 - 64 = 402 m²",
+  "htu_915_b4": "Light Gray: Total area (339 × 2) - excluding bedroom balconies (6 × 64) = 678 - 384 = 294 m²",
+  "htu_916_b5": "Dark Blue: Total area (160 × 4) - excluding living room balconies (8 × 64) = 640 - 512 = 128 m²",
+  "htu_917_b6": "The site supervisor instructs the paint mixer to prepare only the estimated amount for each color, plus a small allowance.",
+  "htu_918_b7": "That allowance is what reflects the experience of a seasoned supervisor.",
 
   "rvw_lst1": "No.",
   "rvw_lst2": "Nickname",
