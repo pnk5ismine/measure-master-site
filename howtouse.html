@@ -498,6 +498,20 @@ body{
 .htu-card {
   gap: 0 !important;
 }
+.youtube-wrapper {
+  width: 100%;
+  max-width: 900px;
+  margin: 14px auto 18px;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.youtube-wrapper iframe {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border: 0;
+  display: block;
+}
 </style>
 
 </head>
@@ -536,6 +550,15 @@ body{
 <main>
   <section class="card howtouse">
     <h1>How to use Measure Master</h1>
+
+    <!-- 여기 추가 -->
+    <div class="youtube-wrapper">
+        <iframe
+          src="https://www.youtube.com/embed/Rr8fyChC-Fs"
+          allowfullscreen>
+        </iframe>
+    </div>
+
     <p class="muted">
       Tap or click an image to open the full-size version in a new tab.
     </p>
