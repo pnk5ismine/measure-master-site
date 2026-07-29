@@ -57,7 +57,7 @@
   "idx.modes.remote.body2": "크기를 아는 기준 사각형을 이용한 원근 보정으로 접근하기 어려운 대상의 길이와 면적을 추정합니다.",
   "idx.modes.remote.title": "원거리 측정  모드",
   "idx.modes.close.alt": "근거리 측정 모드",
-  "idx.modes.close.body1": "실내와 근거리 대상은 AR 카메라의 기준 사각형 자동 인식 기능이나 즉시 길이 측정 기능을 이용합니다.",
+  "idx.modes.close.body1": "실내와 근거리 대상은 AR 카메라의 기준 사각형 자동 삽입 기능이나 즉시 길이 측정 기능을 이용합니다.",
   "idx.modes.close.body2": "AR 사용이 어려운 환경에서는 기준 사각형을 이용한 원근 보정 방식으로 측정을 계속할 수 있습니다.",
   "idx.modes.close.title": "근거리 측정 모드",
   "idx.modes.screen.alt": "스크린 측정 모드",

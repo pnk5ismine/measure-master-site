@@ -57,7 +57,7 @@
   "idx.modes.remote.body2": "Using perspective correction with a reference rectangle of known size, estimate the length and area of objects that are difficult to access.",
   "idx.modes.remote.title": "Remote Mode",
   "idx.modes.close.alt": "Close-range Mode",
-  "idx.modes.close.body1": "For indoor and nearby objects, use the AR camera for automatic reference rectangle detection or instant distance measurement.",
+  "idx.modes.close.body1": "For indoor and nearby objects, use the AR camera for automatic reference rectangle insertion or instant distance measurement.",
   "idx.modes.close.body2": "When AR is unavailable, continue measuring with perspective correction using a reference rectangle.",
   "idx.modes.close.title": "Close-range Mode",
   "idx.modes.screen.alt": "Screen Mode",
