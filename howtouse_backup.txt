@@ -162,7 +162,8 @@ body{
   .htu-subject,
   .htu-title,
   .htu-remark,
-  .htu-divider{
+  .htu-step-title,
+  .htu-step-note{
     grid-column:1 / -1;
     width:100%;
   }
@@ -195,6 +196,7 @@ body{
 }
 
   /* 2) step-title + title : same medium */
+.htu-step-title,
 .htu-title{
   display:block;
   text-align:center;
@@ -213,8 +215,18 @@ body{
   background:var(--htu-bg);
 }
 
+  /* step-title can be slightly more left-oriented if wanted */
+  .htu-step-title{
+    text-align:left;
+    margin:10px 0 2px;
+    padding:12px 14px 8px;
+    border-left:none;
+    border-right:none;
+    background:transparent;
+  }
 
-  /* 3) remark */
+  /* 3) step-note + remark : same level */
+.htu-step-note,
 .htu-remark{
   display:block;
   text-align:left;
@@ -273,34 +285,6 @@ body{
   .htu-spacer--sm{ height:10px; }
   .htu-spacer--md{ height:18px; }
   .htu-spacer--lg{ height:28px; }
-
-  /* =========================
-     Divider
-     ========================= */
-  .htu-divider{
-    grid-column:1 / -1;
-    display:flex;
-    align-items:center;
-    width:100%;
-    gap:16px;
-    margin:30px 0 18px;
-  }
-
-  .htu-divider::before,
-  .htu-divider::after{
-    content:"";
-    flex:1 1 auto;
-    border-top:3px solid rgba(31,41,55,.75);
-  }
-
-  .htu-divider__label{
-    flex:0 0 auto;
-    color:var(--htu-text);
-    font-size:1.2rem;
-    line-height:1.35;
-    font-weight:800;
-    text-align:center;
-  }
 
   /* =========================
      Cards
@@ -391,13 +375,37 @@ body{
     margin-top:0;
   }
 
+  /* step body */
+  .htu-step-body{
+    grid-column:1 / -1;
+    display:flex;
+    align-items:flex-start;
+    gap:10px;
+    padding:1px 2px;
+    color:var(--htu-muted);
+    font-size:0.97rem;
+    line-height:1.18;
+  }
+
+  .htu-step-num{
+    flex:0 0 auto;
+    min-width:24px;
+    font-weight:800;
+    color:var(--htu-text);
+  }
+
+  .htu-step-text{
+    flex:1 1 auto;
+    min-width:0;
+  }
 
   /* =========================
      Visual cleanup
      ========================= */
   .htu-card,
   .htu-title,
-  .htu-remark{
+  .htu-remark,
+  .htu-step-note{
     box-shadow:none;
     border-radius:0;
   }
@@ -412,6 +420,7 @@ body{
   margin:14px 0 6px;
 }
 
+.htu-step-title,
 .htu-title{
   font-size:1.18rem;
   padding:9px 12px 2px;
@@ -426,24 +435,36 @@ body{
       line-height:1.16;
     }
 
+    .htu-step-body{
+      font-size:0.94rem;
+      line-height:1.16;
+    }
 
+    .htu-step-note,
     .htu-remark{
       font-size:0.92rem;
       line-height:1.38;
       padding:8px 10px;
     }
-
-    .htu-divider{
-      gap:10px;
-      margin:24px 0 14px;
-    }
-
-    .htu-divider__label{
-      max-width:72%;
-      font-size:1.02rem;
-    }
   }
 
+.htu-step-image{
+  grid-column: 1 / -1;
+  width: 100%;
+  margin: 4px 0 10px;
+  border-left: 1px solid var(--htu-border);
+  border-right: 1px solid var(--htu-border);
+  background: #fff;
+  overflow: hidden;
+}
+
+.htu-step-image img{
+  display: block;
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+  background: #fff;
+}
 
 .htu-title + .htu-card{
   margin-top:0 !important;
@@ -457,6 +478,8 @@ body{
   margin:0 0.18em;
 }
 
+.htu-step-title .htu-inline-icon,
+.htu-step-text .htu-inline-icon,
 .htu-body .htu-inline-icon{
   position:relative;
   top:0.02em;
@@ -714,21 +737,6 @@ body{
     return el;
   }
 
-  function buildDivider(item) {
-    const el = document.createElement("div");
-    el.className = "htu-divider";
-    el.classList.add("htu-item--full");
-
-    if (item.sid) {
-      const label = document.createElement("span");
-      label.className = "htu-divider__label";
-      label.textContent = tBySid(item.sid);
-      el.appendChild(label);
-    }
-
-    return el;
-  }
-
   function buildCard(item) {
     const card = document.createElement("article");
     card.className = "htu-card";
@@ -782,6 +790,66 @@ body{
     return card;
   }
 
+  function buildStepTitle(item) {
+    const el = document.createElement("div");
+    el.className = "htu-step-title";
+
+    if (Array.isArray(item.parts) && item.parts.length > 0) {
+      appendInlineParts(el, item.parts);
+    } else {
+      el.textContent = tBySid(item.sid);
+    }
+
+    return el;
+  }
+
+  function buildStepBody(item) {
+    const row = document.createElement("div");
+    row.className = "htu-step-body";
+
+    const num = document.createElement("div");
+    num.className = "htu-step-num";
+    num.textContent = (item.num != null ? item.num + "." : "");
+
+    const text = document.createElement("div");
+    text.className = "htu-step-text";
+
+    if (Array.isArray(item.parts) && item.parts.length > 0) {
+      appendInlineParts(text, item.parts);
+    } else {
+      text.textContent = tBySid(item.sid);
+    }
+
+    row.appendChild(num);
+    row.appendChild(text);
+    return row;
+  }
+
+  function buildStepNote(item) {
+    const el = document.createElement("div");
+    el.className = "htu-step-note";
+    el.textContent = tBySid(item.sid);
+    return el;
+  }
+
+  function buildStepImage(stepIndex) {
+    const wrap = document.createElement("div");
+    wrap.className = "htu-step-image htu-item--full";
+
+    const img = document.createElement("img");
+    img.src = "/images/howtouse/howtouse_step" + stepIndex + ".jpg";
+    img.alt = "How to use step " + stepIndex;
+    img.loading = "lazy";
+    img.decoding = "async";
+
+    img.addEventListener("error", function () {
+      console.warn("Step image not found:", img.src);
+      wrap.style.display = "none";
+    });
+
+    wrap.appendChild(img);
+    return wrap;
+  }
 
   function renderItemsTo(containerId, items) {
     const grid = document.getElementById(containerId);
@@ -792,6 +860,7 @@ body{
 
     grid.innerHTML = "";
 
+    let stepTitleIndex = 0;
 
     items.forEach(item => {
       if (!item || !item.kind) return;
@@ -815,14 +884,21 @@ body{
           node = buildSpacer(item);
           break;
 
-        case "divider":
-          node = buildDivider(item);
-          break;
-
         case "card":
           node = buildCard(item);
           break;
 
+        case "step_title":
+          node = buildStepTitle(item);
+          break;
+
+        case "step_body":
+          node = buildStepBody(item);
+          break;
+
+        case "step_note":
+          node = buildStepNote(item);
+          break;
 
         default:
           console.warn("Unknown howtouse item kind:", item.kind, item);
@@ -833,6 +909,12 @@ body{
         node.setAttribute("data-htu-id", item.id || "");
         grid.appendChild(node);
 
+        if (containerId === "htuSteps" && item.kind === "step_title") {
+          stepTitleIndex += 1;
+          const imgNode = buildStepImage(stepTitleIndex);
+          imgNode.setAttribute("data-step-image", String(stepTitleIndex));
+          grid.appendChild(imgNode);
+        }
       }
     });
   }
@@ -864,10 +946,10 @@ body{
       const gallery = document.getElementById("htuGallery");
 
       if (steps) {
-        steps.innerHTML = '<div class="htu-remark">Failed to load step layout.</div>';
+        steps.innerHTML = '<div class="htu-step-note">Failed to load Phase 2 layout.</div>';
       }
       if (gallery) {
-        gallery.innerHTML = '<div class="htu-remark">Failed to load gallery layout.</div>';
+        gallery.innerHTML = '<div class="htu-remark">Failed to load Phase 3 layout.</div>';
       }
     }
   }
