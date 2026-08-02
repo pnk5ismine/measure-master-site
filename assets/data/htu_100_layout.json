@@ -73,7 +73,8 @@
   {
     "id": "htu_card_120a",
     "kind": "card",
-    "src": "/images/howtouse/htu_120.jpg",
+    "src": "/images/howtouse/htu_120a.jpg",
+    "src": "/images/howtouse/htu_120b.png",
     "altSid": "htu_img_120_alt",
     "titleSid": "",
     "bodySids": [
