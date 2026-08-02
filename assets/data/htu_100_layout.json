@@ -68,7 +68,7 @@
     "kind": "title",
     "sid": "htu_121_mai",
     "align": "center",
-    "fullWidth": true"
+    "fullWidth": true
   },
   {
     "id": "htu_card_120a",
@@ -85,7 +85,7 @@
       "htu_133_sho"
     ],
     "fit": "contain",
-    "fullWidth": true"
+    "fullWidth": true
   },
 
   {
@@ -93,7 +93,7 @@
     "kind": "title",
     "sid": "htu_151_scr",
     "align": "center",
-    "fullWidth": true"
+    "fullWidth": true
   },
   {
     "id": "htu_card_150a",
