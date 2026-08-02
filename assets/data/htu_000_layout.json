@@ -48,7 +48,7 @@
          "parts":[
            {"sid":"htu_021b"},
            {"icon":"/images/icons/a6_load.png"},
-           {"icon":"/images/icons/d1r_single.jpg"},
+           {"icon":"/images/icons/d1r_single.png"},
            {"icon":"/images/icons/a3_blue.png"}
          ]
       },
@@ -90,7 +90,12 @@
     "titleSid": "",
     "bodySids": [
       "htu_031a",
-      "htu_031b",
+      {
+         "parts":[
+           {"sid":"htu_031b"},
+           {"icon":"/images/icons/a3_blue.png"}
+        ]
+      },
       "htu_032",
       "htu_033",
       {
@@ -101,8 +106,8 @@
            {"icon":"/images/icons/d5_w.jpg"},
            {"icon":"/images/icons/d6_h.jpg"},
            {"icon":"/images/icons/a3_blue.png"}
-         ]
-       }
+        ]
+     }
     ],
     "fit": "contain",
     "fullWidth": true
