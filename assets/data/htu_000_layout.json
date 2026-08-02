@@ -15,11 +15,21 @@
       "htu_011",
       "htu_012",
       "htu_013",
-      "htu_014"
+      "parts":[
+        {"sid":"htu_014"},
+        {"icon":"/images/icons/a6_load.png"},
+        {"icon":"/images/icons/d5_w.jpg"},
+        {"icon":"/images/icons/d6_h.jpg"},
+        {"icon":"/images/icons/a3_blue.png"}
+      ]
      ],
     "fit": "contain",
     "fullWidth": true
   },
+
+      {
+
+      },
 
   {
     "id": "htu_title_020",
@@ -35,12 +45,27 @@
     "titleSid": "",
     "bodySids": [
       "htu_021a",
-      "htu_021b",
+      "parts":[
+        {"sid":"htu_021b"},
+        {"icon":"/images/icons/a6_load.png"},
+        {"icon":"/images/icons/d1r_single.jpg"},
+        {"icon":"/images/icons/a3_blue.png"}
+      ],
       "htu_022a",
-      "htu_022b",
+      "parts":[
+        {"sid":"htu_022b"},
+        {"icon":"/images/icons/a2_ar.png"},
+        {"icon":"/images/icons/e1_camera.png"}
+      ],
       "htu_023a",
       "htu_023b",
-      "htu_023c"
+      "parts":[
+        {"sid":"htu_023c"},
+        {"icon":"/images/icons/a6_load.png"},
+        {"icon":"/images/icons/d5_w.jpg"},
+        {"icon":"/images/icons/d6_h.jpg"},
+        {"icon":"/images/icons/a3_blue.png"}
+      ]
      ],
     "fit": "contain",
     "fullWidth": true
@@ -63,7 +88,14 @@
       "htu_031b",
       "htu_032",
       "htu_033",
-      "htu_034"
+      "parts":[
+        {"sid":"htu_034"},
+        {"icon":"/images/icons/a6_load.png"},
+        {"icon":"/images/icons/d3r_triangle.png"},
+        {"icon":"/images/icons/d5_w.jpg"},
+        {"icon":"/images/icons/d6_h.jpg"},
+        {"icon":"/images/icons/a3_blue.png"}
+      ]
      ],
     "fit": "contain",
     "fullWidth": true
