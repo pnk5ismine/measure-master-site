@@ -731,15 +731,21 @@ body{
       media.style.aspectRatio = item.ratio;
     }
 
-    const img = document.createElement("img");
-    img.src = item.src || "";
-    img.alt = tBySid(item.altSid || "");
-    img.loading = "lazy";
-    img.decoding = "async";
-    img.style.objectFit = item.fit || "contain";
+    const sources = Array.isArray(item.srcs)
+      ? item.srcs
+      : [item.src || ""];
 
-    media.appendChild(img);
-    card.appendChild(media);
+    sources.forEach((src, index) => {
+      const img = document.createElement("img");
+      img.src = src;
+      img.alt = tBySid(item.altSid || "") + (sources.length > 1 ? ` ${index + 1}` : "");
+      img.loading = "lazy";
+      img.decoding = "async";
+      img.style.objectFit = item.fit || "contain";
+
+      media.appendChild(img);
+      card.appendChild(media);
+   });
 
     const hasTitle = !!(item.titleSid && String(item.titleSid).trim());
     const hasBodySids = Array.isArray(item.bodySids) && item.bodySids.length > 0;
