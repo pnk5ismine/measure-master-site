@@ -99,16 +99,19 @@
       "htu_032",
       "htu_033",
       {
-         "parts":[
-           {"sid":"htu_034"},
-           {"icon":"/images/icons/a6_load.png"},
-           {"icon":"/images/icons/d3r_triangle.png"},
-           {"icon":"/images/icons/d5_w.jpg"},
-           {"icon":"/images/icons/d6_h.jpg"},
-           {"icon":"/images/icons/a3_blue.png"}
+        "parts": [
+          {"sid": "htu_034"},
+          {"icon": "/images/icons/a6_load.png"},
+          {"icon": "/images/icons/d3r_triangle.png"},
+          {"icon": "/images/icons/d5_w.jpg"},
+          {"icon": "/images/icons/d6_h.jpg"},
+         {"icon": "/images/icons/a3_blue.png"}
         ]
      }
     ],
+    "fit": "contain",
+    "fullWidth": true
+    },
     {
       "id": "htu_remark_035",
       "kind": "remark",
@@ -117,14 +120,11 @@
       ],
       "fullWidth": true
     },
-    "fit": "contain",
-    "fullWidth": true
-  },
 
-{
-    "id": "htu_divider_035",
-    "kind": "divider"
-},
+    {
+        "id": "htu_divider_035",
+        "kind": "divider"
+    },
 
   {
     "id": "htu_title_040",
