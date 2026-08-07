@@ -126,6 +126,7 @@
 "htu_032": "This mode can be used for calculating irregular areas, estimating material quantities, and calculating GSM for fabric or sample materials.",
 "htu_033": "If the displayed length does not match the actual measured length, perform [Screen Mode Calibration] once in Settings.",
 "htu_034": "Alternatively, place the object on a sheet of paper with known dimensions, take a photo, and use the same photo measurement method by entering the reference rectangle in RedEye.",
+"htu_035": "All labels can be freely dragged from their default positions to any desired location. Resetting the layer also resets the label positions to their defaults.",
 
 "htu_040_distance": "Long Distance Tracking Mode",
 

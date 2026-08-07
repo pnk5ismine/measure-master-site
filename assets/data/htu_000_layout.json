@@ -85,8 +85,8 @@
   {
     "id": "htu_card_030",
     "kind": "card",
-    "src": "/images/howtouse/htu_screen_1.jpg",
-    "altSid": "htu_img_030_alt",
+    "src": "/images/howtouse/htu_screen_1.png",
+    "altSid": "htu_img_screen_1_alt",
     "titleSid": "",
     "bodySids": [
       "htu_031a",
@@ -109,6 +109,14 @@
         ]
      }
     ],
+    {
+      "id": "htu_remark_035",
+      "kind": "remark",
+      "bodySids": [
+        "htu_035"
+      ],
+      "fullWidth": true
+    },
     "fit": "contain",
     "fullWidth": true
   },
