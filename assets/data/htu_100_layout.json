@@ -96,9 +96,9 @@
     "fullWidth": true
   },
   {
-    "id": "htu_card_150a",
+    "id": "htu_card_150",
     "kind": "card",
-    "src": "/images/howtouse/htu_150.jpg",
+    "src": "/images/howtouse/htu_150.png",
     "altSid": "htu_img_150_alt",
     "titleSid": "",
     "bodySids": [
