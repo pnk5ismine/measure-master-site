@@ -246,20 +246,19 @@
   "htu_811_r1_this": "This method estimates distances by using a known reference distance to a point ahead and calculating distances to other points that are not farther than that reference.",
 
   "htu_812_ctitle": "Preparation",
-  "htu_812_b1_prep": "1. Know a reference distance (e.g., 180 m from the tee to the hole) and a reference width (e.g., 2 m width of the tee-shot zone).",
+  "htu_812_b1_prep": "1. Remember the distance (e.g., 180 m from the tee to the hole) and the width (e.g., 2 m width of the tee-shot zone).",
   "htu_813_b2_iden": "2. Identify the horizon point (vanishing point) in advance.",
   "htu_814_b3_set": "3. Set your preferred distance unit (e.g., meters) before starting.",
 
   "htu_820_title": "Example on a Par-3 Golf Hole",
 
   "htu_821_b1_photo": "1. Take a photo right after the tee shot, placing the hole at the top center and the tee-shot zone at the bottom center.",
-  "htu_822_b2_red": "2. Tap the red eye icon, then tap the load icon to import the photo.",
+  "htu_822_b2_red": "2. Tap the load icon to import the photo and then tap the red eye icon.",
   "htu_823_b3_three": "3. Tap the triangle icon in the floating panel at first. And tap three arbitrary points on the screen. An isosceles trapezoid will be generated automatically.",
-  "htu_824_b4_move": "4. Tap the move icon, then drag the top edge of the trapezoid upward and align it with the horizon (vanishing point).",
-  "htu_825_b5_align": "5. Align the top edge with the hole position and drag one point of the bottom edge to match the tee-shot zone.",
+  "htu_824_b4_move": "4. Tap the move icon, then drag the "x" point of triangle to meet with the horizon (vanishing point).",
+  "htu_825_b5_align": "5. Align the top edge upto the hole position and drag both points of the bottom edge to match the tee-shot zone.",
   "htu_826_b6_enter": "6. Enter 2 for width (w) and 180 for height (h).",
-  "htu_827_b7_blue": "7. Tap the blue eye icon, then tap once on the tee line and another on the ball landing point. A blue line is drawn.",
-  "htu_828_b8_come": "8. Come back to the red eye icon, and tap convert button in the floating panel. Then the distance will be displayed automatically.",
+  "htu_827_b7_blue": "7. Tap the blue eye icon, then tap once on the tee line and another on the ball landing point. Then the actual distance is displayed.",
 
   "htu_831_rb1_prac": "To use this effectively on the field, practice the full process in advance until you are familiar with it.",
 

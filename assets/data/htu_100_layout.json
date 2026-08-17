@@ -543,37 +543,19 @@
           {"icon":"/images/icons/b3r_move.png"}
         ]
       },
-      "htu_825_b5_align"
-    ],
-    "align": "left",
-    "fullWidth": true
-  },
-
-  {
-    "id": "htu_card_826",
-    "kind": "card",
-    "src": "/images/howtouse/htu_826_line.jpg",
-    "altSid": "htu_img_826_alt",
-    "titleSid": "",
-    "bodySids": [
+      "htu_825_b5_align",
       "htu_826_b6_enter",
       {
         "parts":[
           {"sid":"htu_827_b7_blue"},
           {"icon":"/images/icons/a3_blue.png"}
         ]
-      },
-      {
-        "parts":[
-          {"sid":"htu_828_b8_come"},
-          {"icon":"/images/icons/a5_red.png"},
-          {"icon":"/images/icons/d4_convert.png"}
-        ]
       }
     ],
     "align": "left",
     "fullWidth": true
   },
+
   {
     "id": "htu_831",
     "kind": "remark",
