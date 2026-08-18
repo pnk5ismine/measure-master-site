@@ -243,7 +243,7 @@
 
   "htu_821_b1_photo": "1. Take a photo right after the tee shot, placing the hole at the top center and the tee-shot zone at the bottom center.",
   "htu_822_b2_red": "2. Tap the load icon to import the photo and then tap the red eye icon.",
-  "htu_823_b3_three": "3. Tap the triangle icon in the floating panel at first. And tap three arbitrary points on the screen. An isosceles trapezoid will be generated automatically.",
+  "htu_823_b3_three": "3. Tap the triangle icon in the floating panel at first. And tap three arbitrary points on the screen. Then an isosceles trapezoid will be generated automatically.",
   "htu_824_b4_move": "4. Tap the move icon, then drag the "x" point of triangle to meet with the horizon (vanishing point).",
   "htu_825_b5_align": "5. Align the top edge upto the hole position and drag both points of the bottom edge to match the tee-shot zone.",
   "htu_826_b6_enter": "6. Enter 2 for width (w) and 180 for height (h).",
