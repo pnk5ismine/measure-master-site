@@ -163,20 +163,22 @@
   {
     "id": "htu_title_230",
     "kind": "title",
-    "sid": "htu_231_out",
+    "sid": "htu_230_remote2",
     "align": "center",
     "fullWidth": true
   },
   {
     "id": "htu_card_230",
     "kind": "card",
-    "src": "/images/howtouse/htu_230.jpg",
+    "src": "/images/howtouse/htu_230.png",
     "altSid": "htu_img_230_alt",
-    "titleSid": "",
+    "titleSid": "htu_231_park",
     "bodySids": [
-      { "sid": "htu_232_wor", "align": "center" }
+       "htu_232_fire",
+       "htu_233_outline",
+       "htu_234_except",
+       "htu_235_net"        
     ],
-    "ratio": "2 / 1",
     "fit": "contain",
     "fullWidth": true
   },
