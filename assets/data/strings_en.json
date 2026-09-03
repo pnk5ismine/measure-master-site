@@ -173,7 +173,7 @@
   "htu_232_fire": "1. First, choose a reference rectangle within the target area. In this example, the 3 m × 12 m [Fire Truck Stop] block is used as the reference.",
   "htu_233_outline": "2. Draw the outer boundary of the construction area as accurately as possible.",
   "htu_234_except": "3. Draw the areas to be excluded, such as landscaped tree areas and the stair canopy area facing the parking lot.",
-  "htu_235_net": "4. The net parking lot construction area is calculated by subtracting the excluded areas from the total work area."
+  "htu_235_net": "4. The net parking lot construction area is calculated by subtracting the excluded areas from the total work area.",
 
   "htu_img_240_alt": "An Apartment Building",
   "htu_241_rea": "Real-World Example: Measuring an Apartment Building",
