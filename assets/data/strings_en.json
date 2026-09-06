@@ -116,7 +116,7 @@
 
 "htu_023a": "If AR cannot be used (AR unsupported devices or regular photos), or if measurements need to be performed later away from the site,",
 "htu_023b": "simply use the same photo measurement method by entering a reference rectangle in RedEye.",
-"htu_023c": "Workflow: Load > Select 4 corners > Enter Width (W) and Height (H) > BlueEye",
+"htu_023c": "Workflow: Load > RedEye > Select 4 corners > Enter Width (W) and Height (H) > BlueEye",
 
 "htu_030_screen": "3 Screen Mode",
 
