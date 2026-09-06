@@ -19,6 +19,7 @@
          "parts":[
            {"sid":"htu_014"},
            {"icon":"/images/icons/a6_load.png"},
+           {"icon":"/images/icons/a5_red.png"},
            {"icon":"/images/icons/d5_w.jpg"},
            {"icon":"/images/icons/d6_h.jpg"},
            {"icon":"/images/icons/a3_blue.png"}
@@ -48,6 +49,7 @@
          "parts":[
            {"sid":"htu_021b"},
            {"icon":"/images/icons/a6_load.png"},
+           {"icon":"/images/icons/a5_red.png"},
            {"icon":"/images/icons/d1r_single.png"},
            {"icon":"/images/icons/a3_blue.png"}
          ]
@@ -66,6 +68,7 @@
          "parts":[
            {"sid":"htu_023c"},
            {"icon":"/images/icons/a6_load.png"},
+           {"icon":"/images/icons/a5_red.png"},
            {"icon":"/images/icons/d5_w.jpg"},
            {"icon":"/images/icons/d6_h.jpg"},
            {"icon":"/images/icons/a3_blue.png"}

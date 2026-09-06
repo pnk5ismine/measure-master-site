@@ -109,7 +109,7 @@
 "htu_020_close": "2 Close-range Mode",
 
 "htu_021a": "Photos captured with this app's AR camera automatically include a reference rectangle. After confirming it in RedEye, you can immediately begin real-world measurement in BlueEye.",
-"htu_021b": "Workflow: Load > Trapezoid Icon > BlueEye",
+"htu_021b": "Workflow: Load > RedEye > Trapezoid Icon > BlueEye",
 
 "htu_022a": "For indoor and nearby objects, use the AR camera to quickly measure the straight-line distance between two points.",
 "htu_022b": "Workflow: AR > Camera > + > +  ---> The distance between the two points is displayed automatically.",
