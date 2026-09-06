@@ -104,7 +104,7 @@
 "htu_011": "Measure distant buildings, exterior walls, factories, civil engineering structures, and more from a single photo.",
 "htu_012": "First, load a photo containing the object to be measured from the gallery. In RedEye, draw the reference rectangle and enter its actual width (W) and height (H). Then switch to BlueEye and draw the target object. Its actual length and area will be calculated automatically.",
 "htu_013": "You can use any rectangle with known dimensions as the reference rectangle, such as an A4 sheet of paper, a floor tile, a window, or a balcony.",
-"htu_014": "Workflow: Load > Select 4 corners > Enter Width (W) and Height (H) > BlueEye > Draw or mark the target object.",
+"htu_014": "Workflow: Load > RedEye > Select 4 corners > Enter Width (W) and Height (H) > BlueEye > Draw or mark the target object.",
 
 "htu_020_close": "2 Close-range Mode",
 
