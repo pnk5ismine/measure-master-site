@@ -108,7 +108,7 @@
     "kind": "spacer",
     "size": "lg"
   },
-  //라벨 처리
+
   {
     "id": "htu_title_710",
     "kind": "title",
@@ -145,7 +145,6 @@
     "fullWidth": true
   },
 
-  //투시보정
   {
     "id": "htu_200",
     "kind": "subject",
