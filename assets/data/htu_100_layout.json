@@ -108,7 +108,44 @@
     "kind": "spacer",
     "size": "lg"
   },
+  //라벨 처리
+  {
+    "id": "htu_title_710",
+    "kind": "title",
+    "sid": "htu_710_title",
+    "align": "center",
+    "fullWidth": true
+  },
+  {
+    "id": "htu_card_710",
+    "kind": "card",
+    "src": "/images/howtouse/htu_710.jpg",
+    "altSid": "htu_img_710_alt",
+    "titleSid": "htu_711_ctitle",
+    "bodySids": [
+      {
+        "parts":[
+          {"sid":"htu_712_b1"},
+          {"icon":"/images/icons/f1_length.png"},
+          {"icon":"/images/icons/f2_area.png"}
+        ]
+      },
+      "htu_713_b2"
+    ],
+    "fit": "contain",
+    "fullWidth": true
+  },
+  {
+    "id": "htu_714",
+    "kind": "remark",
+    "titleSid": "",
+    "bodySids": [
+      "htu_714_remark"
+    ],
+    "fullWidth": true
+  },
 
+  //투시보정
   {
     "id": "htu_200",
     "kind": "subject",

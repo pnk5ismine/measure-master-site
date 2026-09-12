@@ -236,6 +236,13 @@
   "htu_633_ava": "2. Available only on the RightEye page.",
   "htu_634_req": "3. Requires an ARCore-supported device. some models among Android 16 or more. ",
 
+  "htu_710_title": "Label Controls",
+
+  "htu_711_ctitle": "Show/Hide and Move Labels",
+  "htu_712_b1": "1. Tap the length or area icon at the bottom of the screen to hide all labels in the corresponding group.",
+  "htu_713_b2": "2. Tap the icon again to show the labels in that group.",
+  "htu_714_remark": "You can also drag each label to move it to any desired position.",
+
   "htu_800_sub": "Long Distance Tracking Mode Guide",
 
   "htu_810_rtitle": "Things to Know Before You Begin",
