@@ -101,40 +101,40 @@
 
 "htu_010_remote": "1 Remote Mode (Core Feature)",
 
-"htu_011": "Measure distant buildings, exterior walls, factories, civil engineering structures, and more from a single photo.",
-"htu_012": "First, load a photo containing the object to be measured from the gallery. In RedEye, draw the reference rectangle and enter its actual width (W) and height (H). Then switch to BlueEye and draw the target object. Its actual length and area will be calculated automatically.",
-"htu_013": "You can use any rectangle with known dimensions as the reference rectangle, such as an A4 sheet of paper, a floor tile, a window, or a balcony.",
-"htu_014": "Workflow: Load > RedEye > Select 4 corners > Enter Width (W) and Height (H) > BlueEye > Draw or mark the target object.",
+"htu_011": "1. Measure distant buildings, exterior walls, factories, civil engineering structures, and more from a single photo.",
+"htu_012": "2. First, load a photo containing the object to be measured from the gallery. In RedEye, draw the reference rectangle and enter its actual width (W) and height (H). Then switch to BlueEye and draw the target object. Its actual length and area will be calculated automatically.",
+"htu_013": "3. You can use any rectangle with known dimensions as the reference rectangle, such as an A4 sheet of paper, a floor tile, a window, or a balcony.",
+"htu_014": "4. Workflow: Load > RedEye > Select 4 corners > Enter Width (W) and Height (H) > BlueEye > Draw or mark the target object.",
 
 "htu_020_close": "2 Close-range Mode",
 
-"htu_021a": "Photos captured with this app's AR camera automatically include a reference rectangle. After confirming it in RedEye, you can immediately begin real-world measurement in BlueEye.",
-"htu_021b": "Workflow: Load > RedEye > Trapezoid Icon > BlueEye",
+"htu_021a": "2-1a. Photos captured with this app's AR camera automatically include a reference rectangle. After confirming it in RedEye, you can immediately begin real-world measurement in BlueEye.",
+"htu_021b": "2-1b. Workflow: Load > RedEye > Trapezoid Icon > BlueEye",
 
-"htu_022a": "For indoor and nearby objects, use the AR camera to quickly measure the straight-line distance between two points.",
-"htu_022b": "Workflow: AR > Camera > + > +  ---> The distance between the two points is displayed automatically.",
+"htu_022a": "2-2a. For indoor and nearby objects, use the AR camera to quickly measure the straight-line distance between two points.",
+"htu_022b": "2-2b. Workflow: AR > Camera > + > +  ---> The distance between the two points is displayed automatically.",
 
-"htu_023a": "If AR cannot be used (AR unsupported devices or regular photos), or if measurements need to be performed later away from the site,",
-"htu_023b": "simply use the same photo measurement method by entering a reference rectangle in RedEye.",
-"htu_023c": "Workflow: Load > RedEye > Select 4 corners > Enter Width (W) and Height (H) > BlueEye",
+"htu_023a": "2-3a. If AR cannot be used (AR unsupported devices or regular photos), or if measurements need to be performed later away from the site,",
+"htu_023b": "2-3b. simply use the same photo measurement method by entering a reference rectangle in RedEye.",
+"htu_023c": "2-3c.  Workflow: Load > RedEye > Select 4 corners > Enter Width (W) and Height (H) > BlueEye",
 
 "htu_030_screen": "3 Screen Mode",
 
-"htu_031a": "Even without a photo, you can draw lines or shapes directly on the screen to calculate actual lengths and areas.",
-"htu_031b": "Workflow: BlueEye > Draw directly on the screen. (RedEye must be empty.)",
+"htu_031a": "3-1a. Even without a photo, you can draw lines or shapes directly on the screen to calculate actual lengths and areas.",
+"htu_031b": "3-1b. Workflow: BlueEye > Draw directly on the screen. (RedEye must be empty.)",
 
-"htu_032": "This mode can be used for calculating irregular areas, estimating material quantities, and calculating GSM for fabric or sample materials.",
-"htu_033": "If the displayed length does not match the actual measured length, perform [Screen Mode Calibration] once in Settings.",
-"htu_034": "Alternatively, place the object on a sheet of paper with known dimensions, take a photo, and use the same photo measurement method by entering the reference rectangle in RedEye.",
-"htu_035": "All labels can be freely dragged from their default positions to any desired location. Resetting the layer also resets the label positions to their defaults.",
+"htu_032": "3-2. This mode can be used for calculating irregular areas, estimating material quantities, and calculating GSM for fabric or sample materials.",
+"htu_033": "3-3. If the displayed length does not match the actual measured length, perform [Screen Mode Calibration] once in Settings.",
+"htu_034": "3-4. Alternatively, place the object on a sheet of paper with known dimensions, take a photo, and use the same photo measurement method by entering the reference rectangle in RedEye.",
+"htu_035": "3-5. All labels can be freely dragged from their default positions to any desired location. Resetting the layer also resets the label positions to their defaults.",
 
 "htu_040_distance": " 4 Long Distance Tracking Mode",
 
-"htu_041": "1. Identify a known straight-line distance in advance (e.g., 180 m to the golf hole or a 2 m tee-shot zone width).",
-"htu_042": "2. Identify the horizon point (vanishing point).",
-"htu_043": "3. Set the distance unit (e.g., meters) before starting.",
-"htu_044": "This method estimates the distance from a known straight-line distance to any nearer point using 2D perspective geometry.",
-"htu_045": "Workflow: Load > Select the vanishing point > Select the two lower symmetric points > Triangle Icon > Enter W and H > BlueEye",
+"htu_041": "4-1. Identify a known straight-line distance in advance (e.g., 180 m to the golf hole or a 2 m tee-shot zone width).",
+"htu_042": "4-2. Identify the horizon point (vanishing point).",
+"htu_043": "4-3. Set the distance unit (e.g., meters) before starting.",
+"htu_044": "4-4. This method estimates the distance from a known straight-line distance to any nearer point using 2D perspective geometry.",
+"htu_045": "4-5. Workflow: Load > Select the vanishing point > Select the two lower symmetric points > Triangle Icon > Enter W and H > BlueEye",
 
   "htu_100_und": "Understanding the Menu Icons",
   "htu_img_110_alt": "Home page links",
