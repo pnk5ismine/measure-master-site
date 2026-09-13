@@ -103,7 +103,7 @@
 
 "htu_011": "1. Measure distant buildings, exterior walls, factories, civil engineering structures, and more from a single photo.",
 "htu_012": "2. First, load a photo containing the object to be measured from the gallery. In RedEye, draw the reference rectangle and enter its actual width (W) and height (H). Then switch to BlueEye and draw the target object. Its actual length and area will be calculated automatically.",
-"htu_013": "3. You can use any rectangle with known dimensions as the reference rectangle, such as an A4 sheet of paper, a floor tile, a window, or a balcony.",
+"htu_013": "3. You can use any rectangle with known dimensions as the reference rectangle, such as an A4 sheet of paper, a floor tile, a window, or a balcony --> perspective calibration method.",
 "htu_014": "4. Workflow: Load > RedEye > Select 4 corners > Enter Width (W) and Height (H) > BlueEye > Draw or mark the target object.",
 
 "htu_020_close": "2 Close-range Mode",
@@ -115,7 +115,7 @@
 "htu_022b": "2-2b. Workflow: AR > Camera > + > +  ---> The distance between the two points is displayed automatically.",
 
 "htu_023a": "2-3a. If AR cannot be used (AR unsupported devices or regular photos), or if measurements need to be performed later away from the site,",
-"htu_023b": "2-3b. simply use the same photo measurement method by entering a reference rectangle in RedEye.",
+"htu_023b": "2-3b. simply use the same perspective calibration method by entering a reference rectangle in RedEye.",
 "htu_023c": "2-3c.  Workflow: Load > RedEye > Select 4 corners > Enter Width (W) and Height (H) > BlueEye",
 
 "htu_030_screen": "3 Screen Mode",
@@ -125,7 +125,7 @@
 
 "htu_032": "3-2. This mode can be used for calculating irregular areas, estimating material quantities, and calculating GSM for fabric or sample materials.",
 "htu_033": "3-3. If the displayed length does not match the actual measured length, perform [Screen Mode Calibration] once in Settings.",
-"htu_034": "3-4. Alternatively, place the object on a sheet of paper with known dimensions, take a photo, and use the same photo measurement method by entering the reference rectangle in RedEye.",
+"htu_034": "3-4. Alternatively, place the object on a sheet of paper with known dimensions, take a photo, and use the same perspective calibration method by entering the reference rectangle in RedEye.",
 "htu_035": "3-5. All labels can be freely dragged from their default positions to any desired location. Resetting the layer also resets the label positions to their defaults.",
 
 "htu_040_distance": " 4 Long Distance Tracking Mode",
@@ -133,7 +133,7 @@
 "htu_041": "4-1. Identify a known straight-line distance in advance (e.g., 180 m to the golf hole or a 2 m tee-shot zone width).",
 "htu_042": "4-2. Identify the horizon point (vanishing point).",
 "htu_043": "4-3. Set the distance unit (e.g., meters) before starting.",
-"htu_044": "4-4. This method estimates the distance from a known straight-line distance to any nearer point using 2D perspective geometry.",
+"htu_044": "4-4. This method estimates the distance from a known straight-line distance to any nearer point using the same perspective calibration method.",
 "htu_045": "4-5. Workflow: Load > Select the vanishing point > Select the two lower symmetric points > Triangle Icon > Enter W and H > BlueEye",
 
   "htu_100_und": "Understanding the Menu Icons",
