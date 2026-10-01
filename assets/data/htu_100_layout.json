@@ -298,7 +298,7 @@
       {
          "parts":[
            {"sid":"htu_252_b1"},
-           {"icon":"/images/icons/d7c_quad.png"}
+           {"icon":"/images/icons/d7c_guad.png"}
          ]
       },
       {
@@ -353,7 +353,7 @@
       {
          "parts":[
            {"sid":"htu_253_r2"},
-           {"icon":"/images/icons/d7c_quad.png"}
+           {"icon":"/images/icons/d7c_guad.png"}
          ]
       }
   ],
