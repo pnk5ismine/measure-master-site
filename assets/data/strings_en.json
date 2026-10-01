@@ -108,15 +108,15 @@
 
 "htu_020_close": "2 Close-range Mode",
 
-"htu_021a": "2-1a. Photos captured with this app's AR camera automatically include a reference rectangle. After confirming it in RedEye, you can immediately begin real-world measurement in BlueEye.",
-"htu_021b": "2-1b. Workflow: Load > RedEye > Trapezoid Icon > BlueEye",
+"htu_021a": "2-1a. If AR cannot be used (AR unsupported devices or regular photos), or if measurements need to be performed later away from the site,",
+"htu_021b": "2-1b. simply use the same perspective calibration method by entering a reference rectangle in RedEye.",
+"htu_021c": "2-1c.  Workflow: Load > RedEye > Select 4 corners > Enter Width (W) and Height (H) > BlueEye",
 
-"htu_022a": "2-2a. For indoor and nearby objects, use the AR camera to quickly measure the straight-line distance between two points.",
-"htu_022b": "2-2b. Workflow: AR > Camera > + > +  ---> The distance between the two points is displayed automatically.",
+"htu_022a": "2-2a. Photos captured with this app's AR camera automatically include a reference rectangle. After confirming it in RedEye, you can immediately begin real-world measurement in BlueEye.",
+"htu_022b": "2-2b. Workflow: Load > RedEye > Trapezoid Icon > BlueEye",
 
-"htu_023a": "2-3a. If AR cannot be used (AR unsupported devices or regular photos), or if measurements need to be performed later away from the site,",
-"htu_023b": "2-3b. simply use the same perspective calibration method by entering a reference rectangle in RedEye.",
-"htu_023c": "2-3c.  Workflow: Load > RedEye > Select 4 corners > Enter Width (W) and Height (H) > BlueEye",
+"htu_023a": "2-3a. For indoor and nearby objects, use the AR camera to quickly measure the straight-line distance between two points.",
+"htu_023b": "2-3b. Workflow: AR > Camera > + > +  ---> The distance between the two points is displayed automatically.",
 
 "htu_030_screen": "3 Screen Mode",
 

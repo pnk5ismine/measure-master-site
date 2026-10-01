@@ -268,7 +268,12 @@
   "altSid": "htu_img_251_alt",
   "titleSid": "",
   "bodySids": [
-    "htu_251_b1",
+      {
+         "parts":[
+           {"sid":"htu_251_b1"},
+           {"icon":"/images/icons/d7c_quad.png"}
+         ]
+      },
     "htu_251_b2"
   ],
   "fit": "contain",
@@ -290,8 +295,18 @@
   "titleSid": "",
   "bodySids": [
     "htu_252_b1",
-    "htu_252_b2",
-    "htu_252_b3"
+      {
+         "parts":[
+           {"sid":"htu_252_b1"},
+           {"icon":"/images/icons/d7c_quad.png"}
+         ]
+      },
+      {
+         "parts":[
+           {"sid":"htu_252_b3"},
+           {"icon":"/images/icons/a3_blue.png"}
+         ]
+      }
   ],
   "fit": "contain",
   "fullWidth": true
@@ -336,6 +351,12 @@
   "bodySids": [
     "htu_253_r1",
     "htu_253_r2"
+      {
+         "parts":[
+           {"sid":"htu_253_r2"},
+           {"icon":"/images/icons/d7c_quad.png"}
+         ]
+      }
   ],
   "align": "left",
   "fullWidth": true

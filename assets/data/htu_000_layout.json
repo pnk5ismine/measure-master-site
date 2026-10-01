@@ -45,12 +45,14 @@
     "titleSid": "",
     "bodySids": [
       "htu_021a",
+      "htu_021b",
       {
          "parts":[
-           {"sid":"htu_021b"},
+           {"sid":"htu_021c"},
            {"icon":"/images/icons/a6_load.png"},
            {"icon":"/images/icons/a5_red.png"},
-           {"icon":"/images/icons/d1r_single.png"},
+           {"icon":"/images/icons/d5_w.jpg"},
+           {"icon":"/images/icons/d6_h.jpg"},
            {"icon":"/images/icons/a3_blue.png"}
          ]
       },
@@ -58,20 +60,18 @@
       {
          "parts":[
            {"sid":"htu_022b"},
-           {"icon":"/images/icons/a2_ar.png"},
-           {"icon":"/images/icons/e1_camera.png"}
+           {"icon":"/images/icons/a6_load.png"},
+           {"icon":"/images/icons/a5_red.png"},
+           {"icon":"/images/icons/d1r_single.png"},
+           {"icon":"/images/icons/a3_blue.png"}
          ]
       },
       "htu_023a",
-      "htu_023b",
       {
          "parts":[
-           {"sid":"htu_023c"},
-           {"icon":"/images/icons/a6_load.png"},
-           {"icon":"/images/icons/a5_red.png"},
-           {"icon":"/images/icons/d5_w.jpg"},
-           {"icon":"/images/icons/d6_h.jpg"},
-           {"icon":"/images/icons/a3_blue.png"}
+           {"sid":"htu_023b"},
+           {"icon":"/images/icons/a2_ar.png"},
+           {"icon":"/images/icons/e1_camera.png"}
          ]
       }
      ],
