@@ -184,7 +184,7 @@
 
 "htu_250_sub": "How to Draw the Reference Rectangle Automatically",
 
-"htu_img_251_alt": "How to detect reference rectangle candidates in an image and select one"
+"htu_img_251_alt": "How to detect reference rectangle candidates in an image and select one",
 "htu_251_title": "Finding and Selecting an Outline Candidate",
 "htu_251_b1": "1. Tap the outline detection icon. The rectangular outline candidates will be displayed in a second.",
 "htu_251_b2": "2. Select a candidate matching with the reference rectangle by tapping inside the rectangle one time.",
