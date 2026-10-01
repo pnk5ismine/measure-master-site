@@ -182,6 +182,29 @@
   "htu_244_bas": "Based on perspective estimation, the building’s total size is calculated as 3,124 cm (width) and 6,119 cm (height).",
   "htu_245_nex": "Next, this building dimensions are used to calculate the exterior wall area for painting, with totals organized by color.",
 
+"htu_250_sub": "How to Draw the Reference Rectangle Automatically",
+
+"htu_img_251_alt": "How to detect reference rectangle candidates in an image and select one"
+"htu_251_title": "Finding and Selecting an Outline Candidate",
+"htu_251_b1": "1. Tap the outline detection icon. The rectangular outline candidates will be displayed in a second.",
+"htu_251_b2": "2. Select a candidate matching with the reference rectangle by tapping inside the rectangle one time.",
+
+"htu_img_252_alt": "Using a confirmed reference rectangle to measure the dimensions of a table",
+"htu_252_title": "Confirming the Candidate by Sequent Tap and Using It for Measurement",
+"htu_252_b1": "1. Tap the selected candidate again. Its outline is drawn as a solid red line as one of elements in RedEye.",
+"htu_252_b2": "2. Then, you can transform its shape or draw new ones.",
+"htu_252_b3": "3. Move to the BlueEye page and start drawing objects to measure. Its estimated length or area will be displayed.",
+"htu_252_r1": "The actual dimensions of the table are of  85 × 170 cm. The results are shown as width: 83 85 85 by height: 172 173 169.",
+"htu_252_r2": "The accuracy was significantly improved comparing with manual drawing by 4 taps.",
+
+"htu_img_253_alt": "Three examples showing how reference rectangle detection results vary with different angles",
+"htu_253_title": "Variability in Outline Detection Results",
+"htu_253_b1": "Pic 1 shows four candidates on the table and another four on the floor.",
+"htu_253_b2": "Pic 2 shows five on the table and four on the wall.",
+"htu_253_b3": "Pic 3 shows one (not matching exactly) on the table along with two on the wall and two on the floor.",
+"htu_253_r1": "Even for the same objects, detection results may vary significantly depending on camera angle, distance, lighting, contrast and the camera resolution of the device.",
+"htu_253_r2": "Without any candidate matching with reference rectangle, you should turn off the icon and draw it by tapping four corners manually.",
+
   "htu_300_how": "How to Use AR Mode",
   "htu_img_310_alt": "AR Mode overview",
   "htu_311_arm": "AR Mode",
