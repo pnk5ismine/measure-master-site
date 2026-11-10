@@ -268,15 +268,24 @@
   "altSid": "htu_img_251_alt",
   "titleSid": "",
   "bodySids": [
-      {
-         "parts":[
-           {"sid":"htu_251_b1"},
-           {"icon":"/images/icons/d7c_quad.png"}
-         ]
-      },
-    "htu_251_b2"
+
+    "htu_251_b1",
+    "htu_251_b2",
+    "htu_251_b3",
+    "htu_251_b4"
   ],
   "fit": "contain",
+  "fullWidth": true
+},
+{
+  "id": "htu_remark_251",
+  "kind": "remark",
+  "titleSid": "",
+  "bodySids": [
+    "htu_251_r1",
+    "htu_251_r2"
+  ],
+  "align": "left",
   "fullWidth": true
 },
 
@@ -290,25 +299,11 @@
 {
   "id": "htu_card_252",
   "kind": "card",
-  "src": "/images/howtouse/htu_252.png",
-  "altSid": "htu_img_252_alt",
   "titleSid": "",
   "bodySids": [
     "htu_252_b1",
-      {
-         "parts":[
-           {"sid":"htu_252_b2"},
-           {"icon":"/images/icons/d7c_guad.png"}
-         ]
-      },
-      {
-         "parts":[
-           {"sid":"htu_252_b3"},
-           {"icon":"/images/icons/a3_blue.png"}
-         ]
-      }
+    "htu_252_b2"
   ],
-  "fit": "contain",
   "fullWidth": true
 },
 {
@@ -318,44 +313,6 @@
   "bodySids": [
     "htu_252_r1",
     "htu_252_r2"
-  ],
-  "align": "left",
-  "fullWidth": true
-},
-
-{
-  "id": "htu_title_253",
-  "kind": "title",
-  "sid": "htu_253_title",
-  "align": "center",
-  "fullWidth": true
-},
-{
-  "id": "htu_card_253",
-  "kind": "card",
-  "src": "/images/howtouse/htu_253.png",
-  "altSid": "htu_img_253_alt",
-  "titleSid": "",
-  "bodySids": [
-    "htu_253_b1",
-    "htu_253_b2",
-    "htu_253_b3"
-  ],
-  "fit": "contain",
-  "fullWidth": true
-},
-{
-  "id": "htu_remark_253",
-  "kind": "remark",
-  "titleSid": "",
-  "bodySids": [
-    "htu_253_r1",
-      {
-         "parts":[
-           {"sid":"htu_253_r2"},
-           {"icon":"/images/icons/d7c_guad.png"}
-         ]
-      }
   ],
   "align": "left",
   "fullWidth": true

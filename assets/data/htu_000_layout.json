@@ -42,15 +42,15 @@
     "kind": "card",
     "src": "/images/howtouse/htu_close_1.png",
     "altSid": "htu_img_020_alt",
-    "titleSid": "",
+    "titleSid": "htu_021_title",
     "bodySids": [
       "htu_021a",
-      "htu_021b",
       {
          "parts":[
-           {"sid":"htu_021c"},
+           {"sid":"htu_021b"},
            {"icon":"/images/icons/a6_load.png"},
            {"icon":"/images/icons/a5_red.png"},
+           {"icon":"/images/icons/d7c_quad.png"},
            {"icon":"/images/icons/d5_w.jpg"},
            {"icon":"/images/icons/d6_h.jpg"},
            {"icon":"/images/icons/a3_blue.png"}
