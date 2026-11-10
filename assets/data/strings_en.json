@@ -190,7 +190,7 @@
   "htu_251_b2": "2. Tap inside the selected shape once more to confirm the detected outline as the reference rectangle. Automatic Drawing mode then turns off automatically.",
   "htu_251_b3": "3. Enter the actual width and height of the rectangle in the w and h fields on the panel. This completes the preparation for perspective correction.",
   "htu_251_b4": "4. Move to the BlueEye page and draw the object to be measured. Its length or area will be displayed automatically.",
-  "htu_251_r1": "The actual dimensions of the table in the photo are 85 × 170 cm. The three measurements produced widths of 83, 85, and 85 cm and heights of 172, 173, and 169 cm.",
+  "htu_251_r1": "The actual dimensions of the table in the photo are 85 × 170 cm. The five measurements produced widths of 84, 84, and 85 cm and heights of 170, 170 cm.",
   "htu_251_r2": "Compared with manually marking the four corners, automatic outline detection provides more consistent positioning and significantly improves measurement accuracy.",
 
   "htu_img_252_alt": "Examples in which the outline of an object is not detected accurately",
