@@ -71,9 +71,21 @@
     "fullWidth": true
   },
   {
-    "id": "htu_remark_150",
+    "id": "htu_card_153",
+    "kind": "card",
+    "src": "/images/howtouse/htu_153.png",
+    "altSid": "htu_img_153_alt",
+    "titleSid": "",
+    "bodySids": [
+      { "sid": "htu_153_chn" }
+    ],
+    "fit": "contain",
+    "fullWidth": true
+  },
+  {
+    "id": "htu_remark_154",
     "kind": "remark",
-    "sid": "htu_154_mix",
+    "sid": "htu_154_tog",
     "align": "center",
     "fullWidth": true
   },
